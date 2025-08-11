@@ -70,6 +70,10 @@ export interface BaseCSSProperties {
   borderWidth?: CSSPropertyValue;
   borderStyle?: CSSProperties['borderStyle'];
   borderColor?: CSSPropertyValue;
+  borderTopColor?: CSSPropertyValue;
+  borderRightColor?: CSSPropertyValue;
+  borderBottomColor?: CSSPropertyValue;
+  borderLeftColor?: CSSPropertyValue;
   borderRadius?: CSSPropertyValue;
   
   // Background
@@ -95,6 +99,7 @@ export interface BaseCSSProperties {
   boxShadow?: CSSPropertyValue;
   transform?: CSSPropertyValue;
   transition?: CSSPropertyValue;
+  animation?: CSSPropertyValue;
   
   // Overflow
   overflow?: CSSProperties['overflow'];
@@ -122,6 +127,7 @@ export type ResponsiveCSSProperties = {
 
 // Box component props
 export interface BoxProps extends ResponsiveCSSProperties {
+  as?: keyof JSX.IntrinsicElements;
   children?: ReactNode;
   className?: string;
   id?: string;

@@ -26,7 +26,8 @@
       "Bash(copy README.md api-server)",
       "Bash(powershell:*)",
       "Bash(rmdir:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

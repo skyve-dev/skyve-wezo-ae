@@ -281,6 +281,17 @@ export const applyGlobalStyles = (): void => {
         padding-right: max(0px, env(safe-area-inset-right));
       }
     }
+    
+    /* ===== ANIMATIONS ===== */
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   `;
   
   // Append to document head

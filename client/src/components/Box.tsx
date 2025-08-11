@@ -2,28 +2,8 @@ import React, { useEffect, useRef, forwardRef } from 'react';
 import { BoxProps } from '@/types/box';
 import { responsiveManager, generateComponentId } from '@/utils/responsive';
 
-/**
- * Box component with declarative styling and responsive design support
- * 
- * Features:
- * - Direct CSS property props (width, height, margin, padding, etc.)
- * - Responsive variants (widthSm, widthMd, widthLg, widthXl)
- * - Global box-sizing: border-box
- * - TypeScript support for all CSS properties
- * 
- * @example
- * <Box 
- *   width={100} 
- *   widthLg={300}
- *   display="flex" 
- *   displayLg="none"
- *   padding={16}
- *   paddingMd={24}
- * >
- *   Content here
- * </Box>
- */
-export const Box = forwardRef<HTMLDivElement, BoxProps>(({
+export const Box = forwardRef<HTMLDivElement, BoxProps & React.HTMLAttributes<HTMLDivElement>>(({
+  as = 'div',
   children,
   style: customStyle,
   onClick,
@@ -37,7 +17,8 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(({
   role,
   'aria-label': ariaLabel,
   'data-testid': dataTestId,
-  ...layoutProps
+  className: externalClassName,
+  ...props
 }, ref) => {
   const componentIdRef = useRef<string>();
   const styleElementRef = useRef<HTMLStyleElement>();
@@ -49,9 +30,35 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(({
   
   const componentId = componentIdRef.current;
   
+  // Extract layout props from all props
+  const layoutProps: any = {};
+  const otherProps: any = {};
+  
+  // Define non-CSS props that should be passed to the DOM element
+  const domProps = new Set([
+    'autoCapitalize', 'autoComplete', 'autoCorrect', 'autoFocus', 'autoPlay',
+    'checked', 'className', 'contentEditable', 'dir', 'disabled', 'hidden',
+    'href', 'htmlFor', 'id', 'lang', 'name', 'placeholder', 'readOnly',
+    'required', 'role', 'src', 'tabIndex', 'target', 'title', 'type', 'value',
+    'onBlur', 'onChange', 'onClick', 'onFocus', 'onInput', 'onKeyDown',
+    'onKeyPress', 'onKeyUp', 'onMouseDown', 'onMouseEnter', 'onMouseLeave',
+    'onMouseOver', 'onMouseUp', 'onSubmit', 'onTouchCancel', 'onTouchEnd',
+    'onTouchMove', 'onTouchStart'
+  ]);
+  
+  // Props that start with 'aria-' or 'data-' should also be passed to DOM
+  Object.entries(props).forEach(([key, value]) => {
+    if (domProps.has(key) || key.startsWith('aria-') || key.startsWith('data-')) {
+      otherProps[key] = value;
+    } else {
+      // Everything else is treated as a CSS property
+      layoutProps[key] = value;
+    }
+  });
+  
   // Process layout props to generate styles
   const { baseStyles, responsiveCSS, className } = responsiveManager.processBoxProps(
-    layoutProps as BoxProps,
+    layoutProps,
     componentId
   );
   
@@ -87,25 +94,31 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(({
     ...customStyle
   };
   
-  return (
-    <div
-      ref={ref}
-      id={id}
-      className={className}
-      style={finalStyles}
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      onTouchMove={onTouchMove}
-      onTouchCancel={onTouchCancel}
-      role={role}
-      aria-label={ariaLabel}
-      data-testid={dataTestId}
-    >
-      {children}
-    </div>
+  // Combine classNames
+  const finalClassName = [externalClassName, className].filter(Boolean).join(' ');
+  
+  const Element = as as keyof JSX.IntrinsicElements;
+  
+  return React.createElement(
+    Element,
+    {
+      ref,
+      id,
+      className: finalClassName,
+      style: finalStyles,
+      onClick,
+      onMouseEnter,
+      onMouseLeave,
+      onTouchStart,
+      onTouchEnd,
+      onTouchMove,
+      onTouchCancel,
+      role,
+      'aria-label': ariaLabel,
+      'data-testid': dataTestId,
+      ...otherProps,
+    },
+    children
   );
 });
 

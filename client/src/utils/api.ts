@@ -1,0 +1,121 @@
+import { 
+  LoginRequest, 
+  RegisterRequest, 
+  PasswordResetRequest, 
+  PasswordResetConfirm, 
+  AuthResponse, 
+  User 
+} from '@/types/auth';
+
+const API_BASE_URL = 'http://localhost:3000';
+
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public errors?: Record<string, string[]>
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+class ApiClient {
+  private baseUrl: string;
+  private token: string | null = null;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+    this.token = localStorage.getItem('authToken');
+  }
+
+  setToken(token: string | null) {
+    this.token = token;
+    if (token) {
+      localStorage.setItem('authToken', token);
+    } else {
+      localStorage.removeItem('authToken');
+    }
+  }
+
+  private async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Merge additional headers if provided
+    if (options.headers) {
+      Object.assign(headers, options.headers);
+    }
+
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      throw new ApiError(
+        data.message || `HTTP error! status: ${response.status}`,
+        response.status,
+        data.errors
+      );
+    }
+
+    return data;
+  }
+
+  // Authentication endpoints
+  async login(credentials: LoginRequest): Promise<AuthResponse> {
+    return this.makeRequest<AuthResponse>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+  }
+
+  async register(userData: RegisterRequest): Promise<AuthResponse> {
+    return this.makeRequest<AuthResponse>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async requestPasswordReset(data: PasswordResetRequest): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>('/api/auth/password-reset/request', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resetPassword(data: PasswordResetConfirm): Promise<{ message: string }> {
+    return this.makeRequest<{ message: string }>('/api/auth/password-reset/reset', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getProfile(): Promise<User> {
+    return this.makeRequest<User>('/api/auth/profile');
+  }
+
+  async healthCheck(): Promise<{ status: string }> {
+    return this.makeRequest<{ status: string }>('/api/health');
+  }
+}
+
+export const apiClient = new ApiClient(API_BASE_URL);
+export { ApiError };
