@@ -3,18 +3,25 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  TENANT
+  HOMEOWNER
+  MANAGER
+}
+
 model User {
-  id                    String    @id @default(cuid())
-  username              String    @unique
-  email                 String    @unique
-  password              String
-  isAdmin               Boolean   @default(false)
-  passwordResetToken    String?   @unique
-  passwordResetExpires  DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                   String    @id @default(cuid())
+  username             String    @unique
+  email                String    @unique
+  password             String
+  role                 UserRole  @default(TENANT)
+  isAdmin              Boolean   @default(false)
+  passwordResetToken   String?   @unique
+  passwordResetExpires DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }

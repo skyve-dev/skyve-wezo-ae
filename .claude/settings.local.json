@@ -27,7 +27,10 @@
       "Bash(powershell:*)",
       "Bash(rmdir:*)",
       "Bash(rm:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm run prisma:migrate:*)",
+      "Bash(npm run prisma:reset:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }
