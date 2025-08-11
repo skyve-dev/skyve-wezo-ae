@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma init:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm run prisma:seed:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run dev:*)",
+      "Bash(mv:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(xcopy:*)",
+      "Bash(copy package.json api-server )",
+      "Bash(copy package-lock.json api-server )",
+      "Bash(copy tsconfig.json api-server )",
+      "Bash(copy jest.config.js api-server )",
+      "Bash(copy nodemon.json api-server )",
+      "Bash(copy .env api-server )",
+      "Bash(copy .env.example api-server )",
+      "Bash(copy README.md api-server)",
+      "Bash(powershell:*)"
+    ],
+    "deny": []
+  }
+}

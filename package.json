@@ -1,0 +1,22 @@
+{
+  "name": "wezo-monorepo",
+  "version": "1.0.0",
+  "description": "A monorepo for the Wezo project",
+  "private": true,
+  "workspaces": [
+    "api-server",
+    "homeowner-client",
+    "tenant-client",
+    "manager-client"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w api-server",
+    "build:api": "npm run build -w api-server",
+    "test:api": "npm run test -w api-server",
+    "install:all": "npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
