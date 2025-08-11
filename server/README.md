@@ -1,6 +1,6 @@
-# Wezo Backend API
+# Wezo Server
 
-A TypeScript-based backend API server built with Express.js, Prisma ORM, and SQLite database.
+A TypeScript-based backend server built with Express.js, Prisma ORM, and SQLite database.
 
 ## Features
 

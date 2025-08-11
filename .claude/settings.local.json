@@ -24,7 +24,9 @@
       "Bash(copy .env api-server )",
       "Bash(copy .env.example api-server )",
       "Bash(copy README.md api-server)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(rmdir:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

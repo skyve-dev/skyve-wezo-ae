@@ -1,7 +1,7 @@
 {
-  "name": "@wezo/api-server",
+  "name": "@wezo/server",
   "version": "1.0.0",
-  "description": "Wezo API Server - Backend for property rental platform",
+  "description": "Wezo Server - Backend for property rental platform",
   "main": "index.js",
   "directories": {
     "doc": "docs"

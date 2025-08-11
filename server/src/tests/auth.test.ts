@@ -1,3 +1,5 @@
+
+// @ts-ignore
 import request from 'supertest';
 import app from '../app';
 import prisma from '../config/database';

@@ -10,10 +10,7 @@ Wezo.ae is a property rental platform (similar to Booking.com) focusing on villa
 
 ```
 wezo-monorepo/
-├── api-server/        # Backend API server (TypeScript, Express, Prisma)
-├── homeowner-client/  # Frontend for property owners (planned)
-├── tenant-client/     # Frontend for tenants/guests (planned)
-├── manager-client/    # Management dashboard (planned)
+├── server/            # Backend server (TypeScript, Express, Prisma)
 └── docs/              # Requirements and UI mockups
 ```
 
@@ -26,27 +23,27 @@ wezo-monorepo/
    npm install
    ```
 
-### API Server Setup
+### Server Setup
 
-1. Navigate to api-server and set up database:
+1. Navigate to server and set up database:
    ```bash
-   cd api-server
+   cd server
    npm run db:setup
    ```
 
-2. Start the API server (from root):
+2. Start the server (from root):
    ```bash
-   npm run dev:api
+   npm run dev:server
    ```
 
 ### Workspace Commands (from root)
 
-- `npm run dev:api` - Start API server in development mode
-- `npm run build:api` - Build API server
-- `npm run test:api` - Run API server tests
+- `npm run dev:server` - Start server in development mode
+- `npm run build:server` - Build server
+- `npm run test:server` - Run server tests
 - `npm install` - Install all workspace dependencies
 
-### Direct API Server Commands (from api-server/)
+### Direct Server Commands (from server/)
 
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build TypeScript to JavaScript  
@@ -81,34 +78,6 @@ wezo-monorepo/
 - Email: `admin@wezo.ae`
 - Password: `Admin@123456`
 
-## Frontend Architecture (Planned)
-
-### Planned Features (from requirements)
-
-The application will implement a 6-step villa registration wizard:
-1. **Property Type & Location** - Google Maps integration for address autocomplete
-2. **Villa Details** - Property specifications, amenities, host information
-3. **Pricing & Policies** - Multi-rate pricing (base, weekly, non-refundable)
-4. **Promotions & Availability** - Interactive calendar management
-5. **House Rules & Cancellation** - Policy configuration
-6. **Photos & Review** - Image upload with optimization
-
-### Key Technical Requirements
-
-- **Mapping Integration**: Google Maps API for location services
-- **Image Processing**: Upload, optimization, and gallery management
-- **Calendar System**: Availability management with blackout dates
-- **Multi-language Support**: Host communication in multiple languages
-- **Form Validation**: Multi-step wizard with progress tracking
-
-### UI/UX Reference
-
-The interface follows Booking.com patterns. UI mockups in `docs/homeowner-onboarding-villa-registration/` show:
-- Clean, step-by-step wizard interface
-- Toggle switches for amenities selection
-- Interactive calendar for availability
-- Drag-and-drop photo upload
-- Real-time form validation
 
 ## Important Files
 
@@ -118,7 +87,7 @@ The interface follows Booking.com patterns. UI mockups in `docs/homeowner-onboar
 ## Development Guidelines
 
 When implementing features:
-1. Follow the UI mockups closely - they represent approved designs
-2. Implement proper form validation for each wizard step
-3. Ensure all data models support the fields specified in requirements
-4. Build with internationalization in mind (multi-language support required)
+1. Follow established patterns and maintain code quality
+2. Ensure proper error handling and validation
+3. Write comprehensive tests for new functionality
+4. Document APIs and complex business logic

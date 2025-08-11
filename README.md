@@ -7,9 +7,9 @@ A modern property rental platform for villa listings in the UAE, built as a mono
 This is a monorepo managed with npm workspaces, containing:
 
 - **`api-server/`** - Backend API server (Node.js, Express, TypeScript, Prisma, SQLite)
-- **`homeowner-client/`** - Frontend for property owners (planned)
-- **`tenant-client/`** - Frontend for tenants/guests (planned)
-- **`manager-client/`** - Management dashboard (planned)
+- **`client/homeowner/`** - Frontend for property owners (planned)
+- **`client/guest/`** - Frontend for tenants/guests (planned)
+- **`client/manager/`** - Management dashboard (planned)
 - **`docs/`** - Requirements documentation and UI mockups
 
 ## 🚀 Quick Start
