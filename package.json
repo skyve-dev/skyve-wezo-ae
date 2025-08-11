@@ -4,12 +4,15 @@
   "description": "A monorepo for the Wezo project",
   "private": true,
   "workspaces": [
-    "server"
+    "server",
+    "client"
   ],
   "scripts": {
     "dev:server": "npm run dev -w server",
     "build:server": "npm run build -w server",
     "test:server": "npm run test -w server",
+    "dev:client": "npm run dev -w client",
+    "build:client": "npm run build -w client",
     "install:all": "npm install"
   },
   "engines": {
