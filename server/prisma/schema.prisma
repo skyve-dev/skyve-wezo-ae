@@ -25,3 +25,211 @@ model User {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }
+
+// Enums from your TypeScript model
+enum BedType {
+  TwinBed
+  FullBed
+  QueenBed
+  KingBed
+  BunkBed
+  SofaBed
+  FutonBed
+}
+
+enum RoomSpaceType {
+  Bedroom
+  LivingRoom
+  Kitchen
+  DiningRoom
+  Other
+}
+
+enum ParkingType {
+  YesFree
+  YesPaid
+  No
+}
+
+enum PetPolicy {
+  Yes
+  No
+  UponRequest
+}
+
+enum BookingType {
+  BookInstantly
+  NeedToRequestBook
+}
+
+enum PaymentType {
+  Online
+  ByCreditCardAtProperty
+}
+
+enum Currency {
+  AED
+}
+
+// New model for a group of properties (e.g., a compound villa)
+model PropertyGroup {
+  id         String     @id @default(uuid())
+  name       String
+  properties Property[]
+}
+
+// Main Property model
+model Property {
+  // Unique identifier for the property
+  propertyId String @id @default(uuid())
+
+  name      String
+  addressId String  @unique
+  address   Address @relation(fields: [addressId], references: [id])
+
+  // Relation to the new PropertyGroup model
+  propertyGroupId String?
+  propertyGroup   PropertyGroup? @relation(fields: [propertyGroupId], references: [id])
+
+  // Layout
+  rooms             Room[]
+  maximumGuest      Int
+  bathrooms         Int
+  allowChildren     Boolean
+  offerCribs        Boolean
+  propertySizeSqMtr Int?
+
+  // Amenities
+  amenities Amenity[]
+
+  // Services
+  serveBreakfast Boolean
+  parking        ParkingType
+  languages      String[]
+
+  // Rules
+  smokingAllowed         Boolean
+  partiesOrEventsAllowed Boolean
+  petsAllowed            PetPolicy
+  checkInCheckout        CheckInOutTimes?
+
+  // Profile
+  aboutTheProperty     String
+  aboutTheNeighborhood String
+
+  // Photos
+  photos Photo[]
+
+  // Booking & Payment
+  bookingType BookingType
+  paymentType PaymentType
+
+  // Pricing
+  pricing Pricing?
+
+  // Cancellation
+  cancellation Cancellation?
+
+  // Availability
+  firstDateGuestCanCheckIn String
+}
+
+model Address {
+  id                     String    @id @default(uuid())
+  apartmentOrFloorNumber String?
+  countryOrRegion        String
+  city                   String
+  zipCode                Int
+  latLong                LatLong?
+  property               Property?
+}
+
+model LatLong {
+  id        String  @id @default(uuid())
+  latitude  Float
+  longitude Float
+  addressId String  @unique
+  address   Address @relation(fields: [addressId], references: [id])
+}
+
+model Room {
+  id         String   @id @default(uuid())
+  spaceName  String
+  beds       Bed[]
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [propertyId])
+}
+
+model Bed {
+  id          String  @id @default(uuid())
+  typeOfBed   BedType
+  numberOfBed Int
+  roomId      String
+  room        Room    @relation(fields: [roomId], references: [id])
+}
+
+model CheckInOutTimes {
+  id            String   @id @default(uuid())
+  checkInFrom   String
+  checkInUntil  String
+  checkOutFrom  String
+  checkOutUntil String
+  propertyId    String   @unique
+  property      Property @relation(fields: [propertyId], references: [propertyId])
+}
+
+model Photo {
+  id          String   @id @default(uuid())
+  url         String
+  altText     String
+  description String?
+  tags        String[]
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [propertyId])
+}
+
+model Amenity {
+  id         String   @id @default(uuid())
+  name       String
+  category   String
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [propertyId])
+}
+
+model Pricing {
+  id                                         String              @id @default(uuid())
+  currency                                   Currency
+  ratePerNight                               Float
+  ratePerNightWeekend                        Float
+  promotion                                  Promotion?
+  pricePerGroupSize                          PricePerGroupSize[]
+  discountPercentageForNonRefundableRatePlan Float?
+  discountPercentageForWeeklyRatePlan        Float?
+  propertyId                                 String              @unique
+  property                                   Property            @relation(fields: [propertyId], references: [propertyId])
+}
+
+model Promotion {
+  id          String  @id @default(uuid())
+  type        String
+  percentage  Float
+  description String
+  pricingId   String  @unique
+  pricing     Pricing @relation(fields: [pricingId], references: [id])
+}
+
+model PricePerGroupSize {
+  id           String  @id @default(uuid())
+  groupSize    Int
+  ratePerNight Float
+  pricingId    String
+  pricing      Pricing @relation(fields: [pricingId], references: [id])
+}
+
+model Cancellation {
+  id                                     String   @id @default(uuid())
+  daysBeforeArrivalFreeToCancel          Int
+  waiveCancellationFeeAccidentalBookings Boolean
+  propertyId                             String   @unique
+  property                               Property @relation(fields: [propertyId], references: [propertyId])
+}
