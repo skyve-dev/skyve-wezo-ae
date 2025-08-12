@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Box } from '@/components/Box'
 import { LoginForm } from '@/components/forms/LoginForm'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAppSelector } from '@/store/hooks'
+import { selectIsAuthenticated } from '@/store/slices/authSlice'
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/login')({
@@ -10,7 +11,7 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
 
   useEffect(() => {
     if (isAuthenticated) {

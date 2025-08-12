@@ -1,6 +1,7 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../Box';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { login, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -17,7 +18,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   
-  const { login, isLoading, error: authError, clearError } = useAuth();
+  const dispatch = useAppDispatch();
+  const isLoading = useAppSelector(selectIsLoading);
+  const authError = useAppSelector(selectError);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -38,16 +41,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    clearError();
+    dispatch(clearError());
     
     if (!validateForm()) return;
 
-    try {
-      await login(formData);
-    } catch (error) {
-      // Error is handled by the auth context
-    }
+    dispatch(login(formData));
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleInputChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement>

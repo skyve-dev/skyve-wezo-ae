@@ -1,6 +1,7 @@
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { Dashboard } from '@/components/Dashboard'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAppSelector } from '@/store/hooks'
+import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice'
 import { Box } from '@/components/Box'
 
 export const Route = createFileRoute('/dashboard')({
@@ -8,7 +9,8 @@ export const Route = createFileRoute('/dashboard')({
 })
 
 function DashboardPage() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
+  const isLoading = useAppSelector(selectIsLoading)
 
   if (isLoading) {
     return (
@@ -43,6 +45,3 @@ function DashboardPage() {
 
   return <Dashboard />
 }
-
-// Add React import
-import React from 'react'

@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Box } from '@/components/Box'
 import { RegisterForm } from '@/components/forms/RegisterForm'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAppSelector } from '@/store/hooks'
+import { selectIsAuthenticated } from '@/store/slices/authSlice'
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/register')({
@@ -10,7 +11,7 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
 
   useEffect(() => {
     if (isAuthenticated) {

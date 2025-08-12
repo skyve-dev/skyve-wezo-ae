@@ -175,6 +175,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
         id: true,
         username: true,
         email: true,
+        role: true,
         isAdmin: true,
         createdAt: true,
         updatedAt: true,

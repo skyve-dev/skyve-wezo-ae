@@ -1,6 +1,7 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../Box';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { register, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
@@ -15,7 +16,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   
-  const { register, isLoading, error: authError, clearError } = useAuth();
+  const dispatch = useAppDispatch();
+  const isLoading = useAppSelector(selectIsLoading);
+  const authError = useAppSelector(selectError);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -50,20 +53,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    clearError();
+    dispatch(clearError());
     
     if (!validateForm()) return;
 
-    try {
-      await register({
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-      });
-    } catch (error) {
-      // Error is handled by the auth context
-    }
+    dispatch(register({
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+    }));
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   const handleInputChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement>

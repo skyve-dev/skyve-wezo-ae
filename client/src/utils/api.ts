@@ -109,7 +109,8 @@ class ApiClient {
   }
 
   async getProfile(): Promise<User> {
-    return this.makeRequest<User>('/api/auth/profile');
+    const response = await this.makeRequest<{ user: User }>('/api/auth/profile');
+    return response.user;
   }
 
   async healthCheck(): Promise<{ status: string }> {

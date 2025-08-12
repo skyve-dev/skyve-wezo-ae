@@ -1,8 +1,10 @@
 import { Box } from './Box';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout, selectUser } from '@/store/slices/authSlice';
 
 export const Dashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
 
   return (
     <Box
@@ -31,7 +33,7 @@ export const Dashboard: React.FC = () => {
           </Box>
           
           <button
-            onClick={logout}
+            onClick={() => dispatch(logout())}
             style={{
               backgroundColor: 'transparent',
               color: '#007bff',
@@ -74,6 +76,13 @@ export const Dashboard: React.FC = () => {
                 <Box>
                   <div style={{ fontSize: '12px', fontWeight: 500, color: '#6c757d', marginBottom: '2px' }}>Email</div>
                   <div style={{ fontSize: '16px' }}>{user?.email}</div>
+                </Box>
+                
+                <Box>
+                  <div style={{ fontSize: '12px', fontWeight: 500, color: '#6c757d', marginBottom: '2px' }}>Role</div>
+                  <div style={{ fontSize: '16px', textTransform: 'capitalize' }}>
+                    {user?.role?.toLowerCase() || 'Tenant'}
+                  </div>
                 </Box>
                 
                 <Box>
