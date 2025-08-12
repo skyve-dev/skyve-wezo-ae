@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import { AuthState, User, LoginRequest, RegisterRequest, PasswordResetRequest } from '@/types/auth';
 import { apiClient, ApiError } from '@/utils/api';
 
@@ -8,7 +8,7 @@ interface AuthContextValue extends AuthState {
   logout: () => void;
   requestPasswordReset: (data: PasswordResetRequest) => Promise<void>;
   clearError: () => void;
-  checkAuthStatus: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
 type AuthAction =
@@ -119,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     const token = localStorage.getItem('authToken');
     if (token) {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -133,11 +133,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         dispatch({ type: 'LOGOUT' });
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuthStatus();
-  }, []);
+  }, [checkAuthStatus]);
 
   const value: AuthContextValue = {
     ...state,
@@ -146,7 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     requestPasswordReset,
     clearError,
-    checkAuthStatus,
+    checkAuth: checkAuthStatus,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
