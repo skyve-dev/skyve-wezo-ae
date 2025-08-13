@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react';
-import { BoxProps, defaultBreakpoints, BreakpointConfig, Breakpoint } from '@/types/box';
+import { BoxProps, defaultBreakpoints, BreakpointConfig, Breakpoint, ResponsiveMotionStyles } from '@/types/box';
 
 /**
  * Utility class for handling responsive styles
@@ -61,8 +61,17 @@ export class ResponsiveStyleManager {
       
       // Only process non-responsive properties for base styles
       if (!isResponsive && this.isCSSProperty(key)) {
-        // For React style objects, keep camelCase property names
-        (baseStyles as any)[key] = this.formatCSSValue(value);
+        // Handle special shorthand properties
+        if (key === 'paddingX') {
+          (baseStyles as any).paddingLeft = this.formatCSSValue(value);
+          (baseStyles as any).paddingRight = this.formatCSSValue(value);
+        } else if (key === 'paddingY') {
+          (baseStyles as any).paddingTop = this.formatCSSValue(value);
+          (baseStyles as any).paddingBottom = this.formatCSSValue(value);
+        } else {
+          // For React style objects, keep camelCase property names
+          (baseStyles as any)[key] = this.formatCSSValue(value);
+        }
       }
     });
     
@@ -76,10 +85,105 @@ export class ResponsiveStyleManager {
     // List of properties we don't want to pass to CSS
     const nonCSSProps = [
       'children', 'className', 'id', 'onClick', 'onMouseEnter', 
-      'onMouseLeave', 'style', 'role', 'aria-label', 'data-testid'
+      'onMouseLeave', 'style', 'role', 'aria-label', 'data-testid',
+      'whileTap', 'whileDrag', 'whileFocus', 'whileInView', 'whileHover'
     ];
     
     return !nonCSSProps.includes(key);
+  }
+
+  /**
+   * Process responsive motion styles into CSS rules
+   */
+  private processMotionStyles(motionStyles: ResponsiveMotionStyles): {
+    baseStyles: CSSProperties;
+    responsiveRules: { [key: string]: string[] };
+  } {
+    const baseStyles: CSSProperties = {};
+    const responsiveRules: { [key: string]: string[] } = {
+      Sm: [],
+      Md: [],
+      Lg: [],
+      Xl: []
+    };
+
+    Object.entries(motionStyles).forEach(([key, value]) => {
+      if (key === 'Sm' || key === 'Md' || key === 'Lg' || key === 'Xl') {
+        // Handle breakpoint-specific styles
+        if (value && typeof value === 'object') {
+          const breakpointStyles = this.processMotionStyles(value as ResponsiveMotionStyles);
+          responsiveRules[key].push(...Object.entries(breakpointStyles.baseStyles).map(([prop, val]) => 
+            `${this.camelToKebab(prop)}: ${this.formatCSSValue(val as string | number)} !important;`
+          ));
+        }
+      } else {
+        // Handle base styles
+        if (value !== undefined && value !== null) {
+          // Handle special shorthand properties
+          if (key === 'paddingX') {
+            (baseStyles as any).paddingLeft = this.formatCSSValue(value as string | number);
+            (baseStyles as any).paddingRight = this.formatCSSValue(value as string | number);
+          } else if (key === 'paddingY') {
+            (baseStyles as any).paddingTop = this.formatCSSValue(value as string | number);
+            (baseStyles as any).paddingBottom = this.formatCSSValue(value as string | number);
+          } else {
+            (baseStyles as any)[key] = this.formatCSSValue(value as string | number);
+          }
+        }
+      }
+    });
+
+    return { baseStyles, responsiveRules };
+  }
+
+  /**
+   * Generate motion-based CSS for a specific state
+   */
+  public generateMotionCSS(
+    motionStyles: ResponsiveMotionStyles | undefined,
+    componentId: string,
+    pseudoSelector: string
+  ): string {
+    if (!motionStyles) return '';
+
+    const { baseStyles, responsiveRules } = this.processMotionStyles(motionStyles);
+    let css = '';
+
+    // Base styles for the motion state
+    const baseCSS = Object.entries(baseStyles)
+      .map(([prop, value]) => `${this.camelToKebab(prop)}: ${value} !important;`)
+      .join(' ');
+
+    if (baseCSS) {
+      css += `.${componentId}${pseudoSelector} { ${baseCSS} }`;
+    }
+
+    // Responsive styles for the motion state
+    if (responsiveRules.Sm.length > 0) {
+      css += `@media (min-width: ${this.breakpoints.phone}px) {
+        .${componentId}${pseudoSelector} { ${responsiveRules.Sm.join(' ')} }
+      }`;
+    }
+
+    if (responsiveRules.Md.length > 0) {
+      css += `@media (min-width: ${this.breakpoints.tablet}px) {
+        .${componentId}${pseudoSelector} { ${responsiveRules.Md.join(' ')} }
+      }`;
+    }
+
+    if (responsiveRules.Lg.length > 0) {
+      css += `@media (min-width: ${this.breakpoints.laptop}px) {
+        .${componentId}${pseudoSelector} { ${responsiveRules.Lg.join(' ')} }
+      }`;
+    }
+
+    if (responsiveRules.Xl.length > 0) {
+      css += `@media (min-width: ${this.breakpoints.desktop}px) {
+        .${componentId}${pseudoSelector} { ${responsiveRules.Xl.join(' ')} }
+      }`;
+    }
+
+    return css;
   }
   
   /**
@@ -99,9 +203,20 @@ export class ResponsiveStyleManager {
       const { isResponsive, breakpoint, baseProp } = this.isResponsiveProperty(key);
       
       if (isResponsive && breakpoint && baseProp && this.isCSSProperty(baseProp)) {
-        const cssProperty = this.camelToKebab(baseProp);
-        const cssValue = this.formatCSSValue(value);
-        responsiveRules[breakpoint].push(`${cssProperty}: ${cssValue} !important;`);
+        // Handle special shorthand properties
+        if (baseProp === 'paddingX') {
+          const cssValue = this.formatCSSValue(value);
+          responsiveRules[breakpoint].push(`padding-left: ${cssValue} !important;`);
+          responsiveRules[breakpoint].push(`padding-right: ${cssValue} !important;`);
+        } else if (baseProp === 'paddingY') {
+          const cssValue = this.formatCSSValue(value);
+          responsiveRules[breakpoint].push(`padding-top: ${cssValue} !important;`);
+          responsiveRules[breakpoint].push(`padding-bottom: ${cssValue} !important;`);
+        } else {
+          const cssProperty = this.camelToKebab(baseProp);
+          const cssValue = this.formatCSSValue(value);
+          responsiveRules[breakpoint].push(`${cssProperty}: ${cssValue} !important;`);
+        }
       }
     });
     

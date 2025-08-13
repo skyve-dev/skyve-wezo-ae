@@ -36,6 +36,8 @@ export interface BaseCSSProperties {
   paddingRight?: CSSPropertyValue;
   paddingBottom?: CSSPropertyValue;
   paddingLeft?: CSSPropertyValue;
+  paddingX?: CSSPropertyValue;
+  paddingY?: CSSPropertyValue;
   
   // Flexbox
   flex?: CSSProperties['flex'];
@@ -89,6 +91,7 @@ export interface BaseCSSProperties {
   fontSize?: CSSPropertyValue;
   fontWeight?: CSSProperties['fontWeight'];
   fontFamily?: CSSPropertyValue;
+  fontStyle?: CSSProperties['fontStyle'];
   lineHeight?: CSSPropertyValue;
   textAlign?: CSSProperties['textAlign'];
   textDecoration?: CSSProperties['textDecoration'];
@@ -113,6 +116,9 @@ export interface BaseCSSProperties {
   
   // Visibility
   visibility?: CSSProperties['visibility'];
+  
+  // Misc
+  resize?: CSSProperties['resize'];
 }
 
 // Generate responsive property names
@@ -129,7 +135,7 @@ export type ResponsiveCSSProperties = {
 export type PolymorphicAs = keyof JSX.IntrinsicElements;
 
 // Base Box props without element-specific attributes
-export interface BaseBoxProps extends ResponsiveCSSProperties {
+export interface BaseBoxProps extends ResponsiveCSSProperties, MotionProps {
   children?: ReactNode;
   className?: string;
   style?: CSSProperties; // Additional styles for edge cases
@@ -154,3 +160,24 @@ export const defaultBreakpoints: BreakpointConfig = {
   laptop: 1024, // 1024px and up
   desktop: 1280 // 1280px and up
 };
+
+// Motion-based responsive styles (mobile-first approach)
+export interface ResponsiveMotionStyles {
+  // Base styles (mobile-first, applies to all sizes)
+  [key: string]: CSSPropertyValue | CSSProperties[keyof CSSProperties] | Partial<ResponsiveMotionStyles> | undefined;
+  
+  // Responsive breakpoint styles
+  Sm?: Partial<ResponsiveMotionStyles>;
+  Md?: Partial<ResponsiveMotionStyles>;
+  Lg?: Partial<ResponsiveMotionStyles>;
+  Xl?: Partial<ResponsiveMotionStyles>;
+}
+
+// Motion-based styling props
+export interface MotionProps {
+  whileTap?: ResponsiveMotionStyles;
+  whileDrag?: ResponsiveMotionStyles;
+  whileFocus?: ResponsiveMotionStyles;
+  whileInView?: ResponsiveMotionStyles;
+  whileHover?: ResponsiveMotionStyles;
+}

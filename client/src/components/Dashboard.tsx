@@ -1,10 +1,12 @@
 import { Box } from './Box';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout, selectUser } from '@/store/slices/authSlice';
+import { useNavigate } from '@tanstack/react-router';
 
 export const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -180,6 +182,22 @@ export const Dashboard: React.FC = () => {
                   }}
                 >
                   Messages
+                </Box>
+                
+                <Box as="button"
+                  onClick={() => navigate({ to: '/example/Box' })}
+                  style={{
+                    backgroundColor: '#6f42c1',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '12px 16px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  📦 Box Component Examples
                 </Box>
               </Box>
             </Box>
