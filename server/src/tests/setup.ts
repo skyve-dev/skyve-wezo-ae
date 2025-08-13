@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
+import { beforeAll, afterAll } from '@jest/globals';
 
 const prisma = new PrismaClient();
 
