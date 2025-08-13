@@ -125,29 +125,20 @@ export type ResponsiveCSSProperties = {
   [K in keyof BaseCSSProperties as ResponsiveKey<K>]?: BaseCSSProperties[K];
 };
 
-// Box component props
-export interface BoxProps extends ResponsiveCSSProperties {
-  as?: keyof JSX.IntrinsicElements;
+// Polymorphic Box component types
+export type PolymorphicAs = keyof JSX.IntrinsicElements;
+
+// Base Box props without element-specific attributes
+export interface BaseBoxProps extends ResponsiveCSSProperties {
   children?: ReactNode;
   className?: string;
-  id?: string;
-  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
-  onMouseEnter?: (event: React.MouseEvent<HTMLDivElement>) => void;
-  onMouseLeave?: (event: React.MouseEvent<HTMLDivElement>) => void;
-  
-  // Mobile touch events
-  onTouchStart?: (event: React.TouchEvent<HTMLDivElement>) => void;
-  onTouchEnd?: (event: React.TouchEvent<HTMLDivElement>) => void;
-  onTouchMove?: (event: React.TouchEvent<HTMLDivElement>) => void;
-  onTouchCancel?: (event: React.TouchEvent<HTMLDivElement>) => void;
-  
   style?: CSSProperties; // Additional styles for edge cases
-  
-  // HTML attributes
-  role?: string;
-  'aria-label'?: string;
-  'data-testid'?: string;
 }
+
+// Polymorphic Box component props
+export type BoxProps<T extends PolymorphicAs = 'div'> = BaseBoxProps & {
+  as?: T;
+} & Omit<JSX.IntrinsicElements[T], keyof BaseBoxProps>;
 
 // Breakpoint configuration
 export interface BreakpointConfig {

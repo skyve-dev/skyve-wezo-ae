@@ -76,12 +76,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     >
       <Box display="flex" flexDirection="column" gap={24}>
         <Box textAlign="center">
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
+          <Box as={'h2'}  style={{ margin: 0, fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
             Welcome Back
-          </h2>
-          <p style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>
+          </Box>
+          <Box as={'p'} style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>
             Sign in to your account
-          </p>
+          </Box>
         </Box>
 
         {authError && (
@@ -91,18 +91,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             borderRadius={6}
             border="1px solid #fecaca"
           >
-            <div style={{ fontSize: '14px', color: '#dc3545' }}>
+            <Box style={{ fontSize: '14px', color: '#dc3545' }}>
               {authError}
-            </div>
+            </Box>
           </Box>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <Box as={'form'} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <Box display="flex" flexDirection="column" gap={6}>
-            <label htmlFor="username" style={{ fontSize: '14px', fontWeight: 500 }}>
+            <Box as={'label'} htmlFor="username" style={{ fontSize: '14px', fontWeight: 500 }}>
               Username
-            </label>
-            <input
+            </Box>
+            <Box as={'input'}
               id="username"
               type="text"
               placeholder="Enter your username"
@@ -213,7 +213,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           >
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
-        </form>
+        </Box>
 
         <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef">
           <p style={{ fontSize: '14px', color: '#6c757d', margin: 0 }}>
