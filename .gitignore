@@ -19,3 +19,4 @@ coverage/
 # Legacy directories (will be removed)
 /prisma/
 /nul
+/server/uploads/
