@@ -420,15 +420,22 @@ export class PropertyService {
 
     // Delete existing pricing and related records in correct order
     if (existingProperty.pricing) {
-      await prisma.pricePerGroupSize.deleteMany({
-        where: { pricingId: existingProperty.pricing.id },
-      });
-      await prisma.promotion.deleteMany({
-        where: { pricingId: existingProperty.pricing.id },
-      });
-      await prisma.pricing.delete({
-        where: { id: existingProperty.pricing.id },
-      });
+      try {
+        await prisma.pricePerGroupSize.deleteMany({
+          where: { pricingId: existingProperty.pricing.id },
+        });
+        await prisma.promotion.deleteMany({
+          where: { pricingId: existingProperty.pricing.id },
+        });
+        await prisma.pricing.delete({
+          where: { id: existingProperty.pricing.id },
+        });
+      } catch (error: any) {
+        // If pricing record doesn't exist, continue (it might have been deleted already)
+        if (error.code !== 'P2025') {
+          throw error;
+        }
+      }
     }
 
     const property = await prisma.property.update({
