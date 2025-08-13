@@ -107,26 +107,7 @@ function RegisterPropertyWizard() {
     try {
       // Data is already in the correct format with proper enums
       await dispatch(createProperty(wizardData)).unwrap()
-      
-      // Try to update user role to HOMEOWNER after first property
-      try {
-        const response = await fetch('/api/auth/update-role', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({ role: 'HOMEOWNER' })
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          localStorage.setItem('token', data.token)
-        }
-      } catch (roleError) {
-        console.log('Role update failed (user may already be HOMEOWNER):', roleError)
-      }
-      
+
       navigate({ to: '/dashboard/my-properties', search: { success: 'Property created successfully!' } })
     } catch (error) {
       console.error('Failed to create property:', error)

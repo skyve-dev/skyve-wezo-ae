@@ -2,12 +2,36 @@ import { Request, Response } from 'express';
 import propertyService from '../services/property.service';
 import fs from 'fs';
 import path from 'path';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const createProperty = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
+    }
+
+    // Check if user has HOMEOWNER role, if not, upgrade them
+    if (req.user.role !== 'HOMEOWNER') {
+      try {
+        await prisma.user.update({
+          where: { id: req.user.id },
+          data: { role: 'HOMEOWNER' },
+        });
+        
+        // Update the user object in the request for immediate use
+        req.user.role = 'HOMEOWNER';
+      } catch (roleUpdateError: any) {
+        // If user doesn't exist, the JWT token is invalid
+        if (roleUpdateError.code === 'P2025') {
+          res.status(401).json({ error: 'User not found' });
+          return;
+        }
+        // Re-throw other errors
+        throw roleUpdateError;
+      }
     }
 
     const property = await propertyService.createProperty(req.body, req.user.id);

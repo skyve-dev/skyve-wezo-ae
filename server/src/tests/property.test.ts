@@ -4,7 +4,7 @@ import app from '../app';
 import prisma from '../config/database';
 import { hashPassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
-import { describe, it, beforeAll, beforeEach, expect } from '@jest/globals';
+import { describe, it, beforeAll, beforeEach, afterEach, expect } from '@jest/globals';
 import { cleanupDatabase } from './setup';
 
 describe('Property API Tests', () => {
@@ -106,6 +106,10 @@ describe('Property API Tests', () => {
   };
 
   beforeAll(async () => {
+    await cleanupDatabase();
+  });
+
+  afterEach(async () => {
     await cleanupDatabase();
   });
 
@@ -1226,6 +1230,250 @@ describe('Property API Tests', () => {
 
         expect(response.body.error).toBe('Property or photo not found or you do not have permission');
       });
+    });
+  });
+
+  describe('Role Upgrade Tests', () => {
+    it('should upgrade TENANT user to HOMEOWNER when creating first property', async () => {
+      // Create a user with TENANT role
+      const hashedPassword = await hashPassword('Test@123');
+      const timestamp = Date.now();
+      const tenantUser = await prisma.user.create({
+        data: {
+          username: `tenant_${timestamp}`,
+          email: `tenant_${timestamp}@example.com`,
+          password: hashedPassword,
+          role: 'TENANT', // Start as TENANT
+          isAdmin: false,
+        },
+      });
+      
+      const tenantToken = generateToken(tenantUser);
+
+      // Verify the user starts as TENANT
+      expect(tenantUser.role).toBe('TENANT');
+
+      const propertyData = {
+        name: 'First Property',
+        address: {
+          apartmentOrFloorNumber: '1A',
+          countryOrRegion: 'UAE',
+          city: 'Dubai',
+          zipCode: '12345',
+          latLong: {
+            latitude: 25.0657,
+            longitude: 55.1713,
+          },
+        },
+        layout: {
+          maximumGuest: 4,
+          bathrooms: 2,
+          allowChildren: true,
+          offerCribs: false,
+          propertySizeSqMtr: 120,
+          rooms: [
+            {
+              spaceName: 'Bedroom',
+              beds: [
+                {
+                  typeOfBed: 'QueenBed',
+                  numberOfBed: 1,
+                },
+              ],
+            },
+          ],
+        },
+        amenities: [
+          {
+            name: 'WiFi',
+            category: 'Basic',
+          },
+        ],
+        services: {
+          serveBreakfast: false,
+          parking: 'No',
+          languages: ['English'],
+        },
+        rules: {
+          smokingAllowed: false,
+          partiesOrEventsAllowed: false,
+          petsAllowed: 'No',
+          checkInCheckout: {
+            checkInFrom: '14:00',
+            checkInUntil: '22:00',
+            checkOutFrom: '08:00',
+            checkOutUntil: '12:00',
+          },
+        },
+        photos: [],
+        bookingType: 'BookInstantly',
+        paymentType: 'Online',
+        pricing: {
+          currency: 'AED',
+          ratePerNight: 500,
+          ratePerNightWeekend: 600,
+          discountPercentageForNonRefundableRatePlan: 5,
+          discountPercentageForWeeklyRatePlan: 10,
+        },
+        cancellation: {
+          daysBeforeArrivalFreeToCancel: 3,
+          waiveCancellationFeeAccidentalBookings: true,
+        },
+        aboutTheProperty: 'A cozy property for testing',
+        aboutTheNeighborhood: 'Great test neighborhood',
+        firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+      };
+
+      // Create property as TENANT user
+      const response = await request(app)
+        .post('/api/properties')
+        .set('Authorization', `Bearer ${tenantToken}`)
+        .send(propertyData)
+        .expect(201);
+
+      expect(response.body.message).toBe('Property created successfully');
+      expect(response.body.property.ownerId).toBe(tenantUser.id);
+
+      // Verify that the user has been upgraded to HOMEOWNER in the database
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: tenantUser.id },
+        select: { role: true },
+      });
+
+      expect(updatedUser?.role).toBe('HOMEOWNER');
+    });
+
+    it('should not change role if user is already HOMEOWNER', async () => {
+      // Use the existing test user (already HOMEOWNER)
+      const originalUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      expect(originalUser?.role).toBe('HOMEOWNER');
+
+      // Create another property
+      const testPropertyId = await createTestProperty();
+
+      // Verify the property was created successfully
+      expect(testPropertyId).toBeDefined();
+
+      // Verify that the user role remains HOMEOWNER
+      const userAfterPropertyCreation = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      expect(userAfterPropertyCreation?.role).toBe('HOMEOWNER');
+    });
+
+    it('should upgrade MANAGER user to HOMEOWNER when creating property', async () => {
+      // Create a user with MANAGER role
+      const hashedPassword = await hashPassword('Test@123');
+      const timestamp = Date.now();
+      const managerUser = await prisma.user.create({
+        data: {
+          username: `manager_${timestamp}`,
+          email: `manager_${timestamp}@example.com`,
+          password: hashedPassword,
+          role: 'MANAGER', // Start as MANAGER
+          isAdmin: false,
+        },
+      });
+      
+      const managerToken = generateToken(managerUser);
+
+      // Verify the user starts as MANAGER
+      expect(managerUser.role).toBe('MANAGER');
+
+      const propertyData = {
+        name: 'Manager Property',
+        address: {
+          apartmentOrFloorNumber: '2B',
+          countryOrRegion: 'UAE',
+          city: 'Abu Dhabi',
+          zipCode: '54321',
+          latLong: {
+            latitude: 24.4539,
+            longitude: 54.3773,
+          },
+        },
+        layout: {
+          maximumGuest: 6,
+          bathrooms: 3,
+          allowChildren: true,
+          offerCribs: true,
+          propertySizeSqMtr: 180,
+          rooms: [
+            {
+              spaceName: 'Master Bedroom',
+              beds: [
+                {
+                  typeOfBed: 'KingBed',
+                  numberOfBed: 1,
+                },
+              ],
+            },
+          ],
+        },
+        amenities: [
+          {
+            name: 'Pool',
+            category: 'Features',
+          },
+        ],
+        services: {
+          serveBreakfast: true,
+          parking: 'YesFree',
+          languages: ['English', 'Arabic'],
+        },
+        rules: {
+          smokingAllowed: false,
+          partiesOrEventsAllowed: true,
+          petsAllowed: 'UponRequest',
+          checkInCheckout: {
+            checkInFrom: '15:00',
+            checkInUntil: '23:00',
+            checkOutFrom: '09:00',
+            checkOutUntil: '11:00',
+          },
+        },
+        photos: [],
+        bookingType: 'NeedToRequestBook',
+        paymentType: 'ByCreditCardAtProperty',
+        pricing: {
+          currency: 'AED',
+          ratePerNight: 800,
+          ratePerNightWeekend: 1000,
+          discountPercentageForNonRefundableRatePlan: 8,
+          discountPercentageForWeeklyRatePlan: 15,
+        },
+        cancellation: {
+          daysBeforeArrivalFreeToCancel: 5,
+          waiveCancellationFeeAccidentalBookings: false,
+        },
+        aboutTheProperty: 'Luxury property managed professionally',
+        aboutTheNeighborhood: 'Premium management area',
+        firstDateGuestCanCheckIn: new Date('2024-02-01').toISOString(),
+      };
+
+      // Create property as MANAGER user
+      const response = await request(app)
+        .post('/api/properties')
+        .set('Authorization', `Bearer ${managerToken}`)
+        .send(propertyData)
+        .expect(201);
+
+      expect(response.body.message).toBe('Property created successfully');
+      expect(response.body.property.ownerId).toBe(managerUser.id);
+
+      // Verify that the user has been upgraded to HOMEOWNER in the database
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: managerUser.id },
+        select: { role: true },
+      });
+
+      expect(updatedUser?.role).toBe('HOMEOWNER');
     });
   });
 });

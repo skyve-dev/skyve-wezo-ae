@@ -1,9 +1,9 @@
-import { User } from '@prisma/client';
+import { JWTPayload } from '../utils/jwt';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: Pick<User, 'id' | 'username' | 'email' | 'isAdmin'>;
+      user?: JWTPayload;
     }
   }
 }
