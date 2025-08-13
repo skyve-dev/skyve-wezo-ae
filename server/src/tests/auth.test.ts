@@ -4,6 +4,7 @@ import request from 'supertest';
 import app from '../app';
 import prisma from '../config/database';
 import { hashPassword } from '../utils/password';
+import { describe, it, beforeEach, expect } from '@jest/globals';
 
 describe('Authentication Tests', () => {
   beforeEach(async () => {

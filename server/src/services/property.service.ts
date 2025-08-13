@@ -254,6 +254,18 @@ export class PropertyService {
       throw new Error('Property not found or you do not have permission to update it');
     }
 
+    // Delete beds first, then rooms
+    const existingRooms = await prisma.room.findMany({
+      where: { propertyId },
+      select: { id: true },
+    });
+    
+    for (const room of existingRooms) {
+      await prisma.bed.deleteMany({
+        where: { roomId: room.id },
+      });
+    }
+    
     await prisma.room.deleteMany({
       where: { propertyId },
     });

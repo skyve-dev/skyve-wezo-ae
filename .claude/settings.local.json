@@ -31,7 +31,8 @@
       "Bash(npm run prisma:migrate:*)",
       "Bash(npm run prisma:reset:*)",
       "Bash(npm run:*)",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

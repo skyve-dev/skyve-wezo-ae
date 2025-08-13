@@ -86,6 +86,13 @@ export const validateLayoutUpdate = (req: Request, res: Response, next: NextFunc
     return;
   }
 
+  if (typeof maximumGuest !== 'number' || typeof bathrooms !== 'number') {
+    res.status(400).json({
+      error: 'maximumGuest and bathrooms must be numbers',
+    });
+    return;
+  }
+
   if (typeof allowChildren !== 'boolean' || typeof offerCribs !== 'boolean') {
     res.status(400).json({
       error: 'Layout must include allowChildren and offerCribs as boolean values',
