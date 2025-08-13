@@ -24,7 +24,7 @@ export class PropertyService {
       apartmentOrFloorNumber: address.apartmentOrFloorNumber,
       countryOrRegion: address.countryOrRegion,
       city: address.city,
-      zipCode: address.zipCode,
+      zipCode: parseInt(address.zipCode, 10),
     };
 
     if (address.latLong) {

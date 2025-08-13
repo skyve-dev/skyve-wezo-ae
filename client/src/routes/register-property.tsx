@@ -105,6 +105,7 @@ function RegisterPropertyWizard() {
 
   const handleSubmit = async () => {
     try {
+      // Data is already in the correct format with proper enums
       await dispatch(createProperty(wizardData)).unwrap()
       
       // Try to update user role to HOMEOWNER after first property

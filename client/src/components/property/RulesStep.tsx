@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { PetPolicy, PetPolicyLabels } from '../../constants/propertyEnums'
 
 interface RulesStepProps {
   data: WizardFormData
@@ -103,23 +104,47 @@ const RulesStep: React.FC<RulesStepProps> = ({
               </Box>
             </Box>
 
-            <Box display="flex" alignItems="center" gap="0.75rem">
-              <Box
-                as="input"
-                type="checkbox"
-                checked={data.rules.petsAllowed}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  handleRuleChange('petsAllowed', e.target.checked)
-                }
-                accentColor="#3182ce"
-              />
-              <Box>
-                <Box fontSize="0.875rem" color="#374151" fontWeight="500">
-                  Pets allowed
-                </Box>
-                <Box fontSize="0.75rem" color="#6b7280">
-                  Guests can bring their pets (additional fees may apply)
-                </Box>
+            {/* Pet Policy Options */}
+            <Box>
+              <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.75rem">
+                Pet Policy
+              </Box>
+              <Box display="flex" flexDirection="column" gap="0.5rem">
+                {Object.values(PetPolicy).map((policy) => (
+                  <Box
+                    key={policy}
+                    as="label"
+                    display="flex"
+                    alignItems="flex-start"
+                    gap="0.75rem"
+                    padding="0.75rem"
+                    border="2px solid"
+                    borderColor={data.rules.petsAllowed === policy ? '#3182ce' : '#e5e7eb'}
+                    borderRadius="0.375rem"
+                    cursor="pointer"
+                    whileHover={{ borderColor: '#3182ce' }}
+                  >
+                    <Box
+                      as="input"
+                      type="radio"
+                      name="petsAllowed"
+                      value={policy}
+                      checked={data.rules.petsAllowed === policy}
+                      onChange={() => handleRuleChange('petsAllowed', policy)}
+                      accentColor="#3182ce"
+                    />
+                    <Box>
+                      <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                        {PetPolicyLabels[policy]}
+                      </Box>
+                      <Box fontSize="0.75rem" color="#6b7280">
+                        {policy === PetPolicy.Yes && 'Guests can bring their pets (additional fees may apply)'}
+                        {policy === PetPolicy.No && 'Pets are not allowed at this property'}
+                        {policy === PetPolicy.UponRequest && 'Pet approval required - guests must ask permission'}
+                      </Box>
+                    </Box>
+                  </Box>
+                ))}
               </Box>
             </Box>
           </Box>

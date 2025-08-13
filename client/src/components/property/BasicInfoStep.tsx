@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '../../constants/propertyEnums'
 
 interface BasicInfoStepProps {
   data: WizardFormData
@@ -24,15 +25,15 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
     onChange({ [field]: value })
   }
 
-  const handleBookingTypeChange = (value: 'INSTANT' | 'REQUEST') => {
+  const handleBookingTypeChange = (value: BookingType) => {
     onChange({ bookingType: value })
   }
 
-  const handlePaymentTypeChange = (value: 'FULL' | 'PARTIAL') => {
+  const handlePaymentTypeChange = (value: PaymentType) => {
     onChange({ paymentType: value })
   }
 
-  const isValid = data.name.trim().length >= 3
+  const isValid = data.name.trim().length >= 3 && data.firstDateGuestCanCheckIn
 
   return (
     <Box padding="2rem">
@@ -98,7 +99,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               gap="0.75rem"
               padding="1rem"
               border="2px solid"
-              borderColor={data.bookingType === 'INSTANT' ? '#3182ce' : '#e5e7eb'}
+              borderColor={data.bookingType === BookingType.BookInstantly ? '#3182ce' : '#e5e7eb'}
               borderRadius="0.5rem"
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
@@ -107,14 +108,14 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 as="input"
                 type="radio"
                 name="bookingType"
-                value="INSTANT"
-                checked={data.bookingType === 'INSTANT'}
-                onChange={() => handleBookingTypeChange('INSTANT')}
+                value={BookingType.BookInstantly}
+                checked={data.bookingType === BookingType.BookInstantly}
+                onChange={() => handleBookingTypeChange(BookingType.BookInstantly)}
                 accentColor="#3182ce"
               />
               <Box>
                 <Box fontWeight="500" color="#374151">
-                  Instant Book
+                  {BookingTypeLabels[BookingType.BookInstantly]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
                   Guests can book immediately without waiting for approval
@@ -129,7 +130,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               gap="0.75rem"
               padding="1rem"
               border="2px solid"
-              borderColor={data.bookingType === 'REQUEST' ? '#3182ce' : '#e5e7eb'}
+              borderColor={data.bookingType === BookingType.NeedToRequestBook ? '#3182ce' : '#e5e7eb'}
               borderRadius="0.5rem"
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
@@ -138,14 +139,14 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 as="input"
                 type="radio"
                 name="bookingType"
-                value="REQUEST"
-                checked={data.bookingType === 'REQUEST'}
-                onChange={() => handleBookingTypeChange('REQUEST')}
+                value={BookingType.NeedToRequestBook}
+                checked={data.bookingType === BookingType.NeedToRequestBook}
+                onChange={() => handleBookingTypeChange(BookingType.NeedToRequestBook)}
                 accentColor="#3182ce"
               />
               <Box>
                 <Box fontWeight="500" color="#374151">
-                  Request to Book
+                  {BookingTypeLabels[BookingType.NeedToRequestBook]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
                   You review and approve each booking request before confirmation
@@ -175,7 +176,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               gap="0.75rem"
               padding="1rem"
               border="2px solid"
-              borderColor={data.paymentType === 'FULL' ? '#3182ce' : '#e5e7eb'}
+              borderColor={data.paymentType === PaymentType.Online ? '#3182ce' : '#e5e7eb'}
               borderRadius="0.5rem"
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
@@ -184,17 +185,17 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 as="input"
                 type="radio"
                 name="paymentType"
-                value="FULL"
-                checked={data.paymentType === 'FULL'}
-                onChange={() => handlePaymentTypeChange('FULL')}
+                value={PaymentType.Online}
+                checked={data.paymentType === PaymentType.Online}
+                onChange={() => handlePaymentTypeChange(PaymentType.Online)}
                 accentColor="#3182ce"
               />
               <Box>
                 <Box fontWeight="500" color="#374151">
-                  Full Payment at Booking
+                  {PaymentTypeLabels[PaymentType.Online]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
-                  Collect the entire amount when guests book
+                  Collect the entire amount when guests book online
                 </Box>
               </Box>
             </Box>
@@ -206,7 +207,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               gap="0.75rem"
               padding="1rem"
               border="2px solid"
-              borderColor={data.paymentType === 'PARTIAL' ? '#3182ce' : '#e5e7eb'}
+              borderColor={data.paymentType === PaymentType.ByCreditCardAtProperty ? '#3182ce' : '#e5e7eb'}
               borderRadius="0.5rem"
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
@@ -215,20 +216,52 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 as="input"
                 type="radio"
                 name="paymentType"
-                value="PARTIAL"
-                checked={data.paymentType === 'PARTIAL'}
-                onChange={() => handlePaymentTypeChange('PARTIAL')}
+                value={PaymentType.ByCreditCardAtProperty}
+                checked={data.paymentType === PaymentType.ByCreditCardAtProperty}
+                onChange={() => handlePaymentTypeChange(PaymentType.ByCreditCardAtProperty)}
                 accentColor="#3182ce"
               />
               <Box>
                 <Box fontWeight="500" color="#374151">
-                  Partial Payment (50% at booking, 50% later)
+                  {PaymentTypeLabels[PaymentType.ByCreditCardAtProperty]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
-                  Collect half upfront and half before check-in
+                  Guests pay with credit card when they arrive at the property
                 </Box>
               </Box>
             </Box>
+          </Box>
+        </Box>
+
+        {/* First Available Date */}
+        <Box>
+          <Box
+            as="label"
+            display="block"
+            fontSize="0.875rem"
+            fontWeight="500"
+            color="#374151"
+            marginBottom="0.5rem"
+          >
+            First Available Date for Guests *
+          </Box>
+          <Box
+            as="input"
+            type="date"
+            value={data.firstDateGuestCanCheckIn ? new Date(data.firstDateGuestCanCheckIn).toISOString().split('T')[0] : ''}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+              onChange({ firstDateGuestCanCheckIn: new Date(e.target.value) })
+            }
+            min={new Date().toISOString().split('T')[0]}
+            width="100%"
+            padding="0.75rem"
+            border="1px solid #d1d5db"
+            borderRadius="0.375rem"
+            fontSize="1rem"
+            whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+          />
+          <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+            Select the earliest date guests can check in to your property
           </Box>
         </Box>
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData, Pricing } from '../../types/property'
 import { Box } from '../Box'
+import { Currency } from '../../constants/propertyEnums'
 
 interface PricingStepProps {
   data: WizardFormData
@@ -21,7 +22,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
   loading
 }) => {
   const pricing = data.pricing || {
-    currency: 'AED',
+    currency: Currency.AED,
     ratePerNight: 0
   }
 
@@ -59,22 +60,17 @@ const PricingStep: React.FC<PricingStepProps> = ({
                 Currency
               </Box>
               <Box
-                as="select"
-                value={pricing.currency}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => 
-                  handlePricingChange('currency', e.target.value)
-                }
+                display="flex"
+                alignItems="center"
                 width="100%"
                 padding="0.75rem"
                 border="1px solid #d1d5db"
                 borderRadius="0.375rem"
                 fontSize="1rem"
-                backgroundColor="white"
-                whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                backgroundColor="#f9fafb"
+                color="#374151"
               >
-                <option value="AED">AED</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
+                AED - UAE Dirham (Fixed)
               </Box>
             </Box>
             <Box>

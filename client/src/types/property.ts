@@ -1,3 +1,5 @@
+import { BedType, ParkingType, PetPolicy, BookingType, PaymentType, Currency } from '../constants/propertyEnums'
+
 export interface Address {
   apartmentOrFloorNumber?: string
   countryOrRegion: string
@@ -10,7 +12,7 @@ export interface Address {
 }
 
 export interface Bed {
-  typeOfBed: string
+  typeOfBed: BedType
   numberOfBed: number
 }
 
@@ -35,7 +37,7 @@ export interface Amenity {
 
 export interface Services {
   serveBreakfast: boolean
-  parking: boolean
+  parking: ParkingType
   languages: string[]
 }
 
@@ -49,7 +51,7 @@ export interface CheckInCheckout {
 export interface Rules {
   smokingAllowed: boolean
   partiesOrEventsAllowed: boolean
-  petsAllowed: boolean
+  petsAllowed: PetPolicy
   checkInCheckout?: CheckInCheckout
 }
 
@@ -73,7 +75,7 @@ export interface PricePerGroupSize {
 }
 
 export interface Pricing {
-  currency: string
+  currency: Currency
   ratePerNight: number
   ratePerNightWeekend?: number
   discountPercentageForNonRefundableRatePlan?: number
@@ -96,8 +98,8 @@ export interface Property {
   services: Services
   rules: Rules
   photos?: Photo[]
-  bookingType: 'INSTANT' | 'REQUEST'
-  paymentType: 'FULL' | 'PARTIAL'
+  bookingType: BookingType
+  paymentType: PaymentType
   pricing?: Pricing
   cancellation?: Cancellation
   aboutTheProperty?: string

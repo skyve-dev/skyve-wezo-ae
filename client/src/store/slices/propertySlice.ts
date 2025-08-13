@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Property, PropertyState, WizardFormData, Photo } from '../../types/property'
 import { api } from '../../utils/api'
+import { BookingType, PaymentType, ParkingType, PetPolicy, Currency } from '../../constants/propertyEnums'
 
 const WIZARD_STORAGE_KEY = 'property-wizard-data'
 
@@ -44,7 +45,7 @@ export const fetchMyProperties = createAsyncThunk(
   'property/fetchMyProperties',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get<{ properties: Property[] }>('/api/property/my-properties')
+      const response = await api.get<{ properties: Property[] }>('/api/properties/my-properties')
       return response.properties
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch properties')
@@ -56,7 +57,7 @@ export const fetchPropertyById = createAsyncThunk(
   'property/fetchPropertyById',
   async (propertyId: string, { rejectWithValue }) => {
     try {
-      const response = await api.get<{ property: Property }>(`/api/property/${propertyId}`)
+      const response = await api.get<{ property: Property }>(`/api/properties/${propertyId}`)
       return response.property
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch property')
@@ -68,7 +69,7 @@ export const createProperty = createAsyncThunk(
   'property/createProperty',
   async (propertyData: Property, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ property: Property }>('/api/property', propertyData)
+      const response = await api.post<{ property: Property }>('/api/properties', propertyData)
       return response.property
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to create property')
@@ -80,7 +81,7 @@ export const updateProperty = createAsyncThunk(
   'property/updateProperty',
   async ({ propertyId, data }: { propertyId: string; data: Partial<Property> }, { rejectWithValue }) => {
     try {
-      const response = await api.put<{ property: Property }>(`/api/property/${propertyId}`, data)
+      const response = await api.put<{ property: Property }>(`/api/properties/${propertyId}`, data)
       return response.property
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update property')
@@ -92,7 +93,7 @@ export const deleteProperty = createAsyncThunk(
   'property/deleteProperty',
   async (propertyId: string, { rejectWithValue }) => {
     try {
-      await api.delete(`/api/property/${propertyId}`)
+      await api.delete(`/api/properties/${propertyId}`)
       return propertyId
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to delete property')
@@ -109,7 +110,7 @@ export const uploadPropertyPhotos = createAsyncThunk(
         formData.append('photos', file)
       })
 
-      const response = await api.post<{ photos: Photo[] }>(`/api/property/${propertyId}/photos`, formData, {})
+      const response = await api.post<{ photos: Photo[] }>(`/api/properties/${propertyId}/photos`, formData, {})
       return response.photos
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to upload photos')
@@ -121,7 +122,7 @@ export const deletePropertyPhoto = createAsyncThunk(
   'property/deletePropertyPhoto',
   async ({ propertyId, photoId }: { propertyId: string; photoId: string }, { rejectWithValue }) => {
     try {
-      await api.delete(`/api/property/${propertyId}/photos/${photoId}`)
+      await api.delete(`/api/properties/${propertyId}/photos/${photoId}`)
       return photoId
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to delete photo')
@@ -158,16 +159,20 @@ const propertySlice = createSlice({
         },
         services: {
           serveBreakfast: false,
-          parking: false,
+          parking: ParkingType.No,
           languages: []
         },
         rules: {
           smokingAllowed: false,
           partiesOrEventsAllowed: false,
-          petsAllowed: false
+          petsAllowed: PetPolicy.No
         },
-        bookingType: 'REQUEST',
-        paymentType: 'FULL',
+        bookingType: BookingType.NeedToRequestBook,
+        paymentType: PaymentType.Online,
+        pricing: {
+          currency: Currency.AED,
+          ratePerNight: 0
+        },
         currentStep: 1,
         isComplete: false,
         ...action.payload

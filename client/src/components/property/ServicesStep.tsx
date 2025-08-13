@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { ParkingType, ParkingTypeLabels } from '../../constants/propertyEnums'
 
 interface ServicesStepProps {
   data: WizardFormData
@@ -94,26 +95,44 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
         {/* Parking */}
         <Box>
           <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
-            Transportation
+            Parking Options
           </Box>
-          <Box display="flex" alignItems="center" gap="0.75rem">
-            <Box
-              as="input"
-              type="checkbox"
-              checked={data.services.parking}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleServiceChange('parking', e.target.checked)
-              }
-              accentColor="#3182ce"
-            />
-            <Box>
-              <Box fontSize="0.875rem" color="#374151" fontWeight="500">
-                Free parking
+          <Box display="flex" flexDirection="column" gap="0.75rem">
+            {Object.values(ParkingType).map((parkingType) => (
+              <Box
+                key={parkingType}
+                as="label"
+                display="flex"
+                alignItems="flex-start"
+                gap="0.75rem"
+                padding="1rem"
+                border="2px solid"
+                borderColor={data.services.parking === parkingType ? '#3182ce' : '#e5e7eb'}
+                borderRadius="0.5rem"
+                cursor="pointer"
+                whileHover={{ borderColor: '#3182ce' }}
+              >
+                <Box
+                  as="input"
+                  type="radio"
+                  name="parking"
+                  value={parkingType}
+                  checked={data.services.parking === parkingType}
+                  onChange={() => handleServiceChange('parking', parkingType)}
+                  accentColor="#3182ce"
+                />
+                <Box>
+                  <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                    {ParkingTypeLabels[parkingType]}
+                  </Box>
+                  <Box fontSize="0.75rem" color="#6b7280">
+                    {parkingType === ParkingType.YesFree && 'Guests can park their vehicle free of charge'}
+                    {parkingType === ParkingType.YesPaid && 'Paid parking is available for guests'}
+                    {parkingType === ParkingType.No && 'No parking is available at the property'}
+                  </Box>
+                </Box>
               </Box>
-              <Box fontSize="0.75rem" color="#6b7280">
-                Guests can park their vehicle free of charge
-              </Box>
-            </Box>
+            ))}
           </Box>
         </Box>
 

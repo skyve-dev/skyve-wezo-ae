@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData, Room, Bed } from '../../types/property'
 import { Box } from '../Box'
+import { BedType, BedTypeLabels } from '../../constants/propertyEnums'
 
 interface LayoutStepProps {
   data: WizardFormData
@@ -13,15 +14,7 @@ interface LayoutStepProps {
   isLastStep: boolean
 }
 
-const bedTypes = [
-  'Single bed',
-  'Double bed',
-  'Queen bed', 
-  'King bed',
-  'Bunk bed',
-  'Sofa bed',
-  'Floor mattress'
-]
+const bedTypes = Object.values(BedType)
 
 const LayoutStep: React.FC<LayoutStepProps> = ({
   data,
@@ -66,7 +59,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   const addBed = (roomIndex: number) => {
     const rooms = [...(data.layout.rooms || [])]
     const beds = rooms[roomIndex].beds || []
-    rooms[roomIndex] = { ...rooms[roomIndex], beds: [...beds, { typeOfBed: 'Single bed', numberOfBed: 1 }] }
+    rooms[roomIndex] = { ...rooms[roomIndex], beds: [...beds, { typeOfBed: BedType.TwinBed, numberOfBed: 1 }] }
     handleLayoutChange('rooms', rooms)
   }
 
@@ -326,7 +319,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                     fontSize="0.75rem"
                   >
                     {bedTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>{BedTypeLabels[type]}</option>
                     ))}
                   </Box>
                   <Box
