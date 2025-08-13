@@ -4,18 +4,20 @@ import request from 'supertest';
 import app from '../app';
 import prisma from '../config/database';
 import { hashPassword } from '../utils/password';
-import { describe, it, beforeEach, expect } from '@jest/globals';
+import { describe, it, beforeAll, beforeEach, expect } from '@jest/globals';
+import { cleanupDatabase } from './setup';
 
 describe('Authentication Tests', () => {
-  beforeEach(async () => {
-    await prisma.user.deleteMany();
+  beforeAll(async () => {
+    await cleanupDatabase();
   });
 
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
+      const timestamp = Date.now();
       const newUser = {
-        username: 'testuser',
-        email: 'test@example.com',
+        username: `testuser_${timestamp}`,
+        email: `test_${timestamp}@example.com`,
         password: 'Test@123',
       };
 
@@ -32,17 +34,19 @@ describe('Authentication Tests', () => {
     });
 
     it('should reject registration with existing username', async () => {
+      const timestamp = Date.now();
       const existingUser = {
-        username: 'existinguser',
-        email: 'existing@example.com',
+        username: `existinguser_${timestamp}`,
+        email: `existing_${timestamp}@example.com`,
         password: await hashPassword('Test@123'),
+        isAdmin: false,
       };
 
       await prisma.user.create({ data: existingUser });
 
       const newUser = {
-        username: 'existinguser',
-        email: 'new@example.com',
+        username: `existinguser_${timestamp}`,
+        email: `new_${timestamp}@example.com`,
         password: 'Test@123',
       };
 
@@ -55,8 +59,9 @@ describe('Authentication Tests', () => {
     });
 
     it('should reject registration with invalid email', async () => {
+      const timestamp = Date.now();
       const newUser = {
-        username: 'testuser',
+        username: `testuser_${timestamp}`,
         email: 'invalidemail',
         password: 'Test@123',
       };
@@ -70,9 +75,10 @@ describe('Authentication Tests', () => {
     });
 
     it('should reject registration with short password', async () => {
+      const timestamp = Date.now();
       const newUser = {
-        username: 'testuser',
-        email: 'test@example.com',
+        username: `testuser_${timestamp}`,
+        email: `test_${timestamp}@example.com`,
         password: 'short',
       };
 
@@ -86,20 +92,24 @@ describe('Authentication Tests', () => {
   });
 
   describe('POST /api/auth/login', () => {
+    let loginUser: any;
+    
     beforeEach(async () => {
       const hashedPassword = await hashPassword('Test@123');
-      await prisma.user.create({
+      const timestamp = Date.now();
+      loginUser = await prisma.user.create({
         data: {
-          username: 'testuser',
-          email: 'test@example.com',
+          username: `testuser_${timestamp}`,
+          email: `test_${timestamp}@example.com`,
           password: hashedPassword,
+          isAdmin: false,
         },
       });
     });
 
     it('should login with valid credentials (username)', async () => {
       const credentials = {
-        username: 'testuser',
+        username: loginUser.username,
         password: 'Test@123',
       };
 
@@ -110,12 +120,12 @@ describe('Authentication Tests', () => {
 
       expect(response.body).toHaveProperty('token');
       expect(response.body).toHaveProperty('user');
-      expect(response.body.user.username).toBe('testuser');
+      expect(response.body.user.username).toBe(loginUser.username);
     });
 
     it('should login with valid credentials (email)', async () => {
       const credentials = {
-        username: 'test@example.com',
+        username: loginUser.email,
         password: 'Test@123',
       };
 
@@ -126,12 +136,12 @@ describe('Authentication Tests', () => {
 
       expect(response.body).toHaveProperty('token');
       expect(response.body).toHaveProperty('user');
-      expect(response.body.user.email).toBe('test@example.com');
+      expect(response.body.user.email).toBe(loginUser.email);
     });
 
     it('should reject login with invalid password', async () => {
       const credentials = {
-        username: 'testuser',
+        username: loginUser.username,
         password: 'wrongpassword',
       };
 
@@ -162,9 +172,10 @@ describe('Authentication Tests', () => {
     let token: string;
 
     beforeEach(async () => {
+      const timestamp = Date.now();
       const newUser = {
-        username: 'testuser',
-        email: 'test@example.com',
+        username: `testuser_${timestamp}`,
+        email: `test_${timestamp}@example.com`,
         password: 'Test@123',
       };
 
@@ -182,8 +193,8 @@ describe('Authentication Tests', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('user');
-      expect(response.body.user.username).toBe('testuser');
-      expect(response.body.user.email).toBe('test@example.com');
+      expect(response.body.user.username).toContain('testuser_');
+      expect(response.body.user.email).toContain('@example.com');
     });
 
     it('should reject profile request without token', async () => {
@@ -205,12 +216,16 @@ describe('Authentication Tests', () => {
   });
 
   describe('Password Reset', () => {
+    let resetUser: any;
+    
     beforeEach(async () => {
-      await prisma.user.create({
+      const timestamp = Date.now();
+      resetUser = await prisma.user.create({
         data: {
-          username: 'testuser',
-          email: 'test@example.com',
+          username: `testuser_${timestamp}`,
+          email: `test_${timestamp}@example.com`,
           password: await hashPassword('OldPassword123'),
+          isAdmin: false,
         },
       });
     });
@@ -218,7 +233,7 @@ describe('Authentication Tests', () => {
     it('should request password reset successfully', async () => {
       const response = await request(app)
         .post('/api/auth/password-reset/request')
-        .send({ email: 'test@example.com' })
+        .send({ email: resetUser.email })
         .expect(200);
 
       expect(response.body.message).toBe('If the email exists, a password reset link has been sent');
@@ -235,9 +250,19 @@ describe('Authentication Tests', () => {
     });
 
     it('should reset password with valid token', async () => {
+      // Create a fresh user for this test
+      await prisma.user.create({
+        data: {
+          username: 'resetuser',
+          email: 'reset@example.com',
+          password: await hashPassword('OldPassword123'),
+          isAdmin: false,
+        },
+      });
+
       const resetResponse = await request(app)
         .post('/api/auth/password-reset/request')
-        .send({ email: 'test@example.com' });
+        .send({ email: 'reset@example.com' });
 
       const { resetToken } = resetResponse.body;
 
@@ -254,7 +279,7 @@ describe('Authentication Tests', () => {
       const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({
-          username: 'testuser',
+          username: 'resetuser',
           password: 'NewPassword123',
         })
         .expect(200);

@@ -4,36 +4,119 @@ import app from '../app';
 import prisma from '../config/database';
 import { hashPassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
-import { describe, it, beforeAll, afterAll, expect } from '@jest/globals';
+import { describe, it, beforeAll, beforeEach, expect } from '@jest/globals';
+import { cleanupDatabase } from './setup';
 
 describe('Property API Tests', () => {
   let authToken: string;
   let userId: string;
-  let propertyId: string;
+
+  const createTestProperty = async () => {
+    const propertyData = {
+      name: 'Test Villa',
+      address: {
+        apartmentOrFloorNumber: '10A',
+        countryOrRegion: 'UAE',
+        city: 'Dubai',
+        zipCode: 54321,
+        latLong: {
+          latitude: 25.0657,
+          longitude: 55.1713,
+        },
+      },
+      layout: {
+        maximumGuest: 6,
+        bathrooms: 2,
+        allowChildren: true,
+        offerCribs: false,
+        propertySizeSqMtr: 150,
+        rooms: [
+          {
+            spaceName: 'Master Bedroom',
+            beds: [
+              {
+                typeOfBed: 'KingBed',
+                numberOfBed: 1,
+              },
+            ],
+          },
+        ],
+      },
+      amenities: [
+        {
+          name: 'WiFi',
+          category: 'Technology',
+        },
+        {
+          name: 'Pool',
+          category: 'Outdoor',
+        },
+      ],
+      services: {
+        serveBreakfast: true,
+        parking: 'YesFree',
+        languages: ['English', 'Arabic'],
+      },
+      rules: {
+        smokingAllowed: false,
+        partiesOrEventsAllowed: false,
+        petsAllowed: 'No',
+        checkInCheckout: {
+          checkInFrom: '14:00',
+          checkInUntil: '22:00',
+          checkOutFrom: '08:00',
+          checkOutUntil: '12:00',
+        },
+      },
+      photos: [
+        {
+          url: 'https://example.com/photo1.jpg',
+          altText: 'Villa front',
+          description: 'Front view of the villa',
+          tags: ['exterior', 'front'],
+        },
+      ],
+      bookingType: 'BookInstantly',
+      paymentType: 'Online',
+      pricing: {
+        currency: 'AED',
+        ratePerNight: 1000,
+        ratePerNightWeekend: 1200,
+        discountPercentageForNonRefundableRatePlan: 10,
+        discountPercentageForWeeklyRatePlan: 15,
+      },
+      cancellation: {
+        daysBeforeArrivalFreeToCancel: 7,
+        waiveCancellationFeeAccidentalBookings: true,
+      },
+      aboutTheProperty: 'A beautiful test villa',
+      aboutTheNeighborhood: 'Quiet neighborhood',
+      firstDateGuestCanCheckIn: '2024-01-01',
+    };
+
+    const response = await request(app)
+      .post('/api/properties')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send(propertyData)
+      .expect(201);
+
+    return response.body.property.propertyId;
+  };
 
   beforeAll(async () => {
-    // Clean up in correct order to handle foreign key constraints
-    await prisma.pricePerGroupSize.deleteMany();
-    await prisma.promotion.deleteMany();
-    await prisma.pricing.deleteMany();
-    await prisma.cancellation.deleteMany();
-    await prisma.checkInOutTimes.deleteMany();
-    await prisma.bed.deleteMany();
-    await prisma.room.deleteMany();
-    await prisma.amenity.deleteMany();
-    await prisma.photo.deleteMany();
-    await prisma.property.deleteMany();
-    await prisma.latLong.deleteMany();
-    await prisma.address.deleteMany();
-    await prisma.user.deleteMany();
-    
+    await cleanupDatabase();
+  });
+
+  beforeEach(async () => {
     const hashedPassword = await hashPassword('Test@123');
+    const timestamp = Date.now();
     const user = await prisma.user.create({
       data: {
-        username: 'propertyowner',
-        email: 'owner@example.com',
+        username: `propertyowner_${timestamp}`,
+        email: `owner_${timestamp}@example.com`,
         password: hashedPassword,
         role: 'HOMEOWNER',
+        isAdmin: false,
       },
     });
     
@@ -41,22 +124,6 @@ describe('Property API Tests', () => {
     authToken = generateToken(user);
   });
 
-  afterAll(async () => {
-    // Clean up in correct order to handle foreign key constraints
-    await prisma.pricePerGroupSize.deleteMany();
-    await prisma.promotion.deleteMany();
-    await prisma.pricing.deleteMany();
-    await prisma.cancellation.deleteMany();
-    await prisma.checkInOutTimes.deleteMany();
-    await prisma.bed.deleteMany();
-    await prisma.room.deleteMany();
-    await prisma.amenity.deleteMany();
-    await prisma.photo.deleteMany();
-    await prisma.property.deleteMany();
-    await prisma.latLong.deleteMany();
-    await prisma.address.deleteMany();
-    await prisma.user.deleteMany();
-  });
 
   describe('POST /api/properties', () => {
     it('should create a new property successfully', async () => {
@@ -154,8 +221,6 @@ describe('Property API Tests', () => {
       expect(response.body.property.address.city).toBe('Dubai');
       expect(response.body.property.rooms).toHaveLength(1);
       expect(response.body.property.amenities).toHaveLength(2);
-      
-      propertyId = response.body.property.propertyId;
     });
 
     it('should reject property creation without authentication', async () => {
@@ -271,12 +336,14 @@ describe('Property API Tests', () => {
 
   describe('GET /api/properties/:propertyId', () => {
     it('should retrieve a property by ID', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const response = await request(app)
-        .get(`/api/properties/${propertyId}`)
+        .get(`/api/properties/${testPropertyId}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('property');
-      expect(response.body.property.propertyId).toBe(propertyId);
+      expect(response.body.property.propertyId).toBe(testPropertyId);
       expect(response.body.property.name).toBe('Test Villa');
     });
 
@@ -293,6 +360,8 @@ describe('Property API Tests', () => {
 
   describe('PUT /api/properties/:propertyId', () => {
     it('should update property basic information', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const updateData = {
         name: 'Updated Villa Name',
         aboutTheProperty: 'Updated description of the villa',
@@ -300,7 +369,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}`)
+        .put(`/api/properties/${testPropertyId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateData)
         .expect(200);
@@ -311,12 +380,14 @@ describe('Property API Tests', () => {
     });
 
     it('should reject update without authentication', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const updateData = {
         name: 'Updated Villa Name',
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}`)
+        .put(`/api/properties/${testPropertyId}`)
         .send(updateData)
         .expect(401);
 
@@ -330,6 +401,7 @@ describe('Property API Tests', () => {
           email: 'other@example.com',
           password: await hashPassword('Test@123'),
           role: 'HOMEOWNER',
+          isAdmin: false,
         },
       });
       
@@ -339,20 +411,22 @@ describe('Property API Tests', () => {
         name: 'Unauthorized Update',
       };
 
+      const testPropertyId = await createTestProperty();
+      
       const response = await request(app)
-        .put(`/api/properties/${propertyId}`)
+        .put(`/api/properties/${testPropertyId}`)
         .set('Authorization', `Bearer ${otherToken}`)
         .send(updateData)
         .expect(404);
 
       expect(response.body.error).toBe('Property not found or you do not have permission to update it');
-
-      await prisma.user.delete({ where: { id: otherUser.id } });
     });
   });
 
   describe('PUT /api/properties/:propertyId/layout', () => {
     it('should update property layout', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const layoutUpdate = {
         maximumGuest: 8,
         bathrooms: 3,
@@ -382,7 +456,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/layout`)
+        .put(`/api/properties/${testPropertyId}/layout`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(layoutUpdate)
         .expect(200);
@@ -393,6 +467,8 @@ describe('Property API Tests', () => {
     });
 
     it('should reject layout update with invalid data', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidLayout = {
         maximumGuest: 'not a number',
         bathrooms: 3,
@@ -401,7 +477,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/layout`)
+        .put(`/api/properties/${testPropertyId}/layout`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidLayout)
         .expect(400);
@@ -412,6 +488,8 @@ describe('Property API Tests', () => {
 
   describe('PUT /api/properties/:propertyId/amenities', () => {
     it('should update property amenities', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const amenitiesUpdate = {
         amenities: [
           {
@@ -430,7 +508,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/amenities`)
+        .put(`/api/properties/${testPropertyId}/amenities`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(amenitiesUpdate)
         .expect(200);
@@ -440,12 +518,14 @@ describe('Property API Tests', () => {
     });
 
     it('should reject amenities update with invalid format', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidAmenities = {
         amenities: 'not an array',
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/amenities`)
+        .put(`/api/properties/${testPropertyId}/amenities`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidAmenities)
         .expect(400);
@@ -454,6 +534,8 @@ describe('Property API Tests', () => {
     });
 
     it('should reject amenities with missing fields', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidAmenities = {
         amenities: [
           {
@@ -464,7 +546,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/amenities`)
+        .put(`/api/properties/${testPropertyId}/amenities`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidAmenities)
         .expect(400);
@@ -475,6 +557,8 @@ describe('Property API Tests', () => {
 
   describe('PUT /api/properties/:propertyId/services', () => {
     it('should update property services', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const servicesUpdate = {
         serveBreakfast: false,
         parking: 'YesPaid',
@@ -482,7 +566,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/services`)
+        .put(`/api/properties/${testPropertyId}/services`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(servicesUpdate)
         .expect(200);
@@ -493,6 +577,8 @@ describe('Property API Tests', () => {
     });
 
     it('should reject services update with invalid parking type', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidServices = {
         serveBreakfast: true,
         parking: 'InvalidParking',
@@ -500,7 +586,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/services`)
+        .put(`/api/properties/${testPropertyId}/services`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidServices)
         .expect(400);
@@ -511,6 +597,8 @@ describe('Property API Tests', () => {
 
   describe('PUT /api/properties/:propertyId/rules', () => {
     it('should update property rules', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const rulesUpdate = {
         smokingAllowed: true,
         partiesOrEventsAllowed: false,
@@ -524,7 +612,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/rules`)
+        .put(`/api/properties/${testPropertyId}/rules`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(rulesUpdate)
         .expect(200);
@@ -535,6 +623,8 @@ describe('Property API Tests', () => {
     });
 
     it('should reject rules update with invalid pet policy', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidRules = {
         smokingAllowed: false,
         partiesOrEventsAllowed: false,
@@ -542,7 +632,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/rules`)
+        .put(`/api/properties/${testPropertyId}/rules`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidRules)
         .expect(400);
@@ -553,6 +643,8 @@ describe('Property API Tests', () => {
 
   describe('PUT /api/properties/:propertyId/pricing', () => {
     it('should update property pricing', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const pricingUpdate = {
         currency: 'AED',
         ratePerNight: 1500,
@@ -567,7 +659,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/pricing`)
+        .put(`/api/properties/${testPropertyId}/pricing`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(pricingUpdate)
         .expect(200);
@@ -578,6 +670,8 @@ describe('Property API Tests', () => {
     });
 
     it('should reject pricing update with invalid currency', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidPricing = {
         currency: 'USD',
         ratePerNight: 1500,
@@ -585,7 +679,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/pricing`)
+        .put(`/api/properties/${testPropertyId}/pricing`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidPricing)
         .expect(400);
@@ -594,6 +688,8 @@ describe('Property API Tests', () => {
     });
 
     it('should reject pricing update with negative rates', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidPricing = {
         currency: 'AED',
         ratePerNight: -100,
@@ -601,7 +697,7 @@ describe('Property API Tests', () => {
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/pricing`)
+        .put(`/api/properties/${testPropertyId}/pricing`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidPricing)
         .expect(400);
@@ -612,13 +708,15 @@ describe('Property API Tests', () => {
 
   describe('PUT /api/properties/:propertyId/cancellation', () => {
     it('should update property cancellation policy', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const cancellationUpdate = {
         daysBeforeArrivalFreeToCancel: 14,
         waiveCancellationFeeAccidentalBookings: false,
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/cancellation`)
+        .put(`/api/properties/${testPropertyId}/cancellation`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(cancellationUpdate)
         .expect(200);
@@ -628,13 +726,15 @@ describe('Property API Tests', () => {
     });
 
     it('should reject cancellation update with negative days', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const invalidCancellation = {
         daysBeforeArrivalFreeToCancel: -5,
         waiveCancellationFeeAccidentalBookings: true,
       };
 
       const response = await request(app)
-        .put(`/api/properties/${propertyId}/cancellation`)
+        .put(`/api/properties/${testPropertyId}/cancellation`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidCancellation)
         .expect(400);
@@ -645,6 +745,42 @@ describe('Property API Tests', () => {
 
   describe('GET /api/properties/my-properties', () => {
     it('should retrieve all properties for authenticated owner', async () => {
+      // First create a property
+      const propertyData = {
+        name: 'Test Property for Owner',
+        address: {
+          countryOrRegion: 'UAE',
+          city: 'Dubai',
+          zipCode: 12345,
+        },
+        layout: {
+          maximumGuest: 4,
+          bathrooms: 2,
+          allowChildren: true,
+          offerCribs: false,
+        },
+        services: {
+          serveBreakfast: false,
+          parking: 'YesFree',
+          languages: ['English'],
+        },
+        rules: {
+          smokingAllowed: false,
+          partiesOrEventsAllowed: false,
+          petsAllowed: 'No',
+        },
+        bookingType: 'BookInstantly',
+        paymentType: 'Online',
+        aboutTheProperty: 'Test property',
+        aboutTheNeighborhood: 'Test area',
+        firstDateGuestCanCheckIn: '2024-01-01',
+      };
+
+      await request(app)
+        .post('/api/properties')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(propertyData);
+
       const response = await request(app)
         .get('/api/properties/my-properties')
         .set('Authorization', `Bearer ${authToken}`)
@@ -671,6 +807,7 @@ describe('Property API Tests', () => {
           email: 'newowner@example.com',
           password: await hashPassword('Test@123'),
           role: 'HOMEOWNER',
+          isAdmin: false,
         },
       });
       
@@ -682,8 +819,6 @@ describe('Property API Tests', () => {
         .expect(200);
 
       expect(response.body.properties).toEqual([]);
-
-      await prisma.user.delete({ where: { id: newUser.id } });
     });
   });
 
@@ -743,33 +878,36 @@ describe('Property API Tests', () => {
     });
 
     it('should reject deletion without authentication', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const response = await request(app)
-        .delete(`/api/properties/${propertyId}`)
+        .delete(`/api/properties/${testPropertyId}`)
         .expect(401);
 
       expect(response.body.error).toBe('No token provided');
     });
 
     it('should reject deletion from non-owner', async () => {
+      const testPropertyId = await createTestProperty();
+      
       const otherUser = await prisma.user.create({
         data: {
           username: 'anotheruser',
           email: 'another@example.com',
           password: await hashPassword('Test@123'),
           role: 'HOMEOWNER',
+          isAdmin: false,
         },
       });
       
       const otherToken = generateToken(otherUser);
 
       const response = await request(app)
-        .delete(`/api/properties/${propertyId}`)
+        .delete(`/api/properties/${testPropertyId}`)
         .set('Authorization', `Bearer ${otherToken}`)
         .expect(404);
 
       expect(response.body.error).toBe('Property not found or you do not have permission to delete it');
-
-      await prisma.user.delete({ where: { id: otherUser.id } });
     });
 
     it('should return 404 for non-existent property', async () => {
