@@ -921,4 +921,290 @@ describe('Property API Tests', () => {
       expect(response.body.error).toBe('Property not found or you do not have permission to delete it');
     });
   });
+
+  describe('Photo Management', () => {
+    describe('POST /api/properties/:propertyId/photos', () => {
+      it('should upload property photos successfully', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        // Create a smaller test buffer that represents an image file to avoid size limits
+        const testImageBuffer = Buffer.from('PNG');
+        
+        const response = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer, 'test.png')
+          .expect(201);
+
+        expect(response.body.message).toBe('Photos uploaded successfully');
+        expect(response.body).toHaveProperty('photos');
+        expect(Array.isArray(response.body.photos)).toBe(true);
+        expect(response.body.photos.length).toBeGreaterThan(0);
+        expect(response.body.photos[0]).toHaveProperty('id');
+        expect(response.body.photos[0]).toHaveProperty('url');
+        expect(response.body.photos[0].url).toContain('/uploads/properties/');
+      });
+
+      it('should upload multiple photos at once', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        const testImageBuffer1 = Buffer.from('PNG1');
+        const testImageBuffer2 = Buffer.from('PNG2');
+        
+        const response = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer1, 'test1.png')
+          .attach('photos', testImageBuffer2, 'test2.png')
+          .expect(201);
+
+        expect(response.body.photos).toHaveLength(2);
+      });
+
+      it('should reject photo upload without authentication', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        const testImageBuffer = Buffer.from('PNG');
+        
+        const response = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .attach('photos', testImageBuffer, 'test.png')
+          .expect(401);
+
+        expect(response.body.error).toBe('No token provided');
+      });
+
+      it('should reject photo upload for non-owned property', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        // Create another user
+        const otherUser = await prisma.user.create({
+          data: {
+            username: 'photouser',
+            email: 'photo@example.com',
+            password: await hashPassword('Test@123'),
+            role: 'HOMEOWNER',
+            isAdmin: false,
+          },
+        });
+        
+        const otherToken = generateToken(otherUser);
+        const testImageBuffer = Buffer.from('PNG');
+        
+        const response = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${otherToken}`)
+          .attach('photos', testImageBuffer, 'test.png')
+          .expect(404);
+
+        expect(response.body.error).toBe('Property not found or you do not have permission to update it');
+      });
+
+      it('should reject upload with no files', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        const response = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(400);
+
+        expect(response.body.error).toBe('No files uploaded');
+      });
+
+      it('should reject invalid file types', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        const testTextBuffer = Buffer.from('this is not an image');
+        
+        const response = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testTextBuffer, 'test.txt')
+          .expect(500);
+
+        expect(response.body.error).toBe('Something went wrong!');
+      });
+    });
+
+    describe('DELETE /api/properties/:propertyId/photos/:photoId', () => {
+      it('should delete property photo successfully', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        // First upload a photo
+        const testImageBuffer = Buffer.from('fake image data');
+        const uploadResponse = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer, 'test-image.png');
+
+        const photoId = uploadResponse.body.photos[0].id;
+        
+        const response = await request(app)
+          .delete(`/api/properties/${testPropertyId}/photos/${photoId}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(200);
+
+        expect(response.body.message).toBe('Photo deleted successfully');
+      });
+
+      it('should reject photo deletion without authentication', async () => {
+        const testPropertyId = await createTestProperty();
+        const fakePhotoId = 'fake-photo-id';
+        
+        const response = await request(app)
+          .delete(`/api/properties/${testPropertyId}/photos/${fakePhotoId}`)
+          .expect(401);
+
+        expect(response.body.error).toBe('No token provided');
+      });
+
+      it('should reject photo deletion for non-owned property', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        // Upload a photo first
+        const testImageBuffer = Buffer.from('fake image data');
+        const uploadResponse = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer, 'test-image.png');
+
+        const photoId = uploadResponse.body.photos[0].id;
+        
+        // Create another user
+        const otherUser = await prisma.user.create({
+          data: {
+            username: 'photodelete',
+            email: 'photodelete@example.com',
+            password: await hashPassword('Test@123'),
+            role: 'HOMEOWNER',
+            isAdmin: false,
+          },
+        });
+        
+        const otherToken = generateToken(otherUser);
+        
+        const response = await request(app)
+          .delete(`/api/properties/${testPropertyId}/photos/${photoId}`)
+          .set('Authorization', `Bearer ${otherToken}`)
+          .expect(404);
+
+        expect(response.body.error).toBe('Property or photo not found or you do not have permission');
+      });
+
+      it('should return 404 for non-existent photo', async () => {
+        const testPropertyId = await createTestProperty();
+        const fakePhotoId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+        
+        const response = await request(app)
+          .delete(`/api/properties/${testPropertyId}/photos/${fakePhotoId}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(404);
+
+        expect(response.body.error).toBe('Property or photo not found or you do not have permission');
+      });
+    });
+
+    describe('PUT /api/properties/:propertyId/photos/:photoId', () => {
+      it('should update photo metadata successfully', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        // First upload a photo
+        const testImageBuffer = Buffer.from('fake image data');
+        const uploadResponse = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer, 'test-image.png');
+
+        const photoId = uploadResponse.body.photos[0].id;
+        
+        const updateData = {
+          altText: 'Beautiful villa exterior',
+          description: 'Front view of the villa in the morning',
+          tags: ['exterior', 'morning', 'front-view']
+        };
+        
+        const response = await request(app)
+          .put(`/api/properties/${testPropertyId}/photos/${photoId}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .send(updateData)
+          .expect(200);
+
+        expect(response.body.message).toBe('Photo updated successfully');
+        expect(response.body.photo.altText).toBe('Beautiful villa exterior');
+        expect(response.body.photo.description).toBe('Front view of the villa in the morning');
+        expect(response.body.photo.tags).toEqual(['exterior', 'morning', 'front-view']);
+      });
+
+      it('should reject photo update without authentication', async () => {
+        const testPropertyId = await createTestProperty();
+        const fakePhotoId = 'fake-photo-id';
+        
+        const updateData = {
+          altText: 'Test alt text'
+        };
+        
+        const response = await request(app)
+          .put(`/api/properties/${testPropertyId}/photos/${fakePhotoId}`)
+          .send(updateData)
+          .expect(401);
+
+        expect(response.body.error).toBe('No token provided');
+      });
+
+      it('should reject photo update for non-owned property', async () => {
+        const testPropertyId = await createTestProperty();
+        
+        // Upload a photo first
+        const testImageBuffer = Buffer.from('fake image data');
+        const uploadResponse = await request(app)
+          .post(`/api/properties/${testPropertyId}/photos`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer, 'test-image.png');
+
+        const photoId = uploadResponse.body.photos[0].id;
+        
+        // Create another user
+        const otherUser = await prisma.user.create({
+          data: {
+            username: 'photoupdate',
+            email: 'photoupdate@example.com',
+            password: await hashPassword('Test@123'),
+            role: 'HOMEOWNER',
+            isAdmin: false,
+          },
+        });
+        
+        const otherToken = generateToken(otherUser);
+        
+        const updateData = {
+          altText: 'Unauthorized update'
+        };
+        
+        const response = await request(app)
+          .put(`/api/properties/${testPropertyId}/photos/${photoId}`)
+          .set('Authorization', `Bearer ${otherToken}`)
+          .send(updateData)
+          .expect(404);
+
+        expect(response.body.error).toBe('Property or photo not found or you do not have permission');
+      });
+
+      it('should return 404 for non-existent photo', async () => {
+        const testPropertyId = await createTestProperty();
+        const fakePhotoId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+        
+        const updateData = {
+          altText: 'Test alt text'
+        };
+        
+        const response = await request(app)
+          .put(`/api/properties/${testPropertyId}/photos/${fakePhotoId}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .send(updateData)
+          .expect(404);
+
+        expect(response.body.error).toBe('Property or photo not found or you do not have permission');
+      });
+    });
+  });
 });

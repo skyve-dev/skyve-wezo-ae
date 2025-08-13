@@ -299,4 +299,153 @@ describe('Authentication Tests', () => {
       expect(response.body.error).toBe('Invalid or expired reset token');
     });
   });
+
+  describe('PUT /api/auth/update-role', () => {
+    let authToken: string;
+
+    beforeEach(async () => {
+      const timestamp = Date.now();
+      const newUser = {
+        username: `testuser_${timestamp}`,
+        email: `test_${timestamp}@example.com`,
+        password: 'Test@123',
+      };
+
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send(newUser);
+
+      authToken = response.body.token;
+    });
+
+    it('should upgrade user role to HOMEOWNER after creating first property', async () => {
+      // First create a property to qualify for HOMEOWNER role
+      const propertyData = {
+        name: 'Test Villa',
+        address: {
+          apartmentOrFloorNumber: 'Villa 123',
+          countryOrRegion: 'UAE',
+          city: 'Dubai',
+          zipCode: 12345,
+          latLong: {
+            latitude: 25.2048,
+            longitude: 55.2708
+          }
+        },
+        layout: {
+          maximumGuest: 6,
+          bathrooms: 3,
+          allowChildren: true,
+          offerCribs: false,
+          propertySizeSqMtr: 200,
+          rooms: [
+            {
+              spaceName: 'Master Bedroom',
+              beds: [
+                {
+                  typeOfBed: 'KingBed',
+                  numberOfBed: 1
+                }
+              ]
+            }
+          ]
+        },
+        amenities: [
+          {
+            name: 'WiFi',
+            category: 'Technology'
+          }
+        ],
+        services: {
+          serveBreakfast: false,
+          parking: 'YesFree',
+          languages: ['English', 'Arabic']
+        },
+        rules: {
+          smokingAllowed: false,
+          partiesOrEventsAllowed: false,
+          petsAllowed: 'No'
+        },
+        bookingType: 'BookInstantly',
+        paymentType: 'Online',
+        firstDateGuestCanCheckIn: '2024-01-01'
+      };
+
+      await request(app)
+        .post('/api/properties')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(propertyData)
+        .expect(201);
+
+      // Now try to upgrade role
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ role: 'HOMEOWNER' })
+        .expect(200);
+
+      expect(response.body.message).toBe('Role updated successfully');
+      expect(response.body.user.role).toBe('HOMEOWNER');
+    });
+
+    it('should reject role upgrade to HOMEOWNER without properties', async () => {
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ role: 'HOMEOWNER' })
+        .expect(400);
+
+      expect(response.body.error).toBe('Can only upgrade to HOMEOWNER role after creating a property');
+    });
+
+    it('should reject role upgrade with invalid role', async () => {
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ role: 'INVALID_ROLE' })
+        .expect(400);
+
+      expect(response.body.error).toBe('Invalid role');
+    });
+
+    it('should reject role upgrade without authentication', async () => {
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .send({ role: 'HOMEOWNER' })
+        .expect(401);
+
+      expect(response.body.error).toBe('No token provided');
+    });
+
+    it('should reject role upgrade with invalid token', async () => {
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .set('Authorization', 'Bearer invalidtoken')
+        .send({ role: 'HOMEOWNER' })
+        .expect(401);
+
+      expect(response.body.error).toBe('Invalid or expired token');
+    });
+
+    it('should reject role upgrade with missing role field', async () => {
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({})
+        .expect(400);
+
+      expect(response.body.error).toBe('Invalid role');
+    });
+
+    it('should allow TENANT to upgrade to MANAGER role without properties', async () => {
+      const response = await request(app)
+        .put('/api/auth/update-role')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ role: 'MANAGER' })
+        .expect(200);
+
+      expect(response.body.message).toBe('Role updated successfully');
+      expect(response.body.user.role).toBe('MANAGER');
+    });
+  });
 });
