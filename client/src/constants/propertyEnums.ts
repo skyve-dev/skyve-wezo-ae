@@ -85,3 +85,7 @@ export const PaymentTypeLabels: Record<PaymentType, string> = {
   [PaymentType.Online]: 'Online Payment',
   [PaymentType.ByCreditCardAtProperty]: 'Pay at Property (Credit Card)'
 }
+
+export const CurrencyLabels: Record<Currency, string> = {
+  [Currency.AED]: 'AED (UAE Dirham)'
+}

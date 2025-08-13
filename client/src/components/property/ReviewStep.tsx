@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { BookingType, PaymentType } from '../../constants/propertyEnums'
 
 interface ReviewStepProps {
   data: WizardFormData
@@ -43,11 +44,11 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Booking Type:</Box>
-              <Box fontWeight="500" color="#374151">{data.bookingType === 'INSTANT' ? 'Instant Book' : 'Request to Book'}</Box>
+              <Box fontWeight="500" color="#374151">{data.bookingType === BookingType.BookInstantly ? 'Instant Book' : 'Request to Book'}</Box>
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Payment Type:</Box>
-              <Box fontWeight="500" color="#374151">{data.paymentType === 'FULL' ? 'Full Payment' : 'Partial Payment'}</Box>
+              <Box fontWeight="500" color="#374151">{data.paymentType === PaymentType.Online ? 'Online Payment' : 'Pay at Property'}</Box>
             </Box>
             {data.aboutTheProperty && (
               <Box>
@@ -101,26 +102,26 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Maximum Guests:</Box>
-              <Box fontWeight="500" color="#374151">{data.layout.maximumGuest}</Box>
+              <Box fontWeight="500" color="#374151">{data.maximumGuest}</Box>
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Bathrooms:</Box>
-              <Box fontWeight="500" color="#374151">{data.layout.bathrooms}</Box>
+              <Box fontWeight="500" color="#374151">{data.bathrooms}</Box>
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Children Allowed:</Box>
-              <Box fontWeight="500" color="#374151">{data.layout.allowChildren ? 'Yes' : 'No'}</Box>
+              <Box fontWeight="500" color="#374151">{data.allowChildren ? 'Yes' : 'No'}</Box>
             </Box>
-            {data.layout.allowChildren && (
+            {data.allowChildren && (
               <Box display="flex" justifyContent="space-between">
                 <Box color="#6b7280">Cribs Available:</Box>
-                <Box fontWeight="500" color="#374151">{data.layout.offerCribs ? 'Yes' : 'No'}</Box>
+                <Box fontWeight="500" color="#374151">{data.offerCribs ? 'Yes' : 'No'}</Box>
               </Box>
             )}
-            {data.layout.propertySizeSqMtr && (
+            {data.propertySizeSqMtr && (
               <Box display="flex" justifyContent="space-between">
                 <Box color="#6b7280">Size:</Box>
-                <Box fontWeight="500" color="#374151">{data.layout.propertySizeSqMtr} sq m</Box>
+                <Box fontWeight="500" color="#374151">{data.propertySizeSqMtr} sq m</Box>
               </Box>
             )}
           </Box>
@@ -179,17 +180,17 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Breakfast:</Box>
-              <Box fontWeight="500" color="#374151">{data.services.serveBreakfast ? 'Available' : 'Not available'}</Box>
+              <Box fontWeight="500" color="#374151">{data.serveBreakfast ? 'Available' : 'Not available'}</Box>
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Parking:</Box>
-              <Box fontWeight="500" color="#374151">{data.services.parking ? 'Free parking' : 'No parking'}</Box>
+              <Box fontWeight="500" color="#374151">{data.parking ? 'Free parking' : 'No parking'}</Box>
             </Box>
-            {data.services.languages && data.services.languages.length > 0 && (
+            {data.languages && data.languages.length > 0 && (
               <Box>
                 <Box color="#6b7280">Languages:</Box>
                 <Box marginTop="0.25rem" fontWeight="500" color="#374151">
-                  {data.services.languages.join(', ')}
+                  {data.languages.join(', ')}
                 </Box>
               </Box>
             )}
@@ -204,23 +205,23 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Smoking:</Box>
-              <Box fontWeight="500" color="#374151">{data.rules.smokingAllowed ? 'Allowed' : 'Not allowed'}</Box>
+              <Box fontWeight="500" color="#374151">{data.smokingAllowed ? 'Allowed' : 'Not allowed'}</Box>
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Parties/Events:</Box>
-              <Box fontWeight="500" color="#374151">{data.rules.partiesOrEventsAllowed ? 'Allowed' : 'Not allowed'}</Box>
+              <Box fontWeight="500" color="#374151">{data.partiesOrEventsAllowed ? 'Allowed' : 'Not allowed'}</Box>
             </Box>
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Pets:</Box>
-              <Box fontWeight="500" color="#374151">{data.rules.petsAllowed ? 'Allowed' : 'Not allowed'}</Box>
+              <Box fontWeight="500" color="#374151">{data.petsAllowed ? 'Allowed' : 'Not allowed'}</Box>
             </Box>
-            {data.rules.checkInCheckout && (
+            {data.checkInCheckout && (
               <Box>
                 <Box color="#6b7280">Check-in/out times:</Box>
                 <Box marginTop="0.25rem" fontWeight="500" color="#374151">
-                  In: {data.rules.checkInCheckout.checkInFrom} - {data.rules.checkInCheckout.checkInUntil}
+                  In: {data.checkInCheckout.checkInFrom} - {data.checkInCheckout.checkInUntil}
                   <br />
-                  Out: {data.rules.checkInCheckout.checkOutFrom} - {data.rules.checkInCheckout.checkOutUntil}
+                  Out: {data.checkInCheckout.checkOutFrom} - {data.checkInCheckout.checkOutUntil}
                 </Box>
               </Box>
             )}

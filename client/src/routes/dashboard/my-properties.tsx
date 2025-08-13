@@ -255,8 +255,8 @@ function MyPropertiesPage() {
 
                     <Box display="flex" alignItems="center" justifyContent="space-between" marginBottom="1rem">
                       <Box display="flex" alignItems="center" gap="1rem" fontSize="0.875rem" color="#6b7280">
-                        <Box>👥 {property.layout.maximumGuest} guests</Box>
-                        <Box>🚿 {property.layout.bathrooms} baths</Box>
+                        <Box>👥 {property.maximumGuest} guests</Box>
+                        <Box>🚿 {property.bathrooms} baths</Box>
                       </Box>
                       {property.pricing && (
                         <Box fontSize="1rem" fontWeight="600" color="#059669">

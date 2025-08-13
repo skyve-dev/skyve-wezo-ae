@@ -23,23 +23,20 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   onPrevious,
   loading
 }) => {
-  const handleLayoutChange = (field: keyof typeof data.layout, value: any) => {
+  const handleLayoutChange = (field: string, value: any) => {
     onChange({
-      layout: {
-        ...data.layout,
-        [field]: value
-      }
+      [field]: value
     })
   }
 
   const handleRoomChange = (roomIndex: number, field: keyof Room, value: any) => {
-    const rooms = [...(data.layout.rooms || [])]
+    const rooms = [...(data.rooms || [])]
     rooms[roomIndex] = { ...rooms[roomIndex], [field]: value }
     handleLayoutChange('rooms', rooms)
   }
 
   const handleBedChange = (roomIndex: number, bedIndex: number, field: keyof Bed, value: any) => {
-    const rooms = [...(data.layout.rooms || [])]
+    const rooms = [...(data.rooms || [])]
     const beds = [...(rooms[roomIndex].beds || [])]
     beds[bedIndex] = { ...beds[bedIndex], [field]: value }
     rooms[roomIndex] = { ...rooms[roomIndex], beds }
@@ -47,30 +44,30 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   }
 
   const addRoom = () => {
-    const rooms = data.layout.rooms || []
+    const rooms = data.rooms || []
     handleLayoutChange('rooms', [...rooms, { spaceName: '', beds: [] }])
   }
 
   const removeRoom = (index: number) => {
-    const rooms = data.layout.rooms || []
-    handleLayoutChange('rooms', rooms.filter((_, i) => i !== index))
+    const rooms = data.rooms || []
+    handleLayoutChange('rooms', rooms.filter((_: any, i: number) => i !== index))
   }
 
   const addBed = (roomIndex: number) => {
-    const rooms = [...(data.layout.rooms || [])]
+    const rooms = [...(data.rooms || [])]
     const beds = rooms[roomIndex].beds || []
     rooms[roomIndex] = { ...rooms[roomIndex], beds: [...beds, { typeOfBed: BedType.TwinBed, numberOfBed: 1 }] }
     handleLayoutChange('rooms', rooms)
   }
 
   const removeBed = (roomIndex: number, bedIndex: number) => {
-    const rooms = [...(data.layout.rooms || [])]
+    const rooms = [...(data.rooms || [])]
     const beds = rooms[roomIndex].beds || []
-    rooms[roomIndex] = { ...rooms[roomIndex], beds: beds.filter((_, i) => i !== bedIndex) }
+    rooms[roomIndex] = { ...rooms[roomIndex], beds: beds.filter((_: any, i: number) => i !== bedIndex) }
     handleLayoutChange('rooms', rooms)
   }
 
-  const isValid = data.layout.maximumGuest >= 1 && data.layout.bathrooms >= 1
+  const isValid = data.maximumGuest >= 1 && data.bathrooms >= 1
 
   return (
     <Box padding="2rem">
@@ -102,7 +99,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               type="number"
               min="1"
               max="16"
-              value={data.layout.maximumGuest}
+              value={data.maximumGuest}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleLayoutChange('maximumGuest', parseInt(e.target.value) || 1)
               }
@@ -131,7 +128,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               type="number"
               min="1"
               max="10"
-              value={data.layout.bathrooms}
+              value={data.bathrooms}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleLayoutChange('bathrooms', parseInt(e.target.value) || 1)
               }
@@ -161,7 +158,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             as="input"
             type="number"
             min="0"
-            value={data.layout.propertySizeSqMtr || ''}
+            value={data.propertySizeSqMtr || ''}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
               handleLayoutChange('propertySizeSqMtr', parseInt(e.target.value) || undefined)
             }
@@ -181,7 +178,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             <Box
               as="input"
               type="checkbox"
-              checked={data.layout.allowChildren}
+              checked={data.allowChildren}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleLayoutChange('allowChildren', e.target.checked)
               }
@@ -192,12 +189,12 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             </Box>
           </Box>
 
-          {data.layout.allowChildren && (
+          {data.allowChildren && (
             <Box display="flex" alignItems="center" gap="0.75rem" marginLeft="1.5rem">
               <Box
                 as="input"
                 type="checkbox"
-                checked={data.layout.offerCribs}
+                checked={data.offerCribs}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   handleLayoutChange('offerCribs', e.target.checked)
                 }
@@ -232,7 +229,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             </Box>
           </Box>
 
-          {data.layout.rooms?.map((room, roomIndex) => (
+          {data.rooms?.map((room: any, roomIndex: number) => (
             <Box
               key={roomIndex}
               border="1px solid #e5e7eb"
@@ -295,7 +292,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 </Box>
               </Box>
 
-              {room.beds?.map((bed, bedIndex) => (
+              {room.beds?.map((bed: any, bedIndex: number) => (
                 <Box
                   key={bedIndex}
                   display="flex"

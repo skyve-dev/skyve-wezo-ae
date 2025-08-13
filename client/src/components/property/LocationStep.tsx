@@ -55,7 +55,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   
-  const handleAddressChange = (field: keyof typeof data.address, value: string) => {
+  const handleAddressChange = (field: keyof typeof data.address, value: string | number) => {
     onChange({
       address: {
         ...data.address,
@@ -101,7 +101,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
           handleAddressChange('city', addressDetails.city)
         }
         if (addressDetails.postcode) {
-          handleAddressChange('zipCode', addressDetails.postcode)
+          handleAddressChange('zipCode', parseInt(addressDetails.postcode, 10) || 0)
         }
       }
     } catch (error) {
@@ -111,7 +111,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
     }
   }
 
-  const isValid = data.address.city.trim().length > 0 && data.address.zipCode.trim().length > 0
+  const isValid = data.address.city.trim().length > 0 && data.address.zipCode > 0
 
   return (
     <Box padding="2rem">
@@ -168,10 +168,10 @@ const LocationStep: React.FC<LocationStepProps> = ({
             </Box>
             <Box
               as="input"
-              type="text"
-              value={data.address.zipCode}
+              type="number"
+              value={data.address.zipCode || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleAddressChange('zipCode', e.target.value)
+                handleAddressChange('zipCode', parseInt(e.target.value, 10) || 0)
               }
               placeholder="e.g., 12345"
               width="100%"

@@ -4,7 +4,7 @@ export interface Address {
   apartmentOrFloorNumber?: string
   countryOrRegion: string
   city: string
-  zipCode: string
+  zipCode: number
   latLong?: {
     latitude: number
     longitude: number
@@ -31,6 +31,7 @@ export interface Layout {
 }
 
 export interface Amenity {
+  id?: string
   name: string
   category: string
 }
@@ -93,10 +94,28 @@ export interface Property {
   propertyId?: string
   name: string
   address: Address
-  layout: Layout
+  
+  // Layout fields (flattened)
+  maximumGuest: number
+  bathrooms: number
+  allowChildren: boolean
+  offerCribs: boolean
+  propertySizeSqMtr?: number
+  rooms?: Room[]
+  
   amenities?: Amenity[]
-  services: Services
-  rules: Rules
+  
+  // Services fields (flattened)
+  serveBreakfast: boolean
+  parking: ParkingType
+  languages?: string[]
+  
+  // Rules fields (flattened)
+  smokingAllowed: boolean
+  partiesOrEventsAllowed: boolean
+  petsAllowed: PetPolicy
+  checkInCheckout?: CheckInCheckout
+  
   photos?: Photo[]
   bookingType: BookingType
   paymentType: PaymentType

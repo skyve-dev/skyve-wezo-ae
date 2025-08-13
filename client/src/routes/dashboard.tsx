@@ -1,14 +1,13 @@
-import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { Dashboard } from '@/components/Dashboard'
+import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
 import { useAppSelector } from '@/store/hooks'
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice'
 import { Box } from '@/components/Box'
 
 export const Route = createFileRoute('/dashboard')({
-  component: DashboardPage,
+  component: DashboardLayout,
 })
 
-function DashboardPage() {
+function DashboardLayout() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectIsLoading)
 
@@ -43,5 +42,6 @@ function DashboardPage() {
     return <Navigate to="/login" />
   }
 
-  return <Dashboard />
+  // Render child routes through Outlet
+  return <Outlet />
 }

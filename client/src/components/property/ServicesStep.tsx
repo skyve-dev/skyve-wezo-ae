@@ -34,21 +34,18 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
   onPrevious,
   loading
 }) => {
-  const handleServiceChange = (field: keyof typeof data.services, value: any) => {
+  const handleServiceChange = (field: string, value: any) => {
     onChange({
-      services: {
-        ...data.services,
-        [field]: value
-      }
+      [field]: value
     })
   }
 
   const toggleLanguage = (language: string) => {
-    const currentLanguages = data.services.languages || []
+    const currentLanguages = data.languages || []
     const hasLanguage = currentLanguages.includes(language)
     
     if (hasLanguage) {
-      handleServiceChange('languages', currentLanguages.filter(l => l !== language))
+      handleServiceChange('languages', currentLanguages.filter((l: string) => l !== language))
     } else {
       handleServiceChange('languages', [...currentLanguages, language])
     }
@@ -75,7 +72,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
             <Box
               as="input"
               type="checkbox"
-              checked={data.services.serveBreakfast}
+              checked={data.serveBreakfast}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleServiceChange('serveBreakfast', e.target.checked)
               }
@@ -107,7 +104,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                 gap="0.75rem"
                 padding="1rem"
                 border="2px solid"
-                borderColor={data.services.parking === parkingType ? '#3182ce' : '#e5e7eb'}
+                borderColor={data.parking === parkingType ? '#3182ce' : '#e5e7eb'}
                 borderRadius="0.5rem"
                 cursor="pointer"
                 whileHover={{ borderColor: '#3182ce' }}
@@ -117,7 +114,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                   type="radio"
                   name="parking"
                   value={parkingType}
-                  checked={data.services.parking === parkingType}
+                  checked={data.parking === parkingType}
                   onChange={() => handleServiceChange('parking', parkingType)}
                   accentColor="#3182ce"
                 />
@@ -146,7 +143,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
           </Box>
           <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr', Md: '1fr 1fr 1fr' }} gap="0.75rem">
             {languageOptions.map((language) => {
-              const isSelected = data.services.languages?.includes(language)
+              const isSelected = data.languages?.includes(language)
               return (
                 <Box
                   key={language}

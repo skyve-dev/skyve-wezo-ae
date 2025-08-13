@@ -149,24 +149,21 @@ const propertySlice = createSlice({
         address: {
           countryOrRegion: 'UAE',
           city: '',
-          zipCode: ''
+          zipCode: 0
         },
-        layout: {
-          maximumGuest: 1,
-          bathrooms: 1,
-          allowChildren: false,
-          offerCribs: false
-        },
-        services: {
-          serveBreakfast: false,
-          parking: ParkingType.No,
-          languages: []
-        },
-        rules: {
-          smokingAllowed: false,
-          partiesOrEventsAllowed: false,
-          petsAllowed: PetPolicy.No
-        },
+        // Layout fields (flattened)
+        maximumGuest: 1,
+        bathrooms: 1,
+        allowChildren: false,
+        offerCribs: false,
+        // Services fields (flattened)
+        serveBreakfast: false,
+        parking: ParkingType.No,
+        languages: [],
+        // Rules fields (flattened)
+        smokingAllowed: false,
+        partiesOrEventsAllowed: false,
+        petsAllowed: PetPolicy.No,
         bookingType: BookingType.NeedToRequestBook,
         paymentType: PaymentType.Online,
         pricing: {

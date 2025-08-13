@@ -21,27 +21,21 @@ const RulesStep: React.FC<RulesStepProps> = ({
   onPrevious,
   loading
 }) => {
-  const handleRuleChange = (field: keyof typeof data.rules, value: any) => {
+  const handleRuleChange = (field: string, value: any) => {
     onChange({
-      rules: {
-        ...data.rules,
-        [field]: value
-      }
+      [field]: value
     })
   }
 
-  const handleCheckInOutChange = (field: keyof NonNullable<typeof data.rules.checkInCheckout>, value: string) => {
+  const handleCheckInOutChange = (field: string, value: string) => {
     onChange({
-      rules: {
-        ...data.rules,
-        checkInCheckout: {
-          ...data.rules.checkInCheckout,
-          checkInFrom: data.rules.checkInCheckout?.checkInFrom || '15:00',
-          checkInUntil: data.rules.checkInCheckout?.checkInUntil || '20:00',
-          checkOutFrom: data.rules.checkInCheckout?.checkOutFrom || '08:00',
-          checkOutUntil: data.rules.checkInCheckout?.checkOutUntil || '11:00',
-          [field]: value
-        }
+      checkInCheckout: {
+        ...data.checkInCheckout,
+        checkInFrom: data.checkInCheckout?.checkInFrom || '15:00',
+        checkInUntil: data.checkInCheckout?.checkInUntil || '20:00',
+        checkOutFrom: data.checkInCheckout?.checkOutFrom || '08:00',
+        checkOutUntil: data.checkInCheckout?.checkOutUntil || '11:00',
+        [field]: value
       }
     })
   }
@@ -68,7 +62,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
               <Box
                 as="input"
                 type="checkbox"
-                checked={data.rules.smokingAllowed}
+                checked={data.smokingAllowed}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   handleRuleChange('smokingAllowed', e.target.checked)
                 }
@@ -88,7 +82,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
               <Box
                 as="input"
                 type="checkbox"
-                checked={data.rules.partiesOrEventsAllowed}
+                checked={data.partiesOrEventsAllowed}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   handleRuleChange('partiesOrEventsAllowed', e.target.checked)
                 }
@@ -119,7 +113,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                     gap="0.75rem"
                     padding="0.75rem"
                     border="2px solid"
-                    borderColor={data.rules.petsAllowed === policy ? '#3182ce' : '#e5e7eb'}
+                    borderColor={data.petsAllowed === policy ? '#3182ce' : '#e5e7eb'}
                     borderRadius="0.375rem"
                     cursor="pointer"
                     whileHover={{ borderColor: '#3182ce' }}
@@ -129,7 +123,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                       type="radio"
                       name="petsAllowed"
                       value={policy}
-                      checked={data.rules.petsAllowed === policy}
+                      checked={data.petsAllowed === policy}
                       onChange={() => handleRuleChange('petsAllowed', policy)}
                       accentColor="#3182ce"
                     />
@@ -168,7 +162,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   <Box
                     as="input"
                     type="time"
-                    value={data.rules.checkInCheckout?.checkInFrom || '15:00'}
+                    value={data.checkInCheckout?.checkInFrom || '15:00'}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                       handleCheckInOutChange('checkInFrom', e.target.value)
                     }
@@ -187,7 +181,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   <Box
                     as="input"
                     type="time"
-                    value={data.rules.checkInCheckout?.checkInUntil || '20:00'}
+                    value={data.checkInCheckout?.checkInUntil || '20:00'}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                       handleCheckInOutChange('checkInUntil', e.target.value)
                     }
@@ -214,7 +208,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   <Box
                     as="input"
                     type="time"
-                    value={data.rules.checkInCheckout?.checkOutFrom || '08:00'}
+                    value={data.checkInCheckout?.checkOutFrom || '08:00'}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                       handleCheckInOutChange('checkOutFrom', e.target.value)
                     }
@@ -233,7 +227,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   <Box
                     as="input"
                     type="time"
-                    value={data.rules.checkInCheckout?.checkOutUntil || '11:00'}
+                    value={data.checkInCheckout?.checkOutUntil || '11:00'}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                       handleCheckInOutChange('checkOutUntil', e.target.value)
                     }
