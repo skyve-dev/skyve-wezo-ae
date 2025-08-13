@@ -193,3 +193,60 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const updateUserRole = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { role } = req.body;
+
+    // Validate role
+    if (!['TENANT', 'HOMEOWNER', 'MANAGER'].includes(role)) {
+      res.status(400).json({ error: 'Invalid role' });
+      return;
+    }
+
+    // For security, only allow upgrading to HOMEOWNER when user creates first property
+    // MANAGER role should only be set by admins (not implemented in this basic version)
+    if (role === 'HOMEOWNER') {
+      // Check if user has at least one property
+      const propertyCount = await prisma.property.count({
+        where: { ownerId: req.user.id }
+      });
+
+      if (propertyCount === 0) {
+        res.status(400).json({ error: 'Can only upgrade to HOMEOWNER role after creating a property' });
+        return;
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { role },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        isAdmin: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    // Generate new token with updated role
+    const token = generateToken(updatedUser);
+
+    res.json({
+      message: 'Role updated successfully',
+      user: updatedUser,
+      token
+    });
+  } catch (error) {
+    console.error('Update role error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

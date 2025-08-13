@@ -125,6 +125,7 @@ export const Dashboard: React.FC = () => {
               
               <Box display="flex" flexDirection="column" gap={12}>
                 <Box as="button"
+                  onClick={() => navigate({ to: '/register-property' })}
                   style={{
                     backgroundColor: '#007bff',
                     color: 'white',
@@ -140,6 +141,7 @@ export const Dashboard: React.FC = () => {
                 </Box>
                 
                 <Box as="button"
+                  onClick={() => navigate({ to: '/dashboard/my-properties' })}
                   style={{
                     backgroundColor: 'transparent',
                     color: '#007bff',

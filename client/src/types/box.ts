@@ -119,6 +119,12 @@ export interface BaseCSSProperties {
   
   // Misc
   resize?: CSSProperties['resize'];
+  
+  // Image properties
+  objectFit?: CSSProperties['objectFit'];
+  
+  // Form properties  
+  accentColor?: CSSProperties['accentColor'];
 }
 
 // Generate responsive property names
@@ -126,9 +132,20 @@ type ResponsiveKey<K extends keyof BaseCSSProperties> =
   | K
   | `${K}${Breakpoint}`;
 
+// Specific responsive types for complex properties
+export type GridTemplateColumns<T = string | number> = 
+  | T 
+  | { 
+      Sm?: T; 
+      Md?: T; 
+      Lg?: T; 
+      Xl?: T; 
+    };
+
 // Create responsive properties type
 export type ResponsiveCSSProperties = {
-  [K in keyof BaseCSSProperties as ResponsiveKey<K>]?: BaseCSSProperties[K];
+  [K in keyof BaseCSSProperties as ResponsiveKey<K>]?: 
+    K extends 'gridTemplateColumns' ? GridTemplateColumns : BaseCSSProperties[K];
 };
 
 // Polymorphic Box component types

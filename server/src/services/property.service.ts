@@ -41,8 +41,8 @@ export class PropertyService {
       owner: {
         connect: { id: ownerId },
       },
-      aboutTheProperty,
-      aboutTheNeighborhood,
+      aboutTheProperty: aboutTheProperty || '',
+      aboutTheNeighborhood: aboutTheNeighborhood || '',
       firstDateGuestCanCheckIn,
       bookingType,
       paymentType,
@@ -669,6 +669,99 @@ export class PropertyService {
     }
 
     return { message: 'Property deleted successfully' };
+  }
+
+  async addPropertyPhotos(propertyId: string, photos: any[], ownerId: string) {
+    const existingProperty = await prisma.property.findFirst({
+      where: {
+        propertyId,
+        ownerId,
+      },
+    });
+
+    if (!existingProperty) {
+      throw new Error('Property not found or you do not have permission to update it');
+    }
+
+    await prisma.photo.createMany({
+      data: photos.map(photo => ({
+        ...photo,
+        propertyId,
+      })),
+    });
+
+    const propertyPhotos = await prisma.photo.findMany({
+      where: { propertyId },
+      orderBy: { id: 'desc' },
+      take: photos.length,
+    });
+
+    return propertyPhotos;
+  }
+
+  async deletePropertyPhoto(propertyId: string, photoId: string, ownerId: string) {
+    const existingProperty = await prisma.property.findFirst({
+      where: {
+        propertyId,
+        ownerId,
+      },
+    });
+
+    if (!existingProperty) {
+      throw new Error('Property or photo not found or you do not have permission');
+    }
+
+    const photo = await prisma.photo.findFirst({
+      where: {
+        id: photoId,
+        propertyId,
+      },
+    });
+
+    if (!photo) {
+      throw new Error('Property or photo not found or you do not have permission');
+    }
+
+    await prisma.photo.delete({
+      where: { id: photoId },
+    });
+
+    return { message: 'Photo deleted successfully' };
+  }
+
+  async updatePropertyPhoto(propertyId: string, photoId: string, updateData: any, ownerId: string) {
+    const existingProperty = await prisma.property.findFirst({
+      where: {
+        propertyId,
+        ownerId,
+      },
+    });
+
+    if (!existingProperty) {
+      throw new Error('Property or photo not found or you do not have permission');
+    }
+
+    const photo = await prisma.photo.findFirst({
+      where: {
+        id: photoId,
+        propertyId,
+      },
+    });
+
+    if (!photo) {
+      throw new Error('Property or photo not found or you do not have permission');
+    }
+
+    const updatedPhoto = await prisma.photo.update({
+      where: { id: photoId },
+      data: {
+        altText: updateData.altText,
+        description: updateData.description,
+        tags: updateData.tags || [],
+      },
+    });
+
+    return updatedPhoto;
   }
 }
 

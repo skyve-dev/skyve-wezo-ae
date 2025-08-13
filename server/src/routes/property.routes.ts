@@ -11,6 +11,34 @@ import {
   validatePricingUpdate,
   validateCancellationUpdate,
 } from '../middleware/property.validation';
+import multer from 'multer';
+import path from 'path';
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, 'uploads/properties/');
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `property-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed.'));
+    }
+  }
+});
 
 const router = Router();
 
@@ -65,5 +93,10 @@ router.get('/my-properties', authenticate, propertyController.getMyProperties);
 router.get('/:propertyId', propertyController.getProperty);
 
 router.delete('/:propertyId', authenticate, propertyController.deleteProperty);
+
+// Photo upload routes
+router.post('/:propertyId/photos', authenticate, upload.array('photos', 20), propertyController.uploadPropertyPhotos);
+router.delete('/:propertyId/photos/:photoId', authenticate, propertyController.deletePropertyPhoto);
+router.put('/:propertyId/photos/:photoId', authenticate, propertyController.updatePropertyPhoto);
 
 export default router;

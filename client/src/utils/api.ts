@@ -116,7 +116,32 @@ class ApiClient {
   async healthCheck(): Promise<{ status: string }> {
     return this.makeRequest<{ status: string }>('/api/health');
   }
+
+  // Generic HTTP methods for property management
+  async get<T>(endpoint: string): Promise<T> {
+    return this.makeRequest<T>(endpoint, { method: 'GET' });
+  }
+
+  async post<T>(endpoint: string, data?: any, customHeaders?: Record<string, string>): Promise<T> {
+    return this.makeRequest<T>(endpoint, {
+      method: 'POST',
+      body: data instanceof FormData ? data : JSON.stringify(data),
+      headers: data instanceof FormData ? customHeaders : { 'Content-Type': 'application/json', ...customHeaders }
+    });
+  }
+
+  async put<T>(endpoint: string, data: any): Promise<T> {
+    return this.makeRequest<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.makeRequest<T>(endpoint, { method: 'DELETE' });
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
+export const api = apiClient; // Alias for easier usage
 export { ApiError };

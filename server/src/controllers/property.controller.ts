@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import propertyService from '../services/property.service';
+import fs from 'fs';
+import path from 'path';
 
 export const createProperty = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -259,6 +261,105 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     console.error('Delete property error:', error);
     if (error.message === 'Property not found or you do not have permission to delete it') {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const uploadPropertyPhotos = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { propertyId } = req.params;
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      res.status(400).json({ error: 'No files uploaded' });
+      return;
+    }
+
+    // Create uploads directory if it doesn't exist
+    const uploadDir = path.join(process.cwd(), 'uploads', 'properties');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const photos = files.map(file => ({
+      url: `/uploads/properties/${file.filename}`,
+      altText: '',
+      description: '',
+      tags: []
+    }));
+
+    const result = await propertyService.addPropertyPhotos(propertyId, photos, req.user.id);
+
+    res.status(201).json({
+      message: 'Photos uploaded successfully',
+      photos: result
+    });
+  } catch (error: any) {
+    console.error('Upload photos error:', error);
+    if (error.message === 'Property not found or you do not have permission to update it') {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const deletePropertyPhoto = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { propertyId, photoId } = req.params;
+    const result = await propertyService.deletePropertyPhoto(propertyId, photoId, req.user.id);
+
+    res.json({
+      message: 'Photo deleted successfully',
+      result
+    });
+  } catch (error: any) {
+    console.error('Delete photo error:', error);
+    if (error.message === 'Property or photo not found or you do not have permission') {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updatePropertyPhoto = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { propertyId, photoId } = req.params;
+    const { altText, description, tags } = req.body;
+
+    const result = await propertyService.updatePropertyPhoto(
+      propertyId, 
+      photoId, 
+      { altText, description, tags }, 
+      req.user.id
+    );
+
+    res.json({
+      message: 'Photo updated successfully',
+      photo: result
+    });
+  } catch (error: any) {
+    console.error('Update photo error:', error);
+    if (error.message === 'Property or photo not found or you do not have permission') {
       res.status(404).json({ error: error.message });
       return;
     }

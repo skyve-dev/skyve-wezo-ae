@@ -9,12 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterPropertyRouteImport } from './routes/register-property'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ExampleBoxRouteImport } from './routes/example/Box'
+import { Route as DashboardMyPropertiesRouteImport } from './routes/dashboard/my-properties'
 
+const RegisterPropertyRoute = RegisterPropertyRouteImport.update({
+  id: '/register-property',
+  path: '/register-property',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -40,47 +47,88 @@ const ExampleBoxRoute = ExampleBoxRouteImport.update({
   path: '/example/Box',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardMyPropertiesRoute = DashboardMyPropertiesRouteImport.update({
+  id: '/my-properties',
+  path: '/my-properties',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/register-property': typeof RegisterPropertyRoute
+  '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/example/Box': typeof ExampleBoxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/register-property': typeof RegisterPropertyRoute
+  '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/example/Box': typeof ExampleBoxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/register-property': typeof RegisterPropertyRoute
+  '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/example/Box': typeof ExampleBoxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/register' | '/example/Box'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/register'
+    | '/register-property'
+    | '/dashboard/my-properties'
+    | '/example/Box'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/register' | '/example/Box'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/register' | '/example/Box'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/register'
+    | '/register-property'
+    | '/dashboard/my-properties'
+    | '/example/Box'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/register'
+    | '/register-property'
+    | '/dashboard/my-properties'
+    | '/example/Box'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  RegisterPropertyRoute: typeof RegisterPropertyRoute
   ExampleBoxRoute: typeof ExampleBoxRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register-property': {
+      id: '/register-property'
+      path: '/register-property'
+      fullPath: '/register-property'
+      preLoaderRoute: typeof RegisterPropertyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -116,14 +164,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExampleBoxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/my-properties': {
+      id: '/dashboard/my-properties'
+      path: '/my-properties'
+      fullPath: '/dashboard/my-properties'
+      preLoaderRoute: typeof DashboardMyPropertiesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
+interface DashboardRouteChildren {
+  DashboardMyPropertiesRoute: typeof DashboardMyPropertiesRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardMyPropertiesRoute: DashboardMyPropertiesRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  RegisterPropertyRoute: RegisterPropertyRoute,
   ExampleBoxRoute: ExampleBoxRoute,
 }
 export const routeTree = rootRouteImport

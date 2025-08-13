@@ -1,0 +1,278 @@
+import React from 'react'
+import { WizardFormData } from '../../types/property'
+import { Box } from '../Box'
+
+interface RulesStepProps {
+  data: WizardFormData
+  onChange: (updates: Partial<WizardFormData>) => void
+  onNext: () => void
+  onPrevious: () => void
+  onSubmit: () => void
+  loading: boolean
+  isFirstStep: boolean
+  isLastStep: boolean
+}
+
+const RulesStep: React.FC<RulesStepProps> = ({
+  data,
+  onChange,
+  onNext,
+  onPrevious,
+  loading
+}) => {
+  const handleRuleChange = (field: keyof typeof data.rules, value: any) => {
+    onChange({
+      rules: {
+        ...data.rules,
+        [field]: value
+      }
+    })
+  }
+
+  const handleCheckInOutChange = (field: keyof NonNullable<typeof data.rules.checkInCheckout>, value: string) => {
+    onChange({
+      rules: {
+        ...data.rules,
+        checkInCheckout: {
+          ...data.rules.checkInCheckout,
+          checkInFrom: data.rules.checkInCheckout?.checkInFrom || '15:00',
+          checkInUntil: data.rules.checkInCheckout?.checkInUntil || '20:00',
+          checkOutFrom: data.rules.checkInCheckout?.checkOutFrom || '08:00',
+          checkOutUntil: data.rules.checkInCheckout?.checkOutUntil || '11:00',
+          [field]: value
+        }
+      }
+    })
+  }
+
+  return (
+    <Box padding="2rem">
+      <Box marginBottom="2rem">
+        <Box fontSize="1.5rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
+          Set your house rules
+        </Box>
+        <Box color="#718096">
+          These help set expectations for your guests
+        </Box>
+      </Box>
+
+      <Box display="flex" flexDirection="column" gap="2rem">
+        {/* Basic Rules */}
+        <Box>
+          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            General Rules
+          </Box>
+          <Box display="flex" flexDirection="column" gap="1rem">
+            <Box display="flex" alignItems="center" gap="0.75rem">
+              <Box
+                as="input"
+                type="checkbox"
+                checked={data.rules.smokingAllowed}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleRuleChange('smokingAllowed', e.target.checked)
+                }
+                accentColor="#3182ce"
+              />
+              <Box>
+                <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                  Smoking allowed
+                </Box>
+                <Box fontSize="0.75rem" color="#6b7280">
+                  Guests are permitted to smoke in the property
+                </Box>
+              </Box>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap="0.75rem">
+              <Box
+                as="input"
+                type="checkbox"
+                checked={data.rules.partiesOrEventsAllowed}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleRuleChange('partiesOrEventsAllowed', e.target.checked)
+                }
+                accentColor="#3182ce"
+              />
+              <Box>
+                <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                  Parties and events allowed
+                </Box>
+                <Box fontSize="0.75rem" color="#6b7280">
+                  Guests can organize parties or events at the property
+                </Box>
+              </Box>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap="0.75rem">
+              <Box
+                as="input"
+                type="checkbox"
+                checked={data.rules.petsAllowed}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleRuleChange('petsAllowed', e.target.checked)
+                }
+                accentColor="#3182ce"
+              />
+              <Box>
+                <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                  Pets allowed
+                </Box>
+                <Box fontSize="0.75rem" color="#6b7280">
+                  Guests can bring their pets (additional fees may apply)
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Check-in/Check-out Times */}
+        <Box>
+          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            Check-in and Check-out Times
+          </Box>
+          <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
+            <Box>
+              <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                Check-in
+              </Box>
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <Box flex="1">
+                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
+                    From
+                  </Box>
+                  <Box
+                    as="input"
+                    type="time"
+                    value={data.rules.checkInCheckout?.checkInFrom || '15:00'}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                      handleCheckInOutChange('checkInFrom', e.target.value)
+                    }
+                    width="100%"
+                    padding="0.5rem"
+                    border="1px solid #d1d5db"
+                    borderRadius="0.375rem"
+                    fontSize="0.875rem"
+                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  />
+                </Box>
+                <Box flex="1">
+                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
+                    Until
+                  </Box>
+                  <Box
+                    as="input"
+                    type="time"
+                    value={data.rules.checkInCheckout?.checkInUntil || '20:00'}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                      handleCheckInOutChange('checkInUntil', e.target.value)
+                    }
+                    width="100%"
+                    padding="0.5rem"
+                    border="1px solid #d1d5db"
+                    borderRadius="0.375rem"
+                    fontSize="0.875rem"
+                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+
+            <Box>
+              <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                Check-out
+              </Box>
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <Box flex="1">
+                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
+                    From
+                  </Box>
+                  <Box
+                    as="input"
+                    type="time"
+                    value={data.rules.checkInCheckout?.checkOutFrom || '08:00'}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                      handleCheckInOutChange('checkOutFrom', e.target.value)
+                    }
+                    width="100%"
+                    padding="0.5rem"
+                    border="1px solid #d1d5db"
+                    borderRadius="0.375rem"
+                    fontSize="0.875rem"
+                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  />
+                </Box>
+                <Box flex="1">
+                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
+                    Until
+                  </Box>
+                  <Box
+                    as="input"
+                    type="time"
+                    value={data.rules.checkInCheckout?.checkOutUntil || '11:00'}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                      handleCheckInOutChange('checkOutUntil', e.target.value)
+                    }
+                    width="100%"
+                    padding="0.5rem"
+                    border="1px solid #d1d5db"
+                    borderRadius="0.375rem"
+                    fontSize="0.875rem"
+                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Navigation */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginTop="3rem"
+        paddingTop="2rem"
+        borderTop="1px solid #e5e7eb"
+      >
+        <Box>
+          <Box
+            as="button"
+            onClick={onPrevious}
+            padding="0.75rem 1.5rem"
+            backgroundColor="transparent"
+            color="#6b7280"
+            border="1px solid #d1d5db"
+            borderRadius="0.375rem"
+            fontSize="1rem"
+            cursor="pointer"
+            whileHover={{ borderColor: '#9ca3af', backgroundColor: '#f9fafb' }}
+          >
+            Previous
+          </Box>
+        </Box>
+
+        <Box>
+          <Box
+            as="button"
+            onClick={onNext}
+            disabled={loading}
+            padding="0.75rem 2rem"
+            backgroundColor="#3182ce"
+            color="white"
+            border="none"
+            borderRadius="0.375rem"
+            fontSize="1rem"
+            fontWeight="500"
+            cursor="pointer"
+            whileHover={{ backgroundColor: '#2c5aa0' }}
+          >
+            {loading ? 'Saving...' : 'Next'}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
+export default RulesStep

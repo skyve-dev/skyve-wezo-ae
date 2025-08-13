@@ -20,4 +20,6 @@ router.post('/password-reset/reset', validateNewPassword, authController.resetPa
 
 router.get('/profile', authenticate, authController.getProfile);
 
+router.put('/update-role', authenticate, authController.updateUserRole);
+
 export default router;

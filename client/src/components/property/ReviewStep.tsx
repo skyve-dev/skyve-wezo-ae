@@ -1,0 +1,301 @@
+import React from 'react'
+import { WizardFormData } from '../../types/property'
+import { Box } from '../Box'
+
+interface ReviewStepProps {
+  data: WizardFormData
+  onChange: (updates: Partial<WizardFormData>) => void
+  onNext: () => void
+  onPrevious: () => void
+  onSubmit: () => void
+  loading: boolean
+  isFirstStep: boolean
+  isLastStep: boolean
+}
+
+const ReviewStep: React.FC<ReviewStepProps> = ({
+  data,
+  onPrevious,
+  onSubmit,
+  loading
+}) => {
+  return (
+    <Box padding="2rem">
+      <Box marginBottom="2rem">
+        <Box fontSize="1.5rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
+          Review your property listing
+        </Box>
+        <Box color="#718096">
+          Please review all the information before publishing your property
+        </Box>
+      </Box>
+
+      <Box display="flex" flexDirection="column" gap="2rem">
+        {/* Basic Information */}
+        <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            Basic Information
+          </Box>
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Property Name:</Box>
+              <Box fontWeight="500" color="#374151">{data.name}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Booking Type:</Box>
+              <Box fontWeight="500" color="#374151">{data.bookingType === 'INSTANT' ? 'Instant Book' : 'Request to Book'}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Payment Type:</Box>
+              <Box fontWeight="500" color="#374151">{data.paymentType === 'FULL' ? 'Full Payment' : 'Partial Payment'}</Box>
+            </Box>
+            {data.aboutTheProperty && (
+              <Box>
+                <Box color="#6b7280">About:</Box>
+                <Box marginTop="0.25rem" color="#374151">{data.aboutTheProperty}</Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Location */}
+        <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            Location
+          </Box>
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">City:</Box>
+              <Box fontWeight="500" color="#374151">{data.address.city}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Country:</Box>
+              <Box fontWeight="500" color="#374151">{data.address.countryOrRegion}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">ZIP Code:</Box>
+              <Box fontWeight="500" color="#374151">{data.address.zipCode}</Box>
+            </Box>
+            {data.address.apartmentOrFloorNumber && (
+              <Box display="flex" justifyContent="space-between">
+                <Box color="#6b7280">Apartment/Floor:</Box>
+                <Box fontWeight="500" color="#374151">{data.address.apartmentOrFloorNumber}</Box>
+              </Box>
+            )}
+            {data.address.latLong && (
+              <Box display="flex" justifyContent="space-between">
+                <Box color="#6b7280">Coordinates:</Box>
+                <Box fontWeight="500" color="#374151">
+                  {data.address.latLong.latitude.toFixed(6)}, {data.address.latLong.longitude.toFixed(6)}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Layout */}
+        <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            Layout
+          </Box>
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Maximum Guests:</Box>
+              <Box fontWeight="500" color="#374151">{data.layout.maximumGuest}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Bathrooms:</Box>
+              <Box fontWeight="500" color="#374151">{data.layout.bathrooms}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Children Allowed:</Box>
+              <Box fontWeight="500" color="#374151">{data.layout.allowChildren ? 'Yes' : 'No'}</Box>
+            </Box>
+            {data.layout.allowChildren && (
+              <Box display="flex" justifyContent="space-between">
+                <Box color="#6b7280">Cribs Available:</Box>
+                <Box fontWeight="500" color="#374151">{data.layout.offerCribs ? 'Yes' : 'No'}</Box>
+              </Box>
+            )}
+            {data.layout.propertySizeSqMtr && (
+              <Box display="flex" justifyContent="space-between">
+                <Box color="#6b7280">Size:</Box>
+                <Box fontWeight="500" color="#374151">{data.layout.propertySizeSqMtr} sq m</Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Amenities */}
+        {data.amenities && data.amenities.length > 0 && (
+          <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+            <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+              Amenities ({data.amenities.length})
+            </Box>
+            <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr', Md: '1fr 1fr 1fr' }} gap="0.5rem">
+              {data.amenities.map((amenity, index) => (
+                <Box key={index} fontSize="0.875rem" color="#374151">
+                  • {amenity.name}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Photos */}
+        {data.photos && data.photos.length > 0 && (
+          <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+            <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+              Photos ({data.photos.length})
+            </Box>
+            <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr 1fr', Md: '1fr 1fr 1fr 1fr' }} gap="0.5rem">
+              {data.photos.map((photo, index) => (
+                <Box
+                  key={index}
+                  width="100%"
+                  height="100px"
+                  borderRadius="0.375rem"
+                  overflow="hidden"
+                >
+                  <Box
+                    as="img"
+                    src={photo.url}
+                    alt={photo.altText || `Photo ${index + 1}`}
+                    width="100%"
+                    height="100%"
+                    objectFit="cover"
+                  />
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Services */}
+        <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            Services
+          </Box>
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Breakfast:</Box>
+              <Box fontWeight="500" color="#374151">{data.services.serveBreakfast ? 'Available' : 'Not available'}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Parking:</Box>
+              <Box fontWeight="500" color="#374151">{data.services.parking ? 'Free parking' : 'No parking'}</Box>
+            </Box>
+            {data.services.languages && data.services.languages.length > 0 && (
+              <Box>
+                <Box color="#6b7280">Languages:</Box>
+                <Box marginTop="0.25rem" fontWeight="500" color="#374151">
+                  {data.services.languages.join(', ')}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Rules */}
+        <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            House Rules
+          </Box>
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Smoking:</Box>
+              <Box fontWeight="500" color="#374151">{data.rules.smokingAllowed ? 'Allowed' : 'Not allowed'}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Parties/Events:</Box>
+              <Box fontWeight="500" color="#374151">{data.rules.partiesOrEventsAllowed ? 'Allowed' : 'Not allowed'}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between">
+              <Box color="#6b7280">Pets:</Box>
+              <Box fontWeight="500" color="#374151">{data.rules.petsAllowed ? 'Allowed' : 'Not allowed'}</Box>
+            </Box>
+            {data.rules.checkInCheckout && (
+              <Box>
+                <Box color="#6b7280">Check-in/out times:</Box>
+                <Box marginTop="0.25rem" fontWeight="500" color="#374151">
+                  In: {data.rules.checkInCheckout.checkInFrom} - {data.rules.checkInCheckout.checkInUntil}
+                  <br />
+                  Out: {data.rules.checkInCheckout.checkOutFrom} - {data.rules.checkInCheckout.checkOutUntil}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Pricing */}
+        {data.pricing && (
+          <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
+            <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+              Pricing
+            </Box>
+            <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+              <Box display="flex" justifyContent="space-between">
+                <Box color="#6b7280">Base Rate:</Box>
+                <Box fontWeight="500" color="#374151">{data.pricing.currency} {data.pricing.ratePerNight}/night</Box>
+              </Box>
+              {data.pricing.ratePerNightWeekend && (
+                <Box display="flex" justifyContent="space-between">
+                  <Box color="#6b7280">Weekend Rate:</Box>
+                  <Box fontWeight="500" color="#374151">{data.pricing.currency} {data.pricing.ratePerNightWeekend}/night</Box>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        )}
+      </Box>
+
+      {/* Navigation */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginTop="3rem"
+        paddingTop="2rem"
+        borderTop="1px solid #e5e7eb"
+      >
+        <Box>
+          <Box
+            as="button"
+            onClick={onPrevious}
+            padding="0.75rem 1.5rem"
+            backgroundColor="transparent"
+            color="#6b7280"
+            border="1px solid #d1d5db"
+            borderRadius="0.375rem"
+            fontSize="1rem"
+            cursor="pointer"
+            whileHover={{ borderColor: '#9ca3af', backgroundColor: '#f9fafb' }}
+          >
+            Previous
+          </Box>
+        </Box>
+
+        <Box>
+          <Box
+            as="button"
+            onClick={onSubmit}
+            disabled={loading}
+            padding="0.75rem 2rem"
+            backgroundColor="#10b981"
+            color="white"
+            border="none"
+            borderRadius="0.375rem"
+            fontSize="1rem"
+            fontWeight="500"
+            cursor="pointer"
+            whileHover={{ backgroundColor: '#059669' }}
+          >
+            {loading ? 'Creating Property...' : 'Publish Property'}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
+export default ReviewStep
