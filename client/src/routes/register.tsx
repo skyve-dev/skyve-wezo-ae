@@ -31,12 +31,12 @@ function RegisterPage() {
       padding={20}
     >
       <Box textAlign="center" marginBottom={32}>
-        <h1 style={{ fontSize: '42px', fontWeight: 700, margin: 0, marginBottom: '8px' }}>
+        <Box as="h1" fontSize={42} fontWeight={700} margin={0} marginBottom={8}>
           Wezo
-        </h1>
-        <p style={{ fontSize: '18px', color: '#6c757d', margin: 0 }}>
+        </Box>
+        <Box as="p" fontSize={18} color="#6c757d" margin={0}>
           Property Rental Platform
-        </p>
+        </Box>
       </Box>
 
       <RegisterForm
@@ -49,9 +49,9 @@ function RegisterPage() {
         maxWidth={400}
         width="100%"
       >
-        <p style={{ fontSize: '12px', color: '#6c757d', margin: 0 }}>
+        <Box as="p" fontSize={12} color="#6c757d" margin={0}>
           By using Wezo, you agree to our Terms of Service and Privacy Policy.
-        </p>
+        </Box>
       </Box>
     </Box>
   )

@@ -24,15 +24,15 @@ export const Dashboard: React.FC = () => {
           gap={16}
         >
           <Box>
-            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: 700, marginBottom: '4px' }}>
+            <Box as="h1" margin={0} fontSize={32} fontWeight={700} marginBottom={4}>
               Welcome back, {user?.username}!
-            </h1>
-            <p style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>
+            </Box>
+            <Box as="p" margin={0} color="#6c757d" fontSize={16}>
               Manage your properties and bookings
-            </p>
+            </Box>
           </Box>
           
-          <button
+          <Box as="button"
             onClick={() => dispatch(logout())}
             style={{
               backgroundColor: 'transparent',
@@ -54,7 +54,7 @@ export const Dashboard: React.FC = () => {
             }}
           >
             Sign Out
-          </button>
+          </Box>
         </Box>
 
         <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="1fr 1fr" gap={24}>
@@ -65,36 +65,36 @@ export const Dashboard: React.FC = () => {
             boxShadow="0 2px 4px rgba(0,0,0,0.1)"
           >
             <Box display="flex" flexDirection="column" gap={16}>
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Account Information</h2>
+              <Box as="h2" margin={0} fontSize={20} fontWeight={600}>Account Information</Box>
               
               <Box display="flex" flexDirection="column" gap={8}>
                 <Box>
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: '#6c757d', marginBottom: '2px' }}>Username</div>
-                  <div style={{ fontSize: '16px' }}>{user?.username}</div>
+                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Username</Box>
+                  <Box fontSize={16}>{user?.username}</Box>
                 </Box>
                 
                 <Box>
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: '#6c757d', marginBottom: '2px' }}>Email</div>
-                  <div style={{ fontSize: '16px' }}>{user?.email}</div>
+                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Email</Box>
+                  <Box fontSize={16}>{user?.email}</Box>
                 </Box>
                 
                 <Box>
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: '#6c757d', marginBottom: '2px' }}>Role</div>
-                  <div style={{ fontSize: '16px', textTransform: 'capitalize' }}>
+                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Role</Box>
+                  <Box fontSize={16} textTransform="capitalize">
                     {user?.role?.toLowerCase() || 'Tenant'}
-                  </div>
+                  </Box>
                 </Box>
                 
                 <Box>
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: '#6c757d', marginBottom: '2px' }}>Member Since</div>
-                  <div style={{ fontSize: '16px' }}>
+                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Member Since</Box>
+                  <Box fontSize={16}>
                     {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                  </div>
+                  </Box>
                 </Box>
               </Box>
 
               <Box paddingTop={16}>
-                <button
+                <Box as="button"
                   style={{
                     backgroundColor: 'transparent',
                     color: '#007bff',
@@ -107,7 +107,7 @@ export const Dashboard: React.FC = () => {
                   }}
                 >
                   Edit Profile
-                </button>
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -119,10 +119,10 @@ export const Dashboard: React.FC = () => {
             boxShadow="0 2px 4px rgba(0,0,0,0.1)"
           >
             <Box display="flex" flexDirection="column" gap={16}>
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Quick Actions</h2>
+              <Box as="h2" margin={0} fontSize={20} fontWeight={600}>Quick Actions</Box>
               
               <Box display="flex" flexDirection="column" gap={12}>
-                <button
+                <Box as="button"
                   style={{
                     backgroundColor: '#007bff',
                     color: 'white',
@@ -135,9 +135,9 @@ export const Dashboard: React.FC = () => {
                   }}
                 >
                   List a Property
-                </button>
+                </Box>
                 
-                <button
+                <Box as="button"
                   style={{
                     backgroundColor: 'transparent',
                     color: '#007bff',
@@ -150,9 +150,9 @@ export const Dashboard: React.FC = () => {
                   }}
                 >
                   View My Properties
-                </button>
+                </Box>
                 
-                <button
+                <Box as="button"
                   style={{
                     backgroundColor: 'transparent',
                     color: '#007bff',
@@ -165,9 +165,9 @@ export const Dashboard: React.FC = () => {
                   }}
                 >
                   Booking History
-                </button>
+                </Box>
                 
-                <button
+                <Box as="button"
                   style={{
                     backgroundColor: 'transparent',
                     color: '#007bff',
@@ -180,7 +180,7 @@ export const Dashboard: React.FC = () => {
                   }}
                 >
                   Messages
-                </button>
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -193,7 +193,7 @@ export const Dashboard: React.FC = () => {
             gridColumn="1 / -1"
           >
             <Box display="flex" flexDirection="column" gap={16}>
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Recent Activity</h2>
+              <Box as="h2" margin={0} fontSize={20} fontWeight={600}>Recent Activity</Box>
               
               <Box
                 padding={32}
@@ -202,21 +202,21 @@ export const Dashboard: React.FC = () => {
                 borderRadius={8}
                 border="2px dashed #dee2e6"
               >
-                <div style={{ color: '#6c757d', fontSize: '16px', marginBottom: '8px' }}>
+                <Box color="#6c757d" fontSize={16} marginBottom={8}>
                   No recent activity
-                </div>
-                <div style={{ color: '#6c757d', fontSize: '14px' }}>
+                </Box>
+                <Box color="#6c757d" fontSize={14}>
                   Your recent bookings and property updates will appear here
-                </div>
+                </Box>
               </Box>
             </Box>
           </Box>
         </Box>
 
         <Box marginTop={32} textAlign="center">
-          <p style={{ fontSize: '14px', color: '#6c757d', margin: 0 }}>
+          <Box as="p" fontSize={14} color="#6c757d" margin={0}>
             Need help? Contact our support team or visit our help center.
-          </p>
+          </Box>
         </Box>
       </Box>
     </Box>

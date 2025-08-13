@@ -114,12 +114,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
     >
       <Box display="flex" flexDirection="column" gap={24}>
         <Box textAlign="center">
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600, marginBottom: '8px' }}>
+          <Box as="h2" margin={0} fontSize={24} fontWeight={600} marginBottom={8}>
             Create Account
-          </h2>
-          <p style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>
+          </Box>
+          <Box as="p" margin={0} color="#6c757d" fontSize={16}>
             Join Wezo today
-          </p>
+          </Box>
         </Box>
 
         {authError && (
@@ -129,18 +129,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             borderRadius={6}
             border="1px solid #fecaca"
           >
-            <div style={{ fontSize: '14px', color: '#dc3545' }}>
+            <Box fontSize={14} color="#dc3545">
               {authError}
-            </div>
+            </Box>
           </Box>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <Box as="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={20}>
           <Box display="flex" flexDirection="column" gap={6}>
-            <label htmlFor="username" style={{ fontSize: '14px', fontWeight: 500 }}>
+            <Box as="label" htmlFor="username" fontSize={14} fontWeight={500}>
               Username
-            </label>
-            <input
+            </Box>
+            <Box as="input"
               id="username"
               type="text"
               placeholder="Choose a username"
@@ -152,17 +152,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.username)}
             />
             {errors.username && (
-              <div style={{ fontSize: '14px', color: '#dc3545' }}>
+              <Box fontSize={14} color="#dc3545">
                 {errors.username}
-              </div>
+              </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <label htmlFor="email" style={{ fontSize: '14px', fontWeight: 500 }}>
+            <Box as="label" htmlFor="email" fontSize={14} fontWeight={500}>
               Email Address
-            </label>
-            <input
+            </Box>
+            <Box as="input"
               id="email"
               type="email"
               placeholder="Enter your email"
@@ -174,17 +174,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.email)}
             />
             {errors.email && (
-              <div style={{ fontSize: '14px', color: '#dc3545' }}>
+              <Box fontSize={14} color="#dc3545">
                 {errors.email}
-              </div>
+              </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <label htmlFor="password" style={{ fontSize: '14px', fontWeight: 500 }}>
+            <Box as="label" htmlFor="password" fontSize={14} fontWeight={500}>
               Password
-            </label>
-            <input
+            </Box>
+            <Box as="input"
               id="password"
               type="password"
               placeholder="Create a password"
@@ -196,17 +196,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.password)}
             />
             {errors.password && (
-              <div style={{ fontSize: '14px', color: '#dc3545' }}>
+              <Box fontSize={14} color="#dc3545">
                 {errors.password}
-              </div>
+              </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <label htmlFor="confirmPassword" style={{ fontSize: '14px', fontWeight: 500 }}>
+            <Box as="label" htmlFor="confirmPassword" fontSize={14} fontWeight={500}>
               Confirm Password
-            </label>
-            <input
+            </Box>
+            <Box as="input"
               id="confirmPassword"
               type="password"
               placeholder="Confirm your password"
@@ -218,13 +218,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.confirmPassword)}
             />
             {errors.confirmPassword && (
-              <div style={{ fontSize: '14px', color: '#dc3545' }}>
+              <Box fontSize={14} color="#dc3545">
                 {errors.confirmPassword}
-              </div>
+              </Box>
             )}
           </Box>
 
-          <button
+          <Box as="button"
             type="submit"
             disabled={isLoading}
             style={{
@@ -255,12 +255,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
           >
             {isLoading ? (
               <>
-                <div
+                <Box
+                  width={16}
+                  height={16}
+                  borderRadius="50%"
+                  border="2px solid currentColor"
                   style={{
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '50%',
-                    border: '2px solid currentColor',
                     borderTopColor: 'transparent',
                     animation: 'spin 1s linear infinite',
                   }}
@@ -270,13 +270,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             ) : (
               'Create Account'
             )}
-          </button>
-        </form>
+          </Box>
+        </Box>
 
-        <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef">
-          <p style={{ fontSize: '14px', color: '#6c757d', margin: 0 }}>
+        <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef" >
+          <Box as="p" fontSize={14} color="#6c757d" margin={0} >
             Already have an account?{' '}
-            <button
+            <Box as="button"
               onClick={onSwitchToLogin}
               style={{
                 background: 'none',
@@ -288,8 +288,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               }}
             >
               Sign in
-            </button>
-          </p>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>

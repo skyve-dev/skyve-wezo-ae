@@ -130,17 +130,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }}
             />
             {errors.username && (
-              <div style={{ fontSize: '14px', color: '#dc3545' }}>
+              <Box fontSize={14} color="#dc3545">
                 {errors.username}
-              </div>
+              </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <label htmlFor="password" style={{ fontSize: '14px', fontWeight: 500 }}>
+            <Box as="label" htmlFor="password" fontSize={14} fontWeight={500}>
               Password
-            </label>
-            <input
+            </Box>
+            <Box as="input"
               id="password"
               type="password"
               placeholder="Enter your password"
@@ -168,14 +168,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }}
             />
             {errors.password && (
-              <div style={{ fontSize: '14px', color: '#dc3545' }}>
+              <Box fontSize={14} color="#dc3545">
                 {errors.password}
-              </div>
+              </Box>
             )}
           </Box>
 
           <Box display="flex" justifyContent="flex-end">
-            <button
+            <Box as="button"
               type="button"
               onClick={onSwitchToForgotPassword}
               style={{
@@ -189,10 +189,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }}
             >
               Forgot password?
-            </button>
+            </Box>
           </Box>
 
-          <button
+          <Box as="button"
             type="submit"
             disabled={isLoading}
             style={{
@@ -212,13 +212,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             }}
           >
             {isLoading ? 'Signing In...' : 'Sign In'}
-          </button>
+          </Box>
         </Box>
 
         <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef">
-          <p style={{ fontSize: '14px', color: '#6c757d', margin: 0 }}>
+          <Box as="p" fontSize={14} color="#6c757d" margin={0}>
             Don't have an account?{' '}
-            <button
+            <Box as="button"
               onClick={onSwitchToRegister}
               style={{
                 background: 'none',
@@ -230,8 +230,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }}
             >
               Create one
-            </button>
-          </p>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>
