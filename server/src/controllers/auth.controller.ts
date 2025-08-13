@@ -148,16 +148,25 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
     const hashedPassword = await hashPassword(newPassword);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        passwordResetToken: null,
-        passwordResetExpires: null,
-      },
-    });
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          passwordResetToken: null,
+          passwordResetExpires: null,
+        },
+      });
 
-    res.json({ message: 'Password has been reset successfully' });
+      res.json({ message: 'Password has been reset successfully' });
+    } catch (updateError: any) {
+      // If user was deleted after we found them, treat as invalid token
+      if (updateError.code === 'P2025') {
+        res.status(400).json({ error: 'Invalid or expired reset token' });
+        return;
+      }
+      throw updateError;
+    }
   } catch (error) {
     console.error('Password reset error:', error);
     res.status(500).json({ error: 'Internal server error' });

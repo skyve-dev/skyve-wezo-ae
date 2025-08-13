@@ -4,7 +4,7 @@ import app from '../app';
 import prisma from '../config/database';
 import { hashPassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
-import { describe, it, beforeAll, beforeEach, afterEach, expect } from '@jest/globals';
+import { describe, it, beforeAll, expect } from '@jest/globals';
 import { cleanupDatabase } from './setup';
 
 describe('Property API Tests', () => {
@@ -107,13 +107,8 @@ describe('Property API Tests', () => {
 
   beforeAll(async () => {
     await cleanupDatabase();
-  });
-
-  afterEach(async () => {
-    await cleanupDatabase();
-  });
-
-  beforeEach(async () => {
+    
+    // Create one user for all tests in this suite
     const hashedPassword = await hashPassword('Test@123');
     const timestamp = Date.now();
     const user = await prisma.user.create({
