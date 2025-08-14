@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
-import { useAppSelector } from '@/store/hooks'
+import { useAppSelector } from '@/store'
 import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice'
 import { Box } from '@/components/Box'
 

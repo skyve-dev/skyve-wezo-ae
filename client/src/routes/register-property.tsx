@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState, AppDispatch } from '../store'
+import { useAppDispatch, useAppSelector } from '../store'
 import { initializeWizard, updateWizardData, setWizardStep, clearWizardData, createProperty } from '../store/slices/propertySlice'
 import { WizardStep } from '../types/property'
 import { Box } from '../components/Box'
@@ -47,9 +46,9 @@ const stepTitles = {
 
 function RegisterPropertyWizard() {
   const navigate = useNavigate()
-  const dispatch = useDispatch<AppDispatch>()
-  const { wizardData, loading, error } = useSelector((state: RootState) => state.property)
-  const { user } = useSelector((state: RootState) => state.auth)
+  const dispatch = useAppDispatch()
+  const { wizardData, loading, error } = useAppSelector((state) => state.property)
+  const { user } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
     // Redirect if not authenticated

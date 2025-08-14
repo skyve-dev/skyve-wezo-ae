@@ -3,7 +3,7 @@ import { Provider } from 'react-redux'
 import { store } from '@/store'
 import { router } from './router'
 import { useEffect } from 'react'
-import { useAppDispatch } from '@/store/hooks'
+import { useAppDispatch } from '@/store'
 import { checkAuth } from '@/store/slices/authSlice'
 
 function AppContent() {

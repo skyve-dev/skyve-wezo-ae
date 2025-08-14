@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../Box';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store';
 import { login, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
 
 interface LoginFormProps {

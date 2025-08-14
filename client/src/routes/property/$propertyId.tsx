@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState, AppDispatch } from '../../store'
+import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchPropertyById, clearError } from '../../store/slices/propertySlice'
 import { Box } from '../../components/Box'
 
@@ -12,9 +11,9 @@ export const Route = createFileRoute('/property/$propertyId')({
 function PropertyDetailsPage() {
   const { propertyId } = Route.useParams()
   const navigate = useNavigate()
-  const dispatch = useDispatch<AppDispatch>()
-  const { currentProperty, loading, error } = useSelector((state: RootState) => state.property)
-  const { user } = useSelector((state: RootState) => state.auth)
+  const dispatch = useAppDispatch()
+  const { currentProperty, loading, error } = useAppSelector((state) => state.property)
+  const { user } = useAppSelector((state) => state.auth)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {

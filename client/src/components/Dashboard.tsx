@@ -1,5 +1,5 @@
 import { Box } from './Box';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store';
 import { logout, selectUser } from '@/store/slices/authSlice';
 import { useNavigate } from '@tanstack/react-router';
 

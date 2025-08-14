@@ -36,6 +36,7 @@
       "Bash(grep:*)",
       "Bash(npx jest:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }
