@@ -1,0 +1,9 @@
+1. kita liat ada banyak code yang masih pakai useDispatch<AppDispatch>, kita minta tolong di stramline supaya semua pakai
+useAppDispatch ketimbang pakai useDispatch<AppDispatch> ini biar lebih mudah buat para pengguna memahaminya.
+2. banyak juga yang menggunakan useSelector((state: RootState), sebaiknya kita ganti ini menjadi useAppSelector, dan kita
+minta semua code code yang lain di stream line agar mudah memanagenya.
+
+3. pindahkan useAppDispatch dan useAppSelector ke store/index.ts dan hilangkan hooks.ts, dan hapus jangan buat RootState dan AppDispatch
+diexport dari index.ts, ini agar memaksakan user agar tetap menggunakana useAppDispatch dan useAppSelector.
+4. consider to refactor to use react-hook-form, instead of normal form element.
+5. coba cek gluestack.io buat dapet inspirasinya

@@ -1,0 +1,16 @@
+1. in the property.controller createProperty, we need to change logic little bit, instead of if not homeowner then promoted
+   to homeowner, but if its tenant then promoted to homeowner.
+
+2. considering to change the role using roleLevel,
+
+const ROLES = {
+  TENANT: 10,
+  HOMEOWNER: 20,
+  MANAGER: 30,
+  ADMIN: 40,
+};
+
+by doing this way we are giving more flexibity of user permissions.
+
+3. to check the service and the route, see if there is possible non atomic transaction. i suspect when performing
+deletion is not atomic transactions.
