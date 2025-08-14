@@ -208,7 +208,7 @@ model Pricing {
   id                                         String              @id @default(uuid())
   currency                                   Currency
   ratePerNight                               Float
-  ratePerNightWeekend                        Float
+  ratePerNightWeekend                        Float?
   promotion                                  Promotion?
   pricePerGroupSize                          PricePerGroupSize[]
   discountPercentageForNonRefundableRatePlan Float?
