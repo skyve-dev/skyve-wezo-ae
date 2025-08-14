@@ -40,13 +40,125 @@ const saveWizardDataToStorage = (data: WizardFormData | null) => {
   }
 }
 
+// Transform flattened wizard data to nested server format
+const transformPropertyDataForServer = (data: WizardFormData) => {
+  // Filter out undefined values and prepare the transformed data
+  const transformedData: any = {
+    name: data.name,
+    address: {
+      apartmentOrFloorNumber: data.address.apartmentOrFloorNumber,
+      countryOrRegion: data.address.countryOrRegion,
+      city: data.address.city,
+      zipCode: data.address.zipCode,
+    },
+    layout: {
+      maximumGuest: data.maximumGuest,
+      bathrooms: data.bathrooms,
+      allowChildren: data.allowChildren,
+      offerCribs: data.offerCribs,
+    },
+    amenities: data.amenities || [],
+    services: {
+      serveBreakfast: data.serveBreakfast,
+      parking: data.parking,
+      languages: data.languages || [],
+    },
+    rules: {
+      smokingAllowed: data.smokingAllowed,
+      partiesOrEventsAllowed: data.partiesOrEventsAllowed,
+      petsAllowed: data.petsAllowed,
+    },
+    photos: data.photos || [],
+    bookingType: data.bookingType,
+    paymentType: data.paymentType,
+    aboutTheProperty: data.aboutTheProperty,
+    aboutTheNeighborhood: data.aboutTheNeighborhood,
+  }
+
+  // Add optional fields only if they exist
+  if (data.address.latLong) {
+    transformedData.address.latLong = {
+      latitude: data.address.latLong.latitude,
+      longitude: data.address.latLong.longitude,
+    }
+  }
+
+  if (data.propertySizeSqMtr) {
+    transformedData.layout.propertySizeSqMtr = data.propertySizeSqMtr
+  }
+
+  if (data.rooms && data.rooms.length > 0) {
+    transformedData.layout.rooms = data.rooms
+  }
+
+  if (data.checkInCheckout) {
+    transformedData.rules.checkInCheckout = data.checkInCheckout
+  }
+
+  if (data.pricing) {
+    transformedData.pricing = data.pricing
+  }
+
+  if (data.cancellation) {
+    transformedData.cancellation = data.cancellation
+  }
+
+  if (data.firstDateGuestCanCheckIn) {
+    transformedData.firstDateGuestCanCheckIn = data.firstDateGuestCanCheckIn.toISOString()
+  }
+
+  return transformedData
+}
+
+// Transform nested server data to flattened client format
+const transformServerPropertyData = (serverData: any): Property => {
+  return {
+    propertyId: serverData.propertyId,
+    name: serverData.name,
+    address: serverData.address,
+    
+    // Flatten layout fields
+    maximumGuest: serverData.layout?.maximumGuest || 0,
+    bathrooms: serverData.layout?.bathrooms || 0,
+    allowChildren: serverData.layout?.allowChildren || false,
+    offerCribs: serverData.layout?.offerCribs || false,
+    propertySizeSqMtr: serverData.layout?.propertySizeSqMtr,
+    rooms: serverData.layout?.rooms,
+    
+    amenities: serverData.amenities,
+    
+    // Flatten services fields
+    serveBreakfast: serverData.services?.serveBreakfast || false,
+    parking: serverData.services?.parking,
+    languages: serverData.services?.languages,
+    
+    // Flatten rules fields
+    smokingAllowed: serverData.rules?.smokingAllowed || false,
+    partiesOrEventsAllowed: serverData.rules?.partiesOrEventsAllowed || false,
+    petsAllowed: serverData.rules?.petsAllowed,
+    checkInCheckout: serverData.rules?.checkInCheckout,
+    
+    photos: serverData.photos,
+    bookingType: serverData.bookingType,
+    paymentType: serverData.paymentType,
+    pricing: serverData.pricing,
+    cancellation: serverData.cancellation,
+    aboutTheProperty: serverData.aboutTheProperty,
+    aboutTheNeighborhood: serverData.aboutTheNeighborhood,
+    firstDateGuestCanCheckIn: serverData.firstDateGuestCanCheckIn ? new Date(serverData.firstDateGuestCanCheckIn) : undefined,
+    ownerId: serverData.ownerId,
+    createdAt: serverData.createdAt ? new Date(serverData.createdAt) : undefined,
+    updatedAt: serverData.updatedAt ? new Date(serverData.updatedAt) : undefined,
+  }
+}
+
 // Async thunks
 export const fetchMyProperties = createAsyncThunk(
   'property/fetchMyProperties',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get<{ properties: Property[] }>('/api/properties/my-properties')
-      return response.properties
+      const response = await api.get<{ properties: any[] }>('/api/properties/my-properties')
+      return response.properties.map(transformServerPropertyData)
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch properties')
     }
@@ -57,8 +169,8 @@ export const fetchPropertyById = createAsyncThunk(
   'property/fetchPropertyById',
   async (propertyId: string, { rejectWithValue }) => {
     try {
-      const response = await api.get<{ property: Property }>(`/api/properties/${propertyId}`)
-      return response.property
+      const response = await api.get<{ property: any }>(`/api/properties/${propertyId}`)
+      return transformServerPropertyData(response.property)
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch property')
     }
@@ -67,10 +179,11 @@ export const fetchPropertyById = createAsyncThunk(
 
 export const createProperty = createAsyncThunk(
   'property/createProperty',
-  async (propertyData: Property, { rejectWithValue }) => {
+  async (propertyData: WizardFormData, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ property: Property }>('/api/properties', propertyData)
-      return response.property
+      const transformedData = transformPropertyDataForServer(propertyData)
+      const response = await api.post<{ property: any }>('/api/properties', transformedData)
+      return transformServerPropertyData(response.property)
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to create property')
     }
@@ -81,8 +194,8 @@ export const updateProperty = createAsyncThunk(
   'property/updateProperty',
   async ({ propertyId, data }: { propertyId: string; data: Partial<Property> }, { rejectWithValue }) => {
     try {
-      const response = await api.put<{ property: Property }>(`/api/properties/${propertyId}`, data)
-      return response.property
+      const response = await api.put<{ property: any }>(`/api/properties/${propertyId}`, data)
+      return transformServerPropertyData(response.property)
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update property')
     }

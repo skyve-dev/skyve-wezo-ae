@@ -124,7 +124,7 @@ function RegisterPropertyWizard() {
         padding="1rem 0"
         position="sticky"
         top="0"
-        zIndex={10}
+        zIndex='10'
       >
         <Box maxWidth="1200px" margin="0 auto" padding="0 1rem">
           <Box display="flex" justifyContent="space-between" alignItems="center">
