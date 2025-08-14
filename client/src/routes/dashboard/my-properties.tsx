@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchMyProperties, deleteProperty, clearError } from '../../store/slices/propertySlice'
 import { Box } from '../../components/Box'
+import { redirectToPropertyRegistration } from '../../utils/deviceDetection'
 
 export const Route = createFileRoute('/dashboard/my-properties')({
   component: MyPropertiesPage,
@@ -43,7 +44,7 @@ function MyPropertiesPage() {
   }
 
   const handleStartRegistration = () => {
-    navigate({ to: '/register-property' })
+    redirectToPropertyRegistration(navigate)
   }
 
   if (!user) {

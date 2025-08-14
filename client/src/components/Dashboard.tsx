@@ -2,6 +2,7 @@ import { Box } from './Box';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { logout, selectUser } from '@/store/slices/authSlice';
 import { useNavigate } from '@tanstack/react-router';
+import { redirectToPropertyRegistration } from '../utils/deviceDetection';
 
 export const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -125,7 +126,7 @@ export const Dashboard: React.FC = () => {
               
               <Box display="flex" flexDirection="column" gap={12}>
                 <Box as="button"
-                  onClick={() => navigate({ to: '/register-property' })}
+                  onClick={() => redirectToPropertyRegistration(navigate)}
                   style={{
                     backgroundColor: '#007bff',
                     color: 'white',

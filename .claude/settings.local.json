@@ -34,7 +34,9 @@
       "Bash(npx prisma generate:*)",
       "Bash(npm test:*)",
       "Bash(grep:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(timeout 10s npm run dev)",
+      "Bash(true)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
