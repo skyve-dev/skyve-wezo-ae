@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterPropertyMobileRouteImport } from './routes/register-property-mobile'
 import { Route as RegisterPropertyRouteImport } from './routes/register-property'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
@@ -21,11 +20,6 @@ import { Route as ExampleBoxRouteImport } from './routes/example/Box'
 import { Route as DashboardMyPropertiesRouteImport } from './routes/dashboard/my-properties'
 import { Route as PropertyPropertyIdEditRouteImport } from './routes/property/$propertyId/edit'
 
-const RegisterPropertyMobileRoute = RegisterPropertyMobileRouteImport.update({
-  id: '/register-property-mobile',
-  path: '/register-property-mobile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterPropertyRoute = RegisterPropertyRouteImport.update({
   id: '/register-property',
   path: '/register-property',
@@ -83,7 +77,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
-  '/register-property-mobile': typeof RegisterPropertyMobileRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/example/Box': typeof ExampleBoxRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
@@ -95,7 +88,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
-  '/register-property-mobile': typeof RegisterPropertyMobileRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/example/Box': typeof ExampleBoxRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
@@ -109,7 +101,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
-  '/register-property-mobile': typeof RegisterPropertyMobileRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/example/Box': typeof ExampleBoxRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
@@ -124,7 +115,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/register-property'
-    | '/register-property-mobile'
     | '/dashboard/my-properties'
     | '/example/Box'
     | '/property/$propertyId'
@@ -136,7 +126,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/register-property'
-    | '/register-property-mobile'
     | '/dashboard/my-properties'
     | '/example/Box'
     | '/property/$propertyId'
@@ -149,7 +138,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/register-property'
-    | '/register-property-mobile'
     | '/dashboard/my-properties'
     | '/example/Box'
     | '/property/$propertyId'
@@ -163,20 +151,12 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   RegisterPropertyRoute: typeof RegisterPropertyRoute
-  RegisterPropertyMobileRoute: typeof RegisterPropertyMobileRoute
   ExampleBoxRoute: typeof ExampleBoxRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/register-property-mobile': {
-      id: '/register-property-mobile'
-      path: '/register-property-mobile'
-      fullPath: '/register-property-mobile'
-      preLoaderRoute: typeof RegisterPropertyMobileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register-property': {
       id: '/register-property'
       path: '/register-property'
@@ -281,7 +261,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   RegisterPropertyRoute: RegisterPropertyRoute,
-  RegisterPropertyMobileRoute: RegisterPropertyMobileRoute,
   ExampleBoxRoute: ExampleBoxRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRouteWithChildren,
 }

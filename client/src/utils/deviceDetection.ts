@@ -36,10 +36,9 @@ export const isMobileDevice = (): boolean => {
 }
 
 export const getPropertyRegistrationRoute = (): string => {
-  return isMobileDevice() ? '/register-property-mobile' : '/register-property'
+  return '/register-property'
 }
 
 export const redirectToPropertyRegistration = (navigate: (options: { to: string }) => void): void => {
-  const route = getPropertyRegistrationRoute()
-  navigate({ to: route })
+  navigate({ to: '/register-property' })
 }
