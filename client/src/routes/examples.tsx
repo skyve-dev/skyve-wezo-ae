@@ -6,7 +6,9 @@ import {
   FaMobileAlt, 
   FaBox,
   FaArrowLeft,
-  FaPuzzlePiece
+  FaPuzzlePiece,
+  FaCalendarAlt,
+  FaClock
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples')({
@@ -20,6 +22,8 @@ function ExamplesLayout() {
     { path: '/examples', label: 'Overview', icon: <FaHome /> },
     { path: '/examples/selection-picker', label: 'SelectionPicker', icon: <FaCheckSquare /> },
     { path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: <FaMobileAlt /> },
+    { path: '/examples/date-picker', label: 'DatePicker', icon: <FaCalendarAlt /> },
+    { path: '/examples/time-picker', label: 'TimePicker', icon: <FaClock /> },
     { path: '/examples/box', label: 'Box Component', icon: <FaBox /> }
   ]
 

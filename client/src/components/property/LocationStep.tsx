@@ -3,6 +3,11 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import SelectionPicker from '../SelectionPicker'
+import SlidingDrawer from '../SlidingDrawer'
+import useDrawerManager from '../../hooks/useDrawerManager'
+import { UAE_EMIRATES, getSelectionPattern, getResponsiveColumns } from '../../utils/selectionUtils'
+import { FaMapMarkerAlt, FaSearch } from 'react-icons/fa'
 
 // Fix for default markers
 import 'leaflet/dist/leaflet.css'
@@ -54,6 +59,11 @@ const LocationStep: React.FC<LocationStepProps> = ({
   const [mapCenter, setMapCenter] = useState<[number, number]>([25.2048, 55.2708])
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
+  const [selectedEmirate, setSelectedEmirate] = useState<string>(data.address.city || '')
+  const drawerManager = useDrawerManager()
+  
+  // Determine selection pattern based on screen size
+  const selectionPattern = getSelectionPattern(UAE_EMIRATES.length)
   
   const handleAddressChange = (field: keyof typeof data.address, value: string | number) => {
     onChange({
@@ -125,35 +135,134 @@ const LocationStep: React.FC<LocationStepProps> = ({
       </Box>
 
       <Box display="flex" flexDirection="column" gap="1.5rem">
-        {/* Address Fields */}
-        <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr' }} gap="1rem">
-          <Box>
-            <Box
-              as="label"
-              display="block"
-              fontSize="0.875rem"
-              fontWeight="500"
-              color="#374151"
-              marginBottom="0.5rem"
-            >
-              City *
-            </Box>
-            <Box
-              as="input"
-              type="text"
-              value={data.address.city}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleAddressChange('city', e.target.value)
-              }
-              placeholder="e.g., Dubai, Abu Dhabi, Sharjah"
-              width="100%"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
-              fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
-            />
+        {/* Emirates Selection */}
+        <Box>
+          <Box
+            as="label"
+            display="block"
+            fontSize="0.875rem"
+            fontWeight="500"
+            color="#374151"
+            marginBottom="0.5rem"
+          >
+            Emirate/City *
+
+            {`Selected Emirate ${selectedEmirate}`}
           </Box>
+          {selectionPattern === 'inline' ? (
+            <SelectionPicker
+              data={UAE_EMIRATES}
+              idAccessor={(emirate) => emirate.id}
+              value={selectedEmirate}
+              onChange={(value) => {
+                const emirate = UAE_EMIRATES.find(e => e.id === value)
+                if (emirate) {
+                  setSelectedEmirate(emirate.id)
+                  handleAddressChange('city', emirate.name)
+                }
+              }}
+              isMultiSelect={false}
+              renderItem={(emirate, isSelected) => (
+                <Box display="flex" flexDirection="column" gap="0.25rem" width="100%">
+                  <Box fontSize="0.875rem" fontWeight={isSelected ? '600' : '500'} color="#1a202c">
+                    {emirate.name} {`isSelected ${isSelected}`}
+                  </Box>
+                  <Box fontSize="0.75rem" color="#6b7280">
+                    {emirate.arabicName}
+                  </Box>
+                </Box>
+              )}
+              containerStyles={{
+                display: 'grid',
+                gridTemplateColumns: getResponsiveColumns(UAE_EMIRATES.length, 'inline'),
+                gap: '0.75rem'
+              }}
+              selectedItemStyles={{
+                borderColor: '#3182ce',
+                backgroundColor: '#eff6ff'
+              }}
+            />
+          ) : (
+            <Box>
+              <Box
+                as="div"
+                onClick={() => drawerManager.openDrawer('emirate-selection')}
+                width="100%"
+                padding="0.75rem"
+                border="1px solid #d1d5db"
+                borderRadius="0.375rem"
+                backgroundColor="white"
+                cursor="pointer"
+                fontSize="1rem"
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                whileHover={{ borderColor: '#3182ce' }}
+              >
+                <Box color={selectedEmirate ? '#374151' : '#9ca3af'}>
+                  {selectedEmirate 
+                    ? UAE_EMIRATES.find(e => e.id === selectedEmirate)?.name 
+                    : 'Select Emirate/City'
+                  }
+                </Box>
+                <Box color="#6b7280">
+                  <FaMapMarkerAlt />
+                </Box>
+              </Box>
+              
+              <SlidingDrawer
+                isOpen={drawerManager.isDrawerOpen('emirate-selection')}
+                onClose={() => drawerManager.closeDrawer('emirate-selection')}
+                side="bottom"
+                height="auto"
+                zIndex={drawerManager.getDrawerZIndex('emirate-selection')}
+                showCloseButton
+              >
+                <Box padding="1.5rem">
+                  <Box fontSize="1.25rem" fontWeight="600" marginBottom="1.5rem" textAlign="center">
+                    Select Emirate/City
+                  </Box>
+                  <SelectionPicker
+                    data={UAE_EMIRATES}
+                    idAccessor={(emirate) => emirate.id}
+                    value={selectedEmirate}
+                    onChange={(value) => {
+                      const emirate = UAE_EMIRATES.find(e => e.id === value)
+                      if (emirate) {
+                        setSelectedEmirate(emirate.id)
+                        handleAddressChange('city', emirate.name)
+                        drawerManager.closeDrawer('emirate-selection')
+                      }
+                    }}
+                    isMultiSelect={false}
+                    renderItem={(emirate, isSelected) => (
+                      <Box display="flex" flexDirection="column" gap="0.25rem" width="100%">
+                        <Box fontSize="1rem" fontWeight={isSelected ? '600' : '500'} color="#1a202c">
+                          {emirate.name}
+                        </Box>
+                        <Box fontSize="0.875rem" color="#6b7280">
+                          {emirate.arabicName}
+                        </Box>
+                      </Box>
+                    )}
+                    containerStyles={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '1rem'
+                    }}
+                    selectedItemStyles={{
+                      borderColor: '#3182ce',
+                      backgroundColor: '#eff6ff'
+                    }}
+                  />
+                </Box>
+              </SlidingDrawer>
+            </Box>
+          )}
+        </Box>
+
+        {/* ZIP Code Field */}
+        <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr' }} gap="1rem">
 
           <Box>
             <Box
@@ -174,6 +283,34 @@ const LocationStep: React.FC<LocationStepProps> = ({
                 handleAddressChange('zipCode', parseInt(e.target.value, 10) || 0)
               }
               placeholder="e.g., 12345"
+              width="100%"
+              padding="0.75rem"
+              border="1px solid #d1d5db"
+              borderRadius="0.375rem"
+              fontSize="1rem"
+              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+            />
+          </Box>
+          
+          <Box>
+            <Box
+              as="label"
+              display="block"
+              fontSize="0.875rem"
+              fontWeight="500"
+              color="#374151"
+              marginBottom="0.5rem"
+            >
+              Area/District (Optional)
+            </Box>
+            <Box
+              as="input"
+              type="text"
+              value={data.address.apartmentOrFloorNumber || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                handleAddressChange('apartmentOrFloorNumber', e.target.value)
+              }
+              placeholder="e.g., Marina, Downtown, JBR"
               width="100%"
               padding="0.75rem"
               border="1px solid #d1d5db"
@@ -213,33 +350,6 @@ const LocationStep: React.FC<LocationStepProps> = ({
           </Box>
         </Box>
 
-        <Box>
-          <Box
-            as="label"
-            display="block"
-            fontSize="0.875rem"
-            fontWeight="500"
-            color="#374151"
-            marginBottom="0.5rem"
-          >
-            Apartment/Floor Number (Optional)
-          </Box>
-          <Box
-            as="input"
-            type="text"
-            value={data.address.apartmentOrFloorNumber || ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              handleAddressChange('apartmentOrFloorNumber', e.target.value)
-            }
-            placeholder="e.g., Apt 4B, Floor 12"
-            width="100%"
-            padding="0.75rem"
-            border="1px solid #d1d5db"
-            borderRadius="0.375rem"
-            fontSize="1rem"
-            whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
-          />
-        </Box>
 
         {/* Location Search */}
         <Box>
@@ -287,7 +397,11 @@ const LocationStep: React.FC<LocationStepProps> = ({
               cursor={searchQuery.trim() ? 'pointer' : 'not-allowed'}
               opacity={searchQuery.trim() ? 1 : 0.5}
               whileHover={searchQuery.trim() ? { backgroundColor: '#2c5aa0' } : {}}
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
             >
+              <FaSearch />
               {isSearching ? 'Searching...' : 'Search'}
             </Box>
           </Box>

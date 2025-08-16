@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from './Box'
+import {IoClose} from "react-icons/io5";
 
 // Global portal manager to track multiple drawers using the same portal
 class PortalManager {
@@ -253,6 +254,10 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
       position: 'fixed',
       width: drawerWidth,
       height: drawerHeight,
+      display:'flex',
+      flexDirection:'column',
+      boxSizing:'border-box',
+      maxHeight:'100vh',
       backgroundColor,
       zIndex: zIndex + 1,
       transition: `transform ${animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
@@ -401,6 +406,8 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
     left: 0,
     right: 0,
     bottom: 0,
+    display:'flex',
+    flexDirection:'column',
     backgroundColor: backdropColor,
     zIndex: zIndex - 1, // Backdrop should be behind the drawer
     opacity: isAnimating ? 1 : 0,
@@ -439,7 +446,7 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
       onClick={onClose}
       aria-label="Close drawer"
     >
-      ×
+      <IoClose />
     </Box>
   )
   

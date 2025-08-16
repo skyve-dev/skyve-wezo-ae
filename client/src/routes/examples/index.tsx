@@ -9,7 +9,9 @@ import {
   FaChartBar, 
   FaBook, 
   FaArrowUp,
-  FaSearch 
+  FaSearch,
+  FaCalendarAlt,
+  FaClock
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
@@ -43,6 +45,26 @@ function ExamplesIndex() {
       features: ['Four Slide Directions', 'React Portal', 'Mobile-Friendly', 'Z-Index Management'],
       complexity: 'Advanced',
       path: '/examples/sliding-drawer'
+    },
+    {
+      id: 'date-picker',
+      title: 'DatePicker',
+      description: 'Calendar-based date selection with validation and constraints',
+      icon: <FaCalendarAlt />,
+      color: '#8b5cf6',
+      features: ['Calendar Interface', 'Date Validation', 'Min/Max Constraints', 'Mobile Drawer'],
+      complexity: 'Intermediate',
+      path: '/examples/date-picker'
+    },
+    {
+      id: 'time-picker',
+      title: 'TimePicker',
+      description: 'Intuitive time selection with 12/24-hour formats',
+      icon: <FaClock />,
+      color: '#ef4444',
+      features: ['12/24 Hour Format', 'Custom Intervals', 'Real-time Preview', 'Touch Optimized'],
+      complexity: 'Intermediate',
+      path: '/examples/time-picker'
     },
     {
       id: 'box',
@@ -150,7 +172,7 @@ function ExamplesIndex() {
             boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
           >
             <Box fontSize="2rem" fontWeight="bold" color="#059669" marginBottom="0.5rem">
-              15+
+              20+
             </Box>
             <Box fontSize="0.875rem" color="#6b7280">
               Use Cases
