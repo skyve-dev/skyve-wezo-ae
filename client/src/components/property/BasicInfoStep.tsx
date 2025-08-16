@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import DatePicker from '../DatePicker'
 import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '../../constants/propertyEnums'
 
 interface BasicInfoStepProps {
@@ -236,30 +237,13 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
 
         {/* First Available Date */}
         <Box>
-          <Box
-            as="label"
-            display="block"
-            fontSize="0.875rem"
-            fontWeight="500"
-            color="#374151"
-            marginBottom="0.5rem"
-          >
-            First Available Date for Guests *
-          </Box>
-          <Box
-            as="input"
-            type="date"
-            value={data.firstDateGuestCanCheckIn ? data.firstDateGuestCanCheckIn.split('T')[0] : ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              onChange({ firstDateGuestCanCheckIn: e.target.value })
-            }
-            min={new Date().toISOString().split('T')[0]}
-            width="100%"
-            padding="0.75rem"
-            border="1px solid #d1d5db"
-            borderRadius="0.375rem"
-            fontSize="1rem"
-            whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+          <DatePicker
+            label="First Available Date for Guests"
+            required
+            value={data.firstDateGuestCanCheckIn}
+            onChange={(value) => onChange({ firstDateGuestCanCheckIn: value })}
+            minDate={new Date().toISOString()}
+            placeholder="Select the first available date"
           />
           <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
             Select the earliest date guests can check in to your property

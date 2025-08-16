@@ -239,12 +239,12 @@ const TimePicker: React.FC<TimePickerProps> = ({
   }
 
   // Get display hour for 12-hour format
-  const getDisplayHour = () => {
+  const getDisplayHour = useCallback(() => {
     if (use12HourFormat) {
       return selectedHour === 0 ? 12 : selectedHour > 12 ? selectedHour - 12 : selectedHour
     }
     return selectedHour
-  }
+  }, [use12HourFormat, selectedHour])
 
   const hourOptions = generateHourOptions()
   const minuteOptions = generateMinuteOptions()

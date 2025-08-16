@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import TimePicker from '../TimePicker'
 import { PetPolicy, PetPolicyLabels } from '../../constants/propertyEnums'
 
 interface RulesStepProps {
@@ -28,6 +29,9 @@ const RulesStep: React.FC<RulesStepProps> = ({
   }
 
   const handleCheckInOutChange = (field: string, value: string) => {
+    // Extract time from ISO string if needed
+    const timeValue = value.includes('T') ? new Date(value).toTimeString().slice(0, 5) : value
+    
     onChange({
       checkInCheckout: {
         ...data.checkInCheckout,
@@ -35,9 +39,18 @@ const RulesStep: React.FC<RulesStepProps> = ({
         checkInUntil: data.checkInCheckout?.checkInUntil || '20:00',
         checkOutFrom: data.checkInCheckout?.checkOutFrom || '08:00',
         checkOutUntil: data.checkInCheckout?.checkOutUntil || '11:00',
-        [field]: value
+        [field]: timeValue
       }
     })
+  }
+  
+  // Helper to convert time string to ISO date for TimePicker
+  const timeToISO = (timeStr: string) => {
+    if (!timeStr) return undefined
+    const today = new Date()
+    const [hours, minutes] = timeStr.split(':').map(Number)
+    today.setHours(hours, minutes, 0, 0)
+    return today.toISOString()
   }
 
   return (
@@ -156,41 +169,21 @@ const RulesStep: React.FC<RulesStepProps> = ({
               </Box>
               <Box display="flex" alignItems="center" gap="0.5rem">
                 <Box flex="1">
-                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
-                    From
-                  </Box>
-                  <Box
-                    as="input"
-                    type="time"
-                    value={data.checkInCheckout?.checkInFrom || '15:00'}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleCheckInOutChange('checkInFrom', e.target.value)
-                    }
-                    width="100%"
-                    padding="0.5rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="0.875rem"
-                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  <TimePicker
+                    label="From"
+                    value={timeToISO(data.checkInCheckout?.checkInFrom || '15:00')}
+                    onChange={(value) => handleCheckInOutChange('checkInFrom', value)}
+                    placeholder="Select time"
+                    interval={30}
                   />
                 </Box>
                 <Box flex="1">
-                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
-                    Until
-                  </Box>
-                  <Box
-                    as="input"
-                    type="time"
-                    value={data.checkInCheckout?.checkInUntil || '20:00'}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleCheckInOutChange('checkInUntil', e.target.value)
-                    }
-                    width="100%"
-                    padding="0.5rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="0.875rem"
-                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  <TimePicker
+                    label="Until"
+                    value={timeToISO(data.checkInCheckout?.checkInUntil || '20:00')}
+                    onChange={(value) => handleCheckInOutChange('checkInUntil', value)}
+                    placeholder="Select time"
+                    interval={30}
                   />
                 </Box>
               </Box>
@@ -202,41 +195,21 @@ const RulesStep: React.FC<RulesStepProps> = ({
               </Box>
               <Box display="flex" alignItems="center" gap="0.5rem">
                 <Box flex="1">
-                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
-                    From
-                  </Box>
-                  <Box
-                    as="input"
-                    type="time"
-                    value={data.checkInCheckout?.checkOutFrom || '08:00'}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleCheckInOutChange('checkOutFrom', e.target.value)
-                    }
-                    width="100%"
-                    padding="0.5rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="0.875rem"
-                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  <TimePicker
+                    label="From"
+                    value={timeToISO(data.checkInCheckout?.checkOutFrom || '08:00')}
+                    onChange={(value) => handleCheckInOutChange('checkOutFrom', value)}
+                    placeholder="Select time"
+                    interval={30}
                   />
                 </Box>
                 <Box flex="1">
-                  <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
-                    Until
-                  </Box>
-                  <Box
-                    as="input"
-                    type="time"
-                    value={data.checkInCheckout?.checkOutUntil || '11:00'}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleCheckInOutChange('checkOutUntil', e.target.value)
-                    }
-                    width="100%"
-                    padding="0.5rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="0.875rem"
-                    whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                  <TimePicker
+                    label="Until"
+                    value={timeToISO(data.checkInCheckout?.checkOutUntil || '11:00')}
+                    onChange={(value) => handleCheckInOutChange('checkOutUntil', value)}
+                    placeholder="Select time"
+                    interval={30}
                   />
                 </Box>
               </Box>
