@@ -59,6 +59,8 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   loading
 }) => {
   const [currentRoomIndex, setCurrentRoomIndex] = useState<number | null>(null)
+  const [currentBedIndex, setCurrentBedIndex] = useState<number | null>(null)
+  const [bedSelectionType, setBedSelectionType] = useState<'type' | 'number' | null>(null)
   const drawerManager = useDrawerManager()
   const handleLayoutChange = (field: string, value: any) => {
     onChange({
@@ -101,6 +103,31 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   const openRoomTypeEditor = (roomIndex: number) => {
     setCurrentRoomIndex(roomIndex)
     drawerManager.openDrawer('room-type-selection')
+  }
+  
+  const openBedTypeSelection = (roomIndex: number, bedIndex: number) => {
+    setCurrentRoomIndex(roomIndex)
+    setCurrentBedIndex(bedIndex)
+    setBedSelectionType('type')
+    drawerManager.openDrawer('bed-selection')
+  }
+  
+  const openBedNumberSelection = (roomIndex: number, bedIndex: number) => {
+    setCurrentRoomIndex(roomIndex)
+    setCurrentBedIndex(bedIndex)
+    setBedSelectionType('number')
+    drawerManager.openDrawer('bed-selection')
+  }
+  
+  const handleBedSelection = (value: BedType | number) => {
+    if (currentRoomIndex !== null && currentBedIndex !== null && bedSelectionType) {
+      const field = bedSelectionType === 'type' ? 'typeOfBed' : 'numberOfBed'
+      handleBedChange(currentRoomIndex, currentBedIndex, field as keyof Bed, value)
+      drawerManager.closeDrawer('bed-selection')
+      setCurrentRoomIndex(null)
+      setCurrentBedIndex(null)
+      setBedSelectionType(null)
+    }
   }
 
   const removeRoom = (index: number) => {
@@ -486,90 +513,86 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   border="2px solid #e2e8f0"
                   borderRadius="0.5rem"
                 >
-                  <Box display="flex" flexDirection="column" gap="1rem">
+                  <Box display="flex" flexDirection="row" gap="1rem">
                     {/* Bed Type Selection */}
-                    <Box>
+                    <Box style={{flexGrow:1}}>
                       <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                        Bed Type
+                        Bed Type *
                       </Box>
-                      <SelectionPicker
-                        data={bedTypeOptions}
-                        containerStyles={{
-                          display:'flex',
-                          flexDirection:'row',
-                          flexWrap:'wrap'
+                      <Box
+                        as="button"
+                        onClick={() => openBedTypeSelection(roomIndex, bedIndex)}
+                        width="100%"
+                        padding="0.75rem"
+                        border="2px solid #e5e7eb"
+                        borderRadius="0.375rem"
+                        fontSize="0.875rem"
+                        backgroundColor={bed.typeOfBed ? "white" : "#f9fafb"}
+                        cursor="pointer"
+                        textAlign="left"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        whileHover={{ 
+                          borderColor: '#3182ce',
+                          backgroundColor: '#f8fafc'
                         }}
-                        itemStyles={{
-                          padding:0,
-                          border:'none'
-                        }}
-                        flexDirection={'row'}
-                        idAccessor={(item) => item.id}
-                        value={bed.typeOfBed}
-                        onChange={(value) => handleBedChange(roomIndex, bedIndex, 'typeOfBed', value)}
-                        renderItem={(item, isSelected) => (
-                          <Box
-                            padding="0.75rem"
-                            borderRadius="0.375rem"
-                            backgroundColor={isSelected ? '#3182ce' : 'white'}
-                            color={isSelected ? 'white' : '#374151'}
-                            fontWeight={isSelected ? '500' : '400'}
-                            border={isSelected ? 'none' : '1px solid #e5e7eb'}
-                            cursor="pointer"
-                            whileHover={{ 
-                              backgroundColor: isSelected ? '#2c5aa0' : '#f1f5f9',
-                              transform: 'translateY(-1px)'
-                            }}
-                          >
-                            {item.label}
+                      >
+                        <Box display="flex" alignItems="center" gap="0.5rem">
+                          <FaBed color={bed.typeOfBed ? "#3182ce" : "#9ca3af"} />
+                          <Box color={bed.typeOfBed ? "#374151" : "#9ca3af"}>
+                            {bed.typeOfBed ? BedTypeLabels[bed.typeOfBed as BedType] : 'Select bed type'}
                           </Box>
-                        )}
-                        gap="0.5rem"
-                        marginBottom="0.5rem"
-                      />
+                        </Box>
+                        <Box color="#6b7280" fontSize="0.75rem">
+                          {bed.typeOfBed ? 'Change' : 'Select'}
+                        </Box>
+                      </Box>
                     </Box>
 
                     {/* Number of Beds Selection */}
                     <Box>
                       <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                        Number of Beds
+                        Number of Beds *
                       </Box>
                       <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <SelectionPicker
-                          data={bedNumberOptions}
-                          containerStyles={{
-                            display:'flex',
-                            flexDirection:'row'
-                          }}
-                          itemStyles={{
-                            padding:0,
-                            border:'none'
-                          }}
-                          idAccessor={(item) => item.id}
-                          value={bed.numberOfBed}
-                          onChange={(value) => handleBedChange(roomIndex, bedIndex, 'numberOfBed', value)}
-                          renderItem={(item, isSelected) => (
-                            <Box
-                              padding="0.75rem"
-                              borderRadius="0.375rem"
-                              backgroundColor={isSelected ? '#10b981' : 'white'}
-                              color={isSelected ? 'white' : '#374151'}
-                              fontWeight={isSelected ? '600' : '400'}
-                              border={isSelected ? 'none' : '1px solid #e5e7eb'}
-                              cursor="pointer"
-                              textAlign="center"
-                              whileHover={{ 
-                                backgroundColor: isSelected ? '#059669' : '#f1f5f9',
-                                transform: 'translateY(-1px)'
-                              }}
-                            >
-                              {item.label}
-                            </Box>
-                          )}
-                          gap="0.5rem"
+                        <Box
+                          as="button"
+                          onClick={() => openBedNumberSelection(roomIndex, bedIndex)}
                           flex="1"
+                          gap={'0.5rem'}
+                          padding="0.75rem"
+                          border="2px solid #e5e7eb"
+                          borderRadius="0.375rem"
+                          fontSize="0.875rem"
+                          backgroundColor={bed.numberOfBed ? "white" : "#f9fafb"}
+                          cursor="pointer"
+                          textAlign="left"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="space-between"
                           marginRight="1rem"
-                        />
+                          whileHover={{ 
+                            borderColor: '#3182ce',
+                            backgroundColor: '#f8fafc'
+                          }}
+                        >
+                          <Box display="flex" alignItems="center" gap="0.5rem">
+                            <Box 
+                              fontSize="1rem" 
+                              fontWeight="600" 
+                              color={bed.numberOfBed ? "#10b981" : "#9ca3af"}
+                            >
+                              {bed.numberOfBed || '#'}
+                            </Box>
+                            {/*<Box color={bed.numberOfBed ? "#374151" : "#9ca3af"}>*/}
+                            {/*  {bed.numberOfBed ? `${bed.numberOfBed === 4 ? '4+' : bed.numberOfBed} bed${bed.numberOfBed > 1 ? 's' : ''}` : 'Select quantity'}*/}
+                            {/*</Box>*/}
+                          </Box>
+                          <Box color="#6b7280" fontSize="0.75rem">
+                            {bed.numberOfBed ? 'Change' : 'Select'}
+                          </Box>
+                        </Box>
                         
                         <Box
                           as="button"
@@ -641,6 +664,85 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   backgroundColor: '#eff6ff'
                 }}
               />
+            </Box>
+          </SlidingDrawer>
+          
+          {/* Bed Selection Drawer */}
+          <SlidingDrawer
+            isOpen={drawerManager.isDrawerOpen('bed-selection')}
+            onClose={() => {
+              drawerManager.closeDrawer('bed-selection')
+              setCurrentRoomIndex(null)
+              setCurrentBedIndex(null)
+              setBedSelectionType(null)
+            }}
+            side="bottom"
+            height="auto"
+            zIndex={drawerManager.getDrawerZIndex('bed-selection')}
+            showCloseButton
+          >
+            <Box padding="1.5rem" display="flex" flexDirection="column">
+              <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
+                {bedSelectionType === 'type' ? 'Select Bed Type' : 'Select Number of Beds'}
+              </Box>
+              <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+                {bedSelectionType === 'type' 
+                  ? 'Choose the type of bed for this room'
+                  : 'How many beds of this type?'
+                }
+              </Box>
+              
+              {bedSelectionType === 'type' ? (
+                <SelectionPicker
+                  data={bedTypeOptions}
+                  idAccessor={(item) => item.id}
+                  value=""
+                  onChange={(value) => handleBedSelection(value as BedType)}
+                  isMultiSelect={false}
+                  renderItem={(item) => (
+                    <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+                      <FaBed color="#3182ce" size="1.25rem" />
+                      <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                        {item.label}
+                      </Box>
+                    </Box>
+                  )}
+                  containerStyles={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '0.75rem'
+                  }}
+                  selectedItemStyles={{
+                    borderColor: '#3182ce',
+                    backgroundColor: '#eff6ff'
+                  }}
+                />
+              ) : (
+                <SelectionPicker
+                  data={bedNumberOptions}
+                  idAccessor={(item) => item.id}
+                  value=""
+                  onChange={(value) => handleBedSelection(value as number)}
+                  isMultiSelect={false}
+                  renderItem={(item) => (
+                    <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+                      <FaBed color="#10b981" size="1.25rem" />
+                      <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                        {item.label}
+                      </Box>
+                    </Box>
+                  )}
+                  containerStyles={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                    gap: '0.75rem'
+                  }}
+                  selectedItemStyles={{
+                    borderColor: '#10b981',
+                    backgroundColor: '#ecfdf5'
+                  }}
+                />
+              )}
             </Box>
           </SlidingDrawer>
         </Box>

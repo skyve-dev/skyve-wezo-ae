@@ -157,8 +157,6 @@ const LocationStep: React.FC<LocationStepProps> = ({
           >
             <FaCity color="#3182ce" />
             Emirate/City *
-
-            {`Selected Emirate ${selectedEmirate}`}
           </Box>
           {selectionPattern === 'inline' ? (
             <SelectionPicker
@@ -169,14 +167,14 @@ const LocationStep: React.FC<LocationStepProps> = ({
                 const emirate = UAE_EMIRATES.find(e => e.id === value)
                 if (emirate) {
                   setSelectedEmirate(emirate.id)
-                  handleAddressChange('city', emirate.name)
+                  handleAddressChange('city', emirate.id)
                 }
               }}
               isMultiSelect={false}
               renderItem={(emirate, isSelected) => (
                 <Box display="flex" flexDirection="column" gap="0.25rem" width="100%">
                   <Box fontSize="0.875rem" fontWeight={isSelected ? '600' : '500'} color="#1a202c">
-                    {emirate.name} {`isSelected ${isSelected}`}
+                    {emirate.name}
                   </Box>
                   <Box fontSize="0.75rem" color="#6b7280">
                     {emirate.arabicName}
