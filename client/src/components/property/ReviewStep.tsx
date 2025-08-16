@@ -12,22 +12,24 @@ interface ReviewStepProps {
   loading: boolean
   isFirstStep: boolean
   isLastStep: boolean
+  isEditMode?: boolean
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({
   data,
   onPrevious,
   onSubmit,
-  loading
+  loading,
+  isEditMode
 }) => {
   return (
     <Box padding="2rem">
       <Box marginBottom="2rem">
         <Box fontSize="1.5rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
-          Review your property listing
+          Review your property {isEditMode ? 'changes' : 'listing'}
         </Box>
         <Box color="#718096">
-          Please review all the information before publishing your property
+          Please review all the information before {isEditMode ? 'updating' : 'publishing'} your property
         </Box>
       </Box>
 
@@ -291,7 +293,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             cursor="pointer"
             whileHover={{ backgroundColor: '#059669' }}
           >
-            {loading ? 'Creating Property...' : 'Publish Property'}
+            {loading ? (isEditMode ? 'Updating Property...' : 'Creating Property...') : (isEditMode ? 'Update Property' : 'Publish Property')}
           </Box>
         </Box>
       </Box>

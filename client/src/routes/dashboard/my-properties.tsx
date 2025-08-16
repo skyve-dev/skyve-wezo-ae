@@ -311,7 +311,7 @@ function MyPropertiesPage() {
                       </Box>
                       <Box
                         as="button"
-                        onClick={() => navigate({ to: `/property/${property.propertyId}/edit` })}
+                        onClick={() => navigate({ to: `/edit-property/${property.propertyId}` })}
                         flex="1"
                         padding="0.5rem"
                         backgroundColor="transparent"

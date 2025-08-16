@@ -133,6 +133,7 @@ export interface WizardFormData extends Property {
   currentStep: number
   isComplete: boolean
   lastSaved?: string
+  mode?: 'create' | 'edit'
   
   // Additional location fields for mobile
   country?: string

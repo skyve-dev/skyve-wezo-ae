@@ -34,7 +34,7 @@ function PropertyDetailsPage() {
   }, [])
 
   const handleEdit = () => {
-    navigate({ to: `/property/${propertyId}/edit` })
+    navigate({ to: `/edit-property/${propertyId}` })
   }
 
   const handleBack = () => {

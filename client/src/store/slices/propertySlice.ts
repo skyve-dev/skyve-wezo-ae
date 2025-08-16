@@ -192,9 +192,14 @@ export const createProperty = createAsyncThunk(
 
 export const updateProperty = createAsyncThunk(
   'property/updateProperty',
-  async ({ propertyId, data }: { propertyId: string; data: Partial<Property> }, { rejectWithValue }) => {
+  async ({ propertyId, data }: { propertyId: string; data: Partial<Property> | WizardFormData }, { rejectWithValue }) => {
     try {
-      const response = await api.put<{ property: any }>(`/api/properties/${propertyId}`, data)
+      // Check if data is WizardFormData by checking for currentStep property
+      const dataToSend = 'currentStep' in data 
+        ? transformPropertyDataForServer(data as WizardFormData)
+        : data
+      
+      const response = await api.put<{ property: any }>(`/api/properties/${propertyId}`, dataToSend)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update property')
@@ -290,6 +295,55 @@ const propertySlice = createSlice({
       
       state.wizardData = defaultWizardData
       saveWizardDataToStorage(defaultWizardData)
+    },
+    initializeWizardForEdit: (state, action: PayloadAction<{ property: Property, mode: 'edit' }>) => {
+      const { property } = action.payload
+      
+      // Convert Property to WizardFormData format
+      const wizardData: WizardFormData = {
+        propertyId: property.propertyId,
+        name: property.name || '',
+        address: property.address || {
+          countryOrRegion: 'UAE',
+          city: '',
+          zipCode: 0
+        },
+        // Layout fields (flattened)
+        maximumGuest: property.maximumGuest || 1,
+        bathrooms: property.bathrooms || 1,
+        allowChildren: property.allowChildren || false,
+        offerCribs: property.offerCribs || false,
+        propertySizeSqMtr: property.propertySizeSqMtr,
+        rooms: property.rooms,
+        // Services fields (flattened)
+        serveBreakfast: property.serveBreakfast || false,
+        parking: property.parking || ParkingType.No,
+        languages: property.languages || [],
+        // Rules fields (flattened)
+        smokingAllowed: property.smokingAllowed || false,
+        partiesOrEventsAllowed: property.partiesOrEventsAllowed || false,
+        petsAllowed: property.petsAllowed || PetPolicy.No,
+        checkInCheckout: property.checkInCheckout,
+        // Other fields
+        amenities: property.amenities || [],
+        photos: property.photos || [],
+        bookingType: property.bookingType || BookingType.NeedToRequestBook,
+        paymentType: property.paymentType || PaymentType.Online,
+        pricing: property.pricing || {
+          currency: Currency.AED,
+          ratePerNight: 0
+        },
+        cancellation: property.cancellation,
+        aboutTheProperty: property.aboutTheProperty,
+        aboutTheNeighborhood: property.aboutTheNeighborhood,
+        firstDateGuestCanCheckIn: property.firstDateGuestCanCheckIn,
+        currentStep: 1,
+        isComplete: true,
+        mode: 'edit'
+      }
+      
+      state.wizardData = wizardData
+      saveWizardDataToStorage(wizardData)
     },
     updateWizardData: (state, action: PayloadAction<Partial<WizardFormData>>) => {
       if (state.wizardData) {
@@ -440,6 +494,7 @@ export const {
   clearError,
   setCurrentProperty,
   initializeWizard,
+  initializeWizardForEdit,
   updateWizardData,
   setWizardStep,
   clearWizardData,

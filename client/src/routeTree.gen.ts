@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property/$propertyId'
 import { Route as ExampleBoxRouteImport } from './routes/example/Box'
+import { Route as EditPropertyPropertyIdRouteImport } from './routes/edit-property.$propertyId'
 import { Route as DashboardMyPropertiesRouteImport } from './routes/dashboard/my-properties'
 import { Route as PropertyPropertyIdEditRouteImport } from './routes/property/$propertyId/edit'
 
@@ -60,6 +61,11 @@ const ExampleBoxRoute = ExampleBoxRouteImport.update({
   path: '/example/Box',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditPropertyPropertyIdRoute = EditPropertyPropertyIdRouteImport.update({
+  id: '/edit-property/$propertyId',
+  path: '/edit-property/$propertyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardMyPropertiesRoute = DashboardMyPropertiesRouteImport.update({
   id: '/my-properties',
   path: '/my-properties',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
+  '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/example/Box': typeof ExampleBoxRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
+  '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/example/Box': typeof ExampleBoxRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard': typeof DashboardIndexRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
+  '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/example/Box': typeof ExampleBoxRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
+    | '/edit-property/$propertyId'
     | '/example/Box'
     | '/property/$propertyId'
     | '/dashboard/'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
+    | '/edit-property/$propertyId'
     | '/example/Box'
     | '/property/$propertyId'
     | '/dashboard'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
+    | '/edit-property/$propertyId'
     | '/example/Box'
     | '/property/$propertyId'
     | '/dashboard/'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   RegisterPropertyRoute: typeof RegisterPropertyRoute
+  EditPropertyPropertyIdRoute: typeof EditPropertyPropertyIdRoute
   ExampleBoxRoute: typeof ExampleBoxRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRouteWithChildren
 }
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExampleBoxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/edit-property/$propertyId': {
+      id: '/edit-property/$propertyId'
+      path: '/edit-property/$propertyId'
+      fullPath: '/edit-property/$propertyId'
+      preLoaderRoute: typeof EditPropertyPropertyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/my-properties': {
       id: '/dashboard/my-properties'
       path: '/my-properties'
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   RegisterPropertyRoute: RegisterPropertyRoute,
+  EditPropertyPropertyIdRoute: EditPropertyPropertyIdRoute,
   ExampleBoxRoute: ExampleBoxRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRouteWithChildren,
 }

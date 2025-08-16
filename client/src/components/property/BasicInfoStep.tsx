@@ -12,6 +12,7 @@ interface BasicInfoStepProps {
   loading: boolean
   isFirstStep: boolean
   isLastStep: boolean
+  isEditMode?: boolean
 }
 
 const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
