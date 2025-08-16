@@ -221,7 +221,6 @@ export const Box: BoxComponent = React.forwardRef<any, BoxProps<any>>(
     if (isInView) finalClassName += ' in-view';
     
     const Element = as as keyof JSX.IntrinsicElements;
-    
     return React.createElement(
       Element,
       {

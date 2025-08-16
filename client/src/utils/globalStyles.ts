@@ -201,6 +201,7 @@ export const applyGlobalStyles = (): void => {
       height: 100%;
       width: 100%;
       line-height: 1;
+      overflow : auto;
     }
     
     /* ===== MOBILE OPTIMIZATIONS ===== */

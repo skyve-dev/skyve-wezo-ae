@@ -15,8 +15,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExamplesRouteImport } from './routes/examples'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ExamplesIndexRouteImport } from './routes/examples/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property/$propertyId'
+import { Route as ExamplesTestRouteImport } from './routes/examples/test'
 import { Route as ExamplesSlidingDrawerRouteImport } from './routes/examples/sliding-drawer'
 import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/selection-picker'
 import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
@@ -54,6 +56,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExamplesIndexRoute = ExamplesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ExamplesRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -63,6 +70,11 @@ const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
   id: '/property/$propertyId',
   path: '/property/$propertyId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ExamplesTestRoute = ExamplesTestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => ExamplesRoute,
 } as any)
 const ExamplesSlidingDrawerRoute = ExamplesSlidingDrawerRouteImport.update({
   id: '/sliding-drawer',
@@ -107,13 +119,14 @@ export interface FileRoutesByFullPath {
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
+  '/examples/test': typeof ExamplesTestRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
+  '/examples/': typeof ExamplesIndexRoute
   '/property/$propertyId/edit': typeof PropertyPropertyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/examples': typeof ExamplesRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
@@ -122,8 +135,10 @@ export interface FileRoutesByTo {
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
+  '/examples/test': typeof ExamplesTestRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard': typeof DashboardIndexRoute
+  '/examples': typeof ExamplesIndexRoute
   '/property/$propertyId/edit': typeof PropertyPropertyIdEditRoute
 }
 export interface FileRoutesById {
@@ -139,8 +154,10 @@ export interface FileRoutesById {
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
+  '/examples/test': typeof ExamplesTestRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
+  '/examples/': typeof ExamplesIndexRoute
   '/property/$propertyId/edit': typeof PropertyPropertyIdEditRoute
 }
 export interface FileRouteTypes {
@@ -157,13 +174,14 @@ export interface FileRouteTypes {
     | '/examples/box'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
+    | '/examples/test'
     | '/property/$propertyId'
     | '/dashboard/'
+    | '/examples/'
     | '/property/$propertyId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/examples'
     | '/login'
     | '/register'
     | '/register-property'
@@ -172,8 +190,10 @@ export interface FileRouteTypes {
     | '/examples/box'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
+    | '/examples/test'
     | '/property/$propertyId'
     | '/dashboard'
+    | '/examples'
     | '/property/$propertyId/edit'
   id:
     | '__root__'
@@ -188,8 +208,10 @@ export interface FileRouteTypes {
     | '/examples/box'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
+    | '/examples/test'
     | '/property/$propertyId'
     | '/dashboard/'
+    | '/examples/'
     | '/property/$propertyId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -248,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/examples/': {
+      id: '/examples/'
+      path: '/'
+      fullPath: '/examples/'
+      preLoaderRoute: typeof ExamplesIndexRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
@@ -261,6 +290,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/property/$propertyId'
       preLoaderRoute: typeof PropertyPropertyIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/examples/test': {
+      id: '/examples/test'
+      path: '/test'
+      fullPath: '/examples/test'
+      preLoaderRoute: typeof ExamplesTestRouteImport
+      parentRoute: typeof ExamplesRoute
     }
     '/examples/sliding-drawer': {
       id: '/examples/sliding-drawer'
@@ -325,12 +361,16 @@ interface ExamplesRouteChildren {
   ExamplesBoxRoute: typeof ExamplesBoxRoute
   ExamplesSelectionPickerRoute: typeof ExamplesSelectionPickerRoute
   ExamplesSlidingDrawerRoute: typeof ExamplesSlidingDrawerRoute
+  ExamplesTestRoute: typeof ExamplesTestRoute
+  ExamplesIndexRoute: typeof ExamplesIndexRoute
 }
 
 const ExamplesRouteChildren: ExamplesRouteChildren = {
   ExamplesBoxRoute: ExamplesBoxRoute,
   ExamplesSelectionPickerRoute: ExamplesSelectionPickerRoute,
   ExamplesSlidingDrawerRoute: ExamplesSlidingDrawerRoute,
+  ExamplesTestRoute: ExamplesTestRoute,
+  ExamplesIndexRoute: ExamplesIndexRoute,
 }
 
 const ExamplesRouteWithChildren = ExamplesRoute._addFileChildren(

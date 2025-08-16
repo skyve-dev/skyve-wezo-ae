@@ -7,7 +7,6 @@ export const Route = createFileRoute('/examples')({
 
 function ExamplesLayout() {
   const location = useLocation()
-  const isIndexPage = location.pathname === '/examples' || location.pathname === '/examples/'
 
   const navigationItems = [
     { path: '/examples', label: 'Overview', icon: '🏠' },
@@ -15,10 +14,6 @@ function ExamplesLayout() {
     { path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: '📱' },
     { path: '/examples/box', label: 'Box Component', icon: '📦' }
   ]
-
-  if (isIndexPage) {
-    return <Outlet />
-  }
 
   return (
     <Box minHeight="100vh" backgroundColor="#f8fafc">
