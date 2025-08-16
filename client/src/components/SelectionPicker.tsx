@@ -56,12 +56,12 @@ interface SelectionPickerProps<T> extends Omit<BoxProps<'div'>, 'onChange'>{
   /**
    * Optional styles for each item Box
    */
-  itemStyles?: Record<string, any>
+  itemStyles?: CSSProperties
   
   /**
    * Optional styles for selected item Box
    */
-  selectedItemStyles?: Record<string, any>
+  selectedItemStyles?: CSSProperties
   
   /**
    * Optional label accessor for displaying item text
@@ -215,7 +215,7 @@ function SelectionPicker<T>({
   }
   
   // Merge styles for selected items
-  const getItemStyles = (itemId: string | number, item: T) => {
+  const getItemStyles = (itemId: string | number, item: T):CSSProperties => {
     const selected = isItemSelected(itemId)
     const itemDisabled = isItemDisabled && isItemDisabled(item)
     
@@ -270,7 +270,7 @@ function SelectionPicker<T>({
                   }
                 : {}
             }
-            {...getItemStyles(itemId, item)}
+            style={getItemStyles(itemId, item)}
             role={isMultiSelect ? 'checkbox' : 'radio'}
             aria-checked={selected}
             aria-disabled={disabled || itemDisabled}

@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { WizardFormData, Room, Bed } from '../../types/property'
 import { Box } from '../Box'
-import { BedType, BedTypeLabels } from '../../constants/propertyEnums'
+import { BedType, BedTypeLabels, RoomSpaceType, RoomSpaceTypeLabels } from '../../constants/propertyEnums'
 import SelectionPicker from '../SelectionPicker'
+import SlidingDrawer from '../SlidingDrawer'
+import useDrawerManager from '../../hooks/useDrawerManager'
 import { 
   FaUserFriends, 
   FaBath, 
@@ -13,7 +15,8 @@ import {
   FaPlus, 
   FaTrash,
   FaHome,
-  FaTimes
+  FaTimes,
+  FaDoorOpen
 } from 'react-icons/fa'
 
 interface LayoutStepProps {
@@ -41,6 +44,13 @@ const bedNumberOptions = [
   { id: 4, label: '4+', value: 4 }
 ]
 
+// Room type options for SelectionPicker
+const roomTypeOptions = Object.values(RoomSpaceType).map(type => ({
+  id: type,
+  label: RoomSpaceTypeLabels[type],
+  value: type
+}))
+
 const LayoutStep: React.FC<LayoutStepProps> = ({
   data,
   onChange,
@@ -48,6 +58,8 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   onPrevious,
   loading
 }) => {
+  const [currentRoomIndex, setCurrentRoomIndex] = useState<number | null>(null)
+  const drawerManager = useDrawerManager()
   const handleLayoutChange = (field: string, value: any) => {
     onChange({
       [field]: value
@@ -70,7 +82,25 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
 
   const addRoom = () => {
     const rooms = data.rooms || []
+    const newRoomIndex = rooms.length
     handleLayoutChange('rooms', [...rooms, { spaceName: '', beds: [] }])
+    
+    // Open the drawer for room type selection
+    setCurrentRoomIndex(newRoomIndex)
+    drawerManager.openDrawer('room-type-selection')
+  }
+  
+  const handleRoomTypeSelection = (roomType: RoomSpaceType) => {
+    if (currentRoomIndex !== null) {
+      handleRoomChange(currentRoomIndex, 'spaceName', RoomSpaceTypeLabels[roomType])
+      drawerManager.closeDrawer('room-type-selection')
+      setCurrentRoomIndex(null)
+    }
+  }
+  
+  const openRoomTypeEditor = (roomIndex: number) => {
+    setCurrentRoomIndex(roomIndex)
+    drawerManager.openDrawer('room-type-selection')
   }
 
   const removeRoom = (index: number) => {
@@ -92,7 +122,16 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
     handleLayoutChange('rooms', rooms)
   }
 
-  const isValid = data.maximumGuest >= 1 && data.bathrooms >= 1
+  // Updated validation to include mandatory rooms and beds
+  const hasRoomsWithBeds = () => {
+    const rooms = data.rooms || []
+    if (rooms.length === 0) return false
+    
+    // Check if at least one room has at least one bed
+    return rooms.some((room: any) => room.beds && room.beds.length > 0)
+  }
+  
+  const isValid = data.maximumGuest >= 1 && data.bathrooms >= 1 && hasRoomsWithBeds()
 
   return (
     <Box padding="2rem">
@@ -301,10 +340,15 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
         {/* Rooms and Beds */}
         <Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1.5rem">
-            <Box display="flex" alignItems="center" gap="0.5rem">
-              <FaHome color="#3182ce" />
-              <Box fontSize="1.125rem" fontWeight="600" color="#374151">
-                Rooms and Sleeping Arrangements (Optional)
+            <Box>
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <FaHome color="#3182ce" />
+                <Box fontSize="1.125rem" fontWeight="600" color="#374151">
+                  Rooms and Sleeping Arrangements *
+                </Box>
+              </Box>
+              <Box fontSize="0.875rem" color="#6b7280" marginTop="0.25rem">
+                Add at least one room with one bed to continue
               </Box>
             </Box>
             <Box
@@ -341,32 +385,44 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             >
               <Box 
                 display="flex" 
-                flexDirection="column" 
+                flexDirection="row"
+                alignItems={'flex-end'}
                 gap="1rem" 
                 marginBottom="1.5rem"
               >
                 <Box flex="1">
+                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                    Room Type *
+                  </Box>
                   <Box
-                    as="input"
-                    type="text"
-                    value={room.spaceName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleRoomChange(roomIndex, 'spaceName', e.target.value)
-                    }
-                    placeholder={`Room ${roomIndex + 1} name (e.g., Master bedroom, Living room)`}
+                    as="button"
+                    onClick={() => openRoomTypeEditor(roomIndex)}
                     width="100%"
                     padding="1rem"
                     border="2px solid #e5e7eb"
                     borderRadius="0.5rem"
                     fontSize="1rem"
-                    backgroundColor="#f9fafb"
-                    whileFocus={{ 
-                      borderColor: '#3182ce', 
-                      outline: 'none',
-                      backgroundColor: 'white',
-                      boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
+                    backgroundColor={room.spaceName ? "white" : "#f9fafb"}
+                    cursor="pointer"
+                    textAlign="left"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    whileHover={{ 
+                      borderColor: '#3182ce',
+                      backgroundColor: '#f8fafc'
                     }}
-                  />
+                  >
+                    <Box display="flex" alignItems="center" gap="0.75rem">
+                      <FaDoorOpen color={room.spaceName ? "#3182ce" : "#9ca3af"} />
+                      <Box color={room.spaceName ? "#374151" : "#9ca3af"}>
+                        {room.spaceName || `Select room type for Room ${roomIndex + 1}`}
+                      </Box>
+                    </Box>
+                    <Box color="#6b7280" fontSize="0.875rem">
+                      {room.spaceName ? 'Change' : 'Select'}
+                    </Box>
+                  </Box>
                 </Box>
                 <Box
                   as="button"
@@ -374,7 +430,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   display="flex"
                   alignItems="center"
                   gap="0.5rem"
-                  padding="0.75rem 1rem"
+                  padding="1.15rem 1rem"
                   backgroundColor="#dc2626"
                   color="white"
                   border="none"
@@ -404,7 +460,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                     display="flex"
                     alignItems="center"
                     gap="0.5rem"
-                    padding="0.5rem 1rem"
+                    padding="1.15rem 1rem"
                     backgroundColor="#10b981"
                     color="white"
                     border="none"
@@ -443,6 +499,10 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                           flexDirection:'row',
                           flexWrap:'wrap'
                         }}
+                        itemStyles={{
+                          padding:0,
+                          border:'none'
+                        }}
                         flexDirection={'row'}
                         idAccessor={(item) => item.id}
                         value={bed.typeOfBed}
@@ -480,6 +540,10 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                           containerStyles={{
                             display:'flex',
                             flexDirection:'row'
+                          }}
+                          itemStyles={{
+                            padding:0,
+                            border:'none'
                           }}
                           idAccessor={(item) => item.id}
                           value={bed.numberOfBed}
@@ -532,6 +596,53 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               ))}
             </Box>
           ))}
+          
+          {/* Room Type Selection Drawer */}
+          <SlidingDrawer
+            isOpen={drawerManager.isDrawerOpen('room-type-selection')}
+            onClose={() => {
+              drawerManager.closeDrawer('room-type-selection')
+              setCurrentRoomIndex(null)
+            }}
+            side="bottom"
+            height="auto"
+            zIndex={drawerManager.getDrawerZIndex('room-type-selection')}
+            showCloseButton
+          >
+            <Box padding="1.5rem" display="flex" flexDirection="column">
+              <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
+                Select Room Type
+              </Box>
+              <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+                Choose the type of room you're adding
+              </Box>
+              
+              <SelectionPicker
+                data={roomTypeOptions}
+                idAccessor={(room) => room.id}
+                value=""
+                onChange={(value) => handleRoomTypeSelection(value as RoomSpaceType)}
+                isMultiSelect={false}
+                renderItem={(room) => (
+                  <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+                    <FaDoorOpen color="#3182ce" size="1.25rem" />
+                    <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                      {room.label}
+                    </Box>
+                  </Box>
+                )}
+                containerStyles={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '0.75rem'
+                }}
+                selectedItemStyles={{
+                  borderColor: '#3182ce',
+                  backgroundColor: '#eff6ff'
+                }}
+              />
+            </Box>
+          </SlidingDrawer>
         </Box>
       </Box>
 

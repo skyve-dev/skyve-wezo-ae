@@ -2,20 +2,19 @@
 // These should be used throughout the client application
 
 export enum BedType {
-  TwinBed = 'TwinBed',
-  FullBed = 'FullBed',
   QueenBed = 'QueenBed',
   KingBed = 'KingBed',
+  TwinBed = 'TwinBed',
+  FullBed = 'FullBed',
   BunkBed = 'BunkBed',
   SofaBed = 'SofaBed',
   FutonBed = 'FutonBed'
 }
 
 export enum RoomSpaceType {
+  MasterBedroom = 'MasterBedroom',
   Bedroom = 'Bedroom',
   LivingRoom = 'LivingRoom',
-  Kitchen = 'Kitchen',
-  DiningRoom = 'DiningRoom',
   Other = 'Other'
 }
 
@@ -59,8 +58,7 @@ export const BedTypeLabels: Record<BedType, string> = {
 export const RoomSpaceTypeLabels: Record<RoomSpaceType, string> = {
   [RoomSpaceType.Bedroom]: 'Bedroom',
   [RoomSpaceType.LivingRoom]: 'Living Room',
-  [RoomSpaceType.Kitchen]: 'Kitchen',
-  [RoomSpaceType.DiningRoom]: 'Dining Room',
+  [RoomSpaceType.MasterBedroom]: 'Master Bedroom',
   [RoomSpaceType.Other]: 'Other'
 }
 
