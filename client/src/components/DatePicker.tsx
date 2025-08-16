@@ -83,6 +83,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const drawerManager = useDrawerManager()
   const drawerId = useRef(`date-picker-${Math.random().toString(36).substr(2, 9)}`).current
+  const yearDrawerId = useRef(`year-picker-${Math.random().toString(36).substr(2, 9)}`).current
   
   // Parse current date or use default
   const currentDate = value ? new Date(value) : (defaultValue ? new Date(defaultValue) : null)
@@ -126,6 +127,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
   // Handle year selection
   const handleYearChange = (year: number) => {
     setViewDate(prev => new Date(year, prev.getMonth(), 1))
+    drawerManager.closeDrawer(yearDrawerId)
+  }
+
+  // Open year selection drawer
+  const openYearSelection = () => {
+    drawerManager.openDrawer(yearDrawerId)
   }
 
   // Handle date selection
@@ -286,36 +293,30 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 {MONTHS[viewDate.getMonth()]}
               </Box>
               
-              <SelectionPicker
-                data={yearOptions}
-                idAccessor={(option) => option.id}
-                value={viewDate.getFullYear()}
-                onChange={(year) => handleYearChange(year as number)}
-                isMultiSelect={false}
-                display={'flex'}
-                width={'100%'}
-                background={'red'}
-                flexDirection={'row'}
-                flexWrap={'wrap'}
-                renderItem={(option, isSelected) => (
-                  <Box
-                    fontSize="0.875rem"
-                    fontWeight={isSelected ? '600' : '400'}
-                    color={isSelected ? '#3182ce' : '#374151'}
-                    textAlign="center"
-                  >
-                    {option.label}
-                  </Box>
-                )}
-                containerStyles={{
-                  display: 'inline-block',
-                  minWidth: '80px'
+              <Box
+                as="button"
+                onClick={openYearSelection}
+                padding="0.5rem 1rem"
+                backgroundColor="#f8fafc"
+                border="1px solid #e2e8f0"
+                borderRadius="0.375rem"
+                fontSize="1rem"
+                fontWeight="600"
+                color="#1a202c"
+                cursor="pointer"
+                minWidth="80px"
+                whileHover={{ 
+                  backgroundColor: '#f1f5f9', 
+                  borderColor: '#3182ce' 
                 }}
-                itemStyles={{
-                  padding: '0.5rem',
-                  fontSize: '0.875rem'
+                whileFocus={{ 
+                  outline: 'none', 
+                  borderColor: '#3182ce',
+                  boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
                 }}
-              />
+              >
+                {viewDate.getFullYear()}
+              </Box>
             </Box>
 
             <Box
@@ -428,6 +429,95 @@ const DatePicker: React.FC<DatePickerProps> = ({
             >
               <FaCheck />
               Confirm
+            </Box>
+          </Box>
+        </Box>
+      </SlidingDrawer>
+
+      {/* Year Selection Drawer */}
+      <SlidingDrawer
+        isOpen={drawerManager.isDrawerOpen(yearDrawerId)}
+        onClose={() => drawerManager.closeDrawer(yearDrawerId)}
+        side="bottom"
+        height="70vh"
+        zIndex={drawerManager.getDrawerZIndex(yearDrawerId)}
+        showCloseButton
+      >
+        <Box padding="1.5rem" display="flex" flexDirection="column" overflow="auto">
+          <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center" color="#1a202c">
+            Select Year
+          </Box>
+          <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+            Choose a year to navigate the calendar
+          </Box>
+
+          <SelectionPicker
+            data={yearOptions}
+            idAccessor={(option) => option.id}
+            value={viewDate.getFullYear()}
+            onChange={(year) => handleYearChange(year as number)}
+            isMultiSelect={false}
+            renderItem={(option, isSelected) => (
+              <Box
+                fontSize="1rem"
+                fontWeight={isSelected ? '700' : '500'}
+                color={isSelected ? '#3182ce' : '#374151'}
+                textAlign="center"
+                padding="0.75rem"
+                borderRadius="0.375rem"
+                backgroundColor={isSelected ? '#eff6ff' : 'transparent'}
+                whileHover={{
+                  backgroundColor: isSelected ? '#eff6ff' : '#f8fafc'
+                }}
+              >
+                {option.label}
+              </Box>
+            )}
+            containerStyles={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+              gap: '0.5rem',
+              maxHeight: '400px',
+              overflow: 'auto',
+              padding: '0.5rem'
+            }}
+            selectedItemStyles={{
+              borderColor: '#3182ce',
+              backgroundColor: '#eff6ff'
+            }}
+          />
+
+          {/* Quick Year Navigation */}
+          <Box marginTop="1.5rem" paddingTop="1rem" borderTop="1px solid #e5e7eb">
+            <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="1rem" textAlign="center">
+              Quick Navigation
+            </Box>
+            <Box display="flex" gap="0.5rem" flexWrap="wrap" justifyContent="center">
+              {[
+                { label: 'This Year', year: new Date().getFullYear() },
+                { label: 'Next Year', year: new Date().getFullYear() + 1 },
+                { label: '2025', year: 2025 },
+                { label: '2030', year: 2030 }
+              ].map((quick, index) => (
+                <Box
+                  key={index}
+                  as="button"
+                  onClick={() => handleYearChange(quick.year)}
+                  padding="0.5rem 1rem"
+                  backgroundColor={viewDate.getFullYear() === quick.year ? '#3182ce' : '#f3f4f6'}
+                  color={viewDate.getFullYear() === quick.year ? 'white' : '#374151'}
+                  border="none"
+                  borderRadius="1rem"
+                  fontSize="0.75rem"
+                  fontWeight="500"
+                  cursor="pointer"
+                  whileHover={{
+                    backgroundColor: viewDate.getFullYear() === quick.year ? '#2563eb' : '#e5e7eb'
+                  }}
+                >
+                  {quick.label}
+                </Box>
+              ))}
             </Box>
           </Box>
         </Box>
