@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {CSSProperties} from 'react'
 import { Box } from './Box'
 import {BoxProps} from "@/types/box.ts";
 
@@ -51,7 +51,7 @@ interface SelectionPickerProps<T> extends Omit<BoxProps<'div'>, 'onChange'>{
   /**
    * Optional styles for the container Box
    */
-  containerStyles?: Record<string, any>
+  containerStyles?: CSSProperties
   
   /**
    * Optional styles for each item Box
@@ -250,7 +250,7 @@ function SelectionPicker<T>({
       display="flex"
       flexDirection="column"
       gap="0.5rem"
-      {...containerStyles}
+      style={containerStyles}
     >
       {data.map((item) => {
         const itemId = idAccessor(item)

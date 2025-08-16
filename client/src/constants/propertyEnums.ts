@@ -47,10 +47,10 @@ export enum Currency {
 
 // Display labels for user-friendly UI
 export const BedTypeLabels: Record<BedType, string> = {
-  [BedType.TwinBed]: 'Twin Bed',
-  [BedType.FullBed]: 'Full Bed',
   [BedType.QueenBed]: 'Queen Bed',
   [BedType.KingBed]: 'King Bed',
+  [BedType.FullBed]: 'Single Bed',
+  [BedType.TwinBed]: 'Twin Single Bed',
   [BedType.BunkBed]: 'Bunk Bed',
   [BedType.SofaBed]: 'Sofa Bed',
   [BedType.FutonBed]: 'Futon Bed'

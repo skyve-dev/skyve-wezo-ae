@@ -438,6 +438,12 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                       </Box>
                       <SelectionPicker
                         data={bedTypeOptions}
+                        containerStyles={{
+                          display:'flex',
+                          flexDirection:'row',
+                          flexWrap:'wrap'
+                        }}
+                        flexDirection={'row'}
                         idAccessor={(item) => item.id}
                         value={bed.typeOfBed}
                         onChange={(value) => handleBedChange(roomIndex, bedIndex, 'typeOfBed', value)}
@@ -471,6 +477,10 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                       <Box display="flex" justifyContent="space-between" alignItems="center">
                         <SelectionPicker
                           data={bedNumberOptions}
+                          containerStyles={{
+                            display:'flex',
+                            flexDirection:'row'
+                          }}
                           idAccessor={(item) => item.id}
                           value={bed.numberOfBed}
                           onChange={(value) => handleBedChange(roomIndex, bedIndex, 'numberOfBed', value)}
@@ -483,7 +493,6 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                               fontWeight={isSelected ? '600' : '400'}
                               border={isSelected ? 'none' : '1px solid #e5e7eb'}
                               cursor="pointer"
-                              minWidth="3rem"
                               textAlign="center"
                               whileHover={{ 
                                 backgroundColor: isSelected ? '#059669' : '#f1f5f9',
