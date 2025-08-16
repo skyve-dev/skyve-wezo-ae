@@ -2,6 +2,29 @@ import { useState } from 'react'
 import SelectionPicker from '../components/SelectionPicker'
 import { Box } from '../components/Box'
 import { ParkingType, PetPolicy } from '../constants/propertyEnums'
+import { 
+  FaUser,
+  FaUserTie,
+  FaUserGraduate,
+  FaLaptopCode,
+  FaUmbrellaBeach,
+  FaBuilding,
+  FaCity,
+  FaHome,
+  FaWater,
+  FaMountain,
+  FaWifi,
+  FaSwimmingPool,
+  FaDumbbell,
+  FaSpa,
+  FaParking,
+  FaUtensils,
+  FaTshirt,
+  FaBell,
+  FaLock,
+  FaCar,
+  FaCheck
+} from 'react-icons/fa'
 
 // Example data types
 interface User {
@@ -9,14 +32,14 @@ interface User {
   name: string
   email: string
   role: string
-  avatar?: string
+  avatar?: React.ReactNode
   department: string
 }
 
 interface Category {
   categoryId: string
   label: string
-  icon: string
+  icon: React.ReactNode
   description: string
   disabled?: boolean
   count: number
@@ -47,20 +70,20 @@ export function SelectionPickerExamples() {
   
   // Example data
   const users: User[] = [
-    { id: 1, name: 'Ahmed Al-Rashid', email: 'ahmed@wezo.ae', role: 'Property Owner', department: 'Premium', avatar: '👨‍💼' },
-    { id: 2, name: 'Fatima Hassan', email: 'fatima@wezo.ae', role: 'Guest', department: 'Standard', avatar: '👩‍💼' },
-    { id: 3, name: 'Mohammed Al-Zahra', email: 'mohammed@wezo.ae', role: 'Property Manager', department: 'Premium', avatar: '👨‍🏢' },
-    { id: 4, name: 'Aisha Al-Mansouri', email: 'aisha@wezo.ae', role: 'Guest', department: 'Standard', avatar: '👩‍🎓' },
-    { id: 5, name: 'Omar Al-Khalil', email: 'omar@wezo.ae', role: 'Admin', department: 'Management', avatar: '👨‍💻' }
+    { id: 1, name: 'Ahmed Al-Rashid', email: 'ahmed@wezo.ae', role: 'Property Owner', department: 'Premium', avatar: <FaUserTie /> },
+    { id: 2, name: 'Fatima Hassan', email: 'fatima@wezo.ae', role: 'Guest', department: 'Standard', avatar: <FaUser /> },
+    { id: 3, name: 'Mohammed Al-Zahra', email: 'mohammed@wezo.ae', role: 'Property Manager', department: 'Premium', avatar: <FaBuilding /> },
+    { id: 4, name: 'Aisha Al-Mansouri', email: 'aisha@wezo.ae', role: 'Guest', department: 'Standard', avatar: <FaUserGraduate /> },
+    { id: 5, name: 'Omar Al-Khalil', email: 'omar@wezo.ae', role: 'Admin', department: 'Management', avatar: <FaLaptopCode /> }
   ]
   
   const categories: Category[] = [
-    { categoryId: 'luxury-villas', label: 'Luxury Villas', icon: '🏖️', description: 'Premium waterfront properties', count: 45 },
-    { categoryId: 'apartments', label: 'Modern Apartments', icon: '🏢', description: 'City center accommodations', count: 128 },
-    { categoryId: 'penthouses', label: 'Penthouses', icon: '🏙️', description: 'Sky-high luxury living', count: 23 },
-    { categoryId: 'townhouses', label: 'Family Townhouses', icon: '🏘️', description: 'Perfect for families', count: 67 },
-    { categoryId: 'beach-houses', label: 'Beach Houses', icon: '🌊', description: 'Direct beach access', count: 34 },
-    { categoryId: 'desert-resorts', label: 'Desert Resorts', icon: '🏜️', description: 'Unique desert experience', count: 12, disabled: true }
+    { categoryId: 'luxury-villas', label: 'Luxury Villas', icon: <FaUmbrellaBeach />, description: 'Premium waterfront properties', count: 45 },
+    { categoryId: 'apartments', label: 'Modern Apartments', icon: <FaBuilding />, description: 'City center accommodations', count: 128 },
+    { categoryId: 'penthouses', label: 'Penthouses', icon: <FaCity />, description: 'Sky-high luxury living', count: 23 },
+    { categoryId: 'townhouses', label: 'Family Townhouses', icon: <FaHome />, description: 'Perfect for families', count: 67 },
+    { categoryId: 'beach-houses', label: 'Beach Houses', icon: <FaWater />, description: 'Direct beach access', count: 34 },
+    { categoryId: 'desert-resorts', label: 'Desert Resorts', icon: <FaMountain />, description: 'Unique desert experience', count: 12, disabled: true }
   ]
   
   const plans: Plan[] = [
@@ -85,19 +108,19 @@ export function SelectionPickerExamples() {
     }
   ]
   
-  const propertyFeatures = [
-    { id: 'wifi', name: 'High-Speed WiFi', icon: '📶', essential: true },
-    { id: 'pool', name: 'Swimming Pool', icon: '🏊‍♂️', essential: false },
-    { id: 'gym', name: 'Fitness Center', icon: '💪', essential: false },
-    { id: 'spa', name: 'Spa & Wellness', icon: '🧘‍♀️', essential: false },
-    { id: 'parking', name: 'Free Parking', icon: '🅿️', essential: true },
-    { id: 'kitchen', name: 'Full Kitchen', icon: '🍳', essential: true },
-    { id: 'laundry', name: 'Laundry Service', icon: '👕', essential: false },
-    { id: 'concierge', name: '24/7 Concierge', icon: '🛎️', essential: false },
-    { id: 'security', name: 'Security Service', icon: '🔒', essential: true },
-    { id: 'beach', name: 'Beach Access', icon: '🏖️', essential: false },
-    { id: 'restaurant', name: 'On-site Restaurant', icon: '🍽️', essential: false },
-    { id: 'transport', name: 'Airport Transfer', icon: '🚗', essential: false }
+  const propertyFeatures: { id: string; name: string; icon: React.ReactNode; essential: boolean }[] = [
+    { id: 'wifi', name: 'High-Speed WiFi', icon: <FaWifi />, essential: true },
+    { id: 'pool', name: 'Swimming Pool', icon: <FaSwimmingPool />, essential: false },
+    { id: 'gym', name: 'Fitness Center', icon: <FaDumbbell />, essential: false },
+    { id: 'spa', name: 'Spa & Wellness', icon: <FaSpa />, essential: false },
+    { id: 'parking', name: 'Free Parking', icon: <FaParking />, essential: true },
+    { id: 'kitchen', name: 'Full Kitchen', icon: <FaUtensils />, essential: true },
+    { id: 'laundry', name: 'Laundry Service', icon: <FaTshirt />, essential: false },
+    { id: 'concierge', name: '24/7 Concierge', icon: <FaBell />, essential: false },
+    { id: 'security', name: 'Security Service', icon: <FaLock />, essential: true },
+    { id: 'beach', name: 'Beach Access', icon: <FaUmbrellaBeach />, essential: false },
+    { id: 'restaurant', name: 'On-site Restaurant', icon: <FaUtensils />, essential: false },
+    { id: 'transport', name: 'Airport Transfer', icon: <FaCar />, essential: false }
   ]
   
   const parkingOptions = [
@@ -187,7 +210,7 @@ export function SelectionPickerExamples() {
               isMultiSelect={false}
               renderItem={(user, isSelected) => (
                 <Box display="flex" alignItems="center" gap="1rem" width="100%">
-                  <Box fontSize="2rem">{user.avatar}</Box>
+                  <Box fontSize="2rem" color="#6b7280">{user.avatar}</Box>
                   <Box flex="1">
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                       <Box>
@@ -253,7 +276,7 @@ export function SelectionPickerExamples() {
               isItemDisabled={(category) => category.disabled || false}
               renderItem={(category, isSelected) => (
                 <Box display="flex" alignItems="center" gap="1rem" width="100%">
-                  <Box fontSize="2.5rem">{category.icon}</Box>
+                  <Box fontSize="2.5rem" color="#6b7280">{category.icon}</Box>
                   <Box flex="1">
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                       <Box>
@@ -284,7 +307,7 @@ export function SelectionPickerExamples() {
                     </Box>
                   </Box>
                   {isSelected && (
-                    <Box color="#10b981" fontSize="1.5rem">✓</Box>
+                    <Box color="#10b981" fontSize="1.5rem"><FaCheck /></Box>
                   )}
                 </Box>
               )}
@@ -345,7 +368,7 @@ export function SelectionPickerExamples() {
                       ESSENTIAL
                     </Box>
                   )}
-                  <Box fontSize="1.75rem">{feature.icon}</Box>
+                  <Box fontSize="1.75rem" color="#6b7280">{feature.icon}</Box>
                   <Box 
                     flex="1" 
                     fontWeight={isSelected ? '600' : '400'}
@@ -354,7 +377,7 @@ export function SelectionPickerExamples() {
                     {feature.name}
                   </Box>
                   {isSelected && (
-                    <Box color="#10b981" fontSize="1.25rem">✓</Box>
+                    <Box color="#10b981" fontSize="1.25rem"><FaCheck /></Box>
                   )}
                 </Box>
               )}
@@ -429,7 +452,7 @@ export function SelectionPickerExamples() {
                           fontSize="0.875rem"
                           color="#374151"
                         >
-                          <Box color="#10b981">✓</Box>
+                          <Box color="#10b981"><FaCheck /></Box>
                           <Box>{feature}</Box>
                         </Box>
                       ))}
@@ -539,7 +562,7 @@ export function SelectionPickerExamples() {
               isMultiSelect={true}
               renderItem={(user, isSelected) => (
                 <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
-                  <Box fontSize="1.5rem">{user.avatar}</Box>
+                  <Box fontSize="1.5rem" color="#6b7280">{user.avatar}</Box>
                   <Box flex="1">
                     <Box fontWeight={isSelected ? '600' : '400'} color="#1a202c">
                       {user.name}
@@ -561,7 +584,7 @@ export function SelectionPickerExamples() {
                       fontSize="0.75rem"
                       fontWeight="700"
                     >
-                      ✓
+                      <FaCheck />
                     </Box>
                   )}
                 </Box>

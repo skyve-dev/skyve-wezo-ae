@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Box } from '../../components/Box'
+import { 
+  FaCheckSquare, 
+  FaMobileAlt, 
+  FaBox, 
+  FaHome, 
+  FaChartBar, 
+  FaBook, 
+  FaArrowUp,
+  FaSearch 
+} from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
   component: ExamplesIndex,
@@ -18,7 +28,7 @@ function ExamplesIndex() {
       id: 'selection-picker',
       title: 'SelectionPicker',
       description: 'Versatile selection component for single and multiple choices',
-      icon: '✅',
+      icon: <FaCheckSquare />,
       color: '#3182ce',
       features: ['Single & Multiple Selection', 'Custom Rendering', 'TypeScript Support', 'Accessibility'],
       complexity: 'Intermediate',
@@ -28,7 +38,7 @@ function ExamplesIndex() {
       id: 'sliding-drawer',
       title: 'SlidingDrawer',
       description: 'Full-screen overlay drawers with portal rendering',
-      icon: '📱',
+      icon: <FaMobileAlt />,
       color: '#059669',
       features: ['Four Slide Directions', 'React Portal', 'Mobile-Friendly', 'Z-Index Management'],
       complexity: 'Advanced',
@@ -38,7 +48,7 @@ function ExamplesIndex() {
       id: 'box',
       title: 'Box Component',
       description: 'Foundation component for layouts, styling, and interactions',
-      icon: '📦',
+      icon: <FaBox />,
       color: '#f59e0b',
       features: ['Flexbox & Grid', 'Responsive Design', 'Animations', 'Form Elements'],
       complexity: 'Beginner',
@@ -102,7 +112,7 @@ function ExamplesIndex() {
               fontSize="1.25rem"
               color="#6b7280"
             >
-              🔍
+              <FaSearch />
             </Box>
           </Box>
         </Box>
@@ -192,7 +202,9 @@ function ExamplesIndex() {
               textAlign="center"
               boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
             >
-              <Box fontSize="3rem" marginBottom="1rem">🔍</Box>
+              <Box fontSize="3rem" marginBottom="1rem">
+                <FaSearch />
+              </Box>
               <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" color="#374151">
                 No examples found
               </Box>
@@ -316,7 +328,9 @@ function ExamplesIndex() {
               }}
             >
               <Box>
-                <Box fontSize="2rem" marginBottom="0.5rem">🏠</Box>
+                <Box fontSize="2rem" marginBottom="0.5rem">
+                  <FaHome />
+                </Box>
                 <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
                   Property Registration
                 </Box>
@@ -340,7 +354,9 @@ function ExamplesIndex() {
               }}
             >
               <Box>
-                <Box fontSize="2rem" marginBottom="0.5rem">📊</Box>
+                <Box fontSize="2rem" marginBottom="0.5rem">
+                  <FaChartBar />
+                </Box>
                 <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
                   Dashboard
                 </Box>
@@ -365,7 +381,9 @@ function ExamplesIndex() {
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)'
               }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">📖</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem">
+                <FaBook />
+              </Box>
               <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
                 Documentation
               </Box>
@@ -392,7 +410,9 @@ function ExamplesIndex() {
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)'
               }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">🔝</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem">
+                <FaArrowUp />
+              </Box>
               <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
                 Back to Top
               </Box>

@@ -8,6 +8,7 @@ coverage/
 *.log
 .idea/
 .vscode/
+.tanstack
 
 # Workspace specific
 */node_modules/

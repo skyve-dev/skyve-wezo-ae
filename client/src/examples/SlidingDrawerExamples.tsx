@@ -4,6 +4,45 @@ import SelectionPicker from '../components/SelectionPicker'
 import { Box } from '../components/Box'
 import useDrawerManager from '../hooks/useDrawerManager'
 import { ParkingType, PetPolicy } from '../constants/propertyEnums'
+import { 
+  FaBars,
+  FaHome,
+  FaBuilding,
+  FaCalendarAlt,
+  FaUsers,
+  FaChartLine,
+  FaDollarSign,
+  FaComments,
+  FaCog,
+  FaBell,
+  FaWifi,
+  FaSwimmingPool,
+  FaDumbbell,
+  FaSpa,
+  FaParking,
+  FaUmbrellaBeach,
+  FaUtensils,
+  FaHeart,
+  FaUserFriends,
+  FaBed,
+  FaShower,
+  FaWhatsapp,
+  FaEnvelope,
+  FaLink,
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaPlus,
+  FaCalendar,
+  FaChartBar,
+  FaLifeRing,
+  FaDoorOpen,
+  FaClipboardList,
+  FaSearch,
+  FaLightbulb,
+  FaCity,
+  FaBuilding as FaApartment
+} from 'react-icons/fa'
 
 interface PropertyFilter {
   amenities: string[]
@@ -52,48 +91,48 @@ export function SlidingDrawerExamples() {
 
   // Example data
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', badge: null },
-    { id: 'properties', label: 'My Properties', icon: '🏠', badge: '12' },
-    { id: 'bookings', label: 'Bookings', icon: '📅', badge: '3' },
-    { id: 'guests', label: 'Guests', icon: '👥', badge: null },
-    { id: 'analytics', label: 'Analytics', icon: '📈', badge: null },
-    { id: 'earnings', label: 'Earnings', icon: '💰', badge: 'New' },
-    { id: 'messages', label: 'Messages', icon: '💬', badge: '5' },
-    { id: 'settings', label: 'Settings', icon: '⚙️', badge: null }
+    { id: 'dashboard', label: 'Dashboard', icon: <FaChartLine />, badge: null },
+    { id: 'properties', label: 'My Properties', icon: <FaHome />, badge: '12' },
+    { id: 'bookings', label: 'Bookings', icon: <FaCalendarAlt />, badge: '3' },
+    { id: 'guests', label: 'Guests', icon: <FaUsers />, badge: null },
+    { id: 'analytics', label: 'Analytics', icon: <FaChartLine />, badge: null },
+    { id: 'earnings', label: 'Earnings', icon: <FaDollarSign />, badge: 'New' },
+    { id: 'messages', label: 'Messages', icon: <FaComments />, badge: '5' },
+    { id: 'settings', label: 'Settings', icon: <FaCog />, badge: null }
   ]
 
   const amenityOptions = [
-    { id: 'wifi', name: 'High-Speed WiFi', icon: '📶', category: 'Essential' },
-    { id: 'pool', name: 'Swimming Pool', icon: '🏊‍♂️', category: 'Luxury' },
-    { id: 'gym', name: 'Fitness Center', icon: '💪', category: 'Fitness' },
-    { id: 'spa', name: 'Spa & Wellness', icon: '🧘‍♀️', category: 'Luxury' },
-    { id: 'parking', name: 'Free Parking', icon: '🅿️', category: 'Convenience' },
-    { id: 'beach', name: 'Beach Access', icon: '🏖️', category: 'Location' },
-    { id: 'restaurant', name: 'Restaurant', icon: '🍽️', category: 'Dining' },
-    { id: 'concierge', name: '24/7 Concierge', icon: '🛎️', category: 'Service' }
+    { id: 'wifi', name: 'High-Speed WiFi', icon: <FaWifi />, category: 'Essential' },
+    { id: 'pool', name: 'Swimming Pool', icon: <FaSwimmingPool />, category: 'Luxury' },
+    { id: 'gym', name: 'Fitness Center', icon: <FaDumbbell />, category: 'Fitness' },
+    { id: 'spa', name: 'Spa & Wellness', icon: <FaSpa />, category: 'Luxury' },
+    { id: 'parking', name: 'Free Parking', icon: <FaParking />, category: 'Convenience' },
+    { id: 'beach', name: 'Beach Access', icon: <FaUmbrellaBeach />, category: 'Location' },
+    { id: 'restaurant', name: 'Restaurant', icon: <FaUtensils />, category: 'Dining' },
+    { id: 'concierge', name: '24/7 Concierge', icon: <FaBell />, category: 'Service' }
   ]
 
   const propertyTypes = [
-    { id: 'villa', name: 'Villa', icon: '🏡', count: 145 },
-    { id: 'apartment', name: 'Apartment', icon: '🏢', count: 289 },
-    { id: 'penthouse', name: 'Penthouse', icon: '🏙️', count: 67 },
-    { id: 'townhouse', name: 'Townhouse', icon: '🏘️', count: 123 }
+    { id: 'villa', name: 'Villa', icon: <FaHome />, count: 145 },
+    { id: 'apartment', name: 'Apartment', icon: <FaApartment />, count: 289 },
+    { id: 'penthouse', name: 'Penthouse', icon: <FaCity />, count: 67 },
+    { id: 'townhouse', name: 'Townhouse', icon: <FaBuilding />, count: 123 }
   ]
 
   const shareOptions = [
-    { id: 'whatsapp', label: 'WhatsApp', icon: '💬', color: '#25D366' },
-    { id: 'email', label: 'Email', icon: '📧', color: '#3182ce' },
-    { id: 'copy', label: 'Copy Link', icon: '🔗', color: '#6b7280' },
-    { id: 'facebook', label: 'Facebook', icon: '📘', color: '#1877F2' },
-    { id: 'twitter', label: 'Twitter', icon: '🐦', color: '#1DA1F2' },
-    { id: 'linkedin', label: 'LinkedIn', icon: '💼', color: '#0A66C2' }
+    { id: 'whatsapp', label: 'WhatsApp', icon: <FaWhatsapp />, color: '#25D366' },
+    { id: 'email', label: 'Email', icon: <FaEnvelope />, color: '#3182ce' },
+    { id: 'copy', label: 'Copy Link', icon: <FaLink />, color: '#6b7280' },
+    { id: 'facebook', label: 'Facebook', icon: <FaFacebookF />, color: '#1877F2' },
+    { id: 'twitter', label: 'Twitter', icon: <FaTwitter />, color: '#1DA1F2' },
+    { id: 'linkedin', label: 'LinkedIn', icon: <FaLinkedinIn />, color: '#0A66C2' }
   ]
 
   const quickActions = [
-    { id: 'add-property', label: 'Add Property', icon: '🏠', color: '#059669' },
-    { id: 'calendar', label: 'Calendar', icon: '📅', color: '#3182ce' },
-    { id: 'analytics', label: 'Analytics', icon: '📊', color: '#8b5cf6' },
-    { id: 'support', label: 'Support', icon: '🆘', color: '#f59e0b' }
+    { id: 'add-property', label: 'Add Property', icon: <FaPlus />, color: '#059669' },
+    { id: 'calendar', label: 'Calendar', icon: <FaCalendar />, color: '#3182ce' },
+    { id: 'analytics', label: 'Analytics', icon: <FaChartBar />, color: '#8b5cf6' },
+    { id: 'support', label: 'Support', icon: <FaLifeRing />, color: '#f59e0b' }
   ]
 
   const handleFormSubmit = () => {
@@ -204,7 +243,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#bfdbfe' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">🍔</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaBars /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#1e40af">
                 Navigation Menu
               </Box>
@@ -225,7 +264,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#bbf7d0' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">📋</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaClipboardList /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#065f46">
                 Property Details
               </Box>
@@ -246,7 +285,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#fde68a' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">🔔</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaBell /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#92400e">
                 Notifications
               </Box>
@@ -267,7 +306,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#ddd6fe' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">🔍</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaSearch /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#5b21b6">
                 Mobile Filters
               </Box>
@@ -288,7 +327,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#fbcfe8' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">📤</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaEnvelope /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#be185d">
                 Share Property
               </Box>
@@ -309,7 +348,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#bae6fd' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">📝</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaClipboardList /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#0e7490">
                 Property Form
               </Box>
@@ -330,7 +369,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#dcfce7' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">⚡</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaLightbulb /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#15803d">
                 Quick Actions
               </Box>
@@ -354,7 +393,7 @@ export function SlidingDrawerExamples() {
               textAlign="center"
               whileHover={{ backgroundColor: '#ede9fe' }}
             >
-              <Box fontSize="2rem" marginBottom="0.5rem">🔗</Box>
+              <Box fontSize="2rem" marginBottom="0.5rem"><FaLink /></Box>
               <Box fontSize="1rem" fontWeight="600" color="#7c3aed">
                 Multi-Drawer
               </Box>
@@ -419,7 +458,7 @@ export function SlidingDrawerExamples() {
               justifyContent="center"
               fontSize="1.5rem"
             >
-              🏠
+              <FaHome />
             </Box>
             <Box>
               <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
@@ -491,7 +530,7 @@ export function SlidingDrawerExamples() {
               width="100%"
               textAlign="left"
             >
-              <Box fontSize="1.25rem">🚪</Box>
+              <Box fontSize="1.25rem"><FaDoorOpen /></Box>
               <Box fontSize="0.875rem" color="#dc2626" fontWeight="500">
                 Sign Out
               </Box>
@@ -526,7 +565,7 @@ export function SlidingDrawerExamples() {
               fontSize="4rem"
               marginBottom="1rem"
             >
-              🏖️
+              <FaUmbrellaBeach />
             </Box>
             
             <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1rem">
@@ -555,9 +594,9 @@ export function SlidingDrawerExamples() {
                 CAPACITY
               </Box>
               <Box display="flex" gap="1rem" fontSize="0.875rem" color="#374151">
-                <Box>👥 8 guests</Box>
-                <Box>🛏️ 4 bedrooms</Box>
-                <Box>🚿 3 bathrooms</Box>
+                <Box display="flex" alignItems="center" gap="0.25rem"><FaUserFriends /> 8 guests</Box>
+                <Box display="flex" alignItems="center" gap="0.25rem"><FaBed /> 4 bedrooms</Box>
+                <Box display="flex" alignItems="center" gap="0.25rem"><FaShower /> 3 bathrooms</Box>
               </Box>
             </Box>
 
@@ -619,7 +658,7 @@ export function SlidingDrawerExamples() {
               fontSize="1.25rem"
               cursor="pointer"
             >
-              ❤️
+              <FaHeart />
             </Box>
           </Box>
         </Box>

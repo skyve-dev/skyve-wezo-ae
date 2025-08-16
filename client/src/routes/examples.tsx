@@ -1,5 +1,13 @@
 import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
 import { Box } from '../components/Box'
+import { 
+  FaHome, 
+  FaCheckSquare, 
+  FaMobileAlt, 
+  FaBox,
+  FaArrowLeft,
+  FaPuzzlePiece
+} from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples')({
   component: ExamplesLayout,
@@ -9,10 +17,10 @@ function ExamplesLayout() {
   const location = useLocation()
 
   const navigationItems = [
-    { path: '/examples', label: 'Overview', icon: '🏠' },
-    { path: '/examples/selection-picker', label: 'SelectionPicker', icon: '✅' },
-    { path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: '📱' },
-    { path: '/examples/box', label: 'Box Component', icon: '📦' }
+    { path: '/examples', label: 'Overview', icon: <FaHome /> },
+    { path: '/examples/selection-picker', label: 'SelectionPicker', icon: <FaCheckSquare /> },
+    { path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: <FaMobileAlt /> },
+    { path: '/examples/box', label: 'Box Component', icon: <FaBox /> }
   ]
 
   return (
@@ -41,7 +49,9 @@ function ExamplesLayout() {
                 }}
               >
                 <Box>
-                <Box fontSize="1.5rem">🧩</Box>
+                <Box fontSize="1.5rem">
+                  <FaPuzzlePiece />
+                </Box>
                   <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
                     Examples
                   </Box>
@@ -107,7 +117,9 @@ function ExamplesLayout() {
               }}
             >
               <Box>
-              <Box fontSize="1rem">←</Box>
+              <Box fontSize="1rem">
+                <FaArrowLeft />
+              </Box>
                 <Box style={{ display: 'block' }}>
                   Back to App
                 </Box>

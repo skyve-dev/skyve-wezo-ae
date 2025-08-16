@@ -1,5 +1,26 @@
 import { useState } from 'react'
 import { Box } from '../components/Box'
+import { 
+  FaRuler,
+  FaPalette,
+  FaMouse,
+  FaMobileAlt,
+  FaEdit,
+  FaUmbrellaBeach,
+  FaBuilding,
+  FaHome,
+  FaCity,
+  FaHeart,
+  FaBars,
+  FaBullseye,
+  FaRocket,
+  FaStar,
+  FaPaintBrush,
+  FaBolt,
+  FaTheaterMasks,
+  FaBell
+} from 'react-icons/fa'
+import { FiZap } from 'react-icons/fi'
 
 /**
  * Comprehensive examples showcasing Box component capabilities
@@ -9,12 +30,12 @@ export function BoxExamples() {
   const [hoverStates, setHoverStates] = useState<Record<string, boolean>>({})
 
   const tabs = [
-    { id: 'layout', label: 'Layout & Grid', icon: '📐' },
-    { id: 'styling', label: 'Styling & Colors', icon: '🎨' },
-    { id: 'interactive', label: 'Interactive Elements', icon: '🖱️' },
-    { id: 'responsive', label: 'Responsive Design', icon: '📱' },
-    { id: 'animations', label: 'Animations & Hover', icon: '✨' },
-    { id: 'forms', label: 'Form Elements', icon: '📝' }
+    { id: 'layout', label: 'Layout & Grid', icon: <FaRuler /> },
+    { id: 'styling', label: 'Styling & Colors', icon: <FaPalette /> },
+    { id: 'interactive', label: 'Interactive Elements', icon: <FaMouse /> },
+    { id: 'responsive', label: 'Responsive Design', icon: <FaMobileAlt /> },
+    { id: 'animations', label: 'Animations & Hover', icon: <FiZap /> },
+    { id: 'forms', label: 'Form Elements', icon: <FaEdit /> }
   ]
 
   const colorPalette = [
@@ -131,7 +152,7 @@ export function BoxExamples() {
                         justifyContent="center"
                         fontSize="3rem"
                       >
-                        🏖️
+                        <FaUmbrellaBeach />
                       </Box>
                       <Box padding="1.5rem">
                         <Box fontSize="1.125rem" fontWeight="600" marginBottom="0.5rem">
@@ -182,7 +203,7 @@ export function BoxExamples() {
                         fontSize="2.5rem"
                         color="white"
                       >
-                        {['🏖️', '🏢', '🏘️', '🏙️', '🏡', '🏰'][i]}
+                        {[<FaUmbrellaBeach />, <FaBuilding />, <FaHome />, <FaCity />, <FaHome />, <FaBuilding />][i]}
                       </Box>
                       <Box
                         position="absolute"
@@ -504,7 +525,7 @@ export function BoxExamples() {
                           fontSize="3rem"
                           color="white"
                         >
-                          🏖️
+                          <FaUmbrellaBeach />
                         </Box>
                         <Box
                           position="absolute"
@@ -521,7 +542,7 @@ export function BoxExamples() {
                           color={hoverStates[`card-${i}`] ? '#dc2626' : '#6b7280'}
                           cursor="pointer"
                         >
-                          ❤️
+                          <FaHeart />
                         </Box>
                       </Box>
                       <Box padding="1.5rem">
@@ -662,7 +683,7 @@ export function BoxExamples() {
                         color="white"
                         marginBottom="1rem"
                       >
-                        🏠
+                        <FaHome />
                       </Box>
                       <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
                         Property {i + 1}
@@ -692,7 +713,7 @@ export function BoxExamples() {
                   gap="1rem"
                 >
                   <Box display="flex" alignItems="center" gap="1rem">
-                    <Box fontSize="1.5rem">🏠</Box>
+                    <Box fontSize="1.5rem"><FaHome /></Box>
                     <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
                       Wezo.ae
                     </Box>
@@ -717,7 +738,7 @@ export function BoxExamples() {
                       fontSize="1.25rem"
                       cursor="pointer"
                     >
-                      ☰
+                      <FaBars />
                     </Box>
                     <Box
                       padding="0.5rem 1rem"
@@ -833,7 +854,7 @@ export function BoxExamples() {
                       }}
                     >
                       <Box fontSize="2rem" marginBottom="0.5rem">
-                        {['🎯', '🚀', '⭐', '🎨', '⚡', '🎪'][i]}
+                        {[<FaBullseye />, <FaRocket />, <FaStar />, <FaPaintBrush />, <FaBolt />, <FaTheaterMasks />][i]}
                       </Box>
                       <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                         {['Scale', 'Rotate Y', 'Translate', 'Skew', 'Rotate Z', 'Combined'][i]}
@@ -925,7 +946,7 @@ export function BoxExamples() {
                         animation: 'pulse 2s ease-in-out infinite'
                       }}
                     >
-                      🔔
+                      <FaBell />
                     </Box>
                     <Box fontSize="0.875rem" color="#6b7280">Notification</Box>
                   </Box>
