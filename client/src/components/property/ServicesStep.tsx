@@ -2,6 +2,14 @@ import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
 import { ParkingType, ParkingTypeLabels } from '../../constants/propertyEnums'
+import { 
+  FaUtensils,
+  FaCar,
+  FaMoneyBillWave,
+  FaBan,
+  FaLanguage,
+  FaCheckCircle
+} from 'react-icons/fa'
 
 interface ServicesStepProps {
   data: WizardFormData
@@ -65,10 +73,21 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
       <Box display="flex" flexDirection="column" gap="2rem">
         {/* Breakfast Service */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaUtensils color="#3182ce" />
             Food & Dining
           </Box>
-          <Box display="flex" alignItems="center" gap="0.75rem">
+          <Box 
+            as="label"
+            display="flex" 
+            alignItems="center" 
+            gap="1rem"
+            padding="1rem"
+            backgroundColor="#f8fafc"
+            borderRadius="0.5rem"
+            cursor="pointer"
+            whileHover={{ backgroundColor: '#f1f5f9' }}
+          >
             <Box
               as="input"
               type="checkbox"
@@ -77,12 +96,15 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                 handleServiceChange('serveBreakfast', e.target.checked)
               }
               accentColor="#3182ce"
+              width="1.25rem"
+              height="1.25rem"
             />
             <Box>
-              <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#374151" fontWeight="500">
+                <FaUtensils color={data.serveBreakfast ? "#10b981" : "#6b7280"} />
                 Serve breakfast
               </Box>
-              <Box fontSize="0.75rem" color="#6b7280">
+              <Box fontSize="0.875rem" color="#6b7280">
                 Provide breakfast for guests (additional charges may apply)
               </Box>
             </Box>
@@ -91,7 +113,8 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
 
         {/* Parking */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaCar color="#3182ce" />
             Parking Options
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem">
@@ -119,7 +142,10 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                   accentColor="#3182ce"
                 />
                 <Box>
-                  <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                  <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" color="#374151" fontWeight="500">
+                    {parkingType === ParkingType.YesFree && <FaCheckCircle color="#10b981" />}
+                    {parkingType === ParkingType.YesPaid && <FaMoneyBillWave color="#f59e0b" />}
+                    {parkingType === ParkingType.No && <FaBan color="#ef4444" />}
                     {ParkingTypeLabels[parkingType]}
                   </Box>
                   <Box fontSize="0.75rem" color="#6b7280">
@@ -135,7 +161,8 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
 
         {/* Languages */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaLanguage color="#3182ce" />
             Languages You Speak
           </Box>
           <Box fontSize="0.75rem" color="#6b7280" marginBottom="1rem">

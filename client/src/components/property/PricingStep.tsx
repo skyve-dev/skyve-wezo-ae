@@ -2,6 +2,13 @@ import React from 'react'
 import { WizardFormData, Pricing, Cancellation } from '../../types/property'
 import { Box } from '../Box'
 import { Currency } from '../../constants/propertyEnums'
+import { 
+  FaDollarSign,
+  FaCalendarWeek,
+  FaPercentage,
+  FaShieldAlt,
+  FaEye
+} from 'react-icons/fa'
 
 interface PricingStepProps {
   data: WizardFormData
@@ -65,7 +72,8 @@ const PricingStep: React.FC<PricingStepProps> = ({
       <Box display="flex" flexDirection="column" gap="2rem">
         {/* Basic Pricing */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaDollarSign color="#3182ce" />
             Base Rate
           </Box>
           <Box display="grid" gridTemplateColumns={{ Sm: '100px 1fr' }} gap="1rem">
@@ -114,7 +122,8 @@ const PricingStep: React.FC<PricingStepProps> = ({
 
         {/* Weekend Rate */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaCalendarWeek color="#3182ce" />
             Weekend Rate (Optional)
           </Box>
           <Box>
@@ -146,7 +155,8 @@ const PricingStep: React.FC<PricingStepProps> = ({
 
         {/* Discounts */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaPercentage color="#3182ce" />
             Discounts (Optional)
           </Box>
           <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
@@ -200,7 +210,8 @@ const PricingStep: React.FC<PricingStepProps> = ({
 
         {/* Cancellation Policy */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaShieldAlt color="#3182ce" />
             Cancellation Policy
           </Box>
           <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
@@ -265,7 +276,8 @@ const PricingStep: React.FC<PricingStepProps> = ({
             borderRadius="0.5rem"
             padding="1.5rem"
           >
-            <Box fontSize="1rem" fontWeight="500" color="#0369a1" marginBottom="1rem">
+            <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#0369a1" marginBottom="1rem">
+              <FaEye color="#0369a1" />
               Pricing Preview
             </Box>
             <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="0.875rem" color="#0c4a6e">

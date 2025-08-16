@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { WizardFormData, Photo } from '../../types/property'
 import { Box } from '../Box'
+import { 
+  FaCloudUploadAlt
+} from 'react-icons/fa'
 
 interface PhotosStepProps {
   data: WizardFormData
@@ -102,11 +105,14 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                 }
               }}
             />
-            <Box fontSize="1.125rem" color="#374151" marginBottom="0.5rem">
-              Drop photos here or click to browse
-            </Box>
-            <Box fontSize="0.875rem" color="#6b7280">
-              JPG, PNG, WebP up to 10MB each
+            <Box display="flex" flexDirection="column" alignItems="center" gap="1rem">
+              <FaCloudUploadAlt size="3rem" color={dragOver ? "#3182ce" : "#9ca3af"} />
+              <Box fontSize="1.125rem" color="#374151" fontWeight="500">
+                Drop photos here or click to browse
+              </Box>
+              <Box fontSize="0.875rem" color="#6b7280">
+                JPG, PNG, WebP up to 10MB each
+              </Box>
             </Box>
           </Box>
         </Box>

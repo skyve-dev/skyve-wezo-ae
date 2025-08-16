@@ -3,6 +3,16 @@ import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
 import DatePicker from '../DatePicker'
 import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '../../constants/propertyEnums'
+import { 
+  FaHome, 
+  FaCalendarCheck, 
+  FaCreditCard, 
+  FaHandshake,
+  FaGlobe,
+  FaMapMarkerAlt,
+  FaEdit,
+  FaUserCheck
+} from 'react-icons/fa'
 
 interface BasicInfoStepProps {
   data: WizardFormData
@@ -53,12 +63,15 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaHome color="#3182ce" />
             Property Name *
           </Box>
           <Box
@@ -85,12 +98,15 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaCalendarCheck color="#3182ce" />
             How do you want to handle bookings? *
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem">
@@ -116,7 +132,8 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 accentColor="#3182ce"
               />
               <Box>
-                <Box fontWeight="500" color="#374151">
+                <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
+                  <FaUserCheck color="#10b981" size="1rem" />
                   {BookingTypeLabels[BookingType.BookInstantly]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
@@ -147,7 +164,8 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 accentColor="#3182ce"
               />
               <Box>
-                <Box fontWeight="500" color="#374151">
+                <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
+                  <FaHandshake color="#f59e0b" size="1rem" />
                   {BookingTypeLabels[BookingType.NeedToRequestBook]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
@@ -162,12 +180,15 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaCreditCard color="#3182ce" />
             Payment Collection *
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem">
@@ -193,7 +214,8 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 accentColor="#3182ce"
               />
               <Box>
-                <Box fontWeight="500" color="#374151">
+                <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
+                  <FaGlobe color="#10b981" size="1rem" />
                   {PaymentTypeLabels[PaymentType.Online]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
@@ -224,7 +246,8 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                 accentColor="#3182ce"
               />
               <Box>
-                <Box fontWeight="500" color="#374151">
+                <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
+                  <FaMapMarkerAlt color="#f59e0b" size="1rem" />
                   {PaymentTypeLabels[PaymentType.ByCreditCardAtProperty]}
                 </Box>
                 <Box fontSize="0.875rem" color="#6b7280">
@@ -254,12 +277,15 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaEdit color="#3182ce" />
             About Your Property (Optional)
           </Box>
           <Box
@@ -284,12 +310,15 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaMapMarkerAlt color="#3182ce" />
             About the Neighborhood (Optional)
           </Box>
           <Box

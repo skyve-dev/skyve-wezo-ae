@@ -2,6 +2,19 @@ import React from 'react'
 import { WizardFormData, Room, Bed } from '../../types/property'
 import { Box } from '../Box'
 import { BedType, BedTypeLabels } from '../../constants/propertyEnums'
+import SelectionPicker from '../SelectionPicker'
+import { 
+  FaUserFriends, 
+  FaBath, 
+  FaRulerCombined, 
+  FaChild, 
+  FaBaby, 
+  FaBed, 
+  FaPlus, 
+  FaTrash,
+  FaHome,
+  FaTimes
+} from 'react-icons/fa'
 
 interface LayoutStepProps {
   data: WizardFormData
@@ -14,7 +27,19 @@ interface LayoutStepProps {
   isLastStep: boolean
 }
 
-const bedTypes = Object.values(BedType)
+// Data for SelectionPicker components
+const bedTypeOptions = Object.values(BedType).map(type => ({
+  id: type,
+  label: BedTypeLabels[type],
+  value: type
+}))
+
+const bedNumberOptions = [
+  { id: 1, label: '1', value: 1 },
+  { id: 2, label: '2', value: 2 },
+  { id: 3, label: '3', value: 3 },
+  { id: 4, label: '4+', value: 4 }
+]
 
 const LayoutStep: React.FC<LayoutStepProps> = ({
   data,
@@ -82,16 +107,19 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
 
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {/* Basic Numbers */}
-        <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr' }} gap="1rem">
+        <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1.5rem">
           <Box>
             <Box
               as="label"
-              display="block"
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
               fontSize="0.875rem"
               fontWeight="500"
               color="#374151"
-              marginBottom="0.5rem"
+              marginBottom="0.75rem"
             >
+              <FaUserFriends color="#3182ce" />
               Maximum Guests *
             </Box>
             <Box
@@ -104,23 +132,31 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 handleLayoutChange('maximumGuest', parseInt(e.target.value) || 1)
               }
               width="100%"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
+              padding="1rem"
+              border="2px solid #e5e7eb"
+              borderRadius="0.5rem"
               fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+              backgroundColor="white"
+              whileFocus={{ 
+                borderColor: '#3182ce', 
+                outline: 'none', 
+                boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
+              }}
             />
           </Box>
 
           <Box>
             <Box
               as="label"
-              display="block"
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
               fontSize="0.875rem"
               fontWeight="500"
               color="#374151"
-              marginBottom="0.5rem"
+              marginBottom="0.75rem"
             >
+              <FaBath color="#3182ce" />
               Bathrooms *
             </Box>
             <Box
@@ -133,11 +169,16 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 handleLayoutChange('bathrooms', parseInt(e.target.value) || 1)
               }
               width="100%"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
+              padding="1rem"
+              border="2px solid #e5e7eb"
+              borderRadius="0.5rem"
               fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+              backgroundColor="white"
+              whileFocus={{ 
+                borderColor: '#3182ce', 
+                outline: 'none', 
+                boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
+              }}
             />
           </Box>
         </Box>
@@ -146,12 +187,15 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaRulerCombined color="#3182ce" />
             Property Size (Square Meters) - Optional
           </Box>
           <Box
@@ -164,67 +208,123 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             }
             placeholder="e.g., 120"
             width="100%"
-            padding="0.75rem"
-            border="1px solid #d1d5db"
-            borderRadius="0.375rem"
+            padding="1rem"
+            border="2px solid #e5e7eb"
+            borderRadius="0.5rem"
             fontSize="1rem"
-            whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+            backgroundColor="white"
+            whileFocus={{ 
+              borderColor: '#3182ce', 
+              outline: 'none', 
+              boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
+            }}
           />
         </Box>
 
         {/* Children and Cribs */}
-        <Box display="flex" flexDirection="column" gap="1rem">
-          <Box display="flex" alignItems="center" gap="0.75rem">
-            <Box
-              as="input"
-              type="checkbox"
-              checked={data.allowChildren}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleLayoutChange('allowChildren', e.target.checked)
-              }
-              accentColor="#3182ce"
-            />
-            <Box fontSize="0.875rem" color="#374151">
-              Allow children (ages 2-12)
+        <Box 
+          backgroundColor="#f8fafc"
+          padding="1.5rem"
+          borderRadius="0.5rem"
+          border="2px solid #e2e8f0"
+        >
+          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <Box display="flex" alignItems="center" gap="0.5rem">
+              <FaChild color="#3182ce" />
+              Guest Accommodations
             </Box>
           </Box>
-
-          {data.allowChildren && (
-            <Box display="flex" alignItems="center" gap="0.75rem" marginLeft="1.5rem">
+          
+          <Box display="flex" flexDirection="column" gap="1rem">
+            <Box 
+              as="label"
+              display="flex" 
+              alignItems="center" 
+              gap="1rem"
+              padding="0.75rem"
+              backgroundColor="white"
+              borderRadius="0.375rem"
+              cursor="pointer"
+              whileHover={{ backgroundColor: '#f1f5f9' }}
+            >
               <Box
                 as="input"
                 type="checkbox"
-                checked={data.offerCribs}
+                checked={data.allowChildren}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  handleLayoutChange('offerCribs', e.target.checked)
+                  handleLayoutChange('allowChildren', e.target.checked)
                 }
                 accentColor="#3182ce"
+                width="1.25rem"
+                height="1.25rem"
               />
-              <Box fontSize="0.875rem" color="#374151">
-                Offer cribs for infants
+              <Box fontSize="1rem" color="#374151" fontWeight="500">
+                Allow children (ages 2-12)
               </Box>
             </Box>
-          )}
+
+            {data.allowChildren && (
+              <Box 
+                as="label"
+                display="flex" 
+                alignItems="center" 
+                gap="1rem"
+                marginLeft="1rem"
+                padding="0.75rem"
+                backgroundColor="white"
+                borderRadius="0.375rem"
+                cursor="pointer"
+                whileHover={{ backgroundColor: '#f1f5f9' }}
+              >
+                <Box
+                  as="input"
+                  type="checkbox"
+                  checked={data.offerCribs}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                    handleLayoutChange('offerCribs', e.target.checked)
+                  }
+                  accentColor="#3182ce"
+                  width="1.25rem"
+                  height="1.25rem"
+                />
+                <Box display="flex" alignItems="center" gap="0.5rem">
+                  <FaBaby color="#10b981" />
+                  <Box fontSize="1rem" color="#374151" fontWeight="500">
+                    Offer cribs for infants
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* Rooms and Beds */}
         <Box>
-          <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1rem">
-            <Box fontSize="1rem" fontWeight="500" color="#374151">
-              Rooms and Sleeping Arrangements (Optional)
+          <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1.5rem">
+            <Box display="flex" alignItems="center" gap="0.5rem">
+              <FaHome color="#3182ce" />
+              <Box fontSize="1.125rem" fontWeight="600" color="#374151">
+                Rooms and Sleeping Arrangements (Optional)
+              </Box>
             </Box>
             <Box
               as="button"
               onClick={addRoom}
-              padding="0.5rem 1rem"
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
+              padding="0.75rem 1.25rem"
               backgroundColor="#3182ce"
               color="white"
               border="none"
-              borderRadius="0.375rem"
-              fontSize="0.875rem"
+              borderRadius="0.5rem"
+              fontSize="1rem"
+              fontWeight="500"
               cursor="pointer"
-              whileHover={{ backgroundColor: '#2c5aa0' }}
+              whileHover={{ backgroundColor: '#2c5aa0', transform: 'translateY(-1px)' }}
+              boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
             >
+              <FaPlus size="0.875rem" />
               Add Room
             </Box>
           </Box>
@@ -232,61 +332,90 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
           {data.rooms?.map((room: any, roomIndex: number) => (
             <Box
               key={roomIndex}
-              border="1px solid #e5e7eb"
-              borderRadius="0.5rem"
-              padding="1rem"
-              marginBottom="1rem"
+              border="2px solid #e2e8f0"
+              borderRadius="0.75rem"
+              padding="1.5rem"
+              marginBottom="1.5rem"
+              backgroundColor="white"
+              boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
             >
-              <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1rem">
-                <Box
-                  as="input"
-                  type="text"
-                  value={room.spaceName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                    handleRoomChange(roomIndex, 'spaceName', e.target.value)
-                  }
-                  placeholder={`Room ${roomIndex + 1} name (e.g., Master bedroom, Living room)`}
-                  flex="1"
-                  padding="0.5rem"
-                  border="1px solid #d1d5db"
-                  borderRadius="0.375rem"
-                  fontSize="0.875rem"
-                  whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
-                />
+              <Box 
+                display="flex" 
+                flexDirection="column" 
+                gap="1rem" 
+                marginBottom="1.5rem"
+              >
+                <Box flex="1">
+                  <Box
+                    as="input"
+                    type="text"
+                    value={room.spaceName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                      handleRoomChange(roomIndex, 'spaceName', e.target.value)
+                    }
+                    placeholder={`Room ${roomIndex + 1} name (e.g., Master bedroom, Living room)`}
+                    width="100%"
+                    padding="1rem"
+                    border="2px solid #e5e7eb"
+                    borderRadius="0.5rem"
+                    fontSize="1rem"
+                    backgroundColor="#f9fafb"
+                    whileFocus={{ 
+                      borderColor: '#3182ce', 
+                      outline: 'none',
+                      backgroundColor: 'white',
+                      boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
+                    }}
+                  />
+                </Box>
                 <Box
                   as="button"
                   onClick={() => removeRoom(roomIndex)}
-                  marginLeft="0.5rem"
-                  padding="0.5rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="0.5rem"
+                  padding="0.75rem 1rem"
                   backgroundColor="#dc2626"
                   color="white"
                   border="none"
-                  borderRadius="0.375rem"
-                  fontSize="0.75rem"
+                  borderRadius="0.5rem"
+                  fontSize="0.875rem"
+                  fontWeight="500"
                   cursor="pointer"
-                  whileHover={{ backgroundColor: '#b91c1c' }}
+                  whileHover={{ backgroundColor: '#b91c1c', transform: 'translateY(-1px)' }}
+                  boxShadow="0 2px 4px rgba(220, 38, 38, 0.2)"
                 >
-                  Remove
+                  <FaTrash size="0.75rem" />
+                  Remove Room
                 </Box>
               </Box>
 
-              <Box marginBottom="0.5rem">
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151">
-                    Beds in this room:
+              <Box marginBottom="1rem">
+                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1rem">
+                  <Box display="flex" alignItems="center" gap="0.5rem">
+                    <FaBed color="#10b981" />
+                    <Box fontSize="1rem" fontWeight="600" color="#374151">
+                      Beds in this room:
+                    </Box>
                   </Box>
                   <Box
                     as="button"
                     onClick={() => addBed(roomIndex)}
-                    padding="0.25rem 0.5rem"
+                    display="flex"
+                    alignItems="center"
+                    gap="0.5rem"
+                    padding="0.5rem 1rem"
                     backgroundColor="#10b981"
                     color="white"
                     border="none"
-                    borderRadius="0.25rem"
-                    fontSize="0.75rem"
+                    borderRadius="0.375rem"
+                    fontSize="0.875rem"
+                    fontWeight="500"
                     cursor="pointer"
-                    whileHover={{ backgroundColor: '#059669' }}
+                    whileHover={{ backgroundColor: '#059669', transform: 'translateY(-1px)' }}
+                    boxShadow="0 2px 4px rgba(16, 185, 129, 0.2)"
                   >
+                    <FaPlus size="0.75rem" />
                     Add Bed
                   </Box>
                 </Box>
@@ -295,58 +424,100 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               {room.beds?.map((bed: any, bedIndex: number) => (
                 <Box
                   key={bedIndex}
-                  display="flex"
-                  alignItems="center"
-                  gap="0.5rem"
-                  marginBottom="0.5rem"
-                  padding="0.5rem"
-                  backgroundColor="#f9fafb"
-                  borderRadius="0.25rem"
+                  padding="1rem"
+                  marginBottom="1rem"
+                  backgroundColor="#f8fafc"
+                  border="2px solid #e2e8f0"
+                  borderRadius="0.5rem"
                 >
-                  <Box
-                    as="select"
-                    value={bed.typeOfBed}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => 
-                      handleBedChange(roomIndex, bedIndex, 'typeOfBed', e.target.value)
-                    }
-                    flex="1"
-                    padding="0.25rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.25rem"
-                    fontSize="0.75rem"
-                  >
-                    {bedTypes.map(type => (
-                      <option key={type} value={type}>{BedTypeLabels[type]}</option>
-                    ))}
-                  </Box>
-                  <Box
-                    as="input"
-                    type="number"
-                    min="1"
-                    max="4"
-                    value={bed.numberOfBed}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                      handleBedChange(roomIndex, bedIndex, 'numberOfBed', parseInt(e.target.value) || 1)
-                    }
-                    width="60px"
-                    padding="0.25rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.25rem"
-                    fontSize="0.75rem"
-                  />
-                  <Box
-                    as="button"
-                    onClick={() => removeBed(roomIndex, bedIndex)}
-                    padding="0.25rem"
-                    backgroundColor="#dc2626"
-                    color="white"
-                    border="none"
-                    borderRadius="0.25rem"
-                    fontSize="0.75rem"
-                    cursor="pointer"
-                    whileHover={{ backgroundColor: '#b91c1c' }}
-                  >
-                    ×
+                  <Box display="flex" flexDirection="column" gap="1rem">
+                    {/* Bed Type Selection */}
+                    <Box>
+                      <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                        Bed Type
+                      </Box>
+                      <SelectionPicker
+                        data={bedTypeOptions}
+                        idAccessor={(item) => item.id}
+                        value={bed.typeOfBed}
+                        onChange={(value) => handleBedChange(roomIndex, bedIndex, 'typeOfBed', value)}
+                        renderItem={(item, isSelected) => (
+                          <Box
+                            padding="0.75rem"
+                            borderRadius="0.375rem"
+                            backgroundColor={isSelected ? '#3182ce' : 'white'}
+                            color={isSelected ? 'white' : '#374151'}
+                            fontWeight={isSelected ? '500' : '400'}
+                            border={isSelected ? 'none' : '1px solid #e5e7eb'}
+                            cursor="pointer"
+                            whileHover={{ 
+                              backgroundColor: isSelected ? '#2c5aa0' : '#f1f5f9',
+                              transform: 'translateY(-1px)'
+                            }}
+                          >
+                            {item.label}
+                          </Box>
+                        )}
+                        gap="0.5rem"
+                        marginBottom="0.5rem"
+                      />
+                    </Box>
+
+                    {/* Number of Beds Selection */}
+                    <Box>
+                      <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                        Number of Beds
+                      </Box>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <SelectionPicker
+                          data={bedNumberOptions}
+                          idAccessor={(item) => item.id}
+                          value={bed.numberOfBed}
+                          onChange={(value) => handleBedChange(roomIndex, bedIndex, 'numberOfBed', value)}
+                          renderItem={(item, isSelected) => (
+                            <Box
+                              padding="0.75rem"
+                              borderRadius="0.375rem"
+                              backgroundColor={isSelected ? '#10b981' : 'white'}
+                              color={isSelected ? 'white' : '#374151'}
+                              fontWeight={isSelected ? '600' : '400'}
+                              border={isSelected ? 'none' : '1px solid #e5e7eb'}
+                              cursor="pointer"
+                              minWidth="3rem"
+                              textAlign="center"
+                              whileHover={{ 
+                                backgroundColor: isSelected ? '#059669' : '#f1f5f9',
+                                transform: 'translateY(-1px)'
+                              }}
+                            >
+                              {item.label}
+                            </Box>
+                          )}
+                          gap="0.5rem"
+                          flex="1"
+                          marginRight="1rem"
+                        />
+                        
+                        <Box
+                          as="button"
+                          onClick={() => removeBed(roomIndex, bedIndex)}
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          width="2.5rem"
+                          height="2.5rem"
+                          backgroundColor="#dc2626"
+                          color="white"
+                          border="none"
+                          borderRadius="50%"
+                          cursor="pointer"
+                          whileHover={{ backgroundColor: '#b91c1c', transform: 'scale(1.1)' }}
+                          boxShadow="0 2px 4px rgba(220, 38, 38, 0.2)"
+                        >
+                          <FaTimes size="0.875rem" />
+                        </Box>
+                      </Box>
+                    </Box>
                   </Box>
                 </Box>
               ))}
@@ -362,20 +533,26 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
         alignItems="center"
         marginTop="3rem"
         paddingTop="2rem"
-        borderTop="1px solid #e5e7eb"
+        borderTop="2px solid #e2e8f0"
       >
         <Box>
           <Box
             as="button"
             onClick={onPrevious}
-            padding="0.75rem 1.5rem"
+            padding="1rem 2rem"
             backgroundColor="transparent"
             color="#6b7280"
-            border="1px solid #d1d5db"
-            borderRadius="0.375rem"
+            border="2px solid #d1d5db"
+            borderRadius="0.5rem"
             fontSize="1rem"
+            fontWeight="500"
             cursor="pointer"
-            whileHover={{ borderColor: '#9ca3af', backgroundColor: '#f9fafb' }}
+            whileHover={{ 
+              borderColor: '#9ca3af', 
+              backgroundColor: '#f9fafb',
+              transform: 'translateY(-1px)'
+            }}
+            boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
           >
             Previous
           </Box>
@@ -386,15 +563,19 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             as="button"
             onClick={onNext}
             disabled={!isValid || loading}
-            padding="0.75rem 2rem"
+            padding="1rem 2rem"
             backgroundColor={isValid ? '#3182ce' : '#9ca3af'}
             color="white"
             border="none"
-            borderRadius="0.375rem"
+            borderRadius="0.5rem"
             fontSize="1rem"
-            fontWeight="500"
+            fontWeight="600"
             cursor={isValid ? 'pointer' : 'not-allowed'}
-            whileHover={isValid ? { backgroundColor: '#2c5aa0' } : {}}
+            whileHover={isValid ? { 
+              backgroundColor: '#2c5aa0',
+              transform: 'translateY(-1px)'
+            } : {}}
+            boxShadow={isValid ? '0 4px 8px rgba(49, 130, 206, 0.2)' : 'none'}
           >
             {loading ? 'Saving...' : 'Next'}
           </Box>
