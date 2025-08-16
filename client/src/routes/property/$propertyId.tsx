@@ -3,6 +3,32 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchPropertyById, clearError } from '../../store/slices/propertySlice'
 import { Box } from '../../components/Box'
+import { 
+  FaUserFriends, 
+  FaBath, 
+  FaRulerCombined, 
+  FaHome,
+  FaCreditCard,
+  FaChild,
+  FaBaby,
+  FaSmokingBan,
+  FaSmoking,
+  FaGlassCheers,
+  FaBan,
+  FaPaw,
+  FaQuestionCircle,
+  FaUtensils,
+  FaCar,
+  FaGlobe,
+  FaDollarSign,
+  FaTag,
+  FaConciergeBell,
+  FaMapMarkerAlt,
+  FaStar,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaTimesCircle
+} from 'react-icons/fa'
 
 export const Route = createFileRoute('/property/$propertyId')({
   component: PropertyDetailsPage,
@@ -346,7 +372,8 @@ function PropertyDetailsPage() {
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
               <Box backgroundColor="white" borderRadius="0.75rem" padding="2rem" marginBottom="2rem">
-                <Box fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                  <FaStar color="#3182ce" />
                   Amenities
                 </Box>
                 <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap="0.75rem">
@@ -360,7 +387,7 @@ function PropertyDetailsPage() {
                       backgroundColor="#f9fafb"
                       borderRadius="0.375rem"
                     >
-                      <Box fontSize="1.25rem">✓</Box>
+                      <FaCheckCircle color="#10b981" size="1rem" />
                       <Box fontSize="0.875rem" color="#374151">
                         {amenity.name}
                       </Box>
@@ -372,24 +399,39 @@ function PropertyDetailsPage() {
 
             {/* House Rules */}
             <Box backgroundColor="white" borderRadius="0.75rem" padding="2rem">
-              <Box fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                <FaHome color="#3182ce" />
                 House Rules
               </Box>
               <Box display="flex" flexDirection="column" gap="0.75rem">
                 <Box display="flex" alignItems="center" gap="0.75rem">
-                  <Box fontSize="1rem">{property.smokingAllowed ? '✓' : '✗'}</Box>
+                  {property.smokingAllowed ? (
+                    <FaSmoking color="#f59e0b" size="1rem" />
+                  ) : (
+                    <FaSmokingBan color="#ef4444" size="1rem" />
+                  )}
                   <Box fontSize="0.875rem" color="#374151">
                     Smoking {property.smokingAllowed ? 'allowed' : 'not allowed'}
                   </Box>
                 </Box>
                 <Box display="flex" alignItems="center" gap="0.75rem">
-                  <Box fontSize="1rem">{property.partiesOrEventsAllowed ? '✓' : '✗'}</Box>
+                  {property.partiesOrEventsAllowed ? (
+                    <FaGlassCheers color="#10b981" size="1rem" />
+                  ) : (
+                    <FaBan color="#ef4444" size="1rem" />
+                  )}
                   <Box fontSize="0.875rem" color="#374151">
                     Parties or events {property.partiesOrEventsAllowed ? 'allowed' : 'not allowed'}
                   </Box>
                 </Box>
                 <Box display="flex" alignItems="center" gap="0.75rem">
-                  <Box fontSize="1rem">🐕</Box>
+                  {property.petsAllowed === 'Yes' ? (
+                    <FaPaw color="#10b981" size="1rem" />
+                  ) : property.petsAllowed === 'No' ? (
+                    <FaBan color="#ef4444" size="1rem" />
+                  ) : (
+                    <FaQuestionCircle color="#f59e0b" size="1rem" />
+                  )}
                   <Box fontSize="0.875rem" color="#374151">
                     Pets: {property.petsAllowed === 'Yes' ? 'Allowed' : property.petsAllowed === 'No' ? 'Not allowed' : 'Upon request'}
                   </Box>
@@ -407,33 +449,54 @@ function PropertyDetailsPage() {
               </Box>
               
               <Box display="flex" flexDirection="column" gap="1rem">
-                <Box display="flex" justifyContent="space-between">
-                  <Box color="#6b7280">Guests</Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                    <FaUserFriends color="#3182ce" />
+                    Guests
+                  </Box>
                   <Box fontWeight="500">{property.maximumGuest}</Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between">
-                  <Box color="#6b7280">Bathrooms</Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                    <FaBath color="#3182ce" />
+                    Bathrooms
+                  </Box>
                   <Box fontWeight="500">{property.bathrooms}</Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between">
-                  <Box color="#6b7280">Property Size</Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                    <FaRulerCombined color="#3182ce" />
+                    Property Size
+                  </Box>
                   <Box fontWeight="500">{property.propertySizeSqMtr} sqm</Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between">
-                  <Box color="#6b7280">Booking Type</Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                    <FaCalendarAlt color="#3182ce" />
+                    Booking Type
+                  </Box>
                   <Box fontWeight="500">{property.bookingType}</Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between">
-                  <Box color="#6b7280">Payment</Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                    <FaCreditCard color="#3182ce" />
+                    Payment
+                  </Box>
                   <Box fontWeight="500">{property.paymentType}</Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between">
-                  <Box color="#6b7280">Children</Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                    <FaChild color="#3182ce" />
+                    Children
+                  </Box>
                   <Box fontWeight="500">{property.allowChildren ? 'Allowed' : 'Not allowed'}</Box>
                 </Box>
                 {property.offerCribs && (
-                  <Box display="flex" justifyContent="space-between">
-                    <Box color="#6b7280">Cribs</Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                      <FaBaby color="#3182ce" />
+                      Cribs
+                    </Box>
                     <Box fontWeight="500">Available</Box>
                   </Box>
                 )}
@@ -443,13 +506,17 @@ function PropertyDetailsPage() {
             {/* Pricing */}
             {property.pricing && (
               <Box backgroundColor="white" borderRadius="0.75rem" padding="2rem" marginBottom="1.5rem">
-                <Box fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                  <FaDollarSign color="#3182ce" />
                   Pricing
                 </Box>
                 
                 <Box display="flex" flexDirection="column" gap="1rem">
                   <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box color="#6b7280">Rate per night</Box>
+                    <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                      <FaDollarSign color="#10b981" size="0.875rem" />
+                      Rate per night
+                    </Box>
                     <Box fontSize="1.125rem" fontWeight="600" color="#059669">
                       {property.pricing.currency} {property.pricing.ratePerNight}
                     </Box>
@@ -457,7 +524,10 @@ function PropertyDetailsPage() {
                   
                   {property.pricing.ratePerNightWeekend && (
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box color="#6b7280">Weekend rate</Box>
+                      <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                        <FaDollarSign color="#f59e0b" size="0.875rem" />
+                        Weekend rate
+                      </Box>
                       <Box fontSize="1.125rem" fontWeight="600" color="#059669">
                         {property.pricing.currency} {property.pricing.ratePerNightWeekend}
                       </Box>
@@ -466,7 +536,10 @@ function PropertyDetailsPage() {
 
                   {property.pricing.discountPercentageForWeeklyRatePlan && (
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box color="#6b7280">Weekly discount</Box>
+                      <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                        <FaTag color="#dc2626" size="0.875rem" />
+                        Weekly discount
+                      </Box>
                       <Box fontSize="0.875rem" fontWeight="500" color="#dc2626">
                         -{property.pricing.discountPercentageForWeeklyRatePlan}%
                       </Box>
@@ -478,26 +551,40 @@ function PropertyDetailsPage() {
 
             {/* Services */}
             <Box backgroundColor="white" borderRadius="0.75rem" padding="2rem" marginBottom="1.5rem">
-              <Box fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                <FaConciergeBell color="#3182ce" />
                 Services
               </Box>
               
               <Box display="flex" flexDirection="column" gap="0.75rem">
                 <Box display="flex" alignItems="center" gap="0.75rem">
-                  <Box fontSize="1rem">{property.serveBreakfast ? '✓' : '✗'}</Box>
+                  {property.serveBreakfast ? (
+                    <FaCheckCircle color="#10b981" size="1rem" />
+                  ) : (
+                    <FaTimesCircle color="#ef4444" size="1rem" />
+                  )}
+                  <FaUtensils color="#3182ce" size="0.875rem" />
                   <Box fontSize="0.875rem" color="#374151">
                     Breakfast {property.serveBreakfast ? 'included' : 'not included'}
                   </Box>
                 </Box>
                 <Box display="flex" alignItems="center" gap="0.75rem">
-                  <Box fontSize="1rem">🅿️</Box>
+                  {property.parking === 'YesFree' ? (
+                    <FaCheckCircle color="#10b981" size="1rem" />
+                  ) : property.parking === 'YesPaid' ? (
+                    <FaCheckCircle color="#f59e0b" size="1rem" />
+                  ) : (
+                    <FaTimesCircle color="#ef4444" size="1rem" />
+                  )}
+                  <FaCar color="#3182ce" size="0.875rem" />
                   <Box fontSize="0.875rem" color="#374151">
                     Parking: {property.parking === 'YesFree' ? 'Free' : property.parking === 'YesPaid' ? 'Paid' : 'Not available'}
                   </Box>
                 </Box>
                 {property.languages && property.languages.length > 0 && (
                   <Box display="flex" alignItems="center" gap="0.75rem">
-                    <Box fontSize="1rem">🗣️</Box>
+                    <FaCheckCircle color="#10b981" size="1rem" />
+                    <FaGlobe color="#3182ce" size="0.875rem" />
                     <Box fontSize="0.875rem" color="#374151">
                       Languages: {property.languages.join(', ')}
                     </Box>
@@ -508,7 +595,8 @@ function PropertyDetailsPage() {
 
             {/* Address */}
             <Box backgroundColor="white" borderRadius="0.75rem" padding="2rem">
-              <Box fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.25rem" fontWeight="600" color="#1a202c" marginBottom="1rem">
+                <FaMapMarkerAlt color="#3182ce" />
                 Location
               </Box>
               

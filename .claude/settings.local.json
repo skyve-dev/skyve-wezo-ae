@@ -39,6 +39,9 @@
       "Bash(true)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "C:\\c\\Users\\arif\\WebstormProjects\\skyve-wezo-ae"
+    ]
   }
 }

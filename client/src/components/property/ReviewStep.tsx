@@ -2,6 +2,16 @@ import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
 import { BookingType, PaymentType } from '../../constants/propertyEnums'
+import { 
+  FaHome, 
+  FaMapMarkerAlt, 
+  FaRulerCombined, 
+  FaStar, 
+  FaConciergeBell, 
+  FaClipboardList, 
+  FaDollarSign,
+  FaImage
+} from 'react-icons/fa'
 
 interface ReviewStepProps {
   data: WizardFormData
@@ -36,7 +46,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
       <Box display="flex" flexDirection="column" gap="2rem">
         {/* Basic Information */}
         <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaHome color="#3182ce" />
             Basic Information
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
@@ -63,7 +74,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {/* Location */}
         <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaMapMarkerAlt color="#3182ce" />
             Location
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
@@ -98,7 +110,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {/* Layout */}
         <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaRulerCombined color="#3182ce" />
             Layout
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
@@ -132,7 +145,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         {/* Amenities */}
         {data.amenities && data.amenities.length > 0 && (
           <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-            <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+              <FaStar color="#3182ce" />
               Amenities ({data.amenities.length})
             </Box>
             <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr', Md: '1fr 1fr 1fr' }} gap="0.5rem">
@@ -148,7 +162,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         {/* Photos */}
         {data.photos && data.photos.length > 0 && (
           <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-            <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+              <FaImage color="#3182ce" />
               Photos ({data.photos.length})
             </Box>
             <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr 1fr', Md: '1fr 1fr 1fr 1fr' }} gap="0.5rem">
@@ -176,7 +191,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {/* Services */}
         <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaConciergeBell color="#3182ce" />
             Services
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
@@ -201,7 +217,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
         {/* Rules */}
         <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-          <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaClipboardList color="#3182ce" />
             House Rules
           </Box>
           <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
@@ -233,7 +250,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         {/* Pricing */}
         {data.pricing && (
           <Box border="1px solid #e5e7eb" borderRadius="0.5rem" padding="1.5rem">
-            <Box fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1.125rem" fontWeight="500" color="#374151" marginBottom="1rem">
+              <FaDollarSign color="#3182ce" />
               Pricing
             </Box>
             <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">

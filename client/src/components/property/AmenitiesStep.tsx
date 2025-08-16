@@ -10,7 +10,38 @@ import {
   shouldShowSearch, 
   getDrawerHeight 
 } from '../../utils/selectionUtils'
-import { FaHome, FaSearch, FaFilter } from 'react-icons/fa'
+import { 
+  FaHome, 
+  FaSearch, 
+  FaFilter,
+  FaWifi,
+  FaSnowflake,
+  FaUtensils,
+  FaCar,
+  FaTshirt,
+  FaTv,
+  FaFire,
+  FaSwimmingPool,
+  FaHotTub,
+  FaDumbbell,
+  FaFireAlt,
+  FaTree,
+  FaCouch,
+  FaMusic,
+  FaBuilding,
+  FaLeaf,
+  FaUmbrellaBeach,
+  FaWater,
+  FaMountain,
+  FaCity,
+  FaShieldAlt,
+  FaExclamationTriangle,
+  FaBriefcaseMedical,
+  FaVideo,
+  FaLock,
+  FaWarehouse,
+  FaDoorOpen
+} from 'react-icons/fa'
 
 interface AmenitiesStepProps {
   data: WizardFormData
@@ -21,6 +52,55 @@ interface AmenitiesStepProps {
   loading: boolean
   isFirstStep: boolean
   isLastStep: boolean
+}
+
+// Icon mapping for amenities
+const getAmenityIcon = (amenityId: string) => {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    // Basic Amenities
+    'wifi': FaWifi,
+    'air-conditioning': FaSnowflake,
+    'kitchen': FaUtensils,
+    'free-parking': FaCar,
+    'washer': FaTshirt,
+    'dryer': FaTshirt,
+    'tv': FaTv,
+    'heating': FaFire,
+    
+    // Features
+    'pool': FaSwimmingPool,
+    'hot-tub': FaHotTub,
+    'gym': FaDumbbell,
+    'bbq-grill': FaFireAlt,
+    'fire-pit': FaFireAlt,
+    'outdoor-furniture': FaCouch,
+    'indoor-fireplace': FaFire,
+    'piano': FaMusic,
+    'balcony': FaBuilding,
+    'garden': FaLeaf,
+    
+    // Location & Views
+    'beachfront': FaUmbrellaBeach,
+    'waterfront': FaWater,
+    'mountain-view': FaMountain,
+    'ocean-view': FaWater,
+    'lake-view': FaWater,
+    'city-view': FaCity,
+    'garden-view': FaTree,
+    'desert-view': FaMountain,
+    
+    // Safety & Security
+    'smoke-alarm': FaExclamationTriangle,
+    'carbon-monoxide-alarm': FaExclamationTriangle,
+    'first-aid-kit': FaBriefcaseMedical,
+    'fire-extinguisher': FaShieldAlt,
+    'security-cameras': FaVideo,
+    'lockbox': FaLock,
+    'safe': FaWarehouse,
+    'private-entrance': FaDoorOpen
+  }
+  
+  return iconMap[amenityId] || FaHome
 }
 
 // Group amenities by category for organized display
@@ -99,32 +179,39 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                 value={selectedAmenityIds}
                 onChange={(values) => handleAmenitySelection(values as string[])}
                 isMultiSelect={true}
-                renderItem={(amenity, isSelected) => (
-                  <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
-                    <Box
-                      fontSize="0.875rem"
-                      fontWeight={isSelected ? '600' : '400'}
-                      color={amenity.essential ? '#f59e0b' : '#374151'}
-                      flex="1"
-                    >
-                      {amenity.name}
-                      {amenity.essential && (
-                        <Box
-                          as="span"
-                          fontSize="0.625rem"
-                          fontWeight="700"
-                          color="#f59e0b"
-                          backgroundColor="#fef3c7"
-                          padding="0.125rem 0.375rem"
-                          borderRadius="0.75rem"
-                          marginLeft="0.5rem"
-                        >
-                          ESSENTIAL
-                        </Box>
-                      )}
+                renderItem={(amenity, isSelected) => {
+                  const IconComponent = getAmenityIcon(amenity.id)
+                  return (
+                    <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+                      <IconComponent 
+                        color={isSelected ? '#3182ce' : (amenity.essential ? '#f59e0b' : '#6b7280')} 
+                        size="1.25rem"
+                      />
+                      <Box
+                        fontSize="0.875rem"
+                        fontWeight={isSelected ? '600' : '400'}
+                        color={amenity.essential ? '#f59e0b' : '#374151'}
+                        flex="1"
+                      >
+                        {amenity.name}
+                        {amenity.essential && (
+                          <Box
+                            as="span"
+                            fontSize="0.625rem"
+                            fontWeight="700"
+                            color="#f59e0b"
+                            backgroundColor="#fef3c7"
+                            padding="0.125rem 0.375rem"
+                            borderRadius="0.75rem"
+                            marginLeft="0.5rem"
+                          >
+                            ESSENTIAL
+                          </Box>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                )}
+                  )
+                }}
                 containerStyles={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -276,35 +363,42 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                 value={selectedAmenityIds}
                 onChange={(values) => handleAmenitySelection(values as string[])}
                 isMultiSelect={true}
-                renderItem={(amenity, isSelected) => (
-                  <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
-                    <Box
-                      fontSize="0.875rem"
-                      fontWeight={isSelected ? '600' : '400'}
-                      color={amenity.essential ? '#f59e0b' : '#374151'}
-                      flex="1"
-                    >
-                      {amenity.name}
-                      {amenity.essential && (
-                        <Box
-                          as="span"
-                          fontSize="0.625rem"
-                          fontWeight="700"
-                          color="#f59e0b"
-                          backgroundColor="#fef3c7"
-                          padding="0.125rem 0.375rem"
-                          borderRadius="0.75rem"
-                          marginLeft="0.5rem"
-                        >
-                          ESSENTIAL
-                        </Box>
-                      )}
+                renderItem={(amenity, isSelected) => {
+                  const IconComponent = getAmenityIcon(amenity.id)
+                  return (
+                    <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+                      <IconComponent 
+                        color={isSelected ? '#3182ce' : (amenity.essential ? '#f59e0b' : '#6b7280')} 
+                        size="1.25rem"
+                      />
+                      <Box
+                        fontSize="0.875rem"
+                        fontWeight={isSelected ? '600' : '400'}
+                        color={amenity.essential ? '#f59e0b' : '#374151'}
+                        flex="1"
+                      >
+                        {amenity.name}
+                        {amenity.essential && (
+                          <Box
+                            as="span"
+                            fontSize="0.625rem"
+                            fontWeight="700"
+                            color="#f59e0b"
+                            backgroundColor="#fef3c7"
+                            padding="0.125rem 0.375rem"
+                            borderRadius="0.75rem"
+                            marginLeft="0.5rem"
+                          >
+                            ESSENTIAL
+                          </Box>
+                        )}
+                      </Box>
+                      <Box fontSize="0.75rem" color="#6b7280">
+                        {amenity.category}
+                      </Box>
                     </Box>
-                    <Box fontSize="0.75rem" color="#6b7280">
-                      {amenity.category}
-                    </Box>
-                  </Box>
-                )}
+                  )
+                }}
                 containerStyles={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',

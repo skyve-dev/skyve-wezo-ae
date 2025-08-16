@@ -3,6 +3,17 @@ import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
 import TimePicker from '../TimePicker'
 import { PetPolicy, PetPolicyLabels } from '../../constants/propertyEnums'
+import { 
+  FaSmokingBan, 
+  FaSmoking, 
+  FaGlassCheers, 
+  FaBan, 
+  FaPaw, 
+  FaQuestionCircle,
+  FaClock,
+  FaSignInAlt,
+  FaSignOutAlt
+} from 'react-icons/fa'
 
 interface RulesStepProps {
   data: WizardFormData
@@ -71,7 +82,17 @@ const RulesStep: React.FC<RulesStepProps> = ({
             General Rules
           </Box>
           <Box display="flex" flexDirection="column" gap="1rem">
-            <Box display="flex" alignItems="center" gap="0.75rem">
+            <Box 
+              as="label"
+              display="flex" 
+              alignItems="center" 
+              gap="1rem"
+              padding="0.75rem"
+              backgroundColor="white"
+              borderRadius="0.375rem"
+              cursor="pointer"
+              whileHover={{ backgroundColor: '#f1f5f9' }}
+            >
               <Box
                 as="input"
                 type="checkbox"
@@ -80,18 +101,40 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   handleRuleChange('smokingAllowed', e.target.checked)
                 }
                 accentColor="#3182ce"
+                width="1.25rem"
+                height="1.25rem"
               />
-              <Box>
-                <Box fontSize="0.875rem" color="#374151" fontWeight="500">
-                  Smoking allowed
-                </Box>
-                <Box fontSize="0.75rem" color="#6b7280">
-                  Guests are permitted to smoke in the property
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                {data.smokingAllowed ? (
+                  <FaSmoking color="#f59e0b" size="1.25rem" />
+                ) : (
+                  <FaSmokingBan color="#ef4444" size="1.25rem" />
+                )}
+                <Box>
+                  <Box fontSize="1rem" color="#374151" fontWeight="500">
+                    {data.smokingAllowed ? 'Smoking allowed' : 'No smoking'}
+                  </Box>
+                  <Box fontSize="0.875rem" color="#6b7280">
+                    {data.smokingAllowed 
+                      ? 'Guests are permitted to smoke in the property'
+                      : 'Smoking is not allowed in the property'
+                    }
+                  </Box>
                 </Box>
               </Box>
             </Box>
 
-            <Box display="flex" alignItems="center" gap="0.75rem">
+            <Box 
+              as="label"
+              display="flex" 
+              alignItems="center" 
+              gap="1rem"
+              padding="0.75rem"
+              backgroundColor="white"
+              borderRadius="0.375rem"
+              cursor="pointer"
+              whileHover={{ backgroundColor: '#f1f5f9' }}
+            >
               <Box
                 as="input"
                 type="checkbox"
@@ -100,13 +143,25 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   handleRuleChange('partiesOrEventsAllowed', e.target.checked)
                 }
                 accentColor="#3182ce"
+                width="1.25rem"
+                height="1.25rem"
               />
-              <Box>
-                <Box fontSize="0.875rem" color="#374151" fontWeight="500">
-                  Parties and events allowed
-                </Box>
-                <Box fontSize="0.75rem" color="#6b7280">
-                  Guests can organize parties or events at the property
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                {data.partiesOrEventsAllowed ? (
+                  <FaGlassCheers color="#10b981" size="1.25rem" />
+                ) : (
+                  <FaBan color="#ef4444" size="1.25rem" />
+                )}
+                <Box>
+                  <Box fontSize="1rem" color="#374151" fontWeight="500">
+                    {data.partiesOrEventsAllowed ? 'Parties and events allowed' : 'No parties or events'}
+                  </Box>
+                  <Box fontSize="0.875rem" color="#6b7280">
+                    {data.partiesOrEventsAllowed 
+                      ? 'Guests can organize parties or events at the property'
+                      : 'Parties and events are not allowed at the property'
+                    }
+                  </Box>
                 </Box>
               </Box>
             </Box>
@@ -141,7 +196,10 @@ const RulesStep: React.FC<RulesStepProps> = ({
                       accentColor="#3182ce"
                     />
                     <Box>
-                      <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                      <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" color="#374151" fontWeight="500">
+                        {policy === PetPolicy.Yes && <FaPaw color="#10b981" />}
+                        {policy === PetPolicy.No && <FaBan color="#ef4444" />}
+                        {policy === PetPolicy.UponRequest && <FaQuestionCircle color="#f59e0b" />}
                         {PetPolicyLabels[policy]}
                       </Box>
                       <Box fontSize="0.75rem" color="#6b7280">
@@ -159,12 +217,14 @@ const RulesStep: React.FC<RulesStepProps> = ({
 
         {/* Check-in/Check-out Times */}
         <Box>
-          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            <FaClock color="#3182ce" />
             Check-in and Check-out Times
           </Box>
           <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
             <Box>
-              <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                <FaSignInAlt color="#10b981" />
                 Check-in
               </Box>
               <Box display="flex" alignItems="center" gap="0.5rem">
@@ -190,7 +250,8 @@ const RulesStep: React.FC<RulesStepProps> = ({
             </Box>
 
             <Box>
-              <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                <FaSignOutAlt color="#ef4444" />
                 Check-out
               </Box>
               <Box display="flex" alignItems="center" gap="0.5rem">

@@ -7,7 +7,15 @@ import SelectionPicker from '../SelectionPicker'
 import SlidingDrawer from '../SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
 import { UAE_EMIRATES, getSelectionPattern, getResponsiveColumns } from '../../utils/selectionUtils'
-import { FaMapMarkerAlt, FaSearch } from 'react-icons/fa'
+import { 
+  FaMapMarkerAlt, 
+  FaSearch, 
+  FaGlobe, 
+  FaCity, 
+  FaMailBulk,
+  FaBuilding,
+  FaLocationArrow
+} from 'react-icons/fa'
 
 // Fix for default markers
 import 'leaflet/dist/leaflet.css'
@@ -139,12 +147,15 @@ const LocationStep: React.FC<LocationStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaCity color="#3182ce" />
             Emirate/City *
 
             {`Selected Emirate ${selectedEmirate}`}
@@ -267,12 +278,15 @@ const LocationStep: React.FC<LocationStepProps> = ({
           <Box>
             <Box
               as="label"
-              display="block"
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
               fontSize="0.875rem"
               fontWeight="500"
               color="#374151"
-              marginBottom="0.5rem"
+              marginBottom="0.75rem"
             >
+              <FaMailBulk color="#3182ce" />
               ZIP/Postal Code *
             </Box>
             <Box
@@ -295,12 +309,15 @@ const LocationStep: React.FC<LocationStepProps> = ({
           <Box>
             <Box
               as="label"
-              display="block"
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
               fontSize="0.875rem"
               fontWeight="500"
               color="#374151"
-              marginBottom="0.5rem"
+              marginBottom="0.75rem"
             >
+              <FaBuilding color="#3182ce" />
               Area/District (Optional)
             </Box>
             <Box
@@ -324,12 +341,15 @@ const LocationStep: React.FC<LocationStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaGlobe color="#3182ce" />
             Country/Region
           </Box>
           <Box
@@ -355,12 +375,15 @@ const LocationStep: React.FC<LocationStepProps> = ({
         <Box>
           <Box
             as="label"
-            display="block"
+            display="flex"
+            alignItems="center"
+            gap="0.5rem"
             fontSize="0.875rem"
             fontWeight="500"
             color="#374151"
-            marginBottom="0.5rem"
+            marginBottom="0.75rem"
           >
+            <FaLocationArrow color="#3182ce" />
             Search for Exact Location (Optional)
           </Box>
           <Box display="flex" gap="0.5rem">
