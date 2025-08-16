@@ -248,9 +248,9 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
           <Box
             as="input"
             type="date"
-            value={data.firstDateGuestCanCheckIn ? new Date(data.firstDateGuestCanCheckIn).toISOString().split('T')[0] : ''}
+            value={data.firstDateGuestCanCheckIn ? data.firstDateGuestCanCheckIn.split('T')[0] : ''}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              onChange({ firstDateGuestCanCheckIn: new Date(e.target.value) })
+              onChange({ firstDateGuestCanCheckIn: e.target.value })
             }
             min={new Date().toISOString().split('T')[0]}
             width="100%"

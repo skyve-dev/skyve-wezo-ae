@@ -123,16 +123,16 @@ export interface Property {
   cancellation?: Cancellation
   aboutTheProperty?: string
   aboutTheNeighborhood?: string
-  firstDateGuestCanCheckIn?: Date
+  firstDateGuestCanCheckIn?: string
   ownerId?: string
-  createdAt?: Date
-  updatedAt?: Date
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface WizardFormData extends Property {
   currentStep: number
   isComplete: boolean
-  lastSaved?: Date
+  lastSaved?: string
   
   // Additional location fields for mobile
   country?: string

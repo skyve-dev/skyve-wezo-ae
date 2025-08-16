@@ -104,7 +104,7 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
   }
 
   if (data.firstDateGuestCanCheckIn) {
-    transformedData.firstDateGuestCanCheckIn = data.firstDateGuestCanCheckIn.toISOString()
+    transformedData.firstDateGuestCanCheckIn = data.firstDateGuestCanCheckIn
   }
 
   return transformedData
@@ -145,10 +145,10 @@ const transformServerPropertyData = (serverData: any): Property => {
     cancellation: serverData.cancellation,
     aboutTheProperty: serverData.aboutTheProperty,
     aboutTheNeighborhood: serverData.aboutTheNeighborhood,
-    firstDateGuestCanCheckIn: serverData.firstDateGuestCanCheckIn ? new Date(serverData.firstDateGuestCanCheckIn) : undefined,
+    firstDateGuestCanCheckIn: serverData.firstDateGuestCanCheckIn,
     ownerId: serverData.ownerId,
-    createdAt: serverData.createdAt ? new Date(serverData.createdAt) : undefined,
-    updatedAt: serverData.updatedAt ? new Date(serverData.updatedAt) : undefined,
+    createdAt: serverData.createdAt,
+    updatedAt: serverData.updatedAt,
   }
 }
 
