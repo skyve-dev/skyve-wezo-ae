@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
 import { Box } from './Box'
@@ -83,19 +83,38 @@ const TimePicker: React.FC<TimePickerProps> = ({
   const drawerManager = useDrawerManager()
   const drawerId = useRef(`time-picker-${Math.random().toString(36).substr(2, 9)}`).current
   
+  // Refs for scrollable containers
+  const hourContainerRef = useRef<HTMLDivElement>(null)
+  const minuteContainerRef = useRef<HTMLDivElement>(null)
+  const periodContainerRef = useRef<HTMLDivElement>(null)
+  
   // Parse current time or use default
   const currentTime = value ? new Date(value) : (defaultValue ? new Date(defaultValue) : null)
   
   // State for time selection
-  const [selectedHour, setSelectedHour] = useState<number>(
-    currentTime ? currentTime.getHours() : 9
-  )
-  const [selectedMinute, setSelectedMinute] = useState<number>(
-    currentTime ? Math.floor(currentTime.getMinutes() / interval) * interval : 0
-  )
-  const [selectedPeriod, setSelectedPeriod] = useState<'AM' | 'PM'>(
-    use12HourFormat ? (currentTime && currentTime.getHours() >= 12 ? 'PM' : 'AM') : 'AM'
-  )
+  const [selectedHour, setSelectedHour] = useState<number>(() => {
+    if (currentTime && !isNaN(currentTime.getTime())) {
+      const hours = currentTime.getHours()
+      if (use12HourFormat) {
+        // Convert to 12-hour format for display (1-12)
+        return hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+      }
+      return hours
+    }
+    return use12HourFormat ? 9 : 9 // Default to 9:00
+  })
+  const [selectedMinute, setSelectedMinute] = useState<number>(() => {
+    if (currentTime && !isNaN(currentTime.getTime())) {
+      return Math.floor(currentTime.getMinutes() / interval) * interval
+    }
+    return 0
+  })
+  const [selectedPeriod, setSelectedPeriod] = useState<'AM' | 'PM'>(() => {
+    if (use12HourFormat && currentTime && !isNaN(currentTime.getTime())) {
+      return currentTime.getHours() >= 12 ? 'PM' : 'AM'
+    }
+    return 'AM'
+  })
 
   // Format time for display
   const formatDisplayTime = (time: Date | null) => {
@@ -174,6 +193,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
   const handleConfirm = () => {
     let hour = selectedHour
     
+    // Convert to 24-hour format if using 12-hour format
     if (use12HourFormat) {
       if (selectedPeriod === 'PM' && hour !== 12) {
         hour += 12
@@ -182,18 +202,38 @@ const TimePicker: React.FC<TimePickerProps> = ({
       }
     }
     
+    // Validate hour and minute values
+    if (hour < 0 || hour > 23 || selectedMinute < 0 || selectedMinute > 59) {
+      console.error('Invalid time values:', { hour, selectedMinute })
+      return
+    }
+    
+    // Create a new date with today's date and the selected time
     const date = new Date()
     date.setHours(hour, selectedMinute, 0, 0)
+    
+    // Verify the date is valid before calling toISOString
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date created:', { hour, selectedMinute, date })
+      return
+    }
+    
     onChange(date.toISOString())
     drawerManager.closeDrawer(drawerId)
   }
 
   // Cancel selection
   const handleCancel = () => {
-    if (currentTime) {
-      setSelectedHour(currentTime.getHours())
+    if (currentTime && !isNaN(currentTime.getTime())) {
+      const hours = currentTime.getHours()
+      if (use12HourFormat) {
+        // Convert to 12-hour format for display (1-12)
+        setSelectedHour(hours === 0 ? 12 : hours > 12 ? hours - 12 : hours)
+        setSelectedPeriod(hours >= 12 ? 'PM' : 'AM')
+      } else {
+        setSelectedHour(hours)
+      }
       setSelectedMinute(Math.floor(currentTime.getMinutes() / interval) * interval)
-      setSelectedPeriod(use12HourFormat ? (currentTime.getHours() >= 12 ? 'PM' : 'AM') : 'AM')
     }
     drawerManager.closeDrawer(drawerId)
   }
@@ -209,6 +249,74 @@ const TimePicker: React.FC<TimePickerProps> = ({
   const hourOptions = generateHourOptions()
   const minuteOptions = generateMinuteOptions()
   const periodOptions = generatePeriodOptions()
+
+  // Auto-scroll to selected values
+  const scrollToSelectedValue = useCallback((
+    container: HTMLDivElement | null,
+    selectedValue: number | string,
+    options: TimeOption[],
+    accessor: (option: TimeOption) => number | string
+  ) => {
+    if (!container) return
+
+    const selectedIndex = options.findIndex(option => accessor(option) === selectedValue)
+    if (selectedIndex === -1) return
+
+    // Get all item elements
+    const items = container.children
+    if (items.length === 0 || selectedIndex >= items.length) return
+
+    // Get the selected item element
+    const selectedItem = items[selectedIndex] as HTMLElement
+    if (!selectedItem) return
+
+    // Calculate the item's position relative to container
+    const itemHeight = selectedItem.offsetHeight
+    const itemTop = selectedItem.offsetTop
+    
+    // Calculate scroll position to center the item
+    const containerHeight = container.clientHeight
+    const scrollTop = Math.max(0, itemTop - (containerHeight / 2) + (itemHeight / 2))
+
+    container.scrollTo({
+      top: scrollTop,
+      behavior: 'smooth'
+    })
+  }, [])
+
+  // Auto-scroll when drawer opens or values change
+  useEffect(() => {
+    if (drawerManager.isDrawerOpen(drawerId)) {
+      // Small delay to ensure DOM is rendered
+      setTimeout(() => {
+        // Scroll hour container
+        scrollToSelectedValue(
+          hourContainerRef.current,
+          use12HourFormat ? getDisplayHour() : selectedHour,
+          hourOptions,
+          (option) => option.hour
+        )
+
+        // Scroll minute container
+        scrollToSelectedValue(
+          minuteContainerRef.current,
+          selectedMinute,
+          minuteOptions,
+          (option) => option.minute
+        )
+
+        // Scroll period container (if 12-hour format)
+        if (use12HourFormat && periodContainerRef.current) {
+          scrollToSelectedValue(
+            periodContainerRef.current,
+            selectedPeriod,
+            periodOptions,
+            (option) => option.period || option.id
+          )
+        }
+      }, 150) // Allow time for drawer animation
+    }
+  }, [drawerManager.isDrawerOpen(drawerId), selectedHour, selectedMinute, selectedPeriod, use12HourFormat, scrollToSelectedValue, hourOptions, minuteOptions, periodOptions, getDisplayHour])
 
   return (
     <>
@@ -298,11 +406,16 @@ const TimePicker: React.FC<TimePickerProps> = ({
               </Box>
               <SelectionPicker
                 data={hourOptions}
-                idAccessor={(option) => option.id}
+                idAccessor={(option) => option.hour}
                 value={use12HourFormat ? getDisplayHour() : selectedHour}
                 onChange={(value) => {
-                  const hour = hourOptions.find(opt => (use12HourFormat ? opt.hour : opt.hour) === value)?.hour || 0
-                  setSelectedHour(hour)
+                  if (use12HourFormat) {
+                    // For 12-hour format, the value is the display hour (1-12)
+                    setSelectedHour(value as number)
+                  } else {
+                    // For 24-hour format, the value is the actual hour (0-23)
+                    setSelectedHour(value as number)
+                  }
                 }}
                 isMultiSelect={false}
                 renderItem={(option, isSelected) => (
@@ -311,7 +424,11 @@ const TimePicker: React.FC<TimePickerProps> = ({
                     fontWeight={isSelected ? '600' : '400'}
                     color={isSelected ? '#3182ce' : '#374151'}
                     textAlign="center"
-                    padding="0.5rem"
+                    padding="0.75rem"
+                    style={{
+                      scrollSnapAlign: 'center',
+                      scrollSnapStop: 'always'
+                    }}
                   >
                     {option.label}
                   </Box>
@@ -320,8 +437,11 @@ const TimePicker: React.FC<TimePickerProps> = ({
                   maxHeight: '200px',
                   overflow: 'auto',
                   border: '1px solid #e2e8f0',
-                  borderRadius: '0.5rem'
+                  borderRadius: '0.5rem',
+                  scrollSnapType: 'y mandatory',
+                  scrollBehavior: 'smooth'
                 }}
+                containerRef={hourContainerRef}
                 selectedItemStyles={{
                   backgroundColor: '#eff6ff',
                   borderColor: '#3182ce'
@@ -336,7 +456,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
               </Box>
               <SelectionPicker
                 data={minuteOptions}
-                idAccessor={(option) => option.id}
+                idAccessor={(option) => option.minute}
                 value={selectedMinute}
                 onChange={(value) => setSelectedMinute(value as number)}
                 isMultiSelect={false}
@@ -346,7 +466,11 @@ const TimePicker: React.FC<TimePickerProps> = ({
                     fontWeight={isSelected ? '600' : '400'}
                     color={isSelected ? '#3182ce' : '#374151'}
                     textAlign="center"
-                    padding="0.5rem"
+                    padding="0.75rem"
+                    style={{
+                      scrollSnapAlign: 'center',
+                      scrollSnapStop: 'always'
+                    }}
                   >
                     {option.label}
                   </Box>
@@ -355,8 +479,11 @@ const TimePicker: React.FC<TimePickerProps> = ({
                   maxHeight: '200px',
                   overflow: 'auto',
                   border: '1px solid #e2e8f0',
-                  borderRadius: '0.5rem'
+                  borderRadius: '0.5rem',
+                  scrollSnapType: 'y mandatory',
+                  scrollBehavior: 'smooth'
                 }}
+                containerRef={minuteContainerRef}
                 selectedItemStyles={{
                   backgroundColor: '#eff6ff',
                   borderColor: '#3182ce'
@@ -372,7 +499,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
                 </Box>
                 <SelectionPicker
                   data={periodOptions}
-                  idAccessor={(option) => option.id}
+                  idAccessor={(option) => option.period || option.id}
                   value={selectedPeriod}
                   onChange={(value) => setSelectedPeriod(value as 'AM' | 'PM')}
                   isMultiSelect={false}
@@ -382,15 +509,22 @@ const TimePicker: React.FC<TimePickerProps> = ({
                       fontWeight={isSelected ? '600' : '400'}
                       color={isSelected ? '#3182ce' : '#374151'}
                       textAlign="center"
-                      padding="0.5rem"
+                      padding="0.75rem"
+                      style={{
+                        scrollSnapAlign: 'center',
+                        scrollSnapStop: 'always'
+                      }}
                     >
                       {option.label}
                     </Box>
                   )}
                   containerStyles={{
                     border: '1px solid #e2e8f0',
-                    borderRadius: '0.5rem'
+                    borderRadius: '0.5rem',
+                    scrollSnapType: 'y mandatory',
+                    scrollBehavior: 'smooth'
                   }}
+                  containerRef={periodContainerRef}
                   selectedItemStyles={{
                     backgroundColor: '#eff6ff',
                     borderColor: '#3182ce'

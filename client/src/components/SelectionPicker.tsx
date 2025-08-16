@@ -77,6 +77,11 @@ interface SelectionPickerProps<T> extends Omit<BoxProps<'div'>, 'onChange'>{
    * Optional function to determine if an item should be disabled
    */
   isItemDisabled?: (item: T) => boolean
+  
+  /**
+   * Optional ref to the container element for scroll control
+   */
+  containerRef?: React.RefObject<HTMLDivElement>
 }
 
 /**
@@ -97,7 +102,8 @@ function SelectionPicker<T>({
   selectedItemStyles = {},
   labelAccessor,
   disabled = false,
-  isItemDisabled
+  isItemDisabled,
+  containerRef
 }: SelectionPickerProps<T>) {
   
   // Normalize value to always work with an array internally
@@ -239,6 +245,7 @@ function SelectionPicker<T>({
   
   return (
     <Box
+      ref={containerRef}
       className={containerClassName}
       display="flex"
       flexDirection="column"
