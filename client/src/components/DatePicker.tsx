@@ -260,7 +260,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         showCloseButton={false}
         disableBackdropClick
       >
-        <Box padding="1.5rem">
+        <Box padding="1.5rem" display={'flex'} flexDirection={'column'} overflow={'auto'}>
           <Box fontSize="1.25rem" fontWeight="600" marginBottom="1.5rem" textAlign="center" color="#1a202c">
             Select Date
           </Box>
@@ -293,6 +293,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 onChange={(year) => handleYearChange(year as number)}
                 isMultiSelect={false}
                 display={'flex'}
+                width={'100%'}
+                background={'red'}
                 flexDirection={'row'}
                 flexWrap={'wrap'}
                 renderItem={(option, isSelected) => (
