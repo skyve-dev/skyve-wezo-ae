@@ -187,13 +187,13 @@ model CheckInOutTimes {
 }
 
 model Photo {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   url         String
   altText     String
   description String?
   tags        String[]
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [propertyId])
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [propertyId])
 }
 
 model Amenity {
