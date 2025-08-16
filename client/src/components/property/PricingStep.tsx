@@ -1,5 +1,5 @@
 import React from 'react'
-import { WizardFormData, Pricing } from '../../types/property'
+import { WizardFormData, Pricing, Cancellation } from '../../types/property'
 import { Box } from '../Box'
 import { Currency } from '../../constants/propertyEnums'
 
@@ -26,10 +26,24 @@ const PricingStep: React.FC<PricingStepProps> = ({
     ratePerNight: 0
   }
 
+  const cancellation = data.cancellation || {
+    daysBeforeArrivalFreeToCancel: 7,
+    waiveCancellationFeeAccidentalBookings: true
+  }
+
   const handlePricingChange = (field: keyof Pricing, value: any) => {
     onChange({
       pricing: {
         ...pricing,
+        [field]: value
+      }
+    })
+  }
+
+  const handleCancellationChange = (field: keyof Cancellation, value: any) => {
+    onChange({
+      cancellation: {
+        ...cancellation,
         [field]: value
       }
     })
@@ -184,6 +198,65 @@ const PricingStep: React.FC<PricingStepProps> = ({
           </Box>
         </Box>
 
+        {/* Cancellation Policy */}
+        <Box>
+          <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
+            Cancellation Policy
+          </Box>
+          <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
+            <Box>
+              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
+                Free cancellation (days before arrival)
+              </Box>
+              <Box
+                as="input"
+                type="number"
+                min="0"
+                max="30"
+                value={cancellation.daysBeforeArrivalFreeToCancel}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  handleCancellationChange('daysBeforeArrivalFreeToCancel', parseInt(e.target.value) || 0)
+                }
+                placeholder="7"
+                width="100%"
+                padding="0.75rem"
+                border="1px solid #d1d5db"
+                borderRadius="0.375rem"
+                fontSize="1rem"
+                whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+              />
+              <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+                Guests can cancel for free this many days before check-in
+              </Box>
+            </Box>
+
+            <Box>
+              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
+                Accidental booking protection
+              </Box>
+              <Box display="flex" alignItems="center" gap="0.75rem">
+                <Box
+                  as="input"
+                  type="checkbox"
+                  checked={cancellation.waiveCancellationFeeAccidentalBookings}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                    handleCancellationChange('waiveCancellationFeeAccidentalBookings', e.target.checked)
+                  }
+                  accentColor="#3182ce"
+                />
+                <Box>
+                  <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                    Waive cancellation fee for accidental bookings
+                  </Box>
+                  <Box fontSize="0.75rem" color="#6b7280">
+                    Allow free cancellation within 24 hours of booking for accidental reservations
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
         {/* Pricing Preview */}
         {pricing.ratePerNight > 0 && (
           <Box
@@ -215,6 +288,12 @@ const PricingStep: React.FC<PricingStepProps> = ({
                   </Box>
                 </Box>
               )}
+              <Box display="flex" justifyContent="space-between" marginTop="0.5rem" paddingTop="0.5rem" borderTop="1px solid #0ea5e9">
+                <Box>Cancellation:</Box>
+                <Box fontWeight="500">
+                  Free up to {cancellation.daysBeforeArrivalFreeToCancel} days before
+                </Box>
+              </Box>
             </Box>
           </Box>
         )}

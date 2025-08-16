@@ -5,6 +5,21 @@ import { BookingType, PaymentType, ParkingType, PetPolicy, Currency } from '../.
 
 const WIZARD_STORAGE_KEY = 'property-wizard-data'
 
+// Debug utility to help identify data structure mismatches
+const debugServerDataStructure = (serverData: any, context: string = '') => {
+  if (process.env.NODE_ENV === 'development') {
+    console.group(`🔍 Server Data Structure Debug ${context}`)
+    console.log('Has layout object:', !!serverData.layout)
+    console.log('Has services object:', !!serverData.services)
+    console.log('Has rules object:', !!serverData.rules)
+    console.log('Has flat maximumGuest:', !!serverData.maximumGuest)
+    console.log('Has flat serveBreakfast:', !!serverData.serveBreakfast)
+    console.log('Has flat smokingAllowed:', !!serverData.smokingAllowed)
+    console.log('Full structure keys:', Object.keys(serverData))
+    console.groupEnd()
+  }
+}
+
 const initialState: PropertyState = {
   properties: [],
   currentProperty: null,
@@ -42,7 +57,7 @@ const saveWizardDataToStorage = (data: WizardFormData | null) => {
 
 // Transform flattened wizard data to nested server format
 const transformPropertyDataForServer = (data: WizardFormData) => {
-  // Filter out undefined values and prepare the transformed data
+  // Prepare the transformed data with required structure
   const transformedData: any = {
     name: data.name,
     address: {
@@ -68,7 +83,13 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
       partiesOrEventsAllowed: data.partiesOrEventsAllowed,
       petsAllowed: data.petsAllowed,
     },
-    photos: data.photos || [],
+    // Filter out blob URLs from photos and ensure proper structure
+    photos: (data.photos || []).map(photo => ({
+      url: photo.url.startsWith('blob:') ? '' : photo.url, // Skip blob URLs
+      altText: photo.altText || '',
+      description: photo.description || '',
+      tags: photo.tags || []
+    })).filter(photo => photo.url), // Only include photos with valid URLs
     bookingType: data.bookingType,
     paymentType: data.paymentType,
     aboutTheProperty: data.aboutTheProperty,
@@ -91,16 +112,22 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     transformedData.layout.rooms = data.rooms
   }
 
-  if (data.checkInCheckout) {
-    transformedData.rules.checkInCheckout = data.checkInCheckout
+  // Always include checkInCheckout in rules, with defaults if not provided
+  transformedData.rules.checkInCheckout = data.checkInCheckout || {
+    checkInFrom: '14:00',
+    checkInUntil: '22:00',
+    checkOutFrom: '08:00',
+    checkOutUntil: '12:00'
   }
 
   if (data.pricing) {
     transformedData.pricing = data.pricing
   }
 
-  if (data.cancellation) {
-    transformedData.cancellation = data.cancellation
+  // Always include cancellation with defaults if not provided
+  transformedData.cancellation = data.cancellation || {
+    daysBeforeArrivalFreeToCancel: 7,
+    waiveCancellationFeeAccidentalBookings: true
   }
 
   if (data.firstDateGuestCanCheckIn) {
@@ -110,33 +137,37 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
   return transformedData
 }
 
-// Transform nested server data to flattened client format
+// Transform server property data to flattened client format
+// Handles both nested (layout/services/rules objects) and flat server structures
+// This ensures compatibility with different API response formats
 const transformServerPropertyData = (serverData: any): Property => {
+  debugServerDataStructure(serverData, '- transformServerPropertyData')
+  
   return {
     propertyId: serverData.propertyId,
     name: serverData.name,
     address: serverData.address,
     
-    // Flatten layout fields
-    maximumGuest: serverData.layout?.maximumGuest || 0,
-    bathrooms: serverData.layout?.bathrooms || 0,
-    allowChildren: serverData.layout?.allowChildren || false,
-    offerCribs: serverData.layout?.offerCribs || false,
-    propertySizeSqMtr: serverData.layout?.propertySizeSqMtr,
-    rooms: serverData.layout?.rooms,
+    // Flatten layout fields - handle both nested and flat server structures
+    maximumGuest: serverData.layout?.maximumGuest ?? serverData.maximumGuest ?? 0,
+    bathrooms: serverData.layout?.bathrooms ?? serverData.bathrooms ?? 0,
+    allowChildren: serverData.layout?.allowChildren ?? serverData.allowChildren ?? false,
+    offerCribs: serverData.layout?.offerCribs ?? serverData.offerCribs ?? false,
+    propertySizeSqMtr: serverData.layout?.propertySizeSqMtr ?? serverData.propertySizeSqMtr,
+    rooms: serverData.layout?.rooms ?? serverData.rooms,
     
     amenities: serverData.amenities,
     
-    // Flatten services fields
-    serveBreakfast: serverData.services?.serveBreakfast || false,
-    parking: serverData.services?.parking,
-    languages: serverData.services?.languages,
+    // Flatten services fields - handle both nested and flat server structures
+    serveBreakfast: serverData.services?.serveBreakfast ?? serverData.serveBreakfast ?? false,
+    parking: serverData.services?.parking ?? serverData.parking,
+    languages: serverData.services?.languages ?? serverData.languages,
     
-    // Flatten rules fields
-    smokingAllowed: serverData.rules?.smokingAllowed || false,
-    partiesOrEventsAllowed: serverData.rules?.partiesOrEventsAllowed || false,
-    petsAllowed: serverData.rules?.petsAllowed,
-    checkInCheckout: serverData.rules?.checkInCheckout,
+    // Flatten rules fields - handle both nested and flat server structures
+    smokingAllowed: serverData.rules?.smokingAllowed ?? serverData.smokingAllowed ?? false,
+    partiesOrEventsAllowed: serverData.rules?.partiesOrEventsAllowed ?? serverData.partiesOrEventsAllowed ?? false,
+    petsAllowed: serverData.rules?.petsAllowed ?? serverData.petsAllowed,
+    checkInCheckout: serverData.rules?.checkInCheckout ?? serverData.checkInCheckout,
     
     photos: serverData.photos,
     bookingType: serverData.bookingType,
