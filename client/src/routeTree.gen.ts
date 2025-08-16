@@ -12,11 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterPropertyRouteImport } from './routes/register-property'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ExamplesRouteImport } from './routes/examples'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property/$propertyId'
-import { Route as ExampleBoxRouteImport } from './routes/example/Box'
+import { Route as ExamplesSlidingDrawerRouteImport } from './routes/examples/sliding-drawer'
+import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/selection-picker'
+import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
 import { Route as EditPropertyPropertyIdRouteImport } from './routes/edit-property.$propertyId'
 import { Route as DashboardMyPropertiesRouteImport } from './routes/dashboard/my-properties'
 import { Route as PropertyPropertyIdEditRouteImport } from './routes/property/$propertyId/edit'
@@ -34,6 +37,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamplesRoute = ExamplesRouteImport.update({
+  id: '/examples',
+  path: '/examples',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -56,10 +64,20 @@ const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
   path: '/property/$propertyId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ExampleBoxRoute = ExampleBoxRouteImport.update({
-  id: '/example/Box',
-  path: '/example/Box',
-  getParentRoute: () => rootRouteImport,
+const ExamplesSlidingDrawerRoute = ExamplesSlidingDrawerRouteImport.update({
+  id: '/sliding-drawer',
+  path: '/sliding-drawer',
+  getParentRoute: () => ExamplesRoute,
+} as any)
+const ExamplesSelectionPickerRoute = ExamplesSelectionPickerRouteImport.update({
+  id: '/selection-picker',
+  path: '/selection-picker',
+  getParentRoute: () => ExamplesRoute,
+} as any)
+const ExamplesBoxRoute = ExamplesBoxRouteImport.update({
+  id: '/box',
+  path: '/box',
+  getParentRoute: () => ExamplesRoute,
 } as any)
 const EditPropertyPropertyIdRoute = EditPropertyPropertyIdRouteImport.update({
   id: '/edit-property/$propertyId',
@@ -80,24 +98,30 @@ const PropertyPropertyIdEditRoute = PropertyPropertyIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/examples': typeof ExamplesRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
-  '/example/Box': typeof ExampleBoxRoute
+  '/examples/box': typeof ExamplesBoxRoute
+  '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
+  '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/property/$propertyId/edit': typeof PropertyPropertyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/examples': typeof ExamplesRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
-  '/example/Box': typeof ExampleBoxRoute
+  '/examples/box': typeof ExamplesBoxRoute
+  '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
+  '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard': typeof DashboardIndexRoute
   '/property/$propertyId/edit': typeof PropertyPropertyIdEditRoute
@@ -106,12 +130,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/examples': typeof ExamplesRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
-  '/example/Box': typeof ExampleBoxRoute
+  '/examples/box': typeof ExamplesBoxRoute
+  '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
+  '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/property/$propertyId/edit': typeof PropertyPropertyIdEditRoute
@@ -121,24 +148,30 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/examples'
     | '/login'
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
     | '/edit-property/$propertyId'
-    | '/example/Box'
+    | '/examples/box'
+    | '/examples/selection-picker'
+    | '/examples/sliding-drawer'
     | '/property/$propertyId'
     | '/dashboard/'
     | '/property/$propertyId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/examples'
     | '/login'
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
     | '/edit-property/$propertyId'
-    | '/example/Box'
+    | '/examples/box'
+    | '/examples/selection-picker'
+    | '/examples/sliding-drawer'
     | '/property/$propertyId'
     | '/dashboard'
     | '/property/$propertyId/edit'
@@ -146,12 +179,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/examples'
     | '/login'
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
     | '/edit-property/$propertyId'
-    | '/example/Box'
+    | '/examples/box'
+    | '/examples/selection-picker'
+    | '/examples/sliding-drawer'
     | '/property/$propertyId'
     | '/dashboard/'
     | '/property/$propertyId/edit'
@@ -160,11 +196,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  ExamplesRoute: typeof ExamplesRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   RegisterPropertyRoute: typeof RegisterPropertyRoute
   EditPropertyPropertyIdRoute: typeof EditPropertyPropertyIdRoute
-  ExampleBoxRoute: typeof ExampleBoxRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRouteWithChildren
 }
 
@@ -189,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/examples': {
+      id: '/examples'
+      path: '/examples'
+      fullPath: '/examples'
+      preLoaderRoute: typeof ExamplesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -219,12 +262,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertyPropertyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/example/Box': {
-      id: '/example/Box'
-      path: '/example/Box'
-      fullPath: '/example/Box'
-      preLoaderRoute: typeof ExampleBoxRouteImport
-      parentRoute: typeof rootRouteImport
+    '/examples/sliding-drawer': {
+      id: '/examples/sliding-drawer'
+      path: '/sliding-drawer'
+      fullPath: '/examples/sliding-drawer'
+      preLoaderRoute: typeof ExamplesSlidingDrawerRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
+    '/examples/selection-picker': {
+      id: '/examples/selection-picker'
+      path: '/selection-picker'
+      fullPath: '/examples/selection-picker'
+      preLoaderRoute: typeof ExamplesSelectionPickerRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
+    '/examples/box': {
+      id: '/examples/box'
+      path: '/box'
+      fullPath: '/examples/box'
+      preLoaderRoute: typeof ExamplesBoxRouteImport
+      parentRoute: typeof ExamplesRoute
     }
     '/edit-property/$propertyId': {
       id: '/edit-property/$propertyId'
@@ -264,6 +321,22 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface ExamplesRouteChildren {
+  ExamplesBoxRoute: typeof ExamplesBoxRoute
+  ExamplesSelectionPickerRoute: typeof ExamplesSelectionPickerRoute
+  ExamplesSlidingDrawerRoute: typeof ExamplesSlidingDrawerRoute
+}
+
+const ExamplesRouteChildren: ExamplesRouteChildren = {
+  ExamplesBoxRoute: ExamplesBoxRoute,
+  ExamplesSelectionPickerRoute: ExamplesSelectionPickerRoute,
+  ExamplesSlidingDrawerRoute: ExamplesSlidingDrawerRoute,
+}
+
+const ExamplesRouteWithChildren = ExamplesRoute._addFileChildren(
+  ExamplesRouteChildren,
+)
+
 interface PropertyPropertyIdRouteChildren {
   PropertyPropertyIdEditRoute: typeof PropertyPropertyIdEditRoute
 }
@@ -278,11 +351,11 @@ const PropertyPropertyIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  ExamplesRoute: ExamplesRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   RegisterPropertyRoute: RegisterPropertyRoute,
   EditPropertyPropertyIdRoute: EditPropertyPropertyIdRoute,
-  ExampleBoxRoute: ExampleBoxRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport

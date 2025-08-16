@@ -186,22 +186,7 @@ export const Dashboard: React.FC = () => {
                 >
                   Messages
                 </Box>
-                
-                <Box as="button"
-                  onClick={() => navigate({ to: '/example/Box' })}
-                  style={{
-                    backgroundColor: '#6f42c1',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '12px 16px',
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  📦 Box Component Examples
-                </Box>
+
               </Box>
             </Box>
           </Box>

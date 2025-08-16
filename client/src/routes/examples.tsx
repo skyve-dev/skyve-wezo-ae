@@ -1,0 +1,175 @@
+import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
+import { Box } from '../components/Box'
+
+export const Route = createFileRoute('/examples')({
+  component: ExamplesLayout,
+})
+
+function ExamplesLayout() {
+  const location = useLocation()
+  const isIndexPage = location.pathname === '/examples' || location.pathname === '/examples/'
+
+  const navigationItems = [
+    { path: '/examples', label: 'Overview', icon: '🏠' },
+    { path: '/examples/selection-picker', label: 'SelectionPicker', icon: '✅' },
+    { path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: '📱' },
+    { path: '/examples/box', label: 'Box Component', icon: '📦' }
+  ]
+
+  if (isIndexPage) {
+    return <Outlet />
+  }
+
+  return (
+    <Box minHeight="100vh" backgroundColor="#f8fafc">
+      {/* Header Navigation */}
+      <Box backgroundColor="white" borderBottom="1px solid #e5e7eb" position="sticky" top="0" zIndex={10}>
+        <Box maxWidth="1400px" margin="0 auto" padding="0 2rem">
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            justifyContent="space-between" 
+            height="4rem"
+            flexWrap="wrap"
+            gap="1rem"
+          >
+            {/* Logo/Title */}
+            <Box display="flex" alignItems="center" gap="1rem">
+              <Link
+                to="/examples"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  textDecoration: 'none',
+                  color: 'inherit'
+                }}
+              >
+                <Box>
+                <Box fontSize="1.5rem">🧩</Box>
+                  <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
+                    Examples
+                  </Box>
+                </Box>
+              </Link>
+              
+              <Box fontSize="0.875rem" color="#6b7280" style={{ display: 'block' }}>
+                Interactive component showcase
+              </Box>
+            </Box>
+
+            {/* Navigation Links */}
+            <Box 
+              display="flex" 
+              alignItems="center" 
+              gap="0.5rem"
+              flexWrap="wrap"
+            >
+              {navigationItems.map((item) => {
+                const isActive = location.pathname === item.path
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      textDecoration: 'none',
+                      backgroundColor: isActive ? '#3182ce' : 'transparent',
+                      color: isActive ? 'white' : '#6b7280'
+                    }}
+                  >
+                    <Box>
+                    <Box fontSize="1rem">{item.icon}</Box>
+                      <Box style={{ display: 'block' }}>
+                        {item.label}
+                      </Box>
+                    </Box>
+                  </Link>
+                )
+              })}
+            </Box>
+
+            {/* Back to App */}
+            <Link
+              to="/"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                textDecoration: 'none'
+              }}
+            >
+              <Box>
+              <Box fontSize="1rem">←</Box>
+                <Box style={{ display: 'block' }}>
+                  Back to App
+                </Box>
+              </Box>
+            </Link>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Page Content */}
+      <Outlet />
+
+      {/* Floating Navigation for Mobile */}
+      <Box
+        style={{ display: 'none' }}
+        position="fixed"
+        bottom="1rem"
+        left="50%"
+        transform="translateX(-50%)"
+        backgroundColor="white"
+        borderRadius="2rem"
+        padding="0.5rem"
+        boxShadow="0 10px 25px rgba(0, 0, 0, 0.15)"
+        zIndex={20}
+        border="1px solid #e5e7eb"
+      >
+        <Box display="flex" alignItems="center" gap="0.25rem">
+          {navigationItems.map((item) => {
+            const isActive = location.pathname === item.path
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  borderRadius: '50%',
+                  backgroundColor: isActive ? '#3182ce' : 'transparent',
+                  color: isActive ? 'white' : '#6b7280',
+                  fontSize: '1.25rem',
+                  textDecoration: 'none'
+                }}
+              >
+                {item.icon}
+              </Link>
+            )
+          })}
+        </Box>
+      </Box>
+
+      {/* Bottom spacing for mobile navigation */}
+      <Box height="5rem" style={{ display: 'none' }} />
+    </Box>
+  )
+}
+
+export default ExamplesLayout
