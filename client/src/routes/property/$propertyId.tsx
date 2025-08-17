@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchPropertyById, clearError } from '../../store/slices/propertySlice'
 import { Box } from '../../components/Box'
+import { resolvePhotoUrl } from '../../utils/api'
 import { 
   FaUserFriends, 
   FaBath, 
@@ -230,7 +231,7 @@ function PropertyDetailsPage() {
                   <>
                     <Box
                       as="img"
-                      src={property.photos[currentImageIndex]?.url}
+                      src={resolvePhotoUrl(property.photos[currentImageIndex]?.url || '')}
                       alt={property.photos[currentImageIndex]?.altText || property.name}
                       width="100%"
                       height="400px"
@@ -336,7 +337,7 @@ function PropertyDetailsPage() {
                     >
                       <Box
                         as="img"
-                        src={photo.url}
+                        src={resolvePhotoUrl(photo.url)}
                         alt={photo.altText}
                         width="80px"
                         height="60px"

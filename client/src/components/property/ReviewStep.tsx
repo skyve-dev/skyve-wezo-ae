@@ -2,6 +2,7 @@ import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
 import { BookingType, PaymentType } from '../../constants/propertyEnums'
+import { resolvePhotoUrl } from '../../utils/api'
 import { 
   FaHome, 
   FaMapMarkerAlt, 
@@ -177,7 +178,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                 >
                   <Box
                     as="img"
-                    src={photo.url}
+                    src={resolvePhotoUrl(photo.url)}
                     alt={photo.altText || `Photo ${index + 1}`}
                     width="100%"
                     height="100%"

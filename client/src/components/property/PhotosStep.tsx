@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { WizardFormData, Photo } from '../../types/property'
 import { Box } from '../Box'
-import { api } from '../../utils/api'
+import { api, resolvePhotoUrl } from '../../utils/api'
 import { 
   FaCloudUploadAlt,
   FaSpinner
@@ -205,7 +205,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                   <Box position="relative">
                     <Box
                       as="img"
-                      src={photo.url.startsWith('http') ? photo.url : `http://localhost:3000${photo.url}`}
+                      src={resolvePhotoUrl(photo.url)}
                       alt={photo.altText || `Photo ${index + 1}`}
                       width="100%"
                       height="200px"

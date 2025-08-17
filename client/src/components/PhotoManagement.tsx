@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Photo } from '@/types/property';
-import { api } from '@/utils/api';
+import { api, resolvePhotoUrl } from '@/utils/api';
 import { Box } from './Box';
 
 interface ExtendedPhoto extends Photo {
@@ -390,7 +390,7 @@ const PhotoManagement: React.FC = () => {
             >
               <Box
                 as="img"
-                src={`http://localhost:3000${photo.url}`}
+                src={resolvePhotoUrl(photo.url)}
                 alt={photo.altText || 'Property photo'}
                 position="absolute"
                 top={0}

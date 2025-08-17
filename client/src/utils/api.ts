@@ -7,7 +7,7 @@ import {
   User 
 } from '@/types/auth';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 class ApiError extends Error {
   constructor(
@@ -148,3 +148,16 @@ class ApiClient {
 export const apiClient = new ApiClient(API_BASE_URL);
 export const api = apiClient; // Alias for easier usage
 export { ApiError };
+
+// Utility function to resolve photo URLs
+export const resolvePhotoUrl = (url: string): string => {
+  // If the URL is already a full path (starts with http:// or https://), use it directly
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Otherwise, prepend the API_BASE_URL to form the complete URL
+  return `${API_BASE_URL}${url}`;
+};
+
+// Export API_BASE_URL for use in other parts of the application
+export { API_BASE_URL };
