@@ -44,7 +44,8 @@
     "deny": [],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "C:\\c\\Users\\arif\\WebstormProjects\\skyve-wezo-ae"
+      "C:\\c\\Users\\arif\\WebstormProjects\\skyve-wezo-ae",
+      "C:\\mnt\\c\\Users\\arif\\WebstormProjects\\skyve-wezo-ae"
     ]
   }
 }

@@ -58,7 +58,8 @@ class ApiClient {
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
-
+    // Following is the request headers requested by ngrok
+    headers['ngrok-skip-browser-warning'] = `true`;
     const response = await fetch(url, {
       ...options,
       headers,
@@ -149,7 +150,7 @@ export const apiClient = new ApiClient(API_BASE_URL);
 export const api = apiClient; // Alias for easier usage
 export { ApiError };
 
-// Utility function to resolve photo URLs
+// Utility function to resolve photo URLs from the API
 export const resolvePhotoUrl = (url: string): string => {
   // If the URL is already a full path (starts with http:// or https://), use it directly
   if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -159,5 +160,32 @@ export const resolvePhotoUrl = (url: string): string => {
   return `${API_BASE_URL}${url}`;
 };
 
-// Export API_BASE_URL for use in other parts of the application
+// Utility function to resolve client-side asset paths (images, static files, etc.)
+export const resolveAssetPath = (path: string): string => {
+  // If the path is already absolute or external, return as-is
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+    return path;
+  }
+  
+  // Get the base path from environment variable or Vite's BASE_URL
+  const base = import.meta.env.VITE_APP_BASE || import.meta.env.BASE_URL || '/';
+  
+  // Ensure base ends with slash
+  const basePath = base.endsWith('/') ? base : `${base}/`;
+  
+  // Remove leading slash from path if present to avoid double slashes
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  
+  // Combine base with path
+  return `${basePath}${cleanPath}`;
+};
+
+// Get dynamic base URLs from environment
+export const getClientBaseUrl = (): string => {
+  const base = import.meta.env.VITE_APP_BASE || import.meta.env.BASE_URL || '/';
+  return base.endsWith('/') ? base : `${base}/`;
+};
+
+// Export API_BASE_URL and dynamic base URL for use in other parts of the application
 export { API_BASE_URL };
+export const CLIENT_BASE_URL = getClientBaseUrl();
