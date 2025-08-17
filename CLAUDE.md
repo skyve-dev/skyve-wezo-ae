@@ -69,9 +69,18 @@ wezo-monorepo/
 - `POST /api/auth/password-reset/request` - Request password reset
 - `POST /api/auth/password-reset/reset` - Reset password
 - `GET /api/health` - Health check
+- `GET /uploads/photos/*` - Static photo files (public access, no authentication)
 
 #### Protected Endpoints (require JWT)
 - `GET /api/auth/profile` - Get user profile
+
+### File Upload System
+- **Upload Directory**: `server/uploads/photos/`
+- **Public Access**: All uploaded photos are publicly accessible via `/uploads/photos/filename`
+- **No Authentication Required**: Static files bypass all authentication middleware
+- **CORS Enabled**: Cross-origin access allowed for all uploaded files
+- **Cache Headers**: Files served with 1-day cache for optimal performance
+- **Supported Formats**: JPEG, PNG, WebP with proper MIME type headers
 
 ### Default Admin Account
 - Username: `admin`

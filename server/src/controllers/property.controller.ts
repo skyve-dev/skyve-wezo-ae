@@ -308,13 +308,13 @@ export const uploadPropertyPhotos = async (req: Request, res: Response): Promise
     }
 
     // Create uploads directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'uploads', 'properties');
+    const uploadDir = path.join(process.cwd(), 'uploads', 'photos');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
     const photos = files.map(file => ({
-      url: `/uploads/properties/${file.filename}`,
+      url: `/uploads/photos/${file.filename}`,
       altText: '',
       description: '',
       tags: []

@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import routes from './routes';
 
 dotenv.config();
@@ -16,6 +17,28 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from uploads directory (public access, no authentication)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  // Add cache headers for better performance
+  maxAge: '1d', // Cache for 1 day
+  etag: true,
+  lastModified: true,
+  // Set appropriate MIME types
+  setHeaders: (res: Response, filePath: string) => {
+    if (path.extname(filePath).toLowerCase() === '.jpg' || 
+        path.extname(filePath).toLowerCase() === '.jpeg') {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (path.extname(filePath).toLowerCase() === '.png') {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (path.extname(filePath).toLowerCase() === '.webp') {
+      res.setHeader('Content-Type', 'image/webp');
+    }
+    // Add CORS headers for cross-origin requests
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
 
 app.use('/api', routes);
 
