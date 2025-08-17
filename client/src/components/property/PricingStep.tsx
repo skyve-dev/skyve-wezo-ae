@@ -59,7 +59,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
   const isValid = pricing.ratePerNight > 0
 
   return (
-    <Box padding="2rem">
+    <Box paddingSm="1rem" paddingMd="2rem">
       <Box marginBottom="2rem">
         <Box fontSize="1.5rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
           Set your pricing

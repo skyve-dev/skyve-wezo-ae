@@ -1,16 +1,35 @@
 import app from './app';
 import prisma from './config/database';
+import { networkInterfaces } from 'os';
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
+
+function getNetworkIP(): string | null {
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] || []) {
+      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return null;
+}
 
 async function startServer() {
   try {
     await prisma.$connect();
     console.log('✅ Database connected successfully');
 
-    app.listen(PORT, () => {
+    const networkIP = getNetworkIP();
+    
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`📡 API available at http://localhost:${PORT}/api`);
+      if (networkIP) {
+        console.log(`🌐 API exposed at http://${networkIP}:${PORT}/api (accessible from network)`);
+      }
       console.log(`🏥 Health check at http://localhost:${PORT}/api/health`);
     });
   } catch (error) {

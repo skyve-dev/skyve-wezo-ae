@@ -41,7 +41,7 @@ export const applyGlobalStyles = (): void => {
         sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      font-size: 16px;
+      font-size: 14px;
       color: #000;
       background: #fff;
     }
@@ -50,6 +50,9 @@ export const applyGlobalStyles = (): void => {
     html, body {
       height: 100%;
       width: 100%;
+      display : flex;
+      flex-direction : column;
+      overflow : auto;
       margin: 0;
       padding: 0;
     }

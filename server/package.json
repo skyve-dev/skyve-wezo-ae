@@ -18,7 +18,8 @@
     "prisma:reset": "prisma migrate reset",
     "prisma:seed": "ts-node prisma/seed.ts",
     "db:setup": "prisma migrate dev && npm run prisma:seed",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "network:info": "node scripts/network-info.js"
   },
   "keywords": [],
   "author": "",

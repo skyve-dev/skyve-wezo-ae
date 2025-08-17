@@ -38,7 +38,8 @@
       "Bash(timeout 10s npm run dev)",
       "Bash(true)",
       "Bash(npx @tanstack/router-devtools:*)",
-      "Bash(npx tsr:*)"
+      "Bash(npx tsr:*)",
+      "Bash(timeout 5s npm run dev)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

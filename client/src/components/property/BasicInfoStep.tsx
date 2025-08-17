@@ -48,7 +48,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
   const isValid = data.name.trim().length >= 3 && data.firstDateGuestCanCheckIn
 
   return (
-    <Box padding="2rem">
+    <Box paddingSm="1rem" paddingMd="2rem">
       <Box marginBottom="2rem">
         <Box fontSize="1.5rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
           Tell us about your property

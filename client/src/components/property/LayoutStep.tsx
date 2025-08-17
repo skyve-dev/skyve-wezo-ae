@@ -161,7 +161,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   const isValid = data.maximumGuest >= 1 && data.bathrooms >= 1 && hasRoomsWithBeds()
 
   return (
-    <Box padding="2rem">
+    <Box paddingSm="1rem" paddingMd="2rem">
       <Box marginBottom="2rem">
         <Box fontSize="1.5rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
           Tell us about your space
@@ -396,7 +396,10 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
             >
               <FaPlus size="0.875rem" />
-              Add Room
+              <Box fontSize={'12px'} fontSizeMd={'inherit'}>
+                Add Room
+              </Box>
+
             </Box>
           </Box>
 
@@ -469,7 +472,9 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   boxShadow="0 2px 4px rgba(220, 38, 38, 0.2)"
                 >
                   <FaTrash size="0.75rem" />
+                  <Box display={'none'} displayMd={'flex'}>
                   Remove Room
+                  </Box>
                 </Box>
               </Box>
 
@@ -499,7 +504,9 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                     boxShadow="0 2px 4px rgba(16, 185, 129, 0.2)"
                   >
                     <FaPlus size="0.75rem" />
+                    <Box display={'none'} displayMd={'flex'}>
                     Add Bed
+                    </Box>
                   </Box>
                 </Box>
               </Box>
@@ -507,10 +514,10 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               {room.beds?.map((bed: any, bedIndex: number) => (
                 <Box
                   key={bedIndex}
-                  padding="1rem"
+                  paddingMd="1rem"
                   marginBottom="1rem"
-                  backgroundColor="#f8fafc"
-                  border="2px solid #e2e8f0"
+                  backgroundColorMd="#f8fafc"
+                  borderMd="2px solid #e2e8f0"
                   borderRadius="0.5rem"
                 >
                   <Box display="flex" flexDirection="row" gap="1rem">
@@ -544,7 +551,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                             {bed.typeOfBed ? BedTypeLabels[bed.typeOfBed as BedType] : 'Select bed type'}
                           </Box>
                         </Box>
-                        <Box color="#6b7280" fontSize="0.75rem">
+                        <Box display={'none'} displayMd={'flex'} color="#6b7280" fontSize="0.75rem">
                           {bed.typeOfBed ? 'Change' : 'Select'}
                         </Box>
                       </Box>
@@ -589,7 +596,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                             {/*  {bed.numberOfBed ? `${bed.numberOfBed === 4 ? '4+' : bed.numberOfBed} bed${bed.numberOfBed > 1 ? 's' : ''}` : 'Select quantity'}*/}
                             {/*</Box>*/}
                           </Box>
-                          <Box color="#6b7280" fontSize="0.75rem">
+                          <Box color="#6b7280" fontSize="0.75rem" display={'none'} displayMd={'flex'}>
                             {bed.numberOfBed ? 'Change' : 'Select'}
                           </Box>
                         </Box>

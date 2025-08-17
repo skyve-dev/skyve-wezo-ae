@@ -23,7 +23,7 @@ class PortalManager {
         container.style.top = '0px';
         container.style.left = '0px';
         container.style.width = '100vw';
-        container.style.height = '100vh';
+        container.style.height = '100%';
         container.style.zIndex = '-1';
         container.style.pointerEvents = 'none';
         container.style.transition = 'all 0.1s ease, height 0.1s ease'
