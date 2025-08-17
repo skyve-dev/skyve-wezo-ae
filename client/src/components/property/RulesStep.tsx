@@ -221,7 +221,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
             <FaClock color="#3182ce" />
             Check-in and Check-out Times
           </Box>
-          <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
+          <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <Box>
               <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                 <FaSignInAlt color="#10b981" />

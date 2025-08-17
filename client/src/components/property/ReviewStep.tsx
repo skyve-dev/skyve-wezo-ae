@@ -150,7 +150,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               <FaStar color="#3182ce" />
               Amenities ({data.amenities.length})
             </Box>
-            <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr', Md: '1fr 1fr 1fr' }} gap="0.5rem">
+            <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumnsMd="1fr 1fr 1fr" gap="0.5rem">
               {data.amenities.map((amenity, index) => (
                 <Box key={index} fontSize="0.875rem" color="#374151">
                   • {amenity.name}
@@ -167,7 +167,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               <FaImage color="#3182ce" />
               Photos ({data.photos.length})
             </Box>
-            <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr 1fr', Md: '1fr 1fr 1fr 1fr' }} gap="0.5rem">
+            <Box display="grid" gridTemplateColumnsSm="1fr 1fr 1fr" gridTemplateColumnsMd="1fr 1fr 1fr 1fr" gap="0.5rem">
               {data.photos.map((photo, index) => (
                 <Box
                   key={index}

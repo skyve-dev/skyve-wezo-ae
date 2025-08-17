@@ -489,7 +489,7 @@ export function SelectionPickerExamples() {
               </Box>
             </Box>
             
-            <Box display="grid" gridTemplateColumns={{ Lg: 'repeat(2, 1fr)' }} gap="2rem">
+            <Box display="grid" gridTemplateColumnsLg="repeat(2, 1fr)" gap="2rem">
               {/* Parking Policy */}
               <Box>
                 <Box fontSize="1.125rem" fontWeight="600" color="#374151" marginBottom="1rem">
@@ -602,7 +602,7 @@ export function SelectionPickerExamples() {
             <Box fontSize="1.75rem" fontWeight="600" color="#1a202c" marginBottom="1.5rem">
               Current Selections Summary
             </Box>
-            <Box display="grid" gridTemplateColumns={{ Md: 'repeat(2, 1fr)' }} gap="1.5rem">
+            <Box display="grid" gridTemplateColumnsMd="repeat(2, 1fr)" gap="1.5rem">
               <Box>
                 <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
                   Single Selections

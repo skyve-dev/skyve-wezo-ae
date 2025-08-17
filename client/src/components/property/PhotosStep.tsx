@@ -199,7 +199,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
             <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
               Your Photos ({photos.length})
             </Box>
-            <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
+            <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
               {photos.map((photo, index) => (
                 <Box key={index} border="1px solid #e5e7eb" borderRadius="0.5rem" overflow="hidden">
                   <Box position="relative">

@@ -220,7 +220,7 @@ function PropertyDetailsPage() {
 
       {/* Main Content */}
       <Box maxWidth="1200px" margin="0 auto" padding="2rem 1rem">
-        <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Lg: '2fr 1fr' }} gap="2rem">
+        <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsLg="2fr 1fr" gap="2rem">
           
           {/* Left Column - Photos and Description */}
           <Box>

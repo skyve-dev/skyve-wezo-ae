@@ -168,7 +168,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
           <Box fontSize="0.75rem" color="#6b7280" marginBottom="1rem">
             Select all languages you can communicate with guests in
           </Box>
-          <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr', Md: '1fr 1fr 1fr' }} gap="0.75rem">
+          <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumnsMd="1fr 1fr 1fr" gap="0.75rem">
             {languageOptions.map((language) => {
               const isSelected = data.languages?.includes(language)
               return (

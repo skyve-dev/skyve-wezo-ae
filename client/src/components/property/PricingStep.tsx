@@ -76,7 +76,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
             <FaDollarSign color="#3182ce" />
             Base Rate
           </Box>
-          <Box display="grid" gridTemplateColumns={{ Sm: '100px 1fr' }} gap="1rem">
+          <Box display="grid" gridTemplateColumnsSm="100px 1fr" gap="1rem">
             <Box>
               <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
                 Currency
@@ -159,7 +159,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
             <FaPercentage color="#3182ce" />
             Discounts (Optional)
           </Box>
-          <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
+          <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <Box>
               <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
                 Weekly stay discount (%)
@@ -214,7 +214,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
             <FaShieldAlt color="#3182ce" />
             Cancellation Policy
           </Box>
-          <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1rem">
+          <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <Box>
               <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
                 Free cancellation (days before arrival)

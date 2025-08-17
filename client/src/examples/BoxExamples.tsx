@@ -238,7 +238,7 @@ export function BoxExamples() {
                 </Box>
                 <Box 
                   display="grid" 
-                  gridTemplateColumns={{ Lg: '2fr 1fr' }}
+                  gridTemplateColumnsLg="2fr 1fr"
                   gridTemplateRows="auto auto 1fr"
                   gap="1.5rem"
                   height="400px"

@@ -271,7 +271,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
         </Box>
 
         {/* ZIP Code Field */}
-        <Box display="grid" gridTemplateColumns={{ Sm: '1fr 1fr' }} gap="1rem">
+        <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gap="1rem">
 
           <Box>
             <Box

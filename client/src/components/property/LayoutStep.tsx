@@ -173,7 +173,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
 
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {/* Basic Numbers */}
-        <Box display="grid" gridTemplateColumns={{ Sm: '1fr', Md: '1fr 1fr' }} gap="1.5rem">
+        <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1.5rem">
           <Box>
             <Box
               as="label"
