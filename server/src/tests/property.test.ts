@@ -1295,6 +1295,357 @@ describe('Property API Tests', () => {
     });
   });
 
+  describe('Standalone Photo API Tests', () => {
+    describe('Photo Upload and Attachment', () => {
+      it('should upload photos independently and attach to existing property', async () => {
+        // Step 1: Create a property without photos
+        const propertyData = {
+          name: 'Villa for Photo Attachment Test',
+          address: {
+            apartmentOrFloorNumber: '7C',
+            countryOrRegion: 'UAE',
+            city: 'Dubai',
+            zipCode: 11111,
+          },
+          layout: {
+            maximumGuest: 4,
+            bathrooms: 2,
+            allowChildren: true,
+            offerCribs: false,
+            propertySizeSqMtr: 100,
+            rooms: [
+              {
+                spaceName: 'Bedroom',
+                beds: [
+                  {
+                    typeOfBed: 'QueenBed',
+                    numberOfBed: 1,
+                  },
+                ],
+              },
+            ],
+          },
+          amenities: [
+            {
+              name: 'WiFi',
+              category: 'Technology',
+            },
+          ],
+          services: {
+            serveBreakfast: false,
+            parking: 'No',
+            languages: ['English'],
+          },
+          rules: {
+            smokingAllowed: false,
+            partiesOrEventsAllowed: false,
+            petsAllowed: 'No',
+          },
+          bookingType: 'BookInstantly',
+          paymentType: 'Online',
+          pricing: {
+            currency: 'AED',
+            ratePerNight: 500,
+          },
+          aboutTheProperty: 'Property for testing photo attachment',
+          aboutTheNeighborhood: 'Test neighborhood',
+          firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+        };
+
+        const propertyResponse = await request(app)
+          .post('/api/properties')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send(propertyData)
+          .expect(201);
+
+        const propertyId = propertyResponse.body.property.propertyId;
+        expect(propertyResponse.body.property.photos).toEqual([]);
+
+        // Step 2: Upload photos independently (without property attachment)
+        const testImageBuffer1 = Buffer.from('test image data 1');
+        const testImageBuffer2 = Buffer.from('test image data 2');
+        
+        const photoUploadResponse = await request(app)
+          .post('/api/photos/upload')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer1, 'test-image-1.png')
+          .attach('photos', testImageBuffer2, 'test-image-2.png')
+          .expect(201);
+
+        expect(photoUploadResponse.body.message).toBe('Photos uploaded successfully');
+        expect(photoUploadResponse.body.photos).toHaveLength(2);
+        
+        const photoIds = photoUploadResponse.body.photos.map((p: any) => p.id);
+        
+        // Verify photos are not attached to any property
+        photoUploadResponse.body.photos.forEach((photo: any) => {
+          expect(photo.propertyId).toBeNull();
+        });
+
+        // Step 3: Get unattached photos
+        const unattachedResponse = await request(app)
+          .get('/api/photos/unattached')
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(200);
+
+        expect(unattachedResponse.body.photos.length).toBeGreaterThanOrEqual(2);
+        
+        // Step 4: Attach photos to the property
+        const attachResponse = await request(app)
+          .post(`/api/photos/attach/${propertyId}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ photoIds })
+          .expect(200);
+
+        expect(attachResponse.body.message).toBe('Photos attached to property successfully');
+        expect(attachResponse.body.photos).toHaveLength(2);
+        
+        // Verify photos are now attached to the property
+        attachResponse.body.photos.forEach((photo: any) => {
+          expect(photo.propertyId).toBe(propertyId);
+        });
+
+        // Step 5: Verify property now has the attached photos
+        const propertyWithPhotosResponse = await request(app)
+          .get(`/api/properties/${propertyId}`)
+          .expect(200);
+
+        expect(propertyWithPhotosResponse.body.property.photos).toHaveLength(2);
+        propertyWithPhotosResponse.body.property.photos.forEach((photo: any) => {
+          expect(photo.propertyId).toBe(propertyId);
+        });
+
+        // Step 6: Verify unattached photos list is updated
+        const updatedUnattachedResponse = await request(app)
+          .get('/api/photos/unattached')
+          .set('Authorization', `Bearer ${authToken}`)
+          .expect(200);
+
+        const remainingUnattachedIds = updatedUnattachedResponse.body.photos.map((p: any) => p.id);
+        photoIds.forEach((id: string) => {
+          expect(remainingUnattachedIds).not.toContain(id);
+        });
+      });
+
+      it('should reject attaching photos that are already attached to another property', async () => {
+        // Create first property
+        const property1Response = await request(app)
+          .post('/api/properties')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            name: 'First Property',
+            address: {
+              countryOrRegion: 'UAE',
+              city: 'Dubai',
+              zipCode: 22222,
+            },
+            layout: {
+              maximumGuest: 2,
+              bathrooms: 1,
+              allowChildren: false,
+              offerCribs: false,
+            },
+            services: {
+              serveBreakfast: false,
+              parking: 'No',
+              languages: ['English'],
+            },
+            rules: {
+              smokingAllowed: false,
+              partiesOrEventsAllowed: false,
+              petsAllowed: 'No',
+            },
+            bookingType: 'BookInstantly',
+            paymentType: 'Online',
+            firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+          })
+          .expect(201);
+
+        const property1Id = property1Response.body.property.propertyId;
+
+        // Upload and attach photos to first property
+        const testImageBuffer = Buffer.from('test image for attachment conflict');
+        
+        const photoUploadResponse = await request(app)
+          .post('/api/photos/upload')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('photos', testImageBuffer, 'conflict-test.png')
+          .expect(201);
+
+        const photoId = photoUploadResponse.body.photos[0].id;
+
+        const attachResponse1 = await request(app)
+          .post(`/api/photos/attach/${property1Id}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ photoIds: [photoId] })
+          .expect(200);
+        
+        expect(attachResponse1.body.photos[0].propertyId).toBe(property1Id);
+
+        // Create second property
+        const property2Response = await request(app)
+          .post('/api/properties')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            name: 'Second Property',
+            address: {
+              countryOrRegion: 'UAE',
+              city: 'Abu Dhabi',
+              zipCode: 33333,
+            },
+            layout: {
+              maximumGuest: 3,
+              bathrooms: 1,
+              allowChildren: true,
+              offerCribs: true,
+            },
+            services: {
+              serveBreakfast: true,
+              parking: 'YesFree',
+              languages: ['English', 'Arabic'],
+            },
+            rules: {
+              smokingAllowed: false,
+              partiesOrEventsAllowed: false,
+              petsAllowed: 'UponRequest',
+            },
+            bookingType: 'NeedToRequestBook',
+            paymentType: 'ByCreditCardAtProperty',
+            firstDateGuestCanCheckIn: new Date('2024-02-01').toISOString(),
+          })
+          .expect(201);
+
+        const property2Id = property2Response.body.property.propertyId;
+
+        // Try to attach the same photo to second property (should fail)
+        const attachResponse = await request(app)
+          .post(`/api/photos/attach/${property2Id}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ photoIds: [photoId] })
+          .expect(404);
+
+        expect(attachResponse.body.error).toBe('Some photos not found or already attached to a property');
+      });
+
+      it('should reject attaching non-existent photos', async () => {
+        // Create a property
+        const propertyResponse = await request(app)
+          .post('/api/properties')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            name: 'Property for Invalid Photo Test',
+            address: {
+              countryOrRegion: 'UAE',
+              city: 'Sharjah',
+              zipCode: 44444,
+            },
+            layout: {
+              maximumGuest: 2,
+              bathrooms: 1,
+              allowChildren: false,
+              offerCribs: false,
+            },
+            services: {
+              serveBreakfast: false,
+              parking: 'No',
+              languages: ['English'],
+            },
+            rules: {
+              smokingAllowed: true,
+              partiesOrEventsAllowed: false,
+              petsAllowed: 'No',
+            },
+            bookingType: 'BookInstantly',
+            paymentType: 'Online',
+            firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+          })
+          .expect(201);
+
+        const propertyId = propertyResponse.body.property.propertyId;
+        const fakePhotoIds = ['fake-id-1', 'fake-id-2'];
+
+        // Try to attach non-existent photos
+        const attachResponse = await request(app)
+          .post(`/api/photos/attach/${propertyId}`)
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ photoIds: fakePhotoIds })
+          .expect(404);
+
+        expect(attachResponse.body.error).toBe('Some photos not found or already attached to a property');
+      });
+
+      it('should reject attaching photos to non-owned property', async () => {
+        // Create a property as the main user
+        const propertyResponse = await request(app)
+          .post('/api/properties')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            name: 'Property Owned by Main User',
+            address: {
+              countryOrRegion: 'UAE',
+              city: 'Ajman',
+              zipCode: 55555,
+            },
+            layout: {
+              maximumGuest: 2,
+              bathrooms: 1,
+              allowChildren: false,
+              offerCribs: false,
+            },
+            services: {
+              serveBreakfast: false,
+              parking: 'YesPaid',
+              languages: ['English'],
+            },
+            rules: {
+              smokingAllowed: false,
+              partiesOrEventsAllowed: true,
+              petsAllowed: 'Yes',
+            },
+            bookingType: 'BookInstantly',
+            paymentType: 'Online',
+            firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+          })
+          .expect(201);
+
+        const propertyId = propertyResponse.body.property.propertyId;
+
+        // Create another user
+        const otherUser = await prisma.user.create({
+          data: {
+            username: `photoattach_${Date.now()}`,
+            email: `photoattach_${Date.now()}@example.com`,
+            password: await hashPassword('Test@123'),
+            role: 'HOMEOWNER',
+            isAdmin: false,
+          },
+        });
+        
+        const otherToken = generateToken(otherUser);
+
+        // Upload photos as the other user
+        const testImageBuffer = Buffer.from('other user image');
+        
+        const photoUploadResponse = await request(app)
+          .post('/api/photos/upload')
+          .set('Authorization', `Bearer ${otherToken}`)
+          .attach('photos', testImageBuffer, 'other-user.png')
+          .expect(201);
+
+        const photoId = photoUploadResponse.body.photos[0].id;
+
+        // Try to attach to property owned by main user (should fail)
+        const attachResponse = await request(app)
+          .post(`/api/photos/attach/${propertyId}`)
+          .set('Authorization', `Bearer ${otherToken}`)
+          .send({ photoIds: [photoId] })
+          .expect(404);
+
+        expect(attachResponse.body.error).toBe('Property not found or you do not have permission to update it');
+      });
+    });
+  });
+
   describe('Role Upgrade Tests', () => {
     it('should upgrade TENANT user to HOMEOWNER when creating first property', async () => {
       // Create a user with TENANT role

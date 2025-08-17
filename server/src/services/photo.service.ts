@@ -2,20 +2,20 @@ import prisma from '../config/database';
 
 export class PhotoService {
   async uploadPhotos(photos: any[]) {
-    await prisma.photo.createMany({
-      data: photos.map(photo => ({
-        url: photo.url,
-        altText: photo.altText || '',
-        description: photo.description || null,
-        tags: photo.tags || [],
-        propertyId: null,
-      })),
-    });
-
-    const createdPhotos = await prisma.photo.findMany({
-      orderBy: { id: 'desc' },
-      take: photos.length,
-    });
+    // Create photos individually to get their IDs
+    const createdPhotos = [];
+    for (const photo of photos) {
+      const created = await prisma.photo.create({
+        data: {
+          url: photo.url,
+          altText: photo.altText || '',
+          description: photo.description || null,
+          tags: photo.tags || [],
+          propertyId: null,
+        },
+      });
+      createdPhotos.push(created);
+    }
 
     return createdPhotos;
   }
