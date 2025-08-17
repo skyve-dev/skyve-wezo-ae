@@ -44,6 +44,73 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
     }
   }, [])
 
+  const resizeImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      
+      reader.onload = (e) => {
+        const img = new Image()
+        
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          
+          if (!ctx) {
+            reject(new Error('Could not get canvas context'))
+            return
+          }
+          
+          // Calculate new dimensions - shortest side becomes 800px
+          const aspectRatio = img.width / img.height
+          let newWidth: number
+          let newHeight: number
+          
+          if (img.width < img.height) {
+            // Width is shortest side
+            newWidth = 800
+            newHeight = Math.round(800 / aspectRatio)
+          } else {
+            // Height is shortest side (or square)
+            newHeight = 800
+            newWidth = Math.round(800 * aspectRatio)
+          }
+          
+          // Set canvas dimensions
+          canvas.width = newWidth
+          canvas.height = newHeight
+          
+          // Draw the resized image
+          ctx.drawImage(img, 0, 0, newWidth, newHeight)
+          
+          // Convert to blob with JPEG compression for smaller file size
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob)
+              } else {
+                reject(new Error('Failed to convert canvas to blob'))
+              }
+            },
+            'image/jpeg',
+            0.85 // 85% quality
+          )
+        }
+        
+        img.onerror = () => {
+          reject(new Error('Failed to load image'))
+        }
+        
+        img.src = e.target?.result as string
+      }
+      
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'))
+      }
+      
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleFileUpload = async (files: FileList | File[]) => {
     const validFiles = Array.from(files).filter(file => 
       file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024 // 10MB limit
@@ -58,9 +125,24 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
     
     try {
       const formData = new FormData()
-      validFiles.forEach(file => {
-        formData.append('photos', file)
-      })
+      
+      // Resize each image before uploading
+      for (const file of validFiles) {
+        try {
+          const resizedBlob = await resizeImage(file)
+          // Create a new File object from the resized blob with the original name
+          const resizedFile = new File(
+            [resizedBlob], 
+            file.name.replace(/\.[^/.]+$/, '.jpg'), // Change extension to .jpg
+            { type: 'image/jpeg' }
+          )
+          formData.append('photos', resizedFile)
+        } catch (resizeError) {
+          console.error(`Failed to resize ${file.name}:`, resizeError)
+          // If resizing fails, upload the original file
+          formData.append('photos', file)
+        }
+      }
       
       const response = await api.post<{ photos: Array<{ id: string, url: string }> }>(
         '/api/photos/upload',

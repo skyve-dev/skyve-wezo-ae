@@ -35,7 +35,7 @@ function RegisterPage() {
           Wezo
         </Box>
         <Box as="p" fontSize={18} color="#6c757d" margin={0}>
-          Property Rental Platform
+          Exceptional homes for your next getaway
         </Box>
       </Box>
 

@@ -68,6 +68,72 @@ const PhotoManagement: React.FC = () => {
     }
   };
 
+  const resizeImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const img = new Image();
+        
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            reject(new Error('Could not get canvas context'));
+            return;
+          }
+          
+          // Calculate new dimensions - shorter side becomes 800px
+          let newWidth: number;
+          let newHeight: number;
+          
+          if (img.width < img.height) {
+            // Width is the shorter side
+            newWidth = 800;
+            newHeight = Math.round((img.height / img.width) * 800);
+          } else {
+            // Height is the shorter side (or they're equal)
+            newHeight = 800;
+            newWidth = Math.round((img.width / img.height) * 800);
+          }
+          
+          // Set canvas dimensions
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          
+          // Draw the resized image
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          
+          // Convert to blob with JPEG compression for smaller file size
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Failed to convert canvas to blob'));
+              }
+            },
+            'image/jpeg',
+            0.85 // 85% quality
+          );
+        };
+        
+        img.onerror = () => {
+          reject(new Error('Failed to load image'));
+        };
+        
+        img.src = e.target?.result as string;
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -77,9 +143,24 @@ const PhotoManagement: React.FC = () => {
     setSuccess('');
 
     const formData = new FormData();
-    Array.from(files).forEach((file) => {
-      formData.append('photos', file);
-    });
+    
+    // Resize each image before uploading
+    for (const file of Array.from(files)) {
+      try {
+        const resizedBlob = await resizeImage(file);
+        // Create a new File object from the resized blob with the original name
+        const resizedFile = new File(
+          [resizedBlob], 
+          file.name.replace(/\.[^/.]+$/, '.jpg'), // Change extension to .jpg
+          { type: 'image/jpeg' }
+        );
+        formData.append('photos', resizedFile);
+      } catch (resizeError) {
+        console.error(`Failed to resize ${file.name}:`, resizeError);
+        // If resizing fails, upload the original file
+        formData.append('photos', file);
+      }
+    }
 
     try {
       const response = await api.post<{ photos: ExtendedPhoto[] }>(

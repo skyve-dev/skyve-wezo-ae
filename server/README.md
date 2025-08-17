@@ -244,6 +244,51 @@ enum BookingType {
 }
 ```
 
+### Photo Upload System
+
+#### **Architecture**
+```typescript
+// ✅ Multer-based file upload with validation
+export const uploadPhotos = multer({
+  storage: multer.diskStorage({
+    destination: 'uploads/photos/',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, and WebP images are allowed'));
+    }
+  }
+});
+
+// ✅ Static file serving with proper headers
+app.use('/uploads/photos', express.static('uploads/photos', {
+  maxAge: '1d',
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Cache-Control', 'public, max-age=86400');
+  }
+}));
+```
+
+#### **Photo API Endpoints**
+- `POST /api/photos/upload` - Upload multiple photos (client-side resizing to 800px)
+- `POST /api/photos/attach/:propertyId` - Attach photos to property
+- `GET /api/photos/unattached` - Get all unattached photos
+- `DELETE /api/photos/:photoId` - Delete photo and file
+- `PUT /api/photos/:photoId` - Update photo metadata
+- `DELETE /api/properties/:propertyId/photos/:photoId` - Detach photo from property
+
 ### Database Best Practices
 
 #### 1. **Migration Strategy**

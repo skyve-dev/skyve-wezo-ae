@@ -1,181 +1,209 @@
-# Wezo Client 🏠
+# Wezo Client - Property Management Dashboard 🏠
 
-Frontend application for the Wezo property rental platform - a modern, responsive React application built with TypeScript, Vite, and advanced component architecture.
+A modern, responsive React application for property owners to manage villa listings on the Wezo.ae platform. Built with TypeScript, Vite, and featuring a comprehensive property management system with advanced photo upload capabilities.
 
 ## 🏗️ Architecture Overview
 
 ### Tech Stack
 - **React 18** - Modern React with hooks and concurrent features
-- **TypeScript** - Full type safety and enhanced developer experience
-- **Vite** - Fast development server and build tool
+- **TypeScript** - Full type safety and enhanced developer experience  
+- **Vite** - Lightning-fast development server and build tool
 - **TanStack Router** - Type-safe file-based routing
-- **Redux Toolkit** - Predictable state management
-- **Custom Box Component System** - Advanced styling and responsive design
+- **Redux Toolkit** - Predictable state management with RTK
+- **Custom Box Component** - Advanced styling and responsive design system
+- **React Leaflet** - Interactive maps for property locations
+- **Canvas API** - Client-side image processing and optimization
 
-### Design Patterns
+### Key Features
+- **🏡 Property Registration Wizard** - 9-step comprehensive property onboarding
+- **📸 Smart Photo Management** - Automatic image resizing to 800px with drag-and-drop
+- **🗺️ Interactive Maps** - Location selection with Leaflet integration
+- **📱 Mobile-First Design** - Fully responsive across all devices
+- **🔐 Secure Authentication** - JWT-based auth with role management
+- **⚡ Real-time Updates** - Optimistic UI updates for better UX
+- **🎨 Component Library** - Reusable UI components with examples
 
-#### 1. **Component Composition Pattern**
-```typescript
-// ✅ Good: Compose complex UIs from simple, reusable components
-<Box display="flex" gap={16}>
-  <Box as="button" whileHover={{ transform: 'scale(1.05)' }}>
-    Primary Action
-  </Box>
-  <Box as="button" variant="secondary">
-    Secondary Action
-  </Box>
-</Box>
-```
-
-#### 2. **Props-as-Styles Pattern**
-The Box component implements a props-as-styles pattern, eliminating the need for CSS classes:
-```typescript
-// ✅ Instead of CSS classes, use props
-<Box 
-  backgroundColor="#007bff"
-  padding={16}
-  borderRadius={8}
-  whileHover={{ backgroundColor: '#0056b3' }}
-/>
-```
-
-#### 3. **Polymorphic Component Pattern**
-Components can render as different HTML elements while maintaining type safety:
-```typescript
-// All of these are type-safe and properly typed
-<Box as="button" onClick={handleClick}>Button</Box>
-<Box as="input" value={value} onChange={handleChange} />
-<Box as="a" href="/example">Link</Box>
-```
-
-#### 4. **Mobile-First Responsive Pattern**
-```typescript
-<Box
-  padding={16}        // Mobile: 16px
-  paddingMd={24}     // Tablet+: 24px  
-  paddingLg={32}     // Laptop+: 32px
-  paddingXl={40}     // Desktop+: 40px
-/>
-```
-
-## 📁 Folder Structure
+## 📁 Project Structure
 
 ```
 client/
 ├── src/
-│   ├── components/           # Reusable UI components
-│   │   ├── Box.tsx          # Core Box component (polymorphic, responsive, motion)
-│   │   ├── Dashboard.tsx    # Dashboard page component
-│   │   ├── forms/           # Form-related components
-│   │   │   ├── LoginForm.tsx
-│   │   │   └── RegisterForm.tsx
-│   │   └── examples/        # Example/documentation components
-│   │       └── BoxExamplePage.tsx
-│   ├── routes/              # File-based routing (TanStack Router)
-│   │   ├── __root.tsx       # Root layout component
-│   │   ├── index.tsx        # Home page route
-│   │   ├── dashboard.tsx    # Dashboard route
-│   │   ├── login.tsx        # Login route
-│   │   ├── register.tsx     # Register route
-│   │   └── example/         # Example routes
-│   │       └── Box.tsx      # Box component examples
-│   ├── store/               # Redux state management
-│   │   ├── index.ts         # Store configuration
-│   │   ├── hooks.ts         # Typed Redux hooks
-│   │   └── slices/          # Redux Toolkit slices
-│   │       └── authSlice.ts # Authentication state
-│   ├── types/               # TypeScript type definitions
-│   │   ├── auth.ts          # Authentication types
-│   │   └── box.ts           # Box component types
-│   ├── utils/               # Utility functions and helpers
-│   │   ├── api.ts           # API client utilities
-│   │   ├── globalStyles.ts  # Global CSS styles
-│   │   └── responsive.ts    # Responsive styling utilities
-│   ├── App.tsx              # Root App component
-│   ├── main.tsx             # Application entry point
-│   └── router.tsx           # Router configuration
-├── public/                  # Static assets
-├── index.html               # HTML template
-├── package.json             # Dependencies and scripts
-├── tsconfig.json            # TypeScript configuration
-├── vite.config.ts           # Vite build configuration
-└── README.md                # This file
+│   ├── components/              # Reusable UI components
+│   │   ├── Box.tsx             # Core polymorphic component system
+│   │   ├── Dashboard.tsx       # Main dashboard layout
+│   │   ├── PhotoManagement.tsx # Photo library with resizing
+│   │   ├── DatePicker.tsx      # Custom date selection
+│   │   ├── TimePicker.tsx      # Time selection component
+│   │   ├── SelectionPicker.tsx # Multi-select component
+│   │   ├── SlidingDrawer.tsx   # Mobile-friendly drawer
+│   │   ├── forms/              # Form components
+│   │   │   ├── LoginForm.tsx   # Authentication form
+│   │   │   └── RegisterForm.tsx # User registration
+│   │   └── property/           # Property wizard steps
+│   │       ├── BasicInfoStep.tsx
+│   │       ├── LocationStep.tsx
+│   │       ├── PhotosStep.tsx  # With image resizing
+│   │       ├── ServicesStep.tsx
+│   │       ├── RulesStep.tsx
+│   │       ├── PricingStep.tsx
+│   │       └── ReviewStep.tsx
+│   │
+│   ├── routes/                 # TanStack Router pages
+│   │   ├── __root.tsx          # Root layout
+│   │   ├── index.tsx           # Landing page
+│   │   ├── login.tsx           # Login page
+│   │   ├── register.tsx        # Registration page
+│   │   ├── dashboard/          # Dashboard routes
+│   │   │   ├── index.tsx       # Dashboard home
+│   │   │   ├── my-properties.tsx # Property list
+│   │   │   └── photos.tsx      # Photo management
+│   │   ├── property/           # Property routes
+│   │   │   ├── $propertyId.tsx # Property details
+│   │   │   └── $propertyId/
+│   │   │       └── edit.tsx    # Property editor
+│   │   └── examples/           # Component demos
+│   │
+│   ├── store/                  # Redux state management
+│   │   ├── index.ts            # Store configuration
+│   │   ├── hooks.ts            # Typed Redux hooks
+│   │   └── slices/
+│   │       ├── authSlice.ts    # Authentication state
+│   │       └── propertySlice.ts # Property management
+│   │
+│   ├── types/                  # TypeScript definitions
+│   │   ├── auth.ts             # Auth types
+│   │   ├── property.ts         # Property domain types
+│   │   └── box.ts              # Box component types
+│   │
+│   ├── utils/                  # Utilities and helpers
+│   │   ├── api.ts              # API client with interceptors
+│   │   ├── globalStyles.ts     # Global styles
+│   │   ├── deviceDetection.ts  # Responsive helpers
+│   │   └── assetHelpers.ts     # Asset path resolution
+│   │
+│   ├── App.tsx                 # Root application
+│   ├── main.tsx                # Entry point
+│   └── router.tsx              # Router configuration
+│
+├── public/                     # Static assets
+├── .env.example                # Environment template
+├── package.json                # Dependencies
+├── tsconfig.json               # TypeScript config
+├── vite.config.ts              # Vite configuration
+└── README.md                   # This file
 ```
 
-## 🎨 Box Component System
+## 🎨 Component Architecture
 
-The cornerstone of our architecture is the **Box component** - a powerful, polymorphic component that replaces traditional CSS with a prop-based styling system.
+### Box Component System
 
-### Key Features
+The foundation of our UI is the **Box component** - a powerful, polymorphic component with built-in responsive design and motion capabilities.
 
-#### 🔄 **Polymorphic "as" Prop**
+#### Key Features
+
+**🔄 Polymorphic Rendering**
 ```typescript
-// Renders different HTML elements with full TypeScript support
-<Box as="button" type="submit" onClick={handleSubmit}>Submit</Box>
+// Renders as any HTML element with full TypeScript support
+<Box as="button" onClick={handleClick}>Click me</Box>
 <Box as="input" type="email" value={email} onChange={handleChange} />
-<Box as="h1" fontSize={32} fontWeight="bold">Title</Box>
+<Box as="h1" fontSize={32} fontWeight={700}>Heading</Box>
 ```
 
-#### 📱 **Mobile-First Responsive Design**
+**📱 Mobile-First Responsive Design**
 ```typescript
 <Box
-  // Base (mobile) styles
-  fontSize={16}
+  // Mobile styles (default)
+  fontSize={14}
   padding={8}
-  display="block"
   
-  // Tablet and up (≥768px)
-  fontSizeMd={18}
+  // Tablet (≥768px)
+  fontSizeMd={16}
   paddingMd={12}
-  displayMd="flex"
   
-  // Laptop and up (≥1024px)
-  fontSizeLg={20}
+  // Desktop (≥1024px)
+  fontSizeLg={18}
   paddingLg={16}
-  
-  // Desktop and up (≥1280px)
-  fontSizeXl={24}
-  paddingXl={20}
 />
 ```
 
-#### ✨ **Motion-Based Interactions**
+**✨ Motion & Interactions**
 ```typescript
 <Box
-  whileHover={{
-    // Mobile: subtle effect
-    transform: 'translateY(-2px)',
-    
-    // Desktop: more dramatic
-    Lg: {
-      transform: 'translateY(-4px) scale(1.05)',
-      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-    }
+  whileHover={{ 
+    transform: 'scale(1.05)',
+    backgroundColor: '#0056b3' 
   }}
   whileTap={{ transform: 'scale(0.98)' }}
-  whileInView={{ opacity: 1 }}
+  transition="all 0.2s ease"
 />
 ```
 
-### Breakpoint System
-- **Default (Mobile)**: Base styles, no suffix
-- **Sm (≥640px)**: Small tablets and large phones
-- **Md (≥768px)**: Tablets
-- **Lg (≥1024px)**: Laptops and small desktops
-- **Xl (≥1280px)**: Large desktops
+### Property Registration Wizard
 
-## 🚀 Development Guidelines
+A comprehensive 9-step wizard for property owners to list their villas:
 
-### Getting Started
+1. **Basic Information** - Property name, type, description
+2. **Location** - Address with interactive map selection
+3. **Layout** - Rooms, beds, and capacity configuration
+4. **Amenities** - Available facilities and features
+5. **Photos** - Upload with automatic 800px resizing
+6. **Services** - Breakfast, parking, languages
+7. **Rules** - Smoking, pets, party policies
+8. **Pricing** - Rates and payment configuration
+9. **Review** - Final review before submission
+
+### Photo Management System
+
+Advanced photo handling with client-side optimization:
+
+```typescript
+// Automatic image resizing before upload
+const resizeImage = (file: File): Promise<Blob> => {
+  // Resizes images so shortest side = 800px
+  // Maintains aspect ratio
+  // Converts to JPEG with 85% quality
+  // Examples:
+  // - 1600x1200 → 1067x800
+  // - 1200x1600 → 800x1067
+}
+```
+
+**Features:**
+- **Automatic Resizing** - Images resized to 800px on shortest side
+- **Drag & Drop** - Intuitive file upload interface
+- **Bulk Operations** - Upload/delete multiple photos
+- **Photo Library** - Organize and attach photos to properties
+- **Optimization** - JPEG compression for smaller file sizes
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/skyve-wezo-ae.git
+cd skyve-wezo-ae/client
+
 # Install dependencies
 npm install
 
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### Development
+
+```bash
 # Start development server
 npm run dev
+# Available at http://localhost:5173
 
-# Type check
+# Type checking
 npm run lint
 
 # Build for production
@@ -185,228 +213,177 @@ npm run build
 npm run preview
 ```
 
-### Code Organization
+## 🔧 Configuration
 
-#### 1. **Component Structure**
-```typescript
-// ✅ Good: Well-structured component with clear separation
-import React from 'react';
-import { Box } from '@/components/Box';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+### Environment Variables
 
-interface MyComponentProps {
-  title: string;
-  onAction: () => void;
-}
+```env
+# API Configuration
+VITE_API_BASE_URL=http://localhost:3000
+VITE_API_TIMEOUT=30000
 
-export const MyComponent: React.FC<MyComponentProps> = ({ title, onAction }) => {
-  // Hooks at the top
-  const dispatch = useAppDispatch();
-  const state = useAppSelector(selectSomeState);
-  
-  // Event handlers
-  const handleClick = () => {
-    // Handle logic
-    onAction();
-  };
-  
-  // Render
-  return (
-    <Box padding={20} backgroundColor="white" borderRadius={8}>
-      <Box as="h2" fontSize={24} marginBottom={16}>{title}</Box>
-      <Box as="button" onClick={handleClick}>Action</Box>
-    </Box>
-  );
-};
+# Feature Flags
+VITE_ENABLE_MAPS=true
+VITE_ENABLE_PHOTO_RESIZE=true
+
+# Development
+VITE_DEBUG_MODE=false
 ```
 
-#### 2. **State Management**
-```typescript
-// ✅ Use Redux Toolkit for global state
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+### Routing Configuration
 
-const featureSlice = createSlice({
-  name: 'feature',
-  initialState: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  reducers: {
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
-  },
+Routes are automatically generated from the file structure:
+- `/dashboard` → `src/routes/dashboard/index.tsx`
+- `/property/:id` → `src/routes/property/$propertyId.tsx`
+- `/examples/box` → `src/routes/examples/box.tsx`
+
+## 📱 Responsive Design
+
+### Breakpoint System
+- **Mobile** (default): Base styles, no suffix
+- **Sm** (≥640px): Large phones
+- **Md** (≥768px): Tablets
+- **Lg** (≥1024px): Laptops
+- **Xl** (≥1280px): Desktops
+
+### Usage Example
+```typescript
+<Box
+  display="block"        // Mobile: Stack vertically
+  displayMd="flex"       // Tablet+: Horizontal layout
+  gap={8}                // Mobile: Small gap
+  gapLg={16}            // Desktop: Larger gap
+  flexDirection="column" // Mobile: Column
+  flexDirectionLg="row"  // Desktop: Row
+/>
+```
+
+## 🛠️ State Management
+
+### Redux Toolkit Structure
+
+```typescript
+// Authentication State
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+}
+
+// Property State  
+interface PropertyState {
+  properties: Property[];
+  currentProperty: Property | null;
+  wizardData: WizardFormData;
+  loading: boolean;
+  error: string | null;
+}
+```
+
+### API Integration
+
+```typescript
+// Centralized API client with interceptors
+import { api } from '@/utils/api';
+
+// Automatic token attachment
+api.get('/api/properties/my-properties');
+
+// File upload with progress
+api.post('/api/photos/upload', formData, {
+  onUploadProgress: (progress) => {
+    console.log(`Upload: ${progress.loaded}/${progress.total}`);
+  }
 });
 ```
 
-#### 3. **Routing**
-```typescript
-// ✅ File-based routing with TanStack Router
-import { createFileRoute } from '@tanstack/react-router'
-import { MyPageComponent } from '@/components/MyPageComponent'
+## ✅ Best Practices
 
-export const Route = createFileRoute('/my-page')({
-  component: MyPageComponent,
-})
-```
+### Component Development
+- ✅ Use Box component for all styling needs
+- ✅ Implement responsive design from the start
+- ✅ Add motion effects for better UX
+- ✅ Use semantic HTML via `as` prop
+- ✅ Compose complex UIs from simple components
 
-## ✅ Do's and Don'ts
+### State Management
+- ✅ Use Redux for global application state
+- ✅ Use local state for UI-only concerns
+- ✅ Implement optimistic updates
+- ✅ Normalize complex data structures
 
-### ✅ **DO's**
-
-#### Component Design
-- **DO** use the Box component for all layout and styling needs
-- **DO** implement responsive design with mobile-first approach
-- **DO** use motion props for interactive feedback
-- **DO** leverage polymorphic `as` prop for semantic HTML
-- **DO** compose complex UIs from simple components
-
-```typescript
-// ✅ Good: Using Box for responsive, interactive design
-<Box
-  as="button"
-  padding={12}
-  backgroundColor="#007bff"
-  color="white"
-  borderRadius={6}
-  whileHover={{ backgroundColor: '#0056b3' }}
-  whileTap={{ transform: 'scale(0.98)' }}
->
-  Click me!
-</Box>
-```
-
-#### State Management
-- **DO** use Redux for global application state
-- **DO** use local component state for UI-only state
-- **DO** use typed selectors and actions
-- **DO** normalize complex data structures
-
-```typescript
-// ✅ Good: Typed Redux usage
-const user = useAppSelector(selectUser);
-const dispatch = useAppDispatch();
-dispatch(updateUser({ name: 'New Name' }));
-```
-
-#### TypeScript
-- **DO** leverage full TypeScript capabilities
-- **DO** define proper interfaces for props and data
-- **DO** use strict TypeScript configuration
-- **DO** type your API responses
-
-```typescript
-// ✅ Good: Well-typed component props
-interface UserCardProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  onEdit: (userId: string) => void;
-  variant?: 'default' | 'compact';
-}
-```
-
-### ❌ **DON'Ts**
-
-#### Component Design
-- **DON'T** use traditional CSS classes (use Box props instead)
-- **DON'T** create components without responsive considerations
-- **DON'T** ignore accessibility (use semantic HTML via `as` prop)
-- **DON'T** create overly complex single components
-
-```typescript
-// ❌ Bad: Using CSS classes instead of Box props
-<div className="button primary large">
-  Click me
-</div>
-
-// ❌ Bad: Non-responsive design
-<Box fontSize={24}> // Only works on large screens
-  Text
-</Box>
-
-// ✅ Good: Responsive design
-<Box fontSize={16} fontSizeMd={20} fontSizeLg={24}>
-  Responsive Text
-</Box>
-```
-
-#### State Management
-- **DON'T** put all state in Redux (use local state when appropriate)
-- **DON'T** mutate state directly (Redux Toolkit handles this)
-- **DON'T** use Redux for derived/computed values (use selectors)
-
-```typescript
-// ❌ Bad: Everything in Redux
-const [isModalOpen, setIsModalOpen] = useAppSelector(selectModalState);
-
-// ✅ Good: Local UI state
-const [isModalOpen, setIsModalOpen] = useState(false);
-```
-
-#### File Organization
-- **DON'T** put everything in one file
-- **DON'T** create deep folder nesting (max 3 levels)
-- **DON'T** mix business logic with UI components
-- **DON'T** import from parent directories (use absolute imports)
-
-```typescript
-// ❌ Bad: Relative imports
-import { Box } from '../../../components/Box';
-
-// ✅ Good: Absolute imports
-import { Box } from '@/components/Box';
-```
-
-## 🎯 Best Practices
+### TypeScript
+- ✅ Define interfaces for all props
+- ✅ Use strict TypeScript configuration
+- ✅ Type API responses properly
+- ✅ Leverage utility types
 
 ### Performance
-1. **Lazy Loading**: Use dynamic imports for large components
-2. **Memoization**: Memoize expensive calculations and components
-3. **Bundle Splitting**: Leverage Vite's automatic code splitting
-4. **Image Optimization**: Use appropriate image formats and sizes
+- ✅ Lazy load large components
+- ✅ Memoize expensive calculations
+- ✅ Optimize images before upload
+- ✅ Use virtual scrolling for long lists
 
-### Accessibility
-1. **Semantic HTML**: Use appropriate HTML elements via `as` prop
-2. **ARIA Labels**: Include proper ARIA attributes
-3. **Keyboard Navigation**: Ensure all interactive elements are keyboard accessible
-4. **Focus Management**: Handle focus states properly
+## 🧪 Testing
 
-### Testing Strategy
-1. **Unit Tests**: Test individual component logic
-2. **Integration Tests**: Test component interactions
-3. **E2E Tests**: Test complete user workflows
-4. **Visual Testing**: Test responsive design across breakpoints
+```bash
+# Run unit tests
+npm test
 
-## 📚 Key Resources
+# Run with coverage
+npm run test:coverage
 
-- **Box Component Examples**: Visit `/example/Box` for comprehensive demos
-- **TanStack Router**: [Official Documentation](https://tanstack.com/router)
-- **Redux Toolkit**: [Official Documentation](https://redux-toolkit.js.org/)
-- **TypeScript**: [Official Documentation](https://www.typescriptlang.org/)
-- **Vite**: [Official Documentation](https://vitejs.dev/)
+# Run E2E tests
+npm run test:e2e
+```
+
+## 📦 Build & Deployment
+
+```bash
+# Production build
+npm run build
+
+# Output directory: dist/
+# Optimized for production with:
+# - Code splitting
+# - Tree shaking
+# - Minification
+# - Asset optimization
+```
+
+### Deployment Checklist
+- [ ] Set production environment variables
+- [ ] Configure API endpoints
+- [ ] Enable HTTPS
+- [ ] Set up CDN for static assets
+- [ ] Configure error tracking
+- [ ] Set up monitoring
 
 ## 🤝 Contributing
 
-1. Follow the established patterns and conventions
-2. Write TypeScript with strict typing
-3. Use the Box component system for all styling
-4. Implement responsive design from the start
-5. Add motion effects where appropriate
-6. Write comprehensive tests
-7. Update documentation for new features
+1. Follow established patterns and conventions
+2. Use TypeScript with strict typing
+3. Implement responsive design
+4. Add appropriate motion effects
+5. Write comprehensive tests
+6. Update documentation
+
+## 📚 Resources
+
+- **Live Examples**: `/examples` routes for component demos
+- **API Documentation**: See server README
+- **Design System**: Box component documentation
+- **UI Mockups**: `docs/homeowner-onboarding-villa-registration/*.png`
 
 ## 📞 Support
 
-For questions about the architecture, patterns, or Box component system, refer to:
-- Live examples at `/example/Box`
-- Component source code in `src/components/Box.tsx`
-- Type definitions in `src/types/box.ts`
-- Utility functions in `src/utils/responsive.ts`
+For questions or issues:
+- Component examples: `/examples` routes
+- API integration: `src/utils/api.ts`
+- State management: `src/store/`
+- Routing: `src/routes/`
 
 ---
 
-Built with ❤️ using modern React patterns and the powerful Box component system.
+Built with ❤️ for the UAE property rental market using modern React patterns and best practices.

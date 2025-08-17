@@ -1,16 +1,27 @@
-# Wezo - Property Rental Platform
+# Wezo.ae - Property Rental Platform
 
-A modern property rental platform for villa listings in the UAE, built as a monorepo with separate applications for different user types.
+A modern property rental platform for villa listings in the UAE, built with TypeScript, React, and PostgreSQL. The platform provides comprehensive property management features similar to Booking.com, tailored for the UAE market.
 
 ## 🏗️ Project Structure
 
 This is a monorepo managed with npm workspaces, containing:
 
-- **`api-server/`** - Backend API server (Node.js, Express, TypeScript, Prisma, SQLite)
-- **`client/homeowner/`** - Frontend for property owners (planned)
-- **`client/guest/`** - Frontend for tenants/guests (planned)
-- **`client/manager/`** - Management dashboard (planned)
-- **`docs/`** - Requirements documentation and UI mockups
+```
+wezo-monorepo/
+├── server/          # Backend API (Node.js, Express, Prisma, PostgreSQL)
+├── client/          # Frontend application (React, Vite, TypeScript)
+└── docs/            # Requirements documentation and UI mockups
+```
+
+## ✨ Key Features
+
+- **🏠 Property Management**: Complete CRUD operations for villa listings
+- **📸 Photo Management**: Advanced image upload with automatic resizing (800px optimization)
+- **🔐 Authentication**: JWT-based auth with role-based access control
+- **🗺️ Location Services**: Interactive maps with Leaflet integration
+- **💰 Pricing System**: Flexible pricing and cancellation policies
+- **📱 Responsive Design**: Mobile-first design with adaptive layouts
+- **🧪 Comprehensive Testing**: Full test coverage with Jest and Supertest
 
 ## 🚀 Quick Start
 
@@ -18,28 +29,52 @@ This is a monorepo managed with npm workspaces, containing:
 
 - Node.js >= 18.0.0
 - npm >= 9.0.0
+- PostgreSQL database
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/skyve-wezo-ae.git
+   cd skyve-wezo-ae
+   ```
+
 2. Install all dependencies:
    ```bash
    npm install
    ```
 
-3. Set up the API server database:
+3. Set up environment variables:
    ```bash
-   cd api-server
-   npm run db:setup
+   # Server environment
+   cd server
+   cp .env.example .env
+   # Edit .env with your database credentials
+   
+   # Client environment
+   cd ../client
+   cp .env.example .env
+   # Edit .env if needed
    cd ..
    ```
 
-4. Start the API server:
+4. Set up the database:
    ```bash
-   npm run dev:api
+   cd server
+   npm run prisma:migrate
+   npm run prisma:seed
+   cd ..
    ```
 
-The API will be available at `http://localhost:3000/api`
+5. Start the development servers:
+   ```bash
+   # Start both server and client
+   npm run dev
+   
+   # Or start individually:
+   npm run dev:server  # Backend on http://localhost:3000
+   npm run dev:client  # Frontend on http://localhost:5173
+   ```
 
 ## 📦 Workspace Commands
 
@@ -48,46 +83,165 @@ Run these commands from the root directory:
 | Command | Description |
 |---------|-------------|
 | `npm install` | Install all workspace dependencies |
-| `npm run dev:api` | Start API server in development mode |
-| `npm run build:api` | Build API server for production |
-| `npm run test:api` | Run API server tests |
+| `npm run dev` | Start both server and client in development mode |
+| `npm run dev:server` | Start backend server only |
+| `npm run dev:client` | Start frontend client only |
+| `npm run build` | Build both applications for production |
+| `npm run build:server` | Build backend server |
+| `npm run build:client` | Build frontend client |
+| `npm run test:server` | Run backend tests |
+| `npm run lint` | Run linting for both applications |
 
 ## 🔗 API Documentation
 
-The API server provides the following endpoints:
-
-### Public Endpoints
+### Authentication Endpoints
 - `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
+- `POST /api/auth/login` - User login with JWT token
 - `POST /api/auth/password-reset/request` - Request password reset
-- `POST /api/auth/password-reset/reset` - Reset password
-- `GET /api/health` - Health check
+- `POST /api/auth/password-reset/reset` - Reset password with token
+- `GET /api/auth/profile` - Get current user profile (protected)
+- `PUT /api/auth/update-role` - Update user role (protected)
 
-### Protected Endpoints
-- `GET /api/auth/profile` - Get user profile (requires JWT)
+### Property Management Endpoints
+- `POST /api/properties` - Create new property
+- `GET /api/properties/my-properties` - List user's properties
+- `GET /api/properties/:propertyId` - Get property details
+- `PUT /api/properties/:propertyId` - Update property
+- `DELETE /api/properties/:propertyId` - Delete property
+- `PUT /api/properties/:propertyId/layout` - Update room configuration
+- `PUT /api/properties/:propertyId/amenities` - Update amenities
+- `PUT /api/properties/:propertyId/services` - Update services
+- `PUT /api/properties/:propertyId/rules` - Update house rules
+- `PUT /api/properties/:propertyId/pricing` - Update pricing
+
+### Photo Management Endpoints
+- `POST /api/photos/upload` - Upload photos with automatic resizing
+- `POST /api/photos/attach/:propertyId` - Attach photos to property
+- `GET /api/photos/unattached` - Get unattached photos
+- `DELETE /api/photos/:photoId` - Delete photo
+- `GET /uploads/photos/*` - Public access to uploaded photos
+
+## 🎨 Frontend Features
+
+### Property Registration Wizard
+A comprehensive 9-step wizard for property owners:
+1. **Basic Information** - Property name, type, and description
+2. **Location** - Address and map coordinates
+3. **Layout** - Rooms, beds, and capacity configuration
+4. **Amenities** - Available facilities and features
+5. **Photos** - Image upload with automatic optimization
+6. **Services** - Additional services offered
+7. **House Rules** - Policies for guests
+8. **Pricing** - Rate configuration and payment terms
+9. **Review** - Final review before submission
+
+### Photo Management System
+- **Automatic Image Resizing**: Images are automatically resized to 800px on the shortest side
+- **Bulk Upload**: Support for multiple file uploads
+- **Drag & Drop**: Intuitive file upload interface
+- **Photo Organization**: Attach/detach photos from properties
+- **Gallery View**: Responsive grid layout for photo browsing
+
+### Dashboard Features
+- Property listing management
+- Photo library management
+- Quick property statistics
+- Responsive mobile interface
 
 ## 🔐 Default Admin Account
 
-After running the seed script, you can log in with:
+After running the seed script:
 - **Username:** admin
-- **Email:** admin@wezo.ae  
+- **Email:** admin@wezo.ae
 - **Password:** Admin@123456
 
 ⚠️ **Important:** Change the admin password after first login!
 
 ## 🛠️ Technology Stack
 
-### Backend (api-server)
-- TypeScript
-- Node.js & Express.js
-- Prisma ORM
-- SQLite database
-- JWT authentication
-- Jest for testing
+### Backend
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js v5
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: JWT with bcrypt
+- **File Upload**: Multer with image optimization
+- **Testing**: Jest with Supertest
+- **Validation**: Express Validator
 
-### Frontend (planned)
-- To be determined based on requirements
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Routing**: TanStack Router
+- **State Management**: Redux Toolkit
+- **Styling**: CSS Modules with responsive design system
+- **Maps**: Leaflet with React Leaflet
+- **Icons**: React Icons
+- **Image Processing**: Canvas API for client-side resizing
+
+## 📁 Project Files
+
+### Important Documentation
+- `docs/homeowner-onboarding-villa-registration/Requirement.MD` - Complete functional requirements
+- `docs/homeowner-onboarding-villa-registration/*.png` - UI mockups (30+ screens)
+- `CLAUDE.md` - AI assistant guidance and project context
+
+### Configuration Files
+- `server/.env.example` - Backend environment template
+- `client/.env.example` - Frontend environment template
+- `server/prisma/schema.prisma` - Database schema
+
+## 🧪 Testing
+
+The project includes comprehensive testing:
+
+```bash
+# Run backend tests
+cd server
+npm test
+
+# Tests include:
+# - API endpoint testing
+# - Authentication flow testing
+# - Database operations testing
+# - File upload testing
+```
+
+Tests are configured for sequential execution to prevent race conditions.
+
+## 🚢 Deployment
+
+### Production Build
+
+```bash
+# Build both applications
+npm run build
+
+# Backend build output: server/dist
+# Frontend build output: client/dist
+```
+
+### Environment Configuration
+- Configure production database in `server/.env`
+- Set production API URL in `client/.env`
+- Configure file upload directory permissions
+- Set up reverse proxy for API and static files
 
 ## 📄 License
 
 ISC
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For issues and questions, please open an issue on GitHub or contact the development team.
+
+---
+
+Built with ❤️ for the UAE property rental market

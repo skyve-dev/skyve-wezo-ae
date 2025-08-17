@@ -1,6 +1,6 @@
 # Component Examples
 
-This directory contains comprehensive examples showcasing the reusable React components built for the Wezo.ae property rental platform. Each example demonstrates real-world usage patterns, best practices, and various configuration options.
+This directory contains comprehensive examples showcasing the reusable React components built for the Wezo.ae Exceptional homes for your next getaway. Each example demonstrates real-world usage patterns, best practices, and various configuration options.
 
 ## Available Examples
 
