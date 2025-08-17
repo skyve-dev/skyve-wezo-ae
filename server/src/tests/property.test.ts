@@ -263,6 +263,73 @@ describe('Property API Tests', () => {
       expect(response.body.error).toBe('No token provided');
     });
 
+    it('should create a property without photos', async () => {
+      const propertyData = {
+        name: 'Test Villa Without Photos',
+        address: {
+          apartmentOrFloorNumber: '5B',
+          countryOrRegion: 'UAE',
+          city: 'Abu Dhabi',
+          zipCode: 12345,
+        },
+        layout: {
+          maximumGuest: 4,
+          bathrooms: 2,
+          allowChildren: true,
+          offerCribs: true,
+          propertySizeSqMtr: 120,
+          rooms: [
+            {
+              spaceName: 'Bedroom 1',
+              beds: [
+                {
+                  typeOfBed: 'QueenBed',
+                  numberOfBed: 1,
+                },
+              ],
+            },
+          ],
+        },
+        amenities: [
+          {
+            name: 'AC',
+            category: 'Essential',
+          },
+        ],
+        services: {
+          serveBreakfast: false,
+          parking: 'No',
+          languages: ['English'],
+        },
+        rules: {
+          smokingAllowed: false,
+          partiesOrEventsAllowed: false,
+          petsAllowed: 'No',
+        },
+        // Explicitly not including photos field
+        bookingType: 'BookInstantly',
+        paymentType: 'Online',
+        pricing: {
+          currency: 'AED',
+          ratePerNight: 800,
+        },
+        aboutTheProperty: 'A villa without photos',
+        aboutTheNeighborhood: 'Nice area',
+        firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+      };
+
+      const response = await request(app)
+        .post('/api/properties')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(propertyData)
+        .expect(201);
+
+      expect(response.body.message).toBe('Property created successfully');
+      expect(response.body.property).toBeDefined();
+      expect(response.body.property.name).toBe('Test Villa Without Photos');
+      expect(response.body.property.photos).toEqual([]);
+    });
+
     it('should reject property creation with missing required fields', async () => {
       const incompleteData = {
         name: 'Test Villa',

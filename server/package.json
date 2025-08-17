@@ -15,6 +15,7 @@
     "test:coverage": "jest --coverage",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:reset": "prisma migrate reset",
     "prisma:seed": "ts-node prisma/seed.ts",
     "db:setup": "prisma migrate dev && npm run prisma:seed",
     "lint": "tsc --noEmit"

@@ -134,7 +134,7 @@ CREATE TABLE "public"."Photo" (
     "altText" TEXT NOT NULL,
     "description" TEXT,
     "tags" TEXT[],
-    "propertyId" TEXT NOT NULL,
+    "propertyId" TEXT,
 
     CONSTRAINT "Photo_pkey" PRIMARY KEY ("id")
 );
@@ -154,7 +154,7 @@ CREATE TABLE "public"."Pricing" (
     "id" TEXT NOT NULL,
     "currency" "public"."Currency" NOT NULL,
     "ratePerNight" DOUBLE PRECISION NOT NULL,
-    "ratePerNightWeekend" DOUBLE PRECISION NOT NULL,
+    "ratePerNightWeekend" DOUBLE PRECISION,
     "discountPercentageForNonRefundableRatePlan" DOUBLE PRECISION,
     "discountPercentageForWeeklyRatePlan" DOUBLE PRECISION,
     "propertyId" TEXT NOT NULL,
@@ -242,7 +242,7 @@ ALTER TABLE "public"."Bed" ADD CONSTRAINT "Bed_roomId_fkey" FOREIGN KEY ("roomId
 ALTER TABLE "public"."CheckInOutTimes" ADD CONSTRAINT "CheckInOutTimes_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Photo" ADD CONSTRAINT "Photo_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Photo" ADD CONSTRAINT "Photo_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Amenity" ADD CONSTRAINT "Amenity_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
