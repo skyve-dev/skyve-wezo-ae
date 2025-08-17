@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchMyProperties, deleteProperty, clearError } from '../../store/slices/propertySlice'
 import { Box } from '../../components/Box'
 import { redirectToPropertyRegistration } from '../../utils/deviceDetection'
+import {resolvePhotoUrl} from "@/utils/api.ts";
 
 export const Route = createFileRoute('/dashboard/my-properties')({
   component: MyPropertiesPage,
@@ -54,8 +55,8 @@ function MyPropertiesPage() {
   return (
     <Box minHeight="100vh" backgroundColor="#f8fafc">
       {/* Header */}
-      <Box 
-        backgroundColor="white" 
+      <Box
+        backgroundColor="white"
         borderBottom="1px solid #e2e8f0"
         padding="2rem 0"
       >
@@ -184,11 +185,9 @@ function MyPropertiesPage() {
           <Box>
             <Box
               display="grid"
-              gridTemplateColumns={{ 
-                Sm: '1fr', 
-                Md: '1fr 1fr', 
-                Lg: '1fr 1fr 1fr' 
-              }}
+              gridTemplateColumnsSm={'1fr'}
+              gridTemplateColumnsMd={'1fr 1fr'}
+              gridTemplateColumnsLg={'1fr 1fr 1fr'}
               gap="1.5rem"
             >
               {properties.map((property) => (
@@ -204,17 +203,18 @@ function MyPropertiesPage() {
                   <Box position="relative">
                     {property.photos && property.photos.length > 0 ? (
                       <Box
-                        as="img"
-                        src={property.photos[0].url}
-                        alt={property.photos[0].altText || property.name}
-                        width="100%"
-                        height="200px"
-                        objectFit="cover"
+                        as="div"
+                        paddingTop={'100%'}
+                        background={`url(${resolvePhotoUrl(property.photos[0].url)})`}
+                        backgroundSize={'cover'}
+                        backgroundPosition={'center'}
+                        width={"100%"}
+                        maxHeight={"100px"}
                       />
                     ) : (
                       <Box
                         width="100%"
-                        height="200px"
+                        paddingTop={'100%'}
                         backgroundColor="#f3f4f6"
                         display="flex"
                         alignItems="center"
@@ -225,7 +225,7 @@ function MyPropertiesPage() {
                         🏠
                       </Box>
                     )}
-                    
+
                     {/* Status Badge */}
                     <Box
                       position="absolute"
@@ -266,9 +266,9 @@ function MyPropertiesPage() {
                     </Box>
 
                     {/* Quick Stats */}
-                    <Box 
-                      display="flex" 
-                      justifyContent="space-between" 
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
                       marginBottom="1.5rem"
                       padding="1rem"
                       backgroundColor="#f9fafb"
