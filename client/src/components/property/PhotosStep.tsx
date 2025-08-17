@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { WizardFormData, Photo } from '../../types/property'
 import { Box } from '../Box'
+import { api } from '../../utils/api'
 import { 
-  FaCloudUploadAlt
+  FaCloudUploadAlt,
+  FaSpinner
 } from 'react-icons/fa'
 
 interface PhotosStepProps {
@@ -24,29 +26,79 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
   loading
 }) => {
   const [dragOver, setDragOver] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const photos = data.photos || []
 
-  const handleFileUpload = (files: FileList | File[]) => {
-    const newPhotos: Photo[] = []
-    
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith('image/')) {
-        const url = URL.createObjectURL(file)
-        newPhotos.push({
-          url,
-          altText: '',
-          description: '',
-          tags: []
-        })
+  // Add keyframes for spinner animation
+  React.useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
       }
-    })
+    `
+    document.head.appendChild(style)
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  const handleFileUpload = async (files: FileList | File[]) => {
+    const validFiles = Array.from(files).filter(file => 
+      file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024 // 10MB limit
+    )
     
-    onChange({
-      photos: [...photos, ...newPhotos]
-    })
+    if (validFiles.length === 0) {
+      alert('Please select valid image files (JPG, PNG, WebP) under 10MB')
+      return
+    }
+
+    setUploading(true)
+    
+    try {
+      const formData = new FormData()
+      validFiles.forEach(file => {
+        formData.append('photos', file)
+      })
+      
+      const response = await api.post<{ photos: Array<{ id: string, url: string }> }>(
+        '/api/photos/upload',
+        formData
+      )
+      
+      const newPhotos: Photo[] = response.photos.map(serverPhoto => ({
+        id: serverPhoto.id,
+        url: serverPhoto.url,
+        altText: '',
+        description: '',
+        tags: []
+      }))
+      
+      onChange({
+        photos: [...photos, ...newPhotos]
+      })
+    } catch (error: any) {
+      console.error('Photo upload failed:', error)
+      alert('Failed to upload photos. Please try again.')
+    } finally {
+      setUploading(false)
+    }
   }
 
-  const removePhoto = (index: number) => {
+  const removePhoto = async (index: number) => {
+    const photoToRemove = photos[index]
+    
+    // If photo has an ID, it's been uploaded to server, so delete it
+    if (photoToRemove.id) {
+      try {
+        await api.delete(`/api/photos/${photoToRemove.id}`)
+      } catch (error) {
+        console.error('Failed to delete photo from server:', error)
+        // Continue with removal from client state even if server deletion fails
+      }
+    }
+    
     onChange({
       photos: photos.filter((_, i) => i !== index)
     })
@@ -79,18 +131,21 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
             border="2px dashed #d1d5db"
             borderRadius="0.5rem"
             textAlign="center"
-            cursor="pointer"
+            cursor={uploading ? 'not-allowed' : 'pointer'}
             backgroundColor={dragOver ? '#f3f4f6' : '#fafafa'}
-            whileHover={{ backgroundColor: '#f3f4f6', borderColor: '#3182ce' }}
+            opacity={uploading ? 0.7 : 1}
+            whileHover={!uploading ? { backgroundColor: '#f3f4f6', borderColor: '#3182ce' } : undefined}
             onDragOver={(e: React.DragEvent) => {
               e.preventDefault()
-              setDragOver(true)
+              if (!uploading) setDragOver(true)
             }}
             onDragLeave={() => setDragOver(false)}
             onDrop={(e: React.DragEvent) => {
               e.preventDefault()
               setDragOver(false)
-              handleFileUpload(e.dataTransfer.files)
+              if (!uploading) {
+                handleFileUpload(e.dataTransfer.files)
+              }
             }}
           >
             <Box
@@ -98,21 +153,42 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
               type="file"
               accept="image/*"
               multiple
+              disabled={uploading}
               style={{ display: 'none' }}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (e.target.files) {
                   handleFileUpload(e.target.files)
+                  // Clear the input so the same files can be selected again
+                  e.target.value = ''
                 }
               }}
             />
             <Box display="flex" flexDirection="column" alignItems="center" gap="1rem">
-              <FaCloudUploadAlt size="3rem" color={dragOver ? "#3182ce" : "#9ca3af"} />
-              <Box fontSize="1.125rem" color="#374151" fontWeight="500">
-                Drop photos here or click to browse
-              </Box>
-              <Box fontSize="0.875rem" color="#6b7280">
-                JPG, PNG, WebP up to 10MB each
-              </Box>
+              {uploading ? (
+                <Box display="flex" flexDirection="column" alignItems="center" gap="0.5rem">
+                  <Box 
+                    style={{ 
+                      animation: 'spin 1s linear infinite',
+                      transformOrigin: 'center'
+                    }}
+                  >
+                    <FaSpinner size="3rem" color="#3182ce" />
+                  </Box>
+                  <Box fontSize="1rem" color="#3182ce" fontWeight="500">
+                    Uploading photos...
+                  </Box>
+                </Box>
+              ) : (
+                <>
+                  <FaCloudUploadAlt size="3rem" color={dragOver ? "#3182ce" : "#9ca3af"} />
+                  <Box fontSize="1.125rem" color="#374151" fontWeight="500">
+                    Drop photos here or click to browse
+                  </Box>
+                  <Box fontSize="0.875rem" color="#6b7280">
+                    JPG, PNG, WebP up to 10MB each
+                  </Box>
+                </>
+              )}
             </Box>
           </Box>
         </Box>
@@ -129,7 +205,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                   <Box position="relative">
                     <Box
                       as="img"
-                      src={photo.url}
+                      src={photo.url.startsWith('http') ? photo.url : `http://localhost:3000${photo.url}`}
                       alt={photo.altText || `Photo ${index + 1}`}
                       width="100%"
                       height="200px"

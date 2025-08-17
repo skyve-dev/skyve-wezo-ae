@@ -78,12 +78,7 @@ export class PropertyService {
         })),
       } : undefined,
       photos: photos ? {
-        create: photos.map((photo: any) => ({
-          url: photo.url,
-          altText: photo.altText,
-          description: photo.description,
-          tags: photo.tags || [],
-        })),
+        connect: photos.filter((photo: any) => photo.id).map((photo: any) => ({ id: photo.id })),
       } : undefined,
       checkInCheckout: rules?.checkInCheckout
         ? {
@@ -169,6 +164,26 @@ export class PropertyService {
         },
       },
     });
+
+    // Update photo metadata (altText, description, tags) for connected photos
+    if (photos && photos.length > 0) {
+      const photoUpdates = photos
+        .filter((photo: any) => photo.id)
+        .map((photo: any) => 
+          prisma.photo.update({
+            where: { id: photo.id },
+            data: {
+              altText: photo.altText || '',
+              description: photo.description || '',
+              tags: photo.tags || [],
+            },
+          })
+        );
+      
+      if (photoUpdates.length > 0) {
+        await Promise.all(photoUpdates);
+      }
+    }
 
     return property;
   }

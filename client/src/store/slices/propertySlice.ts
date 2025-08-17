@@ -85,11 +85,12 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     },
     // Filter out blob URLs from photos and ensure proper structure
     photos: (data.photos || []).map(photo => ({
+      id: photo.id, // Include photo ID for server-side linking
       url: photo.url.startsWith('blob:') ? '' : photo.url, // Skip blob URLs
       altText: photo.altText || '',
       description: photo.description || '',
       tags: photo.tags || []
-    })).filter(photo => photo.url), // Only include photos with valid URLs
+    })).filter(photo => photo.url && photo.id), // Only include photos with valid URLs and IDs
     bookingType: data.bookingType,
     paymentType: data.paymentType,
     aboutTheProperty: data.aboutTheProperty,
