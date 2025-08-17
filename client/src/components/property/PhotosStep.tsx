@@ -154,7 +154,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
               accept="image/*"
               multiple
               disabled={uploading}
-              style={{ display: 'none' }}
+              display={'none'}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (e.target.files) {
                   handleFileUpload(e.target.files)

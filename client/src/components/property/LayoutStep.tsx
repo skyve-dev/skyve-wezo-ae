@@ -515,7 +515,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 >
                   <Box display="flex" flexDirection="row" gap="1rem">
                     {/* Bed Type Selection */}
-                    <Box style={{flexGrow:1}}>
+                    <Box flexGrow={'1'}>
                       <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                         Bed Type *
                       </Box>

@@ -157,7 +157,7 @@ Portal Container:
                     fontSize="0.875rem"
                     fontFamily="monospace"
                     maxWidth="500px"
-                    style={{whiteSpace: 'pre-line'}}
+                    style={{ whiteSpace: 'pre-line' }}
                     border="1px solid #d1d5db"
                 >
                     {debugInfo}

@@ -62,7 +62,7 @@ function ExamplesLayout() {
                 </Box>
               </Link>
               
-              <Box fontSize="0.875rem" color="#6b7280" style={{ display: 'block' }}>
+              <Box fontSize="0.875rem" color="#6b7280" display={'block'}>
                 Interactive component showcase
               </Box>
             </Box>
@@ -95,7 +95,7 @@ function ExamplesLayout() {
                   >
                     <Box>
                     <Box fontSize="1rem">{item.icon}</Box>
-                      <Box style={{ display: 'block' }}>
+                      <Box display={'block'}>
                         {item.label}
                       </Box>
                     </Box>
@@ -124,7 +124,7 @@ function ExamplesLayout() {
               <Box fontSize="1rem">
                 <FaArrowLeft />
               </Box>
-                <Box style={{ display: 'block' }}>
+                <Box display={'block'}>
                   Back to App
                 </Box>
               </Box>
@@ -138,7 +138,7 @@ function ExamplesLayout() {
 
       {/* Floating Navigation for Mobile */}
       <Box
-        style={{ display: 'none' }}
+        display={'none'}
         position="fixed"
         bottom="1rem"
         left="50%"
@@ -178,7 +178,7 @@ function ExamplesLayout() {
       </Box>
 
       {/* Bottom spacing for mobile navigation */}
-      <Box height="5rem" style={{ display: 'none' }} />
+      <Box height="5rem" display={'none'} />
     </Box>
   )
 }

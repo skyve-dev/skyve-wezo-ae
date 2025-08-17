@@ -720,7 +720,7 @@ export function BoxExamples() {
                   </Box>
                   
                   <Box 
-                    style={{ display: 'flex' }}
+                    display={'flex'}
                     alignItems="center"
                     gap="2rem"
                     fontSize="0.875rem"
@@ -734,7 +734,7 @@ export function BoxExamples() {
                   
                   <Box display="flex" alignItems="center" gap="1rem">
                     <Box
-                      style={{ display: 'none' }}
+                      display={'none'}
                       fontSize="1.25rem"
                       cursor="pointer"
                     >
