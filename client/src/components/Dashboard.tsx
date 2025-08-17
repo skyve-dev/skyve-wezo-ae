@@ -158,6 +158,22 @@ export const Dashboard: React.FC = () => {
                 </Box>
                 
                 <Box as="button"
+                  onClick={() => navigate({ to: '/dashboard/photos' })}
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: '#007bff',
+                    border: '1px solid #007bff',
+                    borderRadius: '6px',
+                    padding: '12px 16px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Manage Photos
+                </Box>
+                
+                <Box as="button"
                   style={{
                     backgroundColor: 'transparent',
                     color: '#007bff',

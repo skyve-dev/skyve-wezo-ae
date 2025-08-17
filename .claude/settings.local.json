@@ -36,7 +36,9 @@
       "Bash(grep:*)",
       "Bash(npx jest:*)",
       "Bash(timeout 10s npm run dev)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(npx @tanstack/router-devtools:*)",
+      "Bash(npx tsr:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

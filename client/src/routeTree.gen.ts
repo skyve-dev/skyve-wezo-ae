@@ -25,6 +25,7 @@ import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/s
 import { Route as ExamplesDatePickerRouteImport } from './routes/examples/date-picker'
 import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
 import { Route as EditPropertyPropertyIdRouteImport } from './routes/edit-property.$propertyId'
+import { Route as DashboardPhotosRouteImport } from './routes/dashboard/photos'
 import { Route as DashboardMyPropertiesRouteImport } from './routes/dashboard/my-properties'
 import { Route as PropertyPropertyIdEditRouteImport } from './routes/property/$propertyId/edit'
 
@@ -108,6 +109,11 @@ const EditPropertyPropertyIdRoute = EditPropertyPropertyIdRouteImport.update({
   path: '/edit-property/$propertyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardPhotosRoute = DashboardPhotosRouteImport.update({
+  id: '/photos',
+  path: '/photos',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardMyPropertiesRoute = DashboardMyPropertiesRouteImport.update({
   id: '/my-properties',
   path: '/my-properties',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
+  '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
+  '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/register-property': typeof RegisterPropertyRoute
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
+  '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
+    | '/dashboard/photos'
     | '/edit-property/$propertyId'
     | '/examples/box'
     | '/examples/date-picker'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
+    | '/dashboard/photos'
     | '/edit-property/$propertyId'
     | '/examples/box'
     | '/examples/date-picker'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-property'
     | '/dashboard/my-properties'
+    | '/dashboard/photos'
     | '/edit-property/$propertyId'
     | '/examples/box'
     | '/examples/date-picker'
@@ -364,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditPropertyPropertyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/photos': {
+      id: '/dashboard/photos'
+      path: '/photos'
+      fullPath: '/dashboard/photos'
+      preLoaderRoute: typeof DashboardPhotosRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/my-properties': {
       id: '/dashboard/my-properties'
       path: '/my-properties'
@@ -383,11 +402,13 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteChildren {
   DashboardMyPropertiesRoute: typeof DashboardMyPropertiesRoute
+  DashboardPhotosRoute: typeof DashboardPhotosRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardMyPropertiesRoute: DashboardMyPropertiesRoute,
+  DashboardPhotosRoute: DashboardPhotosRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

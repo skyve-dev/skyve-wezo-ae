@@ -43,9 +43,12 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = {};
+
+    // Don't set Content-Type for FormData - browser will set it with boundary
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     // Merge additional headers if provided
     if (options.headers) {
@@ -125,8 +128,8 @@ class ApiClient {
   async post<T>(endpoint: string, data?: any, customHeaders?: Record<string, string>): Promise<T> {
     return this.makeRequest<T>(endpoint, {
       method: 'POST',
-      body: data instanceof FormData ? data : JSON.stringify(data),
-      headers: data instanceof FormData ? customHeaders : { 'Content-Type': 'application/json', ...customHeaders }
+      body: data instanceof FormData ? data : data ? JSON.stringify(data) : undefined,
+      headers: customHeaders
     });
   }
 
