@@ -1027,7 +1027,7 @@ describe('Property API Tests', () => {
         expect(response.body.photos[0]).toHaveProperty('url');
         // Check if URL is either a file path (uploaded) or the test URL from createTestProperty
         expect(
-          response.body.photos[0].url.includes('/uploads/properties/') || 
+          response.body.photos[0].url.includes('/uploads/photos/') || 
           response.body.photos[0].url === 'https://example.com/photo1.jpg'
         ).toBe(true);
       });

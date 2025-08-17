@@ -15,4 +15,8 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
+  // Force Jest to run tests sequentially to avoid race conditions
+  maxWorkers: 1,
+  // Ensure tests don't run in parallel within test suites
+  maxConcurrency: 1,
 };

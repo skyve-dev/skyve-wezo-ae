@@ -48,7 +48,7 @@ wezo-monorepo/
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build TypeScript to JavaScript  
 - `npm start` - Start production server
-- `npm test` - Run tests
+- `npm test` - Run tests (configured for sequential execution to avoid race conditions)
 - `npm run lint` - Check TypeScript types
 - `npm run prisma:seed` - Seed database with admin user
 
@@ -100,3 +100,9 @@ When implementing features:
 2. Ensure proper error handling and validation
 3. Write comprehensive tests for new functionality
 4. Document APIs and complex business logic
+
+### Testing Guidelines
+- Jest is configured for **sequential execution** (`maxWorkers: 1`, `maxConcurrency: 1`)
+- This prevents race conditions between tests that share database state
+- All tests must pass when run individually AND when run together
+- Use proper test isolation and cleanup in `beforeAll`/`afterAll` hooks
