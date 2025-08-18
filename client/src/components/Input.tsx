@@ -154,18 +154,19 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
                     alignItems="center"
                     gap={config.gap}
                     className={labelClassName}
+
                 >
                     {IconComponent && (
-                        <Box 
-                            color="#6b7280" 
-                            display="flex" 
+                        <Box
+                            color="#3182ce"
+                            display="flex"
                             alignItems="center"
                             fontSize={config.iconSize}
                         >
                             <IconComponent size={config.iconSize} />
                         </Box>
                     )}
-                    <Box>
+                    <Box fontWeight={500}>
                         {label}
                         {required && (
                             <Box as="span" color="#ef4444" marginLeft="4px">

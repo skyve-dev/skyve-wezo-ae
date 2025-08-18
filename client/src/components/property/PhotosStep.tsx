@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { WizardFormData, Photo } from '../../types/property'
 import { Box } from '../Box'
+import { Input } from '../Input'
 import { api, resolvePhotoUrl } from '../../utils/api'
 import { 
   FaCloudUploadAlt,
@@ -316,20 +317,14 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                   </Box>
                   <Box padding="1rem">
                     <Box marginBottom="0.5rem">
-                      <Box
-                        as="input"
+                      <Input
                         type="text"
                         placeholder="Alt text (for accessibility)"
                         value={photo.altText || ''}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                           updatePhoto(index, 'altText', e.target.value)
                         }
-                        width="100%"
-                        padding="0.5rem"
-                        border="1px solid #d1d5db"
-                        borderRadius="0.375rem"
-                        fontSize="1rem"
-                        whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
+                        fullWidth={true}
                       />
                     </Box>
                     <Box

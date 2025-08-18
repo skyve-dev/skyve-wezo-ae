@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { Input } from '../Input'
 import DatePicker from '../DatePicker'
 import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '../../constants/propertyEnums'
 import { 
@@ -60,39 +61,18 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
 
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {/* Property Name */}
-        <Box>
-          <Box
-            as="label"
-            display="flex"
-            alignItems="center"
-            gap="0.5rem"
-            fontSize="1rem"
-            fontWeight="500"
-            color="#374151"
-            marginBottom="0.75rem"
-          >
-            <FaHome color="#3182ce" />
-            Property Name *
-          </Box>
-          <Box
-            as="input"
-            type="text"
-            value={data.name}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              handleInputChange('name', e.target.value)
-            }
-            placeholder="e.g., Cozy Downtown Villa with Pool"
-            width="100%"
-            padding="0.75rem"
-            border="1px solid #d1d5db"
-            borderRadius="0.375rem"
-            fontSize="1rem"
-            whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
-          />
-          <Box fontSize="1rem" color="#6b7280" marginTop="0.25rem">
-            Minimum 3 characters. This will be the first thing guests see.
-          </Box>
-        </Box>
+        <Input
+          label="Property Name *"
+          icon={FaHome}
+          type="text"
+          value={data.name}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+            handleInputChange('name', e.target.value)
+          }
+          placeholder="e.g., Cozy Downtown Villa with Pool"
+          helperText="Minimum 3 characters. This will be the first thing guests see."
+          fullWidth
+        />
 
         {/* Booking Type */}
         <Box>

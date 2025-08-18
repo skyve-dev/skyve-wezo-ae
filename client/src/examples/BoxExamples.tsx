@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Box } from '../components/Box'
+import { Input } from '../components/Input'
 import { 
   FaRuler,
   FaPalette,
@@ -1026,26 +1027,13 @@ export function BoxExamples() {
                 
                 <Box display="flex" flexDirection="column" gap="1.5rem">
                   {/* Text Input */}
-                  <Box>
-                    <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
-                      Property Name *
-                    </Box>
-                    <Box
-                      as="input"
-                      type="text"
-                      placeholder="Enter property name"
-                      width="100%"
-                      padding="0.75rem"
-                      border="2px solid #e5e7eb"
-                      borderRadius="0.5rem"
-                      fontSize="1rem"
-                      whileFocus={{
-                        borderColor: '#3182ce',
-                        outline: 'none',
-                        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-                      }}
-                    />
-                  </Box>
+                  <Input
+                    label="Property Name *"
+                    type="text"
+                    placeholder="Enter property name"
+                    fullWidth
+                    variant="outlined"
+                  />
 
                   {/* Select */}
                   <Box>
@@ -1071,36 +1059,20 @@ export function BoxExamples() {
 
                   {/* Grid Layout for Numbers */}
                   <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap="1rem">
-                    <Box>
-                      <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
-                        Bedrooms
-                      </Box>
-                      <Box
-                        as="input"
-                        type="number"
-                        placeholder="0"
-                        width="100%"
-                        padding="0.75rem"
-                        border="2px solid #e5e7eb"
-                        borderRadius="0.5rem"
-                        fontSize="1rem"
-                      />
-                    </Box>
-                    <Box>
-                      <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
-                        Bathrooms
-                      </Box>
-                      <Box
-                        as="input"
-                        type="number"
-                        placeholder="0"
-                        width="100%"
-                        padding="0.75rem"
-                        border="2px solid #e5e7eb"
-                        borderRadius="0.5rem"
-                        fontSize="1rem"
-                      />
-                    </Box>
+                    <Input
+                      label="Bedrooms"
+                      type="number"
+                      placeholder="0"
+                      fullWidth
+                      variant="outlined"
+                    />
+                    <Input
+                      label="Bathrooms"
+                      type="number"
+                      placeholder="0"
+                      fullWidth
+                      variant="outlined"
+                    />
                   </Box>
 
                   {/* Textarea */}

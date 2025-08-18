@@ -266,8 +266,8 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                     gap={currentSizeStyle.gap}
                 >
                     {IconComponent && (
-                        <Box 
-                            color="#6b7280" 
+                        <Box
+                            color="#3182ce"
                             display="flex" 
                             alignItems="center"
                             fontSize={currentSizeStyle.iconSize}

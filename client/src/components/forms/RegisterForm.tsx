@@ -1,5 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../Box';
+import { Input } from '../Input';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { register, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
 
@@ -80,27 +81,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
     }
   };
 
-  const inputStyle = (hasError: boolean) => ({
-    padding: '0.75rem 1rem',
-    fontSize: '1rem',
-    border: `1px solid ${hasError ? '#dc3545' : '#dee2e6'}`,
-    borderRadius: '6px',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-    width: '100%',
-    boxSizing: 'border-box' as const,
-  });
-
-  const inputFocusHandler = (hasError: boolean) => ({
-    onFocus: (e: React.FocusEvent<HTMLInputElement>) => {
-      e.target.style.borderColor = hasError ? '#dc3545' : '#007bff';
-      e.target.style.boxShadow = `0 0 0 3px ${hasError ? 'rgba(220, 53, 69, 0.1)' : 'rgba(0, 123, 255, 0.1)'}`;
-    },
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-      e.target.style.borderColor = hasError ? '#dc3545' : '#dee2e6';
-      e.target.style.boxShadow = 'none';
-    },
-  });
 
   return (
     <Box
@@ -136,93 +116,61 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
         )}
 
         <Box as="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={20}>
-          <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="username" fontSize={16} fontWeight={500}>
-              Username
-            </Box>
-            <Box as="input"
-              id="username"
-              type="text"
-              placeholder="Choose a username"
-              value={formData.username}
-              onChange={handleInputChange('username')}
-              disabled={isLoading}
-              autoComplete="username"
-              style={inputStyle(!!errors.username)}
-              {...inputFocusHandler(!!errors.username)}
-            />
-            {errors.username && (
-              <Box fontSize={16} color="#dc3545">
-                {errors.username}
-              </Box>
-            )}
-          </Box>
+          <Input
+            label="Username"
+            id="username"
+            type="text"
+            placeholder="Choose a username"
+            value={formData.username}
+            onChange={handleInputChange('username')}
+            disabled={isLoading}
+            autoComplete="username"
+            error={!!errors.username}
+            helperText={errors.username}
+            fullWidth
+          />
 
-          <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="email" fontSize={16} fontWeight={500}>
-              Email Address
-            </Box>
-            <Box as="input"
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleInputChange('email')}
-              disabled={isLoading}
-              autoComplete="email"
-              style={inputStyle(!!errors.email)}
-              {...inputFocusHandler(!!errors.email)}
-            />
-            {errors.email && (
-              <Box fontSize={16} color="#dc3545">
-                {errors.email}
-              </Box>
-            )}
-          </Box>
+          <Input
+            label="Email Address"
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleInputChange('email')}
+            disabled={isLoading}
+            autoComplete="email"
+            error={!!errors.email}
+            helperText={errors.email}
+            fullWidth
+          />
 
-          <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="password" fontSize={16} fontWeight={500}>
-              Password
-            </Box>
-            <Box as="input"
-              id="password"
-              type="password"
-              placeholder="Create a password"
-              value={formData.password}
-              onChange={handleInputChange('password')}
-              disabled={isLoading}
-              autoComplete="new-password"
-              style={inputStyle(!!errors.password)}
-              {...inputFocusHandler(!!errors.password)}
-            />
-            {errors.password && (
-              <Box fontSize={16} color="#dc3545">
-                {errors.password}
-              </Box>
-            )}
-          </Box>
+          <Input
+            label="Password"
+            id="password"
+            type="password"
+            placeholder="Create a password"
+            value={formData.password}
+            onChange={handleInputChange('password')}
+            disabled={isLoading}
+            autoComplete="new-password"
+            error={!!errors.password}
+            helperText={errors.password}
+            fullWidth
+          />
 
-          <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="confirmPassword" fontSize={16} fontWeight={500}>
-              Confirm Password
-            </Box>
-            <Box as="input"
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange('confirmPassword')}
-              disabled={isLoading}
-              autoComplete="new-password"
-              style={inputStyle(!!errors.confirmPassword)}
-              {...inputFocusHandler(!!errors.confirmPassword)}
-            />
-            {errors.confirmPassword && (
-              <Box fontSize={16} color="#dc3545">
-                {errors.confirmPassword}
-              </Box>
-            )}
-          </Box>
+          <Input
+            label="Confirm Password"
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange('confirmPassword')}
+            disabled={isLoading}
+            autoComplete="new-password"
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
+            fullWidth
+          />
 
           <Box as="button"
             type="submit"

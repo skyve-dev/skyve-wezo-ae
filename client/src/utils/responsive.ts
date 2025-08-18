@@ -1,6 +1,23 @@
 import {CSSProperties} from 'react';
 import {BoxProps, Breakpoint, BreakpointConfig, defaultBreakpoints, ResponsiveMotionStyles} from '@/types/box';
-
+const unitlessCSSProperties = [
+    'animationIterationCount',
+    'borderImageOutset',
+    'borderImageSlice',
+    'borderImageWidth',
+    'columnCount',
+    'flex',
+    'flexGrow',
+    'flexShrink',
+    'fontWeight',
+    'lineHeight',
+    'opacity',
+    'order',
+    'orphans',
+    'tabSize',
+    'widows',
+    'zIndex'
+];
 /**
  * Utility class for handling responsive styles
  */
@@ -68,8 +85,8 @@ export class ResponsiveStyleManager {
                 } else if (key === 'paddingY') {
                     (baseStyles as any).paddingTop = this.formatCSSValue(value);
                     (baseStyles as any).paddingBottom = this.formatCSSValue(value);
-                }else if (key === 'zIndex') {
-                    (baseStyles as any).zIndex = value+'';
+                }else if (unitlessCSSProperties.includes(key)) {
+                    (baseStyles as any)[key] = value+'';
                 } else {
                     // For React style objects, keep camelCase property names
                     (baseStyles as any)[key] = this.formatCSSValue(value);
@@ -214,7 +231,7 @@ export class ResponsiveStyleManager {
                     const cssValue = this.formatCSSValue(value);
                     responsiveRules[breakpoint].push(`padding-top: ${cssValue} !important;`);
                     responsiveRules[breakpoint].push(`padding-bottom: ${cssValue} !important;`);
-                } else if (baseProp === 'zIndex') {
+                } else if (unitlessCSSProperties.includes(baseProp)) {
                     const cssProperty = this.camelToKebab(baseProp);
                     const cssValue = value + ''
                     responsiveRules[breakpoint].push(`${cssProperty}: ${cssValue} !important;`);

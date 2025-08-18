@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../../../store'
 import { fetchPropertyById, updateProperty, clearError } from '../../../store/slices/propertySlice'
 import { Box } from '../../../components/Box'
+import { Input } from '../../../components/Input'
 import { Property } from '../../../types/property'
 import { 
   BookingType, 
@@ -259,39 +260,21 @@ function PropertyEditPage() {
               </Box>
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    Property Name
-                  </Box>
-                  <Box
-                    as="input"
-                    type="text"
-                    value={formData.name || ''}
-                    onChange={(e) => updateFormData({ name: e.target.value })}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                  />
-                </Box>
+                <Input
+                  label="Property Name"
+                  type="text"
+                  value={formData.name || ''}
+                  onChange={(e) => updateFormData({ name: e.target.value })}
+                  fullWidth={true}
+                />
 
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    Property Size (sqm)
-                  </Box>
-                  <Box
-                    as="input"
-                    type="number"
-                    value={formData.propertySizeSqMtr || ''}
-                    onChange={(e) => updateFormData({ propertySizeSqMtr: parseInt(e.target.value, 10) })}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                  />
-                </Box>
+                <Input
+                  label="Property Size (sqm)"
+                  type="number"
+                  value={formData.propertySizeSqMtr || ''}
+                  onChange={(e) => updateFormData({ propertySizeSqMtr: parseInt(e.target.value, 10) })}
+                  fullWidth={true}
+                />
               </Box>
             </Box>
 
@@ -302,74 +285,38 @@ function PropertyEditPage() {
               </Box>
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    City
-                  </Box>
-                  <Box
-                    as="input"
-                    type="text"
-                    value={formData.address?.city || ''}
-                    onChange={(e) => updateNestedField('address.city', e.target.value)}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                  />
-                </Box>
+                <Input
+                  label="City"
+                  type="text"
+                  value={formData.address?.city || ''}
+                  onChange={(e) => updateNestedField('address.city', e.target.value)}
+                  fullWidth={true}
+                />
 
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    Country/Region
-                  </Box>
-                  <Box
-                    as="input"
-                    type="text"
-                    value={formData.address?.countryOrRegion || ''}
-                    onChange={(e) => updateNestedField('address.countryOrRegion', e.target.value)}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                  />
-                </Box>
+                <Input
+                  label="Country/Region"
+                  type="text"
+                  value={formData.address?.countryOrRegion || ''}
+                  onChange={(e) => updateNestedField('address.countryOrRegion', e.target.value)}
+                  fullWidth={true}
+                />
 
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    ZIP Code
-                  </Box>
-                  <Box
-                    as="input"
-                    type="number"
-                    value={formData.address?.zipCode || ''}
-                    onChange={(e) => updateNestedField('address.zipCode', parseInt(e.target.value, 10) || 0)}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                  />
-                </Box>
+                <Input
+                  label="ZIP Code"
+                  type="number"
+                  value={formData.address?.zipCode || ''}
+                  onChange={(e) => updateNestedField('address.zipCode', parseInt(e.target.value, 10) || 0)}
+                  fullWidth={true}
+                />
 
                 {formData.address?.apartmentOrFloorNumber !== undefined && (
-                  <Box>
-                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                      Apartment/Floor Number
-                    </Box>
-                    <Box
-                      as="input"
-                      type="text"
-                      value={formData.address?.apartmentOrFloorNumber || ''}
-                      onChange={(e) => updateNestedField('address.apartmentOrFloorNumber', e.target.value)}
-                      width="100%"
-                      padding="0.75rem"
-                      border="1px solid #d1d5db"
-                      borderRadius="0.375rem"
-                      fontSize="1rem"
-                    />
-                  </Box>
+                  <Input
+                    label="Apartment/Floor Number"
+                    type="text"
+                    value={formData.address?.apartmentOrFloorNumber || ''}
+                    onChange={(e) => updateNestedField('address.apartmentOrFloorNumber', e.target.value)}
+                    fullWidth={true}
+                  />
                 )}
               </Box>
             </Box>
@@ -429,41 +376,23 @@ function PropertyEditPage() {
               </Box>
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    Maximum Guests
-                  </Box>
-                  <Box
-                    as="input"
-                    type="number"
-                    value={formData.maximumGuest || ''}
-                    onChange={(e) => updateFormData({ maximumGuest: parseInt(e.target.value, 10) })}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                    min="1"
-                  />
-                </Box>
+                <Input
+                  label="Maximum Guests"
+                  type="number"
+                  value={formData.maximumGuest || ''}
+                  onChange={(e) => updateFormData({ maximumGuest: parseInt(e.target.value, 10) })}
+                  fullWidth={true}
+                  min="1"
+                />
 
-                <Box>
-                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                    Bathrooms
-                  </Box>
-                  <Box
-                    as="input"
-                    type="number"
-                    value={formData.bathrooms || ''}
-                    onChange={(e) => updateFormData({ bathrooms: parseInt(e.target.value, 10) })}
-                    width="100%"
-                    padding="0.75rem"
-                    border="1px solid #d1d5db"
-                    borderRadius="0.375rem"
-                    fontSize="1rem"
-                    min="1"
-                  />
-                </Box>
+                <Input
+                  label="Bathrooms"
+                  type="number"
+                  value={formData.bathrooms || ''}
+                  onChange={(e) => updateFormData({ bathrooms: parseInt(e.target.value, 10) })}
+                  fullWidth={true}
+                  min="1"
+                />
 
                 <Box display="flex" alignItems="center" gap="0.75rem">
                   <Box
@@ -521,43 +450,25 @@ function PropertyEditPage() {
                     </Box>
                   </Box>
 
-                  <Box>
-                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                      Rate per Night
-                    </Box>
-                    <Box
-                      as="input"
-                      type="number"
-                      value={formData.pricing.ratePerNight || ''}
-                      onChange={(e) => updateNestedField('pricing.ratePerNight', parseFloat(e.target.value))}
-                      width="100%"
-                      padding="0.75rem"
-                      border="1px solid #d1d5db"
-                      borderRadius="0.375rem"
-                      fontSize="1rem"
-                      min="0"
-                      step="0.01"
-                    />
-                  </Box>
+                  <Input
+                    label="Rate per Night"
+                    type="number"
+                    value={formData.pricing.ratePerNight || ''}
+                    onChange={(e) => updateNestedField('pricing.ratePerNight', parseFloat(e.target.value))}
+                    fullWidth={true}
+                    min="0"
+                    step="0.01"
+                  />
 
-                  <Box>
-                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                      Weekend Rate (optional)
-                    </Box>
-                    <Box
-                      as="input"
-                      type="number"
-                      value={formData.pricing.ratePerNightWeekend || ''}
-                      onChange={(e) => updateNestedField('pricing.ratePerNightWeekend', parseFloat(e.target.value) || undefined)}
-                      width="100%"
-                      padding="0.75rem"
-                      border="1px solid #d1d5db"
-                      borderRadius="0.375rem"
-                      fontSize="1rem"
-                      min="0"
-                      step="0.01"
-                    />
-                  </Box>
+                  <Input
+                    label="Weekend Rate (optional)"
+                    type="number"
+                    value={formData.pricing.ratePerNightWeekend || ''}
+                    onChange={(e) => updateNestedField('pricing.ratePerNightWeekend', parseFloat(e.target.value) || undefined)}
+                    fullWidth={true}
+                    min="0"
+                    step="0.01"
+                  />
                 </Box>
               </Box>
             )}

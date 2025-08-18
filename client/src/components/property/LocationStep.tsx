@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { Input } from '../Input'
 import SelectionPicker from '../SelectionPicker'
 import SlidingDrawer from '../SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
@@ -371,39 +372,24 @@ const LocationStep: React.FC<LocationStepProps> = ({
 
         {/* Location Search */}
         <Box>
-          <Box
-            as="label"
-            display="flex"
-            alignItems="center"
-            gap="0.5rem"
-            fontSize="1rem"
-            fontWeight="500"
-            color="#374151"
-            marginBottom="0.75rem"
-          >
-            <FaLocationArrow color="#3182ce" />
-            Search for Exact Location (Optional)
-          </Box>
           <Box display="flex" gap="0.5rem">
-            <Box
-              as="input"
-              type="text"
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  searchLocation()
-                }
-              }}
-              placeholder="e.g., Marina Walk, Dubai Marina"
-              flex="1"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
-              fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
-            />
+            <Box flex="1">
+              <Input
+                label="Search for Exact Location (Optional)"
+                icon={FaLocationArrow}
+                type="text"
+                value={searchQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    searchLocation()
+                  }
+                }}
+                placeholder="e.g., Marina Walk, Dubai Marina"
+                fullWidth={true}
+              />
+            </Box>
             <Box
               as="button"
               onClick={searchLocation}

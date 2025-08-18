@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../Box'
+import { Input } from '../Input'
 import SelectionPicker from '../SelectionPicker'
 import SlidingDrawer from '../SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
@@ -303,29 +304,14 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
               
               {showSearch && (
                 <Box marginBottom="1rem">
-                  <Box position="relative">
-                    <Box
-                      as="input"
-                      type="text"
-                      placeholder="Search amenities..."
-                      value={searchQuery}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                      width="100%"
-                      padding="0.75rem 0.75rem 0.75rem 2.5rem"
-                      border="1px solid #d1d5db"
-                      borderRadius="0.5rem"
-                      fontSize="1rem"
-                    />
-                    <Box
-                      position="absolute"
-                      left="0.75rem"
-                      top="50%"
-                      transform="translateY(-50%)"
-                      color="#6b7280"
-                    >
-                      <FaSearch />
-                    </Box>
-                  </Box>
+                  <Input
+                    icon={FaSearch}
+                    type="text"
+                    placeholder="Search amenities..."
+                    value={searchQuery}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                    fullWidth={true}
+                  />
                 </Box>
               )}
               

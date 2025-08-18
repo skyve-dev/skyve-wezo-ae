@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SlidingDrawer from '../components/SlidingDrawer'
 import SelectionPicker from '../components/SelectionPicker'
 import { Box } from '../components/Box'
+import { Input } from '../components/Input'
 import useDrawerManager from '../hooks/useDrawerManager'
 import { ParkingType, PetPolicy } from '../constants/propertyEnums'
 import { 
@@ -941,23 +942,14 @@ export function SlidingDrawerExamples() {
           </Box>
           
           <Box as="form" display="flex" flexDirection="column" gap="1.5rem">
-            <Box>
-              <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
-                Property Name *
-              </Box>
-              <Box
-                as="input"
-                type="text"
-                value={propertyForm.name}
-                onChange={(e: any) => setPropertyForm({ ...propertyForm, name: e.target.value })}
-                placeholder="e.g., Luxury Villa with Ocean View"
-                width="100%"
-                padding="0.75rem"
-                border="1px solid #d1d5db"
-                borderRadius="0.5rem"
-                fontSize="1rem"
-              />
-            </Box>
+            <Input
+              label="Property Name *"
+              type="text"
+              value={propertyForm.name}
+              onChange={(e: any) => setPropertyForm({ ...propertyForm, name: e.target.value })}
+              placeholder="e.g., Luxury Villa with Ocean View"
+              fullWidth
+            />
             
             <Box>
               <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
@@ -1000,42 +992,24 @@ export function SlidingDrawerExamples() {
                 </Box>
               </Box>
 
-              <Box>
-                <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
-                  Price (AED/night)
-                </Box>
-                <Box
-                  as="input"
-                  type="number"
-                  value={propertyForm.price}
-                  onChange={(e: any) => setPropertyForm({ ...propertyForm, price: e.target.value })}
-                  placeholder="1500"
-                  width="100%"
-                  padding="0.75rem"
-                  border="1px solid #d1d5db"
-                  borderRadius="0.5rem"
-                  fontSize="1rem"
-                />
-              </Box>
-            </Box>
-
-            <Box>
-              <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
-                Location
-              </Box>
-              <Box
-                as="input"
-                type="text"
-                value={propertyForm.location}
-                onChange={(e: any) => setPropertyForm({ ...propertyForm, location: e.target.value })}
-                placeholder="Dubai Marina, UAE"
-                width="100%"
-                padding="0.75rem"
-                border="1px solid #d1d5db"
-                borderRadius="0.5rem"
-                fontSize="1rem"
+              <Input
+                label="Price (AED/night)"
+                type="number"
+                value={propertyForm.price}
+                onChange={(e: any) => setPropertyForm({ ...propertyForm, price: e.target.value })}
+                placeholder="1500"
+                fullWidth
               />
             </Box>
+
+            <Input
+              label="Location"
+              type="text"
+              value={propertyForm.location}
+              onChange={(e: any) => setPropertyForm({ ...propertyForm, location: e.target.value })}
+              placeholder="Dubai Marina, UAE"
+              fullWidth
+            />
 
             <Box>
               <Box fontSize="1rem" fontWeight="500" marginBottom="1rem" color="#374151">

@@ -1,5 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../Box';
+import { Input } from '../Input';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { login, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
 
@@ -98,81 +99,33 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         )}
 
         <Box as={'form'} onSubmit={handleSubmit} display={'flex'} flexDirection={'column'} gap={'20px'}>
-          <Box display="flex" flexDirection="column" gap={6}>
-            <Box as={'label'} htmlFor="username" fontSize={'1rem'} fontWeight={'500'}>
-              Username
-            </Box>
-            <Box as={'input'}
-              id="username"
-              type="text"
-              placeholder="Enter your username"
-              value={formData.username}
-              onChange={handleInputChange('username')}
-              disabled={isLoading}
-              autoComplete="username"
-              style={{
-                padding: '0.75rem 1rem',
-                fontSize: '1rem',
-                border: `1px solid ${errors.username ? '#dc3545' : '#dee2e6'}`,
-                borderRadius: '6px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                width: '100%',
-                boxSizing: 'border-box',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = errors.username ? '#dc3545' : '#007bff';
-                e.target.style.boxShadow = `0 0 0 3px ${errors.username ? 'rgba(220, 53, 69, 0.1)' : 'rgba(0, 123, 255, 0.1)'}`;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = errors.username ? '#dc3545' : '#dee2e6';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-            {errors.username && (
-              <Box fontSize={'1rem'} color="#dc3545">
-                {errors.username}
-              </Box>
-            )}
-          </Box>
+          <Input
+            label="Username"
+            id="username"
+            type="text"
+            placeholder="Enter your username"
+            value={formData.username}
+            onChange={handleInputChange('username')}
+            disabled={isLoading}
+            autoComplete="username"
+            error={!!errors.username}
+            helperText={errors.username}
+            fullWidth
+          />
 
-          <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="password" fontSize={'1rem'} fontWeight={500}>
-              Password
-            </Box>
-            <Box as="input"
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleInputChange('password')}
-              disabled={isLoading}
-              autoComplete="current-password"
-              style={{
-                padding: '0.75rem 1rem',
-                fontSize: '1rem',
-                border: `1px solid ${errors.password ? '#dc3545' : '#dee2e6'}`,
-                borderRadius: '6px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                width: '100%',
-                boxSizing: 'border-box',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = errors.password ? '#dc3545' : '#007bff';
-                e.target.style.boxShadow = `0 0 0 3px ${errors.password ? 'rgba(220, 53, 69, 0.1)' : 'rgba(0, 123, 255, 0.1)'}`;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = errors.password ? '#dc3545' : '#dee2e6';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-            {errors.password && (
-              <Box fontSize={'1rem'} color="#dc3545">
-                {errors.password}
-              </Box>
-            )}
-          </Box>
+          <Input
+            label="Password"
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleInputChange('password')}
+            disabled={isLoading}
+            autoComplete="current-password"
+            error={!!errors.password}
+            helperText={errors.password}
+            fullWidth
+          />
 
           <Box display="flex" justifyContent="flex-end">
             <Box as="button"
