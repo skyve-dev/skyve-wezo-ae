@@ -24,15 +24,7 @@ interface ServicesStepProps {
 
 const languageOptions = [
   'English',
-  'Arabic', 
-  'Hindi',
-  'Urdu',
-  'French',
-  'Spanish',
-  'German',
-  'Russian',
-  'Chinese',
-  'Japanese'
+  'Arabic'
 ]
 
 const ServicesStep: React.FC<ServicesStepProps> = ({

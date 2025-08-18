@@ -76,7 +76,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
             <FaDollarSign color="#3182ce" />
             Base Rate
           </Box>
-          <Box display="grid" gridTemplateColumnsSm="100px 1fr" gap="1rem">
+          <Box display="grid" gridTemplateColumnsSm="250px 1fr" gap="1rem">
             <Box>
               <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
                 Currency

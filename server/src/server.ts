@@ -30,7 +30,7 @@ async function startServer() {
       if (networkIP) {
         console.log(`🌐 API exposed at http://${networkIP}:${PORT}/api (accessible from network)`);
       }
-      console.log(`🏥 Health check at http://localhost:${PORT}/api/health`);
+      console.log(`🏥 Health check at http://${networkIP}:${PORT}/api/health`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

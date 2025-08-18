@@ -220,9 +220,6 @@ async function main() {
     setTimeout(() => {
       log('\n✅ Development environment is starting!', 'green');
       log('==========================================', 'green');
-      log(`🔗 Server:  http://localhost:${SERVER_PORT}`, 'green');
-      log(`🔗 Client:  http://localhost:${CLIENT_PORT}`, 'green');
-      log('==========================================', 'green');
       log('💡 Services are starting in parallel...', 'yellow');
       log('🛑 Press Ctrl+C to stop all services', 'yellow');
     }, 2000);

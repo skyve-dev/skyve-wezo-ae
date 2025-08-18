@@ -239,7 +239,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
                       const emirate = UAE_EMIRATES.find(e => e.id === value)
                       if (emirate) {
                         setSelectedEmirate(emirate.id)
-                        handleAddressChange('city', emirate.name)
+                        handleAddressChange('city', emirate.id)
                         drawerManager.closeDrawer('emirate-selection')
                       }
                     }}
