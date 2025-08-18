@@ -5,6 +5,7 @@ import { BedType, BedTypeLabels, RoomSpaceType, RoomSpaceTypeLabels } from '../.
 import SelectionPicker from '../SelectionPicker'
 import SlidingDrawer from '../SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
+import { NumberStepperInput } from '../NumberStepperInput'
 import { 
   FaUserFriends, 
   FaBath, 
@@ -37,13 +38,6 @@ const bedTypeOptions = Object.values(BedType).map(type => ({
   value: type
 }))
 
-const bedNumberOptions = [
-  { id: 1, label: '1', value: 1 },
-  { id: 2, label: '2', value: 2 },
-  { id: 3, label: '3', value: 3 },
-  { id: 4, label: '4+', value: 4 }
-]
-
 // Room type options for SelectionPicker
 const roomTypeOptions = Object.values(RoomSpaceType).map(type => ({
   id: type,
@@ -60,7 +54,6 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
 }) => {
   const [currentRoomIndex, setCurrentRoomIndex] = useState<number | null>(null)
   const [currentBedIndex, setCurrentBedIndex] = useState<number | null>(null)
-  const [bedSelectionType, setBedSelectionType] = useState<'type' | 'number' | null>(null)
   const drawerManager = useDrawerManager()
   const handleLayoutChange = (field: string, value: any) => {
     onChange({
@@ -108,25 +101,15 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
   const openBedTypeSelection = (roomIndex: number, bedIndex: number) => {
     setCurrentRoomIndex(roomIndex)
     setCurrentBedIndex(bedIndex)
-    setBedSelectionType('type')
-    drawerManager.openDrawer('bed-selection')
+    drawerManager.openDrawer('bed-type-selection')
   }
   
-  const openBedNumberSelection = (roomIndex: number, bedIndex: number) => {
-    setCurrentRoomIndex(roomIndex)
-    setCurrentBedIndex(bedIndex)
-    setBedSelectionType('number')
-    drawerManager.openDrawer('bed-selection')
-  }
-  
-  const handleBedSelection = (value: BedType | number) => {
-    if (currentRoomIndex !== null && currentBedIndex !== null && bedSelectionType) {
-      const field = bedSelectionType === 'type' ? 'typeOfBed' : 'numberOfBed'
-      handleBedChange(currentRoomIndex, currentBedIndex, field as keyof Bed, value)
-      drawerManager.closeDrawer('bed-selection')
+  const handleBedTypeSelection = (value: BedType) => {
+    if (currentRoomIndex !== null && currentBedIndex !== null) {
+      handleBedChange(currentRoomIndex, currentBedIndex, 'typeOfBed', value)
+      drawerManager.closeDrawer('bed-type-selection')
       setCurrentRoomIndex(null)
       setCurrentBedIndex(null)
-      setBedSelectionType(null)
     }
   }
 
@@ -174,118 +157,40 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {/* Basic Numbers */}
         <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1.5rem">
-          <Box>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              gap="0.5rem"
-              fontSize="0.875rem"
-              fontWeight="500"
-              color="#374151"
-              marginBottom="0.75rem"
-            >
-              <FaUserFriends color="#3182ce" />
-              Maximum Guests *
-            </Box>
-            <Box
-              as="input"
-              type="number"
-              min="1"
-              max="16"
-              value={data.maximumGuest}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleLayoutChange('maximumGuest', parseInt(e.target.value) || 1)
-              }
-              width="100%"
-              padding="1rem"
-              border="2px solid #e5e7eb"
-              borderRadius="0.5rem"
-              fontSize="1rem"
-              backgroundColor="white"
-              whileFocus={{ 
-                borderColor: '#3182ce', 
-                outline: 'none', 
-                boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
-              }}
-            />
-          </Box>
+          <NumberStepperInput
+            label="Maximum Guests *"
+            value={data.maximumGuest}
+            onChange={(value) => handleLayoutChange('maximumGuest', value)}
+            step={1}
+            min={1}
+            max={16}
+            format="integer"
+            required
+          />
 
-          <Box>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              gap="0.5rem"
-              fontSize="0.875rem"
-              fontWeight="500"
-              color="#374151"
-              marginBottom="0.75rem"
-            >
-              <FaBath color="#3182ce" />
-              Bathrooms *
-            </Box>
-            <Box
-              as="input"
-              type="number"
-              min="1"
-              max="10"
-              value={data.bathrooms}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handleLayoutChange('bathrooms', parseInt(e.target.value) || 1)
-              }
-              width="100%"
-              padding="1rem"
-              border="2px solid #e5e7eb"
-              borderRadius="0.5rem"
-              fontSize="1rem"
-              backgroundColor="white"
-              whileFocus={{ 
-                borderColor: '#3182ce', 
-                outline: 'none', 
-                boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
-              }}
-            />
-          </Box>
+          <NumberStepperInput
+            label="Bathrooms *"
+            value={data.bathrooms}
+            onChange={(value) => handleLayoutChange('bathrooms', value)}
+            step={1}
+            min={1}
+            max={10}
+            format="integer"
+            required
+          />
         </Box>
 
         {/* Property Size */}
-        <Box>
-          <Box
-            as="label"
-            display="flex"
-            alignItems="center"
-            gap="0.5rem"
-            fontSize="0.875rem"
-            fontWeight="500"
-            color="#374151"
-            marginBottom="0.75rem"
-          >
-            <FaRulerCombined color="#3182ce" />
-            Property Size (Square Meters) - Optional
-          </Box>
-          <Box
-            as="input"
-            type="number"
-            min="0"
-            value={data.propertySizeSqMtr || ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-              handleLayoutChange('propertySizeSqMtr', parseInt(e.target.value) || undefined)
-            }
-            placeholder="e.g., 120"
-            width="100%"
-            padding="1rem"
-            border="2px solid #e5e7eb"
-            borderRadius="0.5rem"
-            fontSize="1rem"
-            backgroundColor="white"
-            whileFocus={{ 
-              borderColor: '#3182ce', 
-              outline: 'none', 
-              boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' 
-            }}
-          />
-        </Box>
+        <NumberStepperInput
+          label="Property Size (Square Meters) - Optional"
+          value={data.propertySizeSqMtr || 0}
+          onChange={(value) => handleLayoutChange('propertySizeSqMtr', value > 0 ? value : undefined)}
+          step={10}
+          min={0}
+          max={10000}
+          format="integer"
+          placeholder="e.g., 120"
+        />
 
         {/* Children and Cribs */}
         <Box 
@@ -557,68 +462,40 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                       </Box>
                     </Box>
 
-                    {/* Number of Beds Selection */}
-                    <Box>
-                      <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
-                        Number of Beds *
+                    {/* Number of Beds */}
+                    <Box display="flex" alignItems="flex-end" gap="0.5rem">
+                      <Box flex="1">
+                        <NumberStepperInput
+                          label="Number of Beds *"
+                          value={bed.numberOfBed || 1}
+                          onChange={(value) => handleBedChange(roomIndex, bedIndex, 'numberOfBed', value)}
+                          step={1}
+                          min={1}
+                          max={10}
+                          format="integer"
+                          size="small"
+                          required
+                        />
                       </Box>
-                      <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box
-                          as="button"
-                          onClick={() => openBedNumberSelection(roomIndex, bedIndex)}
-                          flex="1"
-                          gap={'0.5rem'}
-                          padding="0.75rem"
-                          border="2px solid #e5e7eb"
-                          borderRadius="0.375rem"
-                          fontSize="0.875rem"
-                          backgroundColor={bed.numberOfBed ? "white" : "#f9fafb"}
-                          cursor="pointer"
-                          textAlign="left"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="space-between"
-                          marginRight="1rem"
-                          whileHover={{ 
-                            borderColor: '#3182ce',
-                            backgroundColor: '#f8fafc'
-                          }}
-                        >
-                          <Box display="flex" alignItems="center" gap="0.5rem">
-                            <Box 
-                              fontSize="1rem" 
-                              fontWeight="600" 
-                              color={bed.numberOfBed ? "#10b981" : "#9ca3af"}
-                            >
-                              {bed.numberOfBed || '#'}
-                            </Box>
-                            {/*<Box color={bed.numberOfBed ? "#374151" : "#9ca3af"}>*/}
-                            {/*  {bed.numberOfBed ? `${bed.numberOfBed === 4 ? '4+' : bed.numberOfBed} bed${bed.numberOfBed > 1 ? 's' : ''}` : 'Select quantity'}*/}
-                            {/*</Box>*/}
-                          </Box>
-                          <Box color="#6b7280" fontSize="0.75rem" display={'none'} displayMd={'flex'}>
-                            {bed.numberOfBed ? 'Change' : 'Select'}
-                          </Box>
-                        </Box>
-                        
-                        <Box
-                          as="button"
-                          onClick={() => removeBed(roomIndex, bedIndex)}
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          width="2.5rem"
-                          height="2.5rem"
-                          backgroundColor="#dc2626"
-                          color="white"
-                          border="none"
-                          borderRadius="50%"
-                          cursor="pointer"
-                          whileHover={{ backgroundColor: '#b91c1c', transform: 'scale(1.1)' }}
-                          boxShadow="0 2px 4px rgba(220, 38, 38, 0.2)"
-                        >
-                          <FaTimes size="0.875rem" />
-                        </Box>
+                      
+                      <Box
+                        as="button"
+                        onClick={() => removeBed(roomIndex, bedIndex)}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        width="2.5rem"
+                        height="2.5rem"
+                        backgroundColor="#dc2626"
+                        color="white"
+                        border="none"
+                        borderRadius="50%"
+                        cursor="pointer"
+                        whileHover={{ backgroundColor: '#b91c1c', transform: 'scale(1.1)' }}
+                        boxShadow="0 2px 4px rgba(220, 38, 38, 0.2)"
+                        marginBottom="0.25rem"
+                      >
+                        <FaTimes size="0.875rem" />
                       </Box>
                     </Box>
                   </Box>
@@ -674,82 +551,51 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
             </Box>
           </SlidingDrawer>
           
-          {/* Bed Selection Drawer */}
+          {/* Bed Type Selection Drawer */}
           <SlidingDrawer
-            isOpen={drawerManager.isDrawerOpen('bed-selection')}
+            isOpen={drawerManager.isDrawerOpen('bed-type-selection')}
             onClose={() => {
-              drawerManager.closeDrawer('bed-selection')
+              drawerManager.closeDrawer('bed-type-selection')
               setCurrentRoomIndex(null)
               setCurrentBedIndex(null)
-              setBedSelectionType(null)
             }}
             side="bottom"
             height="auto"
-            zIndex={drawerManager.getDrawerZIndex('bed-selection')}
+            zIndex={drawerManager.getDrawerZIndex('bed-type-selection')}
             showCloseButton
           >
             <Box padding="1.5rem" display="flex" flexDirection="column">
               <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
-                {bedSelectionType === 'type' ? 'Select Bed Type' : 'Select Number of Beds'}
+                Select Bed Type
               </Box>
               <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
-                {bedSelectionType === 'type' 
-                  ? 'Choose the type of bed for this room'
-                  : 'How many beds of this type?'
-                }
+                Choose the type of bed for this room
               </Box>
               
-              {bedSelectionType === 'type' ? (
-                <SelectionPicker
-                  data={bedTypeOptions}
-                  idAccessor={(item) => item.id}
-                  value=""
-                  onChange={(value) => handleBedSelection(value as BedType)}
-                  isMultiSelect={false}
-                  renderItem={(item) => (
-                    <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
-                      <FaBed color="#3182ce" size="1.25rem" />
-                      <Box fontSize="0.875rem" fontWeight="500" color="#374151">
-                        {item.label}
-                      </Box>
+              <SelectionPicker
+                data={bedTypeOptions}
+                idAccessor={(item) => item.id}
+                value=""
+                onChange={(value) => handleBedTypeSelection(value as BedType)}
+                isMultiSelect={false}
+                renderItem={(item) => (
+                  <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+                    <FaBed color="#3182ce" size="1.25rem" />
+                    <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                      {item.label}
                     </Box>
-                  )}
-                  containerStyles={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '0.75rem'
-                  }}
-                  selectedItemStyles={{
-                    borderColor: '#3182ce',
-                    backgroundColor: '#eff6ff'
-                  }}
-                />
-              ) : (
-                <SelectionPicker
-                  data={bedNumberOptions}
-                  idAccessor={(item) => item.id}
-                  value=""
-                  onChange={(value) => handleBedSelection(value as number)}
-                  isMultiSelect={false}
-                  renderItem={(item) => (
-                    <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
-                      <FaBed color="#10b981" size="1.25rem" />
-                      <Box fontSize="0.875rem" fontWeight="500" color="#374151">
-                        {item.label}
-                      </Box>
-                    </Box>
-                  )}
-                  containerStyles={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                    gap: '0.75rem'
-                  }}
-                  selectedItemStyles={{
-                    borderColor: '#10b981',
-                    backgroundColor: '#ecfdf5'
-                  }}
-                />
-              )}
+                  </Box>
+                )}
+                containerStyles={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '0.75rem'
+                }}
+                selectedItemStyles={{
+                  borderColor: '#3182ce',
+                  backgroundColor: '#eff6ff'
+                }}
+              />
             </Box>
           </SlidingDrawer>
         </Box>

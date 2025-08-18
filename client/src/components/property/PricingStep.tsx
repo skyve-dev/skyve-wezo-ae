@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData, Pricing, Cancellation } from '../../types/property'
 import { Box } from '../Box'
+import { NumberStepperInput } from '../NumberStepperInput'
 import { Currency } from '../../constants/propertyEnums'
 import { 
   FaDollarSign,
@@ -95,28 +96,20 @@ const PricingStep: React.FC<PricingStepProps> = ({
                 AED - UAE Dirham (Fixed)
               </Box>
             </Box>
-            <Box>
-              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
-                Rate per night *
-              </Box>
-              <Box
-                as="input"
-                type="number"
-                min="0"
-                step="0.01"
-                value={pricing.ratePerNight || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  handlePricingChange('ratePerNight', parseFloat(e.target.value) || 0)
-                }
-                placeholder="e.g., 350"
-                width="100%"
-                padding="0.75rem"
-                border="1px solid #d1d5db"
-                borderRadius="0.375rem"
-                fontSize="1rem"
-                whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
-              />
-            </Box>
+            <NumberStepperInput
+              label="Rate per night *"
+              value={pricing.ratePerNight || 0}
+              onChange={(value) => handlePricingChange('ratePerNight', value)}
+              step={100}
+              min={0}
+              max={100000}
+              format="currency"
+              currency="AED "
+              currencyPosition="prefix"
+              decimalPlaces={0}
+              placeholder="e.g., 350"
+              required
+            />
           </Box>
         </Box>
 
@@ -126,31 +119,20 @@ const PricingStep: React.FC<PricingStepProps> = ({
             <FaCalendarWeek color="#3182ce" />
             Weekend Rate (Optional)
           </Box>
-          <Box>
-            <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
-              Weekend rate per night
-            </Box>
-            <Box
-              as="input"
-              type="number"
-              min="0"
-              step="0.01"
-              value={pricing.ratePerNightWeekend || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                handlePricingChange('ratePerNightWeekend', parseFloat(e.target.value) || undefined)
-              }
-              placeholder="Leave empty to use base rate"
-              width="100%"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
-              fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
-            />
-            <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
-              Higher rate for Friday-Saturday nights
-            </Box>
-          </Box>
+          <NumberStepperInput
+            label="Weekend rate per night"
+            value={pricing.ratePerNightWeekend || 0}
+            onChange={(value) => handlePricingChange('ratePerNightWeekend', value > 0 ? value : undefined)}
+            step={100}
+            min={0}
+            max={100000}
+            format="currency"
+            currency="AED "
+            currencyPosition="prefix"
+            decimalPlaces={0}
+            placeholder="Leave empty to use base rate"
+            helperText="Higher rate for Friday-Saturday nights"
+          />
         </Box>
 
         {/* Discounts */}
@@ -160,51 +142,27 @@ const PricingStep: React.FC<PricingStepProps> = ({
             Discounts (Optional)
           </Box>
           <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
-            <Box>
-              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
-                Weekly stay discount (%)
-              </Box>
-              <Box
-                as="input"
-                type="number"
-                min="0"
-                max="50"
-                value={pricing.discountPercentageForWeeklyRatePlan || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  handlePricingChange('discountPercentageForWeeklyRatePlan', parseInt(e.target.value) || undefined)
-                }
-                placeholder="e.g., 10"
-                width="100%"
-                padding="0.75rem"
-                border="1px solid #d1d5db"
-                borderRadius="0.375rem"
-                fontSize="1rem"
-                whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
-              />
-            </Box>
+            <NumberStepperInput
+              label="Weekly stay discount (%)"
+              value={pricing.discountPercentageForWeeklyRatePlan || 0}
+              onChange={(value) => handlePricingChange('discountPercentageForWeeklyRatePlan', value > 0 ? value : undefined)}
+              step={1}
+              min={0}
+              max={50}
+              format="integer"
+              placeholder="e.g., 10"
+            />
 
-            <Box>
-              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
-                Non-refundable discount (%)
-              </Box>
-              <Box
-                as="input"
-                type="number"
-                min="0"
-                max="30"
-                value={pricing.discountPercentageForNonRefundableRatePlan || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  handlePricingChange('discountPercentageForNonRefundableRatePlan', parseInt(e.target.value) || undefined)
-                }
-                placeholder="e.g., 5"
-                width="100%"
-                padding="0.75rem"
-                border="1px solid #d1d5db"
-                borderRadius="0.375rem"
-                fontSize="1rem"
-                whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
-              />
-            </Box>
+            <NumberStepperInput
+              label="Non-refundable discount (%)"
+              value={pricing.discountPercentageForNonRefundableRatePlan || 0}
+              onChange={(value) => handlePricingChange('discountPercentageForNonRefundableRatePlan', value > 0 ? value : undefined)}
+              step={1}
+              min={0}
+              max={30}
+              format="integer"
+              placeholder="e.g., 5"
+            />
           </Box>
         </Box>
 
@@ -215,31 +173,17 @@ const PricingStep: React.FC<PricingStepProps> = ({
             Cancellation Policy
           </Box>
           <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
-            <Box>
-              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
-                Free cancellation (days before arrival)
-              </Box>
-              <Box
-                as="input"
-                type="number"
-                min="0"
-                max="30"
-                value={cancellation.daysBeforeArrivalFreeToCancel}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                  handleCancellationChange('daysBeforeArrivalFreeToCancel', parseInt(e.target.value) || 0)
-                }
-                placeholder="7"
-                width="100%"
-                padding="0.75rem"
-                border="1px solid #d1d5db"
-                borderRadius="0.375rem"
-                fontSize="1rem"
-                whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
-              />
-              <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
-                Guests can cancel for free this many days before check-in
-              </Box>
-            </Box>
+            <NumberStepperInput
+              label="Free cancellation (days before arrival)"
+              value={cancellation.daysBeforeArrivalFreeToCancel}
+              onChange={(value) => handleCancellationChange('daysBeforeArrivalFreeToCancel', value)}
+              step={1}
+              min={0}
+              max={30}
+              format="integer"
+              placeholder="7"
+              helperText="Guests can cancel for free this many days before check-in"
+            />
 
             <Box>
               <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">

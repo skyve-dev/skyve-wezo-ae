@@ -41,7 +41,7 @@ export const applyGlobalStyles = (): void => {
         sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      font-size: 14px;
+      font-size: 16px;
       color: #000;
       background: #fff;
     }
