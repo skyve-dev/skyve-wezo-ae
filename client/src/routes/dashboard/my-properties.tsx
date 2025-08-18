@@ -235,7 +235,7 @@ function MyPropertiesPage() {
                       color="white"
                       padding="0.25rem 0.75rem"
                       borderRadius="1rem"
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       fontWeight="500"
                     >
                       Active
@@ -248,13 +248,13 @@ function MyPropertiesPage() {
                       <Box fontSize="1.125rem" fontWeight="600" color="#1a202c" marginBottom="0.25rem">
                         {property.name}
                       </Box>
-                      <Box fontSize="0.875rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         {property.address.city}, {property.address.countryOrRegion}
                       </Box>
                     </Box>
 
                     <Box display="flex" alignItems="center" justifyContent="space-between" marginBottom="1rem">
-                      <Box display="flex" alignItems="center" gap="1rem" fontSize="0.875rem" color="#6b7280">
+                      <Box display="flex" alignItems="center" gap="1rem" fontSize="1rem" color="#6b7280">
                         <Box>👥 {property.maximumGuest} guests</Box>
                         <Box>🚿 {property.bathrooms} baths</Box>
                       </Box>
@@ -276,19 +276,19 @@ function MyPropertiesPage() {
                     >
                       <Box textAlign="center">
                         <Box fontSize="1.25rem" fontWeight="600" color="#1a202c">0</Box>
-                        <Box fontSize="0.75rem" color="#6b7280">Bookings</Box>
+                        <Box fontSize="1rem" color="#6b7280">Bookings</Box>
                       </Box>
                       <Box textAlign="center">
                         <Box fontSize="1.25rem" fontWeight="600" color="#1a202c">
                           {property.amenities?.length || 0}
                         </Box>
-                        <Box fontSize="0.75rem" color="#6b7280">Amenities</Box>
+                        <Box fontSize="1rem" color="#6b7280">Amenities</Box>
                       </Box>
                       <Box textAlign="center">
                         <Box fontSize="1.25rem" fontWeight="600" color="#1a202c">
                           {property.photos?.length || 0}
                         </Box>
-                        <Box fontSize="0.75rem" color="#6b7280">Photos</Box>
+                        <Box fontSize="1rem" color="#6b7280">Photos</Box>
                       </Box>
                     </Box>
 
@@ -303,7 +303,7 @@ function MyPropertiesPage() {
                         color="white"
                         border="none"
                         borderRadius="0.375rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         cursor="pointer"
                         whileHover={{ backgroundColor: '#2c5aa0' }}
                       >
@@ -318,7 +318,7 @@ function MyPropertiesPage() {
                         color="#6b7280"
                         border="1px solid #d1d5db"
                         borderRadius="0.375rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         cursor="pointer"
                         whileHover={{ borderColor: '#9ca3af', backgroundColor: '#f9fafb' }}
                       >
@@ -332,7 +332,7 @@ function MyPropertiesPage() {
                         color="#dc2626"
                         border="1px solid #fca5a5"
                         borderRadius="0.375rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         cursor="pointer"
                         whileHover={{ backgroundColor: '#fee2e2', borderColor: '#f87171' }}
                       >
@@ -346,7 +346,7 @@ function MyPropertiesPage() {
 
             {/* Load More (if needed in future) */}
             <Box display="flex" justifyContent="center" marginTop="3rem">
-              <Box fontSize="0.875rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 Showing {properties.length} propert{properties.length === 1 ? 'y' : 'ies'}
               </Box>
             </Box>

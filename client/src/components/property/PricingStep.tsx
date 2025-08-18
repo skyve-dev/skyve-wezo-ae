@@ -79,7 +79,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
           </Box>
           <Box display="grid" gridTemplateColumnsSm="250px 1fr" gap="1rem">
             <Box>
-              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
+              <Box fontSize="1rem" color="#374151" marginBottom="0.5rem">
                 Currency
               </Box>
               <Box
@@ -186,7 +186,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
             />
 
             <Box>
-              <Box fontSize="0.875rem" color="#374151" marginBottom="0.5rem">
+              <Box fontSize="1rem" color="#374151" marginBottom="0.5rem">
                 Accidental booking protection
               </Box>
               <Box display="flex" alignItems="center" gap="0.75rem">
@@ -200,10 +200,10 @@ const PricingStep: React.FC<PricingStepProps> = ({
                   accentColor="#3182ce"
                 />
                 <Box>
-                  <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                  <Box fontSize="1rem" color="#374151" fontWeight="500">
                     Waive cancellation fee for accidental bookings
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     Allow free cancellation within 24 hours of booking for accidental reservations
                   </Box>
                 </Box>
@@ -224,7 +224,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
               <FaEye color="#0369a1" />
               Pricing Preview
             </Box>
-            <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="0.875rem" color="#0c4a6e">
+            <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="1rem" color="#0c4a6e">
               <Box display="flex" justifyContent="space-between">
                 <Box>Base rate (weeknight):</Box>
                 <Box fontWeight="500">{pricing.currency} {pricing.ratePerNight.toFixed(2)}</Box>
@@ -240,7 +240,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
                   <Box>7+ nights (weekly discount):</Box>
                   <Box fontWeight="500">
                     {pricing.currency} {(pricing.ratePerNight * (1 - pricing.discountPercentageForWeeklyRatePlan / 100)).toFixed(2)} 
-                    <Box as="span" fontSize="0.75rem" color="#6b7280"> (-{pricing.discountPercentageForWeeklyRatePlan}%)</Box>
+                    <Box as="span" fontSize="1rem" color="#6b7280"> (-{pricing.discountPercentageForWeeklyRatePlan}%)</Box>
                   </Box>
                 </Box>
               )}

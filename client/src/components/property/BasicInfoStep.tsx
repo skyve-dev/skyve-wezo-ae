@@ -66,7 +66,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -89,7 +89,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             fontSize="1rem"
             whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
           />
-          <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+          <Box fontSize="1rem" color="#6b7280" marginTop="0.25rem">
             Minimum 3 characters. This will be the first thing guests see.
           </Box>
         </Box>
@@ -101,7 +101,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -136,7 +136,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                   <FaUserCheck color="#10b981" size="1rem" />
                   {BookingTypeLabels[BookingType.BookInstantly]}
                 </Box>
-                <Box fontSize="0.875rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   Guests can book immediately without waiting for approval
                 </Box>
               </Box>
@@ -168,7 +168,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                   <FaHandshake color="#f59e0b" size="1rem" />
                   {BookingTypeLabels[BookingType.NeedToRequestBook]}
                 </Box>
-                <Box fontSize="0.875rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   You review and approve each booking request before confirmation
                 </Box>
               </Box>
@@ -183,7 +183,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -218,7 +218,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                   <FaGlobe color="#10b981" size="1rem" />
                   {PaymentTypeLabels[PaymentType.Online]}
                 </Box>
-                <Box fontSize="0.875rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   Collect the entire amount when guests book online
                 </Box>
               </Box>
@@ -250,7 +250,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
                   <FaMapMarkerAlt color="#f59e0b" size="1rem" />
                   {PaymentTypeLabels[PaymentType.ByCreditCardAtProperty]}
                 </Box>
-                <Box fontSize="0.875rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   Guests pay with credit card when they arrive at the property
                 </Box>
               </Box>
@@ -268,7 +268,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             minDate={new Date().toISOString()}
             placeholder="Select the first available date"
           />
-          <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+          <Box fontSize="1rem" color="#6b7280" marginTop="0.25rem">
             Select the earliest date guests can check in to your property
           </Box>
         </Box>
@@ -280,7 +280,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -313,7 +313,7 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"

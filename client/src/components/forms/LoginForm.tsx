@@ -76,10 +76,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     >
       <Box display="flex" flexDirection="column" gap={24}>
         <Box textAlign="center">
-          <Box as={'h2'} margin={'0px'} fontSize={'24px'} fontWeight={'600'} marginBottom={'8px'}>
+          <Box as={'h2'} margin={'0px'} fontSize={'1.5rem'} fontWeight={'600'} marginBottom={'8px'}>
             Welcome Back
           </Box>
-          <Box as={'p'} margin={'0px'} color={'#6c757d'} fontSize={'16px'}>
+          <Box as={'p'} margin={'0px'} color={'#6c757d'} fontSize={'1rem'}>
             Sign in to your account
           </Box>
         </Box>
@@ -91,7 +91,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             borderRadius={6}
             border="1px solid #fecaca"
           >
-            <Box fontSize={'14px'} color={'#dc3545'}>
+            <Box fontSize={'1rem'} color={'#dc3545'}>
               {authError}
             </Box>
           </Box>
@@ -99,7 +99,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         <Box as={'form'} onSubmit={handleSubmit} display={'flex'} flexDirection={'column'} gap={'20px'}>
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box as={'label'} htmlFor="username" fontSize={'14px'} fontWeight={'500'}>
+            <Box as={'label'} htmlFor="username" fontSize={'1rem'} fontWeight={'500'}>
               Username
             </Box>
             <Box as={'input'}
@@ -111,8 +111,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               disabled={isLoading}
               autoComplete="username"
               style={{
-                padding: '10px 14px',
-                fontSize: '16px',
+                padding: '0.75rem 1rem',
+                fontSize: '1rem',
                 border: `1px solid ${errors.username ? '#dc3545' : '#dee2e6'}`,
                 borderRadius: '6px',
                 outline: 'none',
@@ -130,14 +130,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }}
             />
             {errors.username && (
-              <Box fontSize={14} color="#dc3545">
+              <Box fontSize={'1rem'} color="#dc3545">
                 {errors.username}
               </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="password" fontSize={14} fontWeight={500}>
+            <Box as="label" htmlFor="password" fontSize={'1rem'} fontWeight={500}>
               Password
             </Box>
             <Box as="input"
@@ -149,8 +149,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               disabled={isLoading}
               autoComplete="current-password"
               style={{
-                padding: '10px 14px',
-                fontSize: '16px',
+                padding: '0.75rem 1rem',
+                fontSize: '1rem',
                 border: `1px solid ${errors.password ? '#dc3545' : '#dee2e6'}`,
                 borderRadius: '6px',
                 outline: 'none',
@@ -168,7 +168,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }}
             />
             {errors.password && (
-              <Box fontSize={14} color="#dc3545">
+              <Box fontSize={'1rem'} color="#dc3545">
                 {errors.password}
               </Box>
             )}
@@ -182,9 +182,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 background: 'none',
                 border: 'none',
                 color: '#007bff',
-                fontSize: '14px',
+                fontSize: '1rem',
                 cursor: 'pointer',
-                padding: '4px 8px',
+                padding: '0.25rem 0.5rem',
                 textDecoration: 'underline',
               }}
             >
@@ -200,7 +200,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              padding: '12px 24px',
+              padding: '0.75rem 1.5rem',
               fontSize: '16px',
               fontWeight: 500,
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -216,7 +216,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </Box>
 
         <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef">
-          <Box as="p" fontSize={14} color="#6c757d" margin={0}>
+          <Box as="p" fontSize={'1rem'} color="#6c757d" margin={0}>
             Don't have an account?{' '}
             <Box as="button"
               onClick={onSwitchToRegister}
@@ -224,7 +224,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 background: 'none',
                 border: 'none',
                 color: '#007bff',
-                fontSize: '14px',
+                fontSize: '1rem',
                 cursor: 'pointer',
                 textDecoration: 'underline',
               }}

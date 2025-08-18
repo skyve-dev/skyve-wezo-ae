@@ -170,7 +170,7 @@ function ExamplesIndex() {
             <Box fontSize="2rem" fontWeight="bold" color="#3182ce" marginBottom="0.5rem">
               {examples.length}
             </Box>
-            <Box fontSize="0.875rem" color="#6b7280">
+            <Box fontSize="1rem" color="#6b7280">
               Components
             </Box>
           </Box>
@@ -185,7 +185,7 @@ function ExamplesIndex() {
             <Box fontSize="2rem" fontWeight="bold" color="#059669" marginBottom="0.5rem">
               20+
             </Box>
-            <Box fontSize="0.875rem" color="#6b7280">
+            <Box fontSize="1rem" color="#6b7280">
               Use Cases
             </Box>
           </Box>
@@ -200,7 +200,7 @@ function ExamplesIndex() {
             <Box fontSize="2rem" fontWeight="bold" color="#f59e0b" marginBottom="0.5rem">
               100%
             </Box>
-            <Box fontSize="0.875rem" color="#6b7280">
+            <Box fontSize="1rem" color="#6b7280">
               TypeScript
             </Box>
           </Box>
@@ -215,7 +215,7 @@ function ExamplesIndex() {
             <Box fontSize="2rem" fontWeight="bold" color="#8b5cf6" marginBottom="0.5rem">
               A11Y
             </Box>
-            <Box fontSize="0.875rem" color="#6b7280">
+            <Box fontSize="1rem" color="#6b7280">
               Accessible
             </Box>
           </Box>
@@ -241,7 +241,7 @@ function ExamplesIndex() {
               <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" color="#374151">
                 No examples found
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 Try searching for different keywords or browse all examples
               </Box>
             </Box>
@@ -279,7 +279,7 @@ function ExamplesIndex() {
                       padding="0.25rem 0.75rem"
                       backgroundColor="white"
                       borderRadius="1rem"
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       fontWeight="600"
                       color={getComplexityColor(example.complexity)}
                     >
@@ -292,19 +292,19 @@ function ExamplesIndex() {
                     <Box fontSize="1.5rem" fontWeight="bold" marginBottom="0.5rem">
                       {example.title}
                     </Box>
-                    <Box fontSize="0.875rem" opacity={0.9}>
+                    <Box fontSize="1rem" opacity={0.9}>
                       {example.description}
                     </Box>
                   </Box>
 
                   {/* Content */}
                   <Box padding="2rem">
-                    <Box fontSize="0.875rem" fontWeight="600" marginBottom="1rem" color="#374151">
+                    <Box fontSize="1rem" fontWeight="600" marginBottom="1rem" color="#374151">
                       Key Features
                     </Box>
                     <Box display="flex" flexDirection="column" gap="0.5rem" marginBottom="2rem">
                       {example.features.map((feature, i) => (
-                        <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="0.75rem" color="#6b7280">
+                        <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#6b7280">
                           <Box color={example.color}>✓</Box>
                           {feature}
                         </Box>
@@ -322,7 +322,7 @@ function ExamplesIndex() {
                         backgroundColor: example.color,
                         color: 'white',
                         borderRadius: '0.75rem',
-                        fontSize: '0.875rem',
+                        fontSize: '1rem',
                         fontWeight: '600',
                         textDecoration: 'none'
                       }}
@@ -364,10 +364,10 @@ function ExamplesIndex() {
                 <Box fontSize="2rem" marginBottom="0.5rem">
                   <FaHome />
                 </Box>
-                <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
+                <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                   Property Registration
                 </Box>
-                <Box fontSize="0.75rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   Try the wizard
                 </Box>
               </Box>
@@ -390,10 +390,10 @@ function ExamplesIndex() {
                 <Box fontSize="2rem" marginBottom="0.5rem">
                   <FaChartBar />
                 </Box>
-                <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
+                <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                   Dashboard
                 </Box>
-                <Box fontSize="0.75rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   View properties
                 </Box>
               </Box>
@@ -417,10 +417,10 @@ function ExamplesIndex() {
               <Box fontSize="2rem" marginBottom="0.5rem">
                 <FaBook />
               </Box>
-              <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
+              <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                 Documentation
               </Box>
-              <Box fontSize="0.75rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 Learn more
               </Box>
             </Box>
@@ -446,10 +446,10 @@ function ExamplesIndex() {
               <Box fontSize="2rem" marginBottom="0.5rem">
                 <FaArrowUp />
               </Box>
-              <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
+              <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                 Back to Top
               </Box>
-              <Box fontSize="0.75rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 Scroll up
               </Box>
             </Box>
@@ -458,10 +458,10 @@ function ExamplesIndex() {
 
         {/* Footer */}
         <Box marginTop="4rem" textAlign="center" padding="2rem 0" borderTop="1px solid #e5e7eb">
-          <Box fontSize="0.875rem" color="#6b7280" marginBottom="1rem">
+          <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
             Built with React, TypeScript, and the Box component system
           </Box>
-          <Box display="flex" justifyContent="center" gap="2rem" fontSize="0.875rem">
+          <Box display="flex" justifyContent="center" gap="2rem" fontSize="1rem">
             <Link to="/" style={{ color: '#3182ce', textDecoration: 'none' }}>
               Home
             </Link>

@@ -85,7 +85,7 @@ export function DatePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">Event Date</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">Choose any date</Box>
+                  <Box fontSize="1rem" color="#6b7280">Choose any date</Box>
                 </Box>
               </Box>
               
@@ -97,7 +97,7 @@ export function DatePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#f8fafc" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#374151">
+                <Box fontSize="1rem" color="#374151">
                   <Box fontWeight="600">Selected:</Box>
                   {formatDisplayDate(eventDate)}
                 </Box>
@@ -111,7 +111,7 @@ export function DatePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">Default Value</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">With pre-selected date</Box>
+                  <Box fontSize="1rem" color="#6b7280">With pre-selected date</Box>
                 </Box>
               </Box>
               
@@ -123,7 +123,7 @@ export function DatePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#f8fafc" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#374151">
+                <Box fontSize="1rem" color="#374151">
                   <Box fontWeight="600">Selected:</Box>
                   {formatDisplayDate(defaultDate)}
                 </Box>
@@ -153,7 +153,7 @@ export function DatePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">Birth Date</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">Must be 18+ years old</Box>
+                  <Box fontSize="1rem" color="#6b7280">Must be 18+ years old</Box>
                 </Box>
               </Box>
               
@@ -167,14 +167,14 @@ export function DatePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#fef3c7" borderRadius="0.5rem">
-                <Box fontSize="0.75rem" color="#92400e">
+                <Box fontSize="1rem" color="#92400e">
                   <Box fontWeight="600">Constraint:</Box>
                   Must be born before {maxBirthDate.toLocaleDateString()}
                 </Box>
               </Box>
               
               <Box marginTop="0.5rem" padding="1rem" backgroundColor="#f8fafc" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#374151">
+                <Box fontSize="1rem" color="#374151">
                   <Box fontWeight="600">Selected:</Box>
                   {formatDisplayDate(birthDate)}
                 </Box>
@@ -188,7 +188,7 @@ export function DatePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">Future Booking</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">Within next year only</Box>
+                  <Box fontSize="1rem" color="#6b7280">Within next year only</Box>
                 </Box>
               </Box>
               
@@ -203,14 +203,14 @@ export function DatePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#dcfce7" borderRadius="0.5rem">
-                <Box fontSize="0.75rem" color="#166534">
+                <Box fontSize="1rem" color="#166534">
                   <Box fontWeight="600">Constraints:</Box>
                   Between {minDate.toLocaleDateString()} and {maxDate.toLocaleDateString()}
                 </Box>
               </Box>
               
               <Box marginTop="0.5rem" padding="1rem" backgroundColor="#f8fafc" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#374151">
+                <Box fontSize="1rem" color="#374151">
                   <Box fontWeight="600">Selected:</Box>
                   {formatDisplayDate(minMaxDate)}
                 </Box>
@@ -295,21 +295,21 @@ export function DatePickerExamples() {
               
               <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap="1rem">
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#6b7280">Check-in</Box>
+                  <Box fontSize="1rem" fontWeight="500" color="#6b7280">Check-in</Box>
                   <Box fontSize="1rem" fontWeight="600" color="#1a202c">
                     {checkInDate ? formatDisplayDate(checkInDate) : 'Not selected'}
                   </Box>
                 </Box>
                 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#6b7280">Check-out</Box>
+                  <Box fontSize="1rem" fontWeight="500" color="#6b7280">Check-out</Box>
                   <Box fontSize="1rem" fontWeight="600" color="#1a202c">
                     {checkOutDate ? formatDisplayDate(checkOutDate) : 'Not selected'}
                   </Box>
                 </Box>
                 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#6b7280">Duration</Box>
+                  <Box fontSize="1rem" fontWeight="500" color="#6b7280">Duration</Box>
                   <Box fontSize="1rem" fontWeight="600" color="#1a202c">
                     {checkInDate && checkOutDate 
                       ? `${getDaysDifference(checkInDate, checkOutDate)} nights`
@@ -319,7 +319,7 @@ export function DatePickerExamples() {
                 </Box>
                 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#6b7280">Total Price</Box>
+                  <Box fontSize="1rem" fontWeight="500" color="#6b7280">Total Price</Box>
                   <Box fontSize="1rem" fontWeight="600" color="#059669">
                     {checkInDate && checkOutDate 
                       ? `AED ${(getDaysDifference(checkInDate, checkOutDate) * 850).toLocaleString()}`
@@ -405,13 +405,13 @@ export function DatePickerExamples() {
                   </Box>
                 </Box>
                 
-                <Box fontSize="0.875rem" color="#6b7280" marginBottom="1rem">
+                <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                   {feature.description}
                 </Box>
                 
                 <Box display="flex" flexDirection="column" gap="0.5rem">
                   {feature.features.map((item, i) => (
-                    <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="0.75rem">
+                    <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="1rem">
                       <Box color="#059669">✓</Box>
                       <Box color="#374151">{item}</Box>
                     </Box>

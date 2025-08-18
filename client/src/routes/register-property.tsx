@@ -132,7 +132,7 @@ function RegisterPropertyWizard() {
               <Box fontSize="1.5rem" fontWeight="600" color="#1a202c">
                 Register Your Property
               </Box>
-              <Box fontSize="0.875rem" color="#718096">
+              <Box fontSize="1rem" color="#718096">
                 Step {currentStep} of {totalSteps}: {stepTitles[currentStep as WizardStep]}
               </Box>
             </Box>
@@ -191,7 +191,7 @@ function RegisterPropertyWizard() {
                 borderColor={step <= currentStep ? '#3182ce' : '#e2e8f0'}
                 backgroundColor={step === currentStep ? '#3182ce' : step < currentStep ? '#3182ce' : 'white'}
                 color={step <= currentStep ? 'white' : '#718096'}
-                fontSize="0.875rem"
+                fontSize="1rem"
                 fontWeight="600"
                 cursor="pointer"
                 display="flex"

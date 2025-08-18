@@ -81,8 +81,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
   };
 
   const inputStyle = (hasError: boolean) => ({
-    padding: '12px 16px',
-    fontSize: '16px',
+    padding: '0.75rem 1rem',
+    fontSize: '1rem',
     border: `1px solid ${hasError ? '#dc3545' : '#dee2e6'}`,
     borderRadius: '6px',
     outline: 'none',
@@ -129,7 +129,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             borderRadius={6}
             border="1px solid #fecaca"
           >
-            <Box fontSize={14} color="#dc3545">
+            <Box fontSize={16} color="#dc3545">
               {authError}
             </Box>
           </Box>
@@ -137,7 +137,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
 
         <Box as="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={20}>
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="username" fontSize={14} fontWeight={500}>
+            <Box as="label" htmlFor="username" fontSize={16} fontWeight={500}>
               Username
             </Box>
             <Box as="input"
@@ -152,14 +152,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.username)}
             />
             {errors.username && (
-              <Box fontSize={14} color="#dc3545">
+              <Box fontSize={16} color="#dc3545">
                 {errors.username}
               </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="email" fontSize={14} fontWeight={500}>
+            <Box as="label" htmlFor="email" fontSize={16} fontWeight={500}>
               Email Address
             </Box>
             <Box as="input"
@@ -174,14 +174,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.email)}
             />
             {errors.email && (
-              <Box fontSize={14} color="#dc3545">
+              <Box fontSize={16} color="#dc3545">
                 {errors.email}
               </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="password" fontSize={14} fontWeight={500}>
+            <Box as="label" htmlFor="password" fontSize={16} fontWeight={500}>
               Password
             </Box>
             <Box as="input"
@@ -196,14 +196,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.password)}
             />
             {errors.password && (
-              <Box fontSize={14} color="#dc3545">
+              <Box fontSize={16} color="#dc3545">
                 {errors.password}
               </Box>
             )}
           </Box>
 
           <Box display="flex" flexDirection="column" gap={6}>
-            <Box as="label" htmlFor="confirmPassword" fontSize={14} fontWeight={500}>
+            <Box as="label" htmlFor="confirmPassword" fontSize={16} fontWeight={500}>
               Confirm Password
             </Box>
             <Box as="input"
@@ -218,7 +218,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               {...inputFocusHandler(!!errors.confirmPassword)}
             />
             {errors.confirmPassword && (
-              <Box fontSize={14} color="#dc3545">
+              <Box fontSize={16} color="#dc3545">
                 {errors.confirmPassword}
               </Box>
             )}
@@ -232,8 +232,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              padding: '12px 24px',
-              fontSize: '16px',
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
               fontWeight: 500,
               cursor: isLoading ? 'not-allowed' : 'pointer',
               transition: 'background-color 0.2s',
@@ -274,7 +274,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
         </Box>
 
         <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef" >
-          <Box as="p" fontSize={14} color="#6c757d" margin={0} >
+          <Box as="p" fontSize={16} color="#6c757d" margin={0} >
             Already have an account?{' '}
             <Box as="button"
               onClick={onSwitchToLogin}
@@ -282,7 +282,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                 background: 'none',
                 border: 'none',
                 color: '#007bff',
-                fontSize: '14px',
+                fontSize: '1rem',
                 cursor: 'pointer',
                 textDecoration: 'underline',
               }}

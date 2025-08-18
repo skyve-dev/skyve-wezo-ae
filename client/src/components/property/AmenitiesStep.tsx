@@ -188,7 +188,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                         size="1.25rem"
                       />
                       <Box
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         fontWeight={isSelected ? '600' : '400'}
                         color={amenity.essential ? '#f59e0b' : '#374151'}
                         flex="1"
@@ -197,7 +197,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                         {amenity.essential && (
                           <Box
                             as="span"
-                            fontSize="0.625rem"
+                            fontSize="1rem"
                             fontWeight="700"
                             color="#f59e0b"
                             backgroundColor="#fef3c7"
@@ -249,7 +249,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                   : `${selectedAmenities.length} amenities selected`
                 }
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 {selectedAmenities.length === 0 
                   ? 'Tap to choose from over 30 available amenities'
                   : 'Tap to modify your selection'
@@ -260,7 +260,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                   {selectedAmenities.slice(0, 6).map((amenity, index) => (
                     <Box
                       key={index}
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       backgroundColor="#3182ce"
                       color="white"
                       padding="0.25rem 0.5rem"
@@ -271,7 +271,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                   ))}
                   {selectedAmenities.length > 6 && (
                     <Box
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       backgroundColor="#6b7280"
                       color="white"
                       padding="0.25rem 0.5rem"
@@ -297,7 +297,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
               <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
                 Select Amenities
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
                 Choose all amenities your guests will have access to
               </Box>
               
@@ -314,7 +314,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                       padding="0.75rem 0.75rem 0.75rem 2.5rem"
                       border="1px solid #d1d5db"
                       borderRadius="0.5rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                     />
                     <Box
                       position="absolute"
@@ -337,7 +337,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                       as="button"
                       onClick={() => setSelectedCategory(category)}
                       padding="0.5rem 1rem"
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       fontWeight="500"
                       backgroundColor={selectedCategory === category ? '#3182ce' : '#f3f4f6'}
                       color={selectedCategory === category ? 'white' : '#374151'}
@@ -372,7 +372,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                         size="1.25rem"
                       />
                       <Box
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         fontWeight={isSelected ? '600' : '400'}
                         color={amenity.essential ? '#f59e0b' : '#374151'}
                         flex="1"
@@ -381,7 +381,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                         {amenity.essential && (
                           <Box
                             as="span"
-                            fontSize="0.625rem"
+                            fontSize="1rem"
                             fontWeight="700"
                             color="#f59e0b"
                             backgroundColor="#fef3c7"
@@ -393,7 +393,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                           </Box>
                         )}
                       </Box>
-                      <Box fontSize="0.75rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         {amenity.category}
                       </Box>
                     </Box>
@@ -420,7 +420,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                 paddingTop="1rem"
                 borderTop="1px solid #e5e7eb"
               >
-                <Box fontSize="0.875rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   {selectedAmenities.length} selected
                 </Box>
                 <Box
@@ -431,7 +431,7 @@ const AmenitiesStep: React.FC<AmenitiesStepProps> = ({
                   color="white"
                   border="none"
                   borderRadius="0.375rem"
-                  fontSize="0.875rem"
+                  fontSize="1rem"
                   fontWeight="600"
                   cursor="pointer"
                   whileHover={{ backgroundColor: '#2563eb' }}

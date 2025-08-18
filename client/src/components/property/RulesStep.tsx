@@ -114,7 +114,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   <Box fontSize="1rem" color="#374151" fontWeight="500">
                     {data.smokingAllowed ? 'Smoking allowed' : 'No smoking'}
                   </Box>
-                  <Box fontSize="0.875rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     {data.smokingAllowed 
                       ? 'Guests are permitted to smoke in the property'
                       : 'Smoking is not allowed in the property'
@@ -156,7 +156,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
                   <Box fontSize="1rem" color="#374151" fontWeight="500">
                     {data.partiesOrEventsAllowed ? 'Parties and events allowed' : 'No parties or events'}
                   </Box>
-                  <Box fontSize="0.875rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     {data.partiesOrEventsAllowed 
                       ? 'Guests can organize parties or events at the property'
                       : 'Parties and events are not allowed at the property'
@@ -168,7 +168,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
 
             {/* Pet Policy Options */}
             <Box>
-              <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.75rem">
+              <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.75rem">
                 Pet Policy
               </Box>
               <Box display="flex" flexDirection="column" gap="0.5rem">
@@ -196,13 +196,13 @@ const RulesStep: React.FC<RulesStepProps> = ({
                       accentColor="#3182ce"
                     />
                     <Box>
-                      <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" color="#374151" fontWeight="500">
+                      <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#374151" fontWeight="500">
                         {policy === PetPolicy.Yes && <FaPaw color="#10b981" />}
                         {policy === PetPolicy.No && <FaBan color="#ef4444" />}
                         {policy === PetPolicy.UponRequest && <FaQuestionCircle color="#f59e0b" />}
                         {PetPolicyLabels[policy]}
                       </Box>
-                      <Box fontSize="0.75rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         {policy === PetPolicy.Yes && 'Guests can bring their pets (additional fees may apply)'}
                         {policy === PetPolicy.No && 'Pets are not allowed at this property'}
                         {policy === PetPolicy.UponRequest && 'Pet approval required - guests must ask permission'}
@@ -223,7 +223,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
           </Box>
           <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <Box>
-              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                 <FaSignInAlt color="#10b981" />
                 Check-in
               </Box>
@@ -250,7 +250,7 @@ const RulesStep: React.FC<RulesStepProps> = ({
             </Box>
 
             <Box>
-              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                 <FaSignOutAlt color="#ef4444" />
                 Check-out
               </Box>

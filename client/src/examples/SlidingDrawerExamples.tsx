@@ -217,7 +217,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1.125rem" fontWeight="600" color="#1a202c" marginBottom="0.5rem">
                 {item.title}
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 {item.desc}
               </Box>
             </Box>
@@ -247,7 +247,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#1e40af">
                 Navigation Menu
               </Box>
-              <Box fontSize="0.75rem" color="#3730a3">
+              <Box fontSize="1rem" color="#3730a3">
                 Left sliding menu
               </Box>
             </Box>
@@ -268,7 +268,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#065f46">
                 Property Details
               </Box>
-              <Box fontSize="0.75rem" color="#047857">
+              <Box fontSize="1rem" color="#047857">
                 Right details panel
               </Box>
             </Box>
@@ -289,7 +289,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#92400e">
                 Notifications
               </Box>
-              <Box fontSize="0.75rem" color="#b45309">
+              <Box fontSize="1rem" color="#b45309">
                 Top notification bar
               </Box>
             </Box>
@@ -310,7 +310,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#5b21b6">
                 Mobile Filters
               </Box>
-              <Box fontSize="0.75rem" color="#6d28d9">
+              <Box fontSize="1rem" color="#6d28d9">
                 Bottom sheet filters
               </Box>
             </Box>
@@ -331,7 +331,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#be185d">
                 Share Property
               </Box>
-              <Box fontSize="0.75rem" color="#db2777">
+              <Box fontSize="1rem" color="#db2777">
                 Bottom share sheet
               </Box>
             </Box>
@@ -352,7 +352,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#0e7490">
                 Property Form
               </Box>
-              <Box fontSize="0.75rem" color="#0891b2">
+              <Box fontSize="1rem" color="#0891b2">
                 Right form drawer
               </Box>
             </Box>
@@ -373,7 +373,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#15803d">
                 Quick Actions
               </Box>
-              <Box fontSize="0.75rem" color="#16a34a">
+              <Box fontSize="1rem" color="#16a34a">
                 Bottom action sheet
               </Box>
             </Box>
@@ -397,7 +397,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1rem" fontWeight="600" color="#7c3aed">
                 Multi-Drawer
               </Box>
-              <Box fontSize="0.75rem" color="#8b5cf6">
+              <Box fontSize="1rem" color="#8b5cf6">
                 Test z-index stacking
               </Box>
             </Box>
@@ -412,10 +412,10 @@ export function SlidingDrawerExamples() {
               borderRadius="0.5rem"
               textAlign="center"
             >
-              <Box fontSize="0.875rem" fontWeight="600" color="#92400e">
+              <Box fontSize="1rem" fontWeight="600" color="#92400e">
                 Active Drawers: {drawerManager.openDrawerCount}
               </Box>
-              <Box fontSize="0.75rem" color="#b45309" marginTop="0.25rem">
+              <Box fontSize="1rem" color="#b45309" marginTop="0.25rem">
                 IDs: {drawerManager.openDrawerIds.join(', ')}
               </Box>
               <Box
@@ -423,7 +423,7 @@ export function SlidingDrawerExamples() {
                 onClick={drawerManager.closeAllDrawers}
                 marginTop="0.5rem"
                 padding="0.25rem 0.75rem"
-                fontSize="0.75rem"
+                fontSize="1rem"
                 backgroundColor="#f59e0b"
                 color="white"
                 border="none"
@@ -464,7 +464,7 @@ export function SlidingDrawerExamples() {
               <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
                 Wezo.ae
               </Box>
-              <Box fontSize="0.75rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 Property Management
               </Box>
             </Box>
@@ -494,13 +494,13 @@ export function SlidingDrawerExamples() {
               >
                 <Box display="flex" alignItems="center" gap="0.75rem">
                   <Box fontSize="1.25rem">{item.icon}</Box>
-                  <Box fontSize="0.875rem" color="#374151" fontWeight="500">
+                  <Box fontSize="1rem" color="#374151" fontWeight="500">
                     {item.label}
                   </Box>
                 </Box>
                 {item.badge && (
                   <Box
-                    fontSize="0.625rem"
+                    fontSize="1rem"
                     fontWeight="700"
                     color="white"
                     backgroundColor={item.badge === 'New' ? '#f59e0b' : '#3182ce'}
@@ -531,7 +531,7 @@ export function SlidingDrawerExamples() {
               textAlign="left"
             >
               <Box fontSize="1.25rem"><FaDoorOpen /></Box>
-              <Box fontSize="0.875rem" color="#dc2626" fontWeight="500">
+              <Box fontSize="1rem" color="#dc2626" fontWeight="500">
                 Sign Out
               </Box>
             </Box>
@@ -574,26 +574,26 @@ export function SlidingDrawerExamples() {
               </Box>
               <Box display="flex" alignItems="center" gap="0.25rem">
                 <Box color="#f59e0b" fontSize="1.25rem">★★★★★</Box>
-                <Box fontSize="0.875rem" color="#6b7280">(4.9)</Box>
+                <Box fontSize="1rem" color="#6b7280">(4.9)</Box>
               </Box>
             </Box>
           </Box>
 
           <Box display="flex" flexDirection="column" gap="1.5rem">
             <Box>
-              <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="0.25rem">
                 LOCATION
               </Box>
-              <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+              <Box fontSize="1rem" fontWeight="500" color="#374151">
                 Dubai Marina, UAE
               </Box>
             </Box>
 
             <Box>
-              <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.25rem">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="0.25rem">
                 CAPACITY
               </Box>
-              <Box display="flex" gap="1rem" fontSize="0.875rem" color="#374151">
+              <Box display="flex" gap="1rem" fontSize="1rem" color="#374151">
                 <Box display="flex" alignItems="center" gap="0.25rem"><FaUserFriends /> 8 guests</Box>
                 <Box display="flex" alignItems="center" gap="0.25rem"><FaBed /> 4 bedrooms</Box>
                 <Box display="flex" alignItems="center" gap="0.25rem"><FaShower /> 3 bathrooms</Box>
@@ -601,7 +601,7 @@ export function SlidingDrawerExamples() {
             </Box>
 
             <Box>
-              <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.5rem">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="0.5rem">
                 AMENITIES
               </Box>
               <Box display="flex" flexWrap="wrap" gap="0.5rem">
@@ -612,7 +612,7 @@ export function SlidingDrawerExamples() {
                     backgroundColor="#e0f2fe"
                     color="#0891b2"
                     borderRadius="0.25rem"
-                    fontSize="0.75rem"
+                    fontSize="1rem"
                     fontWeight="500"
                   >
                     {amenity}
@@ -622,10 +622,10 @@ export function SlidingDrawerExamples() {
             </Box>
 
             <Box>
-              <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.5rem">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="0.5rem">
                 DESCRIPTION
               </Box>
-              <Box fontSize="0.875rem" color="#374151" lineHeight="1.5">
+              <Box fontSize="1rem" color="#374151" lineHeight="1.5">
                 Stunning oceanfront villa with panoramic views of Dubai Marina. 
                 Features private beach access, infinity pool, and world-class amenities. 
                 Perfect for luxury getaways and special occasions.
@@ -642,7 +642,7 @@ export function SlidingDrawerExamples() {
               color="white"
               border="none"
               borderRadius="0.5rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="600"
               cursor="pointer"
             >
@@ -709,10 +709,10 @@ export function SlidingDrawerExamples() {
                     {colors.icon}
                   </Box>
                   <Box flex="1">
-                    <Box fontSize="0.875rem" fontWeight="600" color="#1a202c" marginBottom="0.25rem">
+                    <Box fontSize="1rem" fontWeight="600" color="#1a202c" marginBottom="0.25rem">
                       {notification.title}
                     </Box>
-                    <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.5rem">
+                    <Box fontSize="1rem" color="#6b7280" marginBottom="0.5rem">
                       {notification.message}
                     </Box>
                     <Box fontSize="0.625rem" color={colors.text} fontWeight="500">
@@ -732,7 +732,7 @@ export function SlidingDrawerExamples() {
               color="white"
               border="none"
               borderRadius="0.375rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               cursor="pointer"
             >
               Mark All as Read
@@ -754,7 +754,7 @@ export function SlidingDrawerExamples() {
           <Box fontSize="1.5rem" fontWeight="bold" marginBottom="0.5rem" color="#1a202c">
             Filter Properties
           </Box>
-          <Box fontSize="0.875rem" color="#6b7280" marginBottom="2rem">
+          <Box fontSize="1rem" color="#6b7280" marginBottom="2rem">
             Find your perfect property with advanced filters
           </Box>
 
@@ -775,7 +775,7 @@ export function SlidingDrawerExamples() {
                     <Box fontSize="1.5rem">{type.icon}</Box>
                     <Box flex="1">
                       <Box fontWeight={isSelected ? '600' : '400'}>{type.name}</Box>
-                      <Box fontSize="0.75rem" color="#6b7280">{type.count} available</Box>
+                      <Box fontSize="1rem" color="#6b7280">{type.count} available</Box>
                     </Box>
                   </Box>
                 )}
@@ -803,7 +803,7 @@ export function SlidingDrawerExamples() {
                     <Box fontSize="1.25rem">{amenity.icon}</Box>
                     <Box flex="1">
                       <Box fontWeight={isSelected ? '600' : '400'}>{amenity.name}</Box>
-                      <Box fontSize="0.75rem" color="#6b7280">{amenity.category}</Box>
+                      <Box fontSize="1rem" color="#6b7280">{amenity.category}</Box>
                     </Box>
                   </Box>
                 )}
@@ -891,7 +891,7 @@ export function SlidingDrawerExamples() {
                 }}
               >
                 <Box fontSize="2rem">{option.icon}</Box>
-                <Box fontSize="0.75rem" color="#374151" fontWeight="500">
+                <Box fontSize="1rem" color="#374151" fontWeight="500">
                   {option.label}
                 </Box>
               </Box>
@@ -906,7 +906,7 @@ export function SlidingDrawerExamples() {
             alignItems="center"
             justifyContent="space-between"
           >
-            <Box fontSize="0.75rem" color="#6b7280" flex="1" marginRight="1rem">
+            <Box fontSize="1rem" color="#6b7280" flex="1" marginRight="1rem">
               https://wezo.ae/property/villa-sunrise-dubai-marina-12345
             </Box>
             <Box
@@ -916,7 +916,7 @@ export function SlidingDrawerExamples() {
               color="white"
               border="none"
               borderRadius="0.375rem"
-              fontSize="0.75rem"
+              fontSize="1rem"
               cursor="pointer"
             >
               Copy
@@ -942,7 +942,7 @@ export function SlidingDrawerExamples() {
           
           <Box as="form" display="flex" flexDirection="column" gap="1.5rem">
             <Box>
-              <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
+              <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
                 Property Name *
               </Box>
               <Box
@@ -955,12 +955,12 @@ export function SlidingDrawerExamples() {
                 padding="0.75rem"
                 border="1px solid #d1d5db"
                 borderRadius="0.5rem"
-                fontSize="0.875rem"
+                fontSize="1rem"
               />
             </Box>
             
             <Box>
-              <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
+              <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
                 Description
               </Box>
               <Box
@@ -973,14 +973,14 @@ export function SlidingDrawerExamples() {
                 padding="0.75rem"
                 border="1px solid #d1d5db"
                 borderRadius="0.5rem"
-                fontSize="0.875rem"
+                fontSize="1rem"
                 resize="vertical"
               />
             </Box>
 
             <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap="1rem">
               <Box>
-                <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
+                <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
                   Category
                 </Box>
                 <Box
@@ -991,7 +991,7 @@ export function SlidingDrawerExamples() {
                   padding="0.75rem"
                   border="1px solid #d1d5db"
                   borderRadius="0.5rem"
-                  fontSize="0.875rem"
+                  fontSize="1rem"
                 >
                   <option value="">Select category</option>
                   <option value="villa">Villa</option>
@@ -1001,7 +1001,7 @@ export function SlidingDrawerExamples() {
               </Box>
 
               <Box>
-                <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
+                <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
                   Price (AED/night)
                 </Box>
                 <Box
@@ -1014,13 +1014,13 @@ export function SlidingDrawerExamples() {
                   padding="0.75rem"
                   border="1px solid #d1d5db"
                   borderRadius="0.5rem"
-                  fontSize="0.875rem"
+                  fontSize="1rem"
                 />
               </Box>
             </Box>
 
             <Box>
-              <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
+              <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block" color="#374151">
                 Location
               </Box>
               <Box
@@ -1033,12 +1033,12 @@ export function SlidingDrawerExamples() {
                 padding="0.75rem"
                 border="1px solid #d1d5db"
                 borderRadius="0.5rem"
-                fontSize="0.875rem"
+                fontSize="1rem"
               />
             </Box>
 
             <Box>
-              <Box fontSize="0.875rem" fontWeight="500" marginBottom="1rem" color="#374151">
+              <Box fontSize="1rem" fontWeight="500" marginBottom="1rem" color="#374151">
                 Amenities
               </Box>
               <SelectionPicker
@@ -1050,7 +1050,7 @@ export function SlidingDrawerExamples() {
                 renderItem={(amenity, isSelected) => (
                   <Box display="flex" alignItems="center" gap="0.5rem">
                     <Box fontSize="1rem">{amenity.icon}</Box>
-                    <Box fontSize="0.75rem" fontWeight={isSelected ? '600' : '400'}>
+                    <Box fontSize="1rem" fontWeight={isSelected ? '600' : '400'}>
                       {amenity.name}
                     </Box>
                   </Box>
@@ -1082,7 +1082,7 @@ export function SlidingDrawerExamples() {
                 color="#374151"
                 border="none"
                 borderRadius="0.5rem"
-                fontSize="0.875rem"
+                fontSize="1rem"
                 cursor="pointer"
                 onClick={() => drawerManager.closeDrawer('property-form')}
               >
@@ -1097,7 +1097,7 @@ export function SlidingDrawerExamples() {
                 color="white"
                 border="none"
                 borderRadius="0.5rem"
-                fontSize="0.875rem"
+                fontSize="1rem"
                 cursor="pointer"
                 onClick={handleFormSubmit}
               >
@@ -1146,7 +1146,7 @@ export function SlidingDrawerExamples() {
                 }}
               >
                 <Box fontSize="2rem">{action.icon}</Box>
-                <Box fontSize="0.875rem" fontWeight="600">
+                <Box fontSize="1rem" fontWeight="600">
                   {action.label}
                 </Box>
               </Box>

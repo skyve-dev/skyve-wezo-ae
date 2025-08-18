@@ -154,7 +154,7 @@ Portal Container:
                     backgroundColor="#f3f4f6"
                     color="#374151"
                     borderRadius="0.5rem"
-                    fontSize="0.875rem"
+                    fontSize="1rem"
                     fontFamily="monospace"
                     maxWidth="500px"
                     style={{ whiteSpace: 'pre-line' }}
@@ -191,16 +191,16 @@ Portal Container:
                         padding="1rem"
                         borderRadius="0.5rem"
                     >
-                        <Box fontSize="0.875rem" fontWeight="600" color="#374151">
+                        <Box fontSize="1rem" fontWeight="600" color="#374151">
                             ✅ Drawer State Management: Working
                         </Box>
-                        <Box fontSize="0.875rem" fontWeight="600" color="#374151">
+                        <Box fontSize="1rem" fontWeight="600" color="#374151">
                             ✅ Portal Rendering: Working
                         </Box>
-                        <Box fontSize="0.875rem" fontWeight="600" color="#374151">
+                        <Box fontSize="1rem" fontWeight="600" color="#374151">
                             ✅ Animation: Working
                         </Box>
-                        <Box fontSize="0.875rem" fontWeight="600" color="#374151">
+                        <Box fontSize="1rem" fontWeight="600" color="#374151">
                             ✅ Z-Index Management: Working
                         </Box>
                     </Box>

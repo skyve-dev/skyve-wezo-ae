@@ -279,7 +279,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   Rooms and Sleeping Arrangements *
                 </Box>
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280" marginTop="0.25rem">
+              <Box fontSize="1rem" color="#6b7280" marginTop="0.25rem">
                 Add at least one room with one bed to continue
               </Box>
             </Box>
@@ -301,7 +301,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
             >
               <FaPlus size="0.875rem" />
-              <Box fontSize={'12px'} fontSizeMd={'inherit'}>
+              <Box fontSize={'1rem'} fontSizeMd={'inherit'}>
                 Add Room
               </Box>
 
@@ -326,7 +326,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 marginBottom="1.5rem"
               >
                 <Box flex="1">
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Room Type *
                   </Box>
                   <Box
@@ -354,7 +354,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                         {room.spaceName || `Select room type for Room ${roomIndex + 1}`}
                       </Box>
                     </Box>
-                    <Box color="#6b7280" fontSize="0.875rem">
+                    <Box color="#6b7280" fontSize="1rem">
                       {room.spaceName ? 'Change' : 'Select'}
                     </Box>
                   </Box>
@@ -370,7 +370,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   color="white"
                   border="none"
                   borderRadius="0.5rem"
-                  fontSize="0.875rem"
+                  fontSize="1rem"
                   fontWeight="500"
                   cursor="pointer"
                   whileHover={{ backgroundColor: '#b91c1c', transform: 'translateY(-1px)' }}
@@ -402,7 +402,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                     color="white"
                     border="none"
                     borderRadius="0.375rem"
-                    fontSize="0.875rem"
+                    fontSize="1rem"
                     fontWeight="500"
                     cursor="pointer"
                     whileHover={{ backgroundColor: '#059669', transform: 'translateY(-1px)' }}
@@ -428,7 +428,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   <Box display="flex" flexDirection="row" gap="1rem">
                     {/* Bed Type Selection */}
                     <Box flexGrow={'1'}>
-                      <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                      <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                         Bed Type *
                       </Box>
                       <Box
@@ -438,7 +438,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                         padding="0.75rem"
                         border="2px solid #e5e7eb"
                         borderRadius="0.375rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         backgroundColor={bed.typeOfBed ? "white" : "#f9fafb"}
                         cursor="pointer"
                         textAlign="left"
@@ -456,7 +456,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                             {bed.typeOfBed ? BedTypeLabels[bed.typeOfBed as BedType] : 'Select bed type'}
                           </Box>
                         </Box>
-                        <Box display={'none'} displayMd={'flex'} color="#6b7280" fontSize="0.75rem">
+                        <Box display={'none'} displayMd={'flex'} color="#6b7280" fontSize="1rem">
                           {bed.typeOfBed ? 'Change' : 'Select'}
                         </Box>
                       </Box>
@@ -520,7 +520,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
                 Select Room Type
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
                 Choose the type of room you're adding
               </Box>
               
@@ -533,7 +533,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 renderItem={(room) => (
                   <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
                     <FaDoorOpen color="#3182ce" size="1.25rem" />
-                    <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                    <Box fontSize="1rem" fontWeight="500" color="#374151">
                       {room.label}
                     </Box>
                   </Box>
@@ -568,7 +568,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
                 Select Bed Type
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+              <Box fontSize="1rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
                 Choose the type of bed for this room
               </Box>
               
@@ -581,7 +581,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 renderItem={(item) => (
                   <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
                     <FaBed color="#3182ce" size="1.25rem" />
-                    <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                    <Box fontSize="1rem" fontWeight="500" color="#374151">
                       {item.label}
                     </Box>
                   </Box>

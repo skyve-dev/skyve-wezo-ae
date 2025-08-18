@@ -65,7 +65,7 @@ function NumberStepperExample() {
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr" gap={24}>
           {/* Default Integer */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Default Integer Stepper
             </Box>
             <NumberStepperInput
@@ -80,7 +80,7 @@ function NumberStepperExample() {
           
           {/* Controlled Value */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Controlled Value (Current: {controlledValue1})
             </Box>
             <NumberStepperInput
@@ -111,7 +111,7 @@ function NumberStepperExample() {
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr" gap={24}>
           {/* USD Currency */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               USD Price Input
             </Box>
             <NumberStepperInput
@@ -131,7 +131,7 @@ function NumberStepperExample() {
           
           {/* EUR Currency with Suffix */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               EUR Price with Suffix Position
             </Box>
             <NumberStepperInput
@@ -149,7 +149,7 @@ function NumberStepperExample() {
           
           {/* Custom Currency */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               AED Currency
             </Box>
             <NumberStepperInput
@@ -166,7 +166,7 @@ function NumberStepperExample() {
           
           {/* Large Numbers with Thousands Separator */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Large Number Formatting
             </Box>
             <NumberStepperInput
@@ -199,7 +199,7 @@ function NumberStepperExample() {
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr 1fr" gap={24}>
           {/* Decimal with 1 place */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               1 Decimal Place
             </Box>
             <NumberStepperInput
@@ -215,7 +215,7 @@ function NumberStepperExample() {
           
           {/* Decimal with 3 places */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               3 Decimal Places
             </Box>
             <NumberStepperInput
@@ -230,7 +230,7 @@ function NumberStepperExample() {
           
           {/* Custom Separators */}
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               European Format (comma decimal)
             </Box>
             <NumberStepperInput
@@ -261,7 +261,7 @@ function NumberStepperExample() {
         
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr 1fr" gap={24}>
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Small Size
             </Box>
             <NumberStepperInput
@@ -273,7 +273,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Medium Size (Default)
             </Box>
             <NumberStepperInput
@@ -285,7 +285,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Large Size
             </Box>
             <NumberStepperInput
@@ -313,7 +313,7 @@ function NumberStepperExample() {
         
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr 1fr" gap={24}>
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Default Variant
             </Box>
             <NumberStepperInput
@@ -325,7 +325,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Outlined Variant
             </Box>
             <NumberStepperInput
@@ -337,7 +337,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Filled Variant
             </Box>
             <NumberStepperInput
@@ -365,7 +365,7 @@ function NumberStepperExample() {
         
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr 1fr" gap={24}>
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Step by 0.25
             </Box>
             <NumberStepperInput
@@ -380,7 +380,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Step by 10
             </Box>
             <NumberStepperInput
@@ -393,7 +393,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Step by 100
             </Box>
             <NumberStepperInput
@@ -422,7 +422,7 @@ function NumberStepperExample() {
         
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr 1fr" gap={24}>
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Disabled State
             </Box>
             <NumberStepperInput
@@ -434,7 +434,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Read-only State
             </Box>
             <NumberStepperInput
@@ -446,7 +446,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Error State
             </Box>
             <NumberStepperInput
@@ -474,7 +474,7 @@ function NumberStepperExample() {
         
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr" gap={24}>
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Percentage (0-100)
             </Box>
             <NumberStepperInput
@@ -490,7 +490,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Age Range (18-120)
             </Box>
             <NumberStepperInput
@@ -571,7 +571,7 @@ function NumberStepperExample() {
               color="white"
               border="none"
               borderRadius={6}
-              fontSize={14}
+              fontSize={16}
               fontWeight={500}
               cursor="pointer"
               whileHover={{ backgroundColor: '#2563eb' }}
@@ -580,7 +580,7 @@ function NumberStepperExample() {
             </Box>
             
             {Object.keys(formData).length > 0 && (
-              <Box fontSize={14} color="#059669">
+              <Box fontSize={16} color="#059669">
                 Submitted: Qty: {formData.quantity}, Price: ${formData.price?.toFixed(2)}, Discount: {formData.discount}%
               </Box>
             )}
@@ -602,7 +602,7 @@ function NumberStepperExample() {
         </Box>
         
         <Box backgroundColor="#f0f9ff" padding={20} borderRadius={8} border="1px solid #bfdbfe">
-          <Box as="ul" style={{ paddingLeft: '20px' }}>
+          <Box as="ul" style={{ paddingLeft: '1.25rem' }}>
             <Box as="li" marginBottom={8} color="#1e40af">
               <strong>Arrow Up/Down:</strong> Increment/decrement value when input is focused
             </Box>
@@ -640,7 +640,7 @@ function NumberStepperExample() {
         
         <Box display="grid" gridTemplateColumnsMd="1fr 1fr" gap={24}>
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Temperature (-50 to 50)
             </Box>
             <NumberStepperInput
@@ -656,7 +656,7 @@ function NumberStepperExample() {
           </Box>
           
           <Box>
-            <Box fontSize={14} fontWeight={500} color="#4a5568" marginBottom={8}>
+            <Box fontSize={16} fontWeight={500} color="#4a5568" marginBottom={8}>
               Profit/Loss
             </Box>
             <NumberStepperInput

@@ -150,7 +150,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -173,10 +173,10 @@ const LocationStep: React.FC<LocationStepProps> = ({
               isMultiSelect={false}
               renderItem={(emirate, isSelected) => (
                 <Box display="flex" flexDirection="column" gap="0.25rem" width="100%">
-                  <Box fontSize="0.875rem" fontWeight={isSelected ? '600' : '500'} color="#1a202c">
+                  <Box fontSize="1rem" fontWeight={isSelected ? '600' : '500'} color="#1a202c">
                     {emirate.name}
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     {emirate.arabicName}
                   </Box>
                 </Box>
@@ -249,7 +249,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
                         <Box fontSize="1rem" fontWeight={isSelected ? '600' : '500'} color="#1a202c">
                           {emirate.name}
                         </Box>
-                        <Box fontSize="0.875rem" color="#6b7280">
+                        <Box fontSize="1rem" color="#6b7280">
                           {emirate.arabicName}
                         </Box>
                       </Box>
@@ -279,7 +279,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
               display="flex"
               alignItems="center"
               gap="0.5rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="500"
               color="#374151"
               marginBottom="0.75rem"
@@ -310,7 +310,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
               display="flex"
               alignItems="center"
               gap="0.5rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="500"
               color="#374151"
               marginBottom="0.75rem"
@@ -342,7 +342,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -376,7 +376,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
             display="flex"
             alignItems="center"
             gap="0.5rem"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.75rem"
@@ -433,14 +433,14 @@ const LocationStep: React.FC<LocationStepProps> = ({
           <Box
             as="label"
             display="block"
-            fontSize="0.875rem"
+            fontSize="1rem"
             fontWeight="500"
             color="#374151"
             marginBottom="0.5rem"
           >
             Pin Your Exact Location (Optional)
           </Box>
-          <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.5rem">
+          <Box fontSize="1rem" color="#6b7280" marginBottom="0.5rem">
             Click on the map to set your property's exact location
           </Box>
           <Box
@@ -467,7 +467,7 @@ const LocationStep: React.FC<LocationStepProps> = ({
             </MapContainer>
           </Box>
           {data.address.latLong && (
-            <Box fontSize="0.75rem" color="#059669" marginTop="0.5rem">
+            <Box fontSize="1rem" color="#059669" marginTop="0.5rem">
               ✓ Location set: {data.address.latLong.latitude.toFixed(6)}, {data.address.latLong.longitude.toFixed(6)}
             </Box>
           )}

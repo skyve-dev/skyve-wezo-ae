@@ -113,7 +113,7 @@ The foundation of our UI is the **Box component** - a powerful, polymorphic comp
 ```typescript
 <Box
   // Mobile styles (default)
-  fontSize={14}
+  fontSize={16}
   padding={8}
   
   // Tablet (≥768px)
@@ -298,14 +298,66 @@ api.post('/api/photos/upload', formData, {
 });
 ```
 
+## 📐 CSS Unit Standards & Design System
+
+### **MANDATORY CSS Unit Rules**
+All styling properties must follow these strict guidelines:
+
+#### **📏 Font Size Rules**
+- **MINIMUM**: `fontSize: '1rem'` (16px baseline)
+- **ALLOWED VALUES**: `1rem`, `1.125rem`, `1.25rem`, `1.5rem`, `2rem`, etc.
+- **NEVER USE**: Sub-1rem values like `0.875rem`, `0.75rem`, `14px`
+
+```typescript
+// ✅ CORRECT
+<Box fontSize="1rem">Standard text</Box>
+<Box fontSize="1.25rem">Large text</Box>
+<Box fontSize="2rem">Heading text</Box>
+
+// ❌ INCORRECT  
+<Box fontSize="0.875rem">Too small</Box>
+<Box fontSize="14px">Wrong unit</Box>
+```
+
+#### **📦 Spacing Rules (padding, margin, width, height)**
+- **UNIT**: Must use `rem` units only
+- **SCALE**: Must be multiples of `0.25rem`
+- **ALLOWED VALUES**: `0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.25rem`, `1.5rem`, `2rem`, etc.
+
+```typescript
+// ✅ CORRECT
+<Box padding="1rem" margin="0.5rem" width="10rem">Content</Box>
+<Box paddingMd="1.5rem" marginLg="2rem">Responsive</Box>
+
+// ❌ INCORRECT
+<Box padding="12px" margin="8px">Wrong units</Box>
+<Box padding="0.3rem" margin="0.6rem">Not 0.25rem multiples</Box>
+```
+
+#### **🎯 Design System Scale**
+
+| **Property** | **Values** | **Examples** |
+|-------------|------------|--------------|
+| **fontSize** | `≥1rem` in any increment | `1rem`, `1.125rem`, `1.25rem`, `1.5rem`, `2rem` |
+| **Spacing** | `0.25rem` multiples | `0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.5rem`, `2rem` |
+| **Width/Height** | `0.25rem` multiples | `1rem`, `2.5rem`, `5rem`, `10rem`, `20rem` |
+
 ## ✅ Best Practices
 
-### Component Development
+### CSS & Styling
+- ✅ **ALWAYS use rem units** for all measurements
+- ✅ **fontSize minimum 1rem** for accessibility
+- ✅ **0.25rem spacing scale** for consistency
 - ✅ Use Box component for all styling needs
 - ✅ Implement responsive design from the start
 - ✅ Add motion effects for better UX
 - ✅ Use semantic HTML via `as` prop
+
+### Component Development
 - ✅ Compose complex UIs from simple components
+- ✅ Follow established rem-based patterns
+- ✅ Use TypeScript for prop validation
+- ✅ Implement proper error boundaries
 
 ### State Management
 - ✅ Use Redux for global application state

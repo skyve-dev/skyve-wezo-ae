@@ -209,7 +209,7 @@ function PropertyEditPage() {
                 <Box fontSize="1.5rem" fontWeight="600" color="#1a202c">
                   Edit {formData.name}
                 </Box>
-                <Box fontSize="0.875rem" color="#718096">
+                <Box fontSize="1rem" color="#718096">
                   {formData.address?.city}, {formData.address?.countryOrRegion}
                 </Box>
               </Box>
@@ -260,7 +260,7 @@ function PropertyEditPage() {
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Property Name
                   </Box>
                   <Box
@@ -277,7 +277,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Property Size (sqm)
                   </Box>
                   <Box
@@ -303,7 +303,7 @@ function PropertyEditPage() {
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     City
                   </Box>
                   <Box
@@ -320,7 +320,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Country/Region
                   </Box>
                   <Box
@@ -337,7 +337,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     ZIP Code
                   </Box>
                   <Box
@@ -355,7 +355,7 @@ function PropertyEditPage() {
 
                 {formData.address?.apartmentOrFloorNumber !== undefined && (
                   <Box>
-                    <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                       Apartment/Floor Number
                     </Box>
                     <Box
@@ -382,7 +382,7 @@ function PropertyEditPage() {
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     About the Property
                   </Box>
                   <Box
@@ -400,7 +400,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     About the Neighborhood
                   </Box>
                   <Box
@@ -430,7 +430,7 @@ function PropertyEditPage() {
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Maximum Guests
                   </Box>
                   <Box
@@ -448,7 +448,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Bathrooms
                   </Box>
                   <Box
@@ -472,7 +472,7 @@ function PropertyEditPage() {
                     checked={formData.allowChildren || false}
                     onChange={(e) => updateFormData({ allowChildren: e.target.checked })}
                   />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Allow children
                   </Box>
                 </Box>
@@ -484,7 +484,7 @@ function PropertyEditPage() {
                     checked={formData.offerCribs || false}
                     onChange={(e) => updateFormData({ offerCribs: e.target.checked })}
                   />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Offer cribs
                   </Box>
                 </Box>
@@ -500,7 +500,7 @@ function PropertyEditPage() {
                 
                 <Box display="flex" flexDirection="column" gap="1.5rem">
                   <Box>
-                    <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                       Currency
                     </Box>
                     <Box
@@ -522,7 +522,7 @@ function PropertyEditPage() {
                   </Box>
 
                   <Box>
-                    <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                       Rate per Night
                     </Box>
                     <Box
@@ -541,7 +541,7 @@ function PropertyEditPage() {
                   </Box>
 
                   <Box>
-                    <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                    <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                       Weekend Rate (optional)
                     </Box>
                     <Box
@@ -570,7 +570,7 @@ function PropertyEditPage() {
               
               <Box display="flex" flexDirection="column" gap="1.5rem">
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Booking Type
                   </Box>
                   <Box
@@ -592,7 +592,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Payment Type
                   </Box>
                   <Box
@@ -629,13 +629,13 @@ function PropertyEditPage() {
                     checked={formData.serveBreakfast || false}
                     onChange={(e) => updateFormData({ serveBreakfast: e.target.checked })}
                   />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Serve breakfast
                   </Box>
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Parking
                   </Box>
                   <Box
@@ -657,7 +657,7 @@ function PropertyEditPage() {
                 </Box>
 
                 <Box>
-                  <Box fontSize="0.875rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
                     Pet Policy
                   </Box>
                   <Box
@@ -685,7 +685,7 @@ function PropertyEditPage() {
                     checked={formData.smokingAllowed || false}
                     onChange={(e) => updateFormData({ smokingAllowed: e.target.checked })}
                   />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Allow smoking
                   </Box>
                 </Box>
@@ -697,7 +697,7 @@ function PropertyEditPage() {
                     checked={formData.partiesOrEventsAllowed || false}
                     onChange={(e) => updateFormData({ partiesOrEventsAllowed: e.target.checked })}
                   />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Allow parties or events
                   </Box>
                 </Box>

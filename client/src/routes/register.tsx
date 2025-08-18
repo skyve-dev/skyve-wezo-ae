@@ -49,7 +49,7 @@ function RegisterPage() {
         maxWidth={400}
         width="100%"
       >
-        <Box as="p" fontSize={12} color="#6c757d" margin={0}>
+        <Box as="p" fontSize={16} color="#6c757d" margin={0}>
           By using Wezo, you agree to our Terms of Service and Privacy Policy.
         </Box>
       </Box>

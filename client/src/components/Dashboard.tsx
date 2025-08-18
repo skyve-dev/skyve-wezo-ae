@@ -42,8 +42,8 @@ export const Dashboard: React.FC = () => {
               color: '#007bff',
               border: '1px solid #007bff',
               borderRadius: '6px',
-              padding: '8px 16px',
-              fontSize: '14px',
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
@@ -72,24 +72,24 @@ export const Dashboard: React.FC = () => {
               
               <Box display="flex" flexDirection="column" gap={8}>
                 <Box>
-                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Username</Box>
+                  <Box fontSize={16} fontWeight={500} color="#6c757d" marginBottom={2}>Username</Box>
                   <Box fontSize={16}>{user?.username}</Box>
                 </Box>
                 
                 <Box>
-                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Email</Box>
+                  <Box fontSize={16} fontWeight={500} color="#6c757d" marginBottom={2}>Email</Box>
                   <Box fontSize={16}>{user?.email}</Box>
                 </Box>
                 
                 <Box>
-                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Role</Box>
+                  <Box fontSize={16} fontWeight={500} color="#6c757d" marginBottom={2}>Role</Box>
                   <Box fontSize={16} textTransform="capitalize">
                     {user?.role?.toLowerCase() || 'Tenant'}
                   </Box>
                 </Box>
                 
                 <Box>
-                  <Box fontSize={12} fontWeight={500} color="#6c757d" marginBottom={2}>Member Since</Box>
+                  <Box fontSize={16} fontWeight={500} color="#6c757d" marginBottom={2}>Member Since</Box>
                   <Box fontSize={16}>
                     {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                   </Box>
@@ -103,8 +103,8 @@ export const Dashboard: React.FC = () => {
                     color: '#007bff',
                     border: '1px solid #007bff',
                     borderRadius: '6px',
-                    padding: '6px 12px',
-                    fontSize: '14px',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -132,8 +132,8 @@ export const Dashboard: React.FC = () => {
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
-                    padding: '12px 16px',
-                    fontSize: '16px',
+                    padding: '0.75rem 1rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'background-color 0.2s',
                   }}
@@ -148,8 +148,8 @@ export const Dashboard: React.FC = () => {
                     color: '#007bff',
                     border: '1px solid #007bff',
                     borderRadius: '6px',
-                    padding: '12px 16px',
-                    fontSize: '16px',
+                    padding: '0.75rem 1rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -164,8 +164,8 @@ export const Dashboard: React.FC = () => {
                     color: '#007bff',
                     border: '1px solid #007bff',
                     borderRadius: '6px',
-                    padding: '12px 16px',
-                    fontSize: '16px',
+                    padding: '0.75rem 1rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -179,8 +179,8 @@ export const Dashboard: React.FC = () => {
                     color: '#007bff',
                     border: '1px solid #007bff',
                     borderRadius: '6px',
-                    padding: '12px 16px',
-                    fontSize: '16px',
+                    padding: '0.75rem 1rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -194,8 +194,8 @@ export const Dashboard: React.FC = () => {
                     color: '#007bff',
                     border: '1px solid #007bff',
                     borderRadius: '6px',
-                    padding: '12px 16px',
-                    fontSize: '16px',
+                    padding: '0.75rem 1rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -227,7 +227,7 @@ export const Dashboard: React.FC = () => {
                 <Box color="#6c757d" fontSize={16} marginBottom={8}>
                   No recent activity
                 </Box>
-                <Box color="#6c757d" fontSize={14}>
+                <Box color="#6c757d" fontSize={16}>
                   Your recent bookings and property updates will appear here
                 </Box>
               </Box>
@@ -236,7 +236,7 @@ export const Dashboard: React.FC = () => {
         </Box>
 
         <Box marginTop={32} textAlign="center">
-          <Box as="p" fontSize={14} color="#6c757d" margin={0}>
+          <Box as="p" fontSize={16} color="#6c757d" margin={0}>
             Need help? Contact our support team or visit our help center.
           </Box>
         </Box>

@@ -266,7 +266,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                   <Box fontSize="1.125rem" color="#374151" fontWeight="500">
                     Drop photos here or click to browse
                   </Box>
-                  <Box fontSize="0.875rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     JPG, PNG, WebP up to 10MB each
                   </Box>
                 </>
@@ -328,7 +328,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                         padding="0.5rem"
                         border="1px solid #d1d5db"
                         borderRadius="0.375rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                         whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
                       />
                     </Box>
@@ -344,7 +344,7 @@ const PhotosStep: React.FC<PhotosStepProps> = ({
                       padding="0.5rem"
                       border="1px solid #d1d5db"
                       borderRadius="0.375rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       resize="vertical"
                       whileFocus={{ borderColor: '#3182ce', outline: 'none' }}
                     />

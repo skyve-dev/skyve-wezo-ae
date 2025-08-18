@@ -216,7 +216,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <Box
           as="label"
           display="block"
-          fontSize="0.875rem"
+          fontSize="1rem"
           fontWeight="500"
           color="#374151"
           marginBottom="0.5rem"
@@ -253,7 +253,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <Box color={selectedDate ? '#374151' : '#9ca3af'}>
           {selectedDate ? formatDisplayDate(selectedDate) : placeholder}
         </Box>
-        <Box color="#6b7280" fontSize="1.125rem">
+        <Box color="#6b7280" fontSize="1.25rem">
           <FaCalendarAlt />
         </Box>
       </Box>
@@ -289,7 +289,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </Box>
 
             <Box display="flex" alignItems="center" gap="1rem">
-              <Box fontSize="1.125rem" fontWeight="600" color="#1a202c">
+              <Box fontSize="1.25rem" fontWeight="600" color="#1a202c">
                 {MONTHS[viewDate.getMonth()]}
               </Box>
               
@@ -342,7 +342,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <Box
                   key={day}
                   textAlign="center"
-                  fontSize="0.75rem"
+                  fontSize="1rem"
                   fontWeight="600"
                   color="#6b7280"
                   padding="0.5rem"
@@ -376,7 +376,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     }
                     border={today && !selected ? '1px solid #3182ce' : 'none'}
                     borderRadius="0.375rem"
-                    fontSize="0.875rem"
+                    fontSize="1rem"
                     fontWeight={today || selected ? '600' : '400'}
                     cursor={disabled ? 'not-allowed' : 'pointer'}
                     opacity={disabled ? 0.5 : 1}
@@ -401,7 +401,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               color="#6b7280"
               border="1px solid #d1d5db"
               borderRadius="0.375rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="500"
               cursor="pointer"
               whileHover={{ backgroundColor: '#f9fafb', borderColor: '#9ca3af' }}
@@ -417,7 +417,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               color="white"
               border="none"
               borderRadius="0.375rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="500"
               cursor={selectedDate ? 'pointer' : 'not-allowed'}
               display="flex"
@@ -447,7 +447,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center" color="#1a202c">
             Select Year
           </Box>
-          <Box fontSize="0.875rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
+          <Box fontSize="1rem" color="#6b7280" marginBottom="1.5rem" textAlign="center">
             Choose a year to navigate the calendar
           </Box>
 
@@ -489,7 +489,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
           {/* Quick Year Navigation */}
           <Box marginTop="1.5rem" paddingTop="1rem" borderTop="1px solid #e5e7eb">
-            <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="1rem" textAlign="center">
+            <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="1rem" textAlign="center">
               Quick Navigation
             </Box>
             <Box display="flex" gap="0.5rem" flexWrap="wrap" justifyContent="center">
@@ -508,7 +508,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                   color={viewDate.getFullYear() === quick.year ? 'white' : '#374151'}
                   border="none"
                   borderRadius="1rem"
-                  fontSize="0.75rem"
+                  fontSize="1rem"
                   fontWeight="500"
                   cursor="pointer"
                   whileHover={{

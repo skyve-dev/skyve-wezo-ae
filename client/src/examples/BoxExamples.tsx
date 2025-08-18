@@ -92,7 +92,7 @@ export function BoxExamples() {
                 border={activeTab === tab.id ? 'none' : '1px solid #d1d5db'}
                 borderRadius="0.5rem"
                 cursor="pointer"
-                fontSize="0.875rem"
+                fontSize="1rem"
                 fontWeight="500"
                 display="flex"
                 alignItems="center"
@@ -158,14 +158,14 @@ export function BoxExamples() {
                         <Box fontSize="1.125rem" fontWeight="600" marginBottom="0.5rem">
                           Villa Sunset {i + 1}
                         </Box>
-                        <Box fontSize="0.875rem" color="#6b7280" marginBottom="1rem">
+                        <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                           Dubai Marina, UAE
                         </Box>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
                           <Box fontSize="1.25rem" fontWeight="bold" color="#059669">
                             AED {(1200 + i * 200)}/night
                           </Box>
-                          <Box fontSize="0.875rem" color="#f59e0b">
+                          <Box fontSize="1rem" color="#f59e0b">
                             ★ 4.{8 + i}
                           </Box>
                         </Box>
@@ -213,7 +213,7 @@ export function BoxExamples() {
                         color="white"
                         padding="0.25rem 0.75rem"
                         borderRadius="1rem"
-                        fontSize="0.75rem"
+                        fontSize="1rem"
                         fontWeight="600"
                       >
                         {['Villa', 'Apartment', 'Townhouse', 'Penthouse', 'House', 'Castle'][i]}
@@ -222,7 +222,7 @@ export function BoxExamples() {
                         <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                           Property {i + 1}
                         </Box>
-                        <Box fontSize="0.75rem" color="#6b7280">
+                        <Box fontSize="1rem" color="#6b7280">
                           Location {i + 1}
                         </Box>
                       </Box>
@@ -255,14 +255,14 @@ export function BoxExamples() {
                   >
                     <Box>
                       <Box fontSize="1.25rem" fontWeight="bold">Dashboard Header</Box>
-                      <Box fontSize="0.875rem" color="#6b7280">Welcome back to your property management</Box>
+                      <Box fontSize="1rem" color="#6b7280">Welcome back to your property management</Box>
                     </Box>
                     <Box 
                       padding="0.75rem 1.5rem"
                       backgroundColor="#3182ce"
                       color="white"
                       borderRadius="0.5rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       fontWeight="600"
                     >
                       Add Property
@@ -286,7 +286,7 @@ export function BoxExamples() {
                           borderLeft={`4px solid ${colorPalette[i].color}`}
                         >
                           <Box fontWeight="500">Item {i + 1}</Box>
-                          <Box fontSize="0.75rem" color="#6b7280">Content description</Box>
+                          <Box fontSize="1rem" color="#6b7280">Content description</Box>
                         </Box>
                       ))}
                     </Box>
@@ -306,7 +306,7 @@ export function BoxExamples() {
                           padding="0.5rem"
                           backgroundColor="#f3f4f6"
                           borderRadius="0.375rem"
-                          fontSize="0.875rem"
+                          fontSize="1rem"
                         >
                           {item}
                         </Box>
@@ -349,7 +349,7 @@ export function BoxExamples() {
                       <Box fontSize="1.125rem" fontWeight="bold" marginBottom="0.5rem">
                         {item.name}
                       </Box>
-                      <Box fontSize="0.875rem" opacity={0.9}>
+                      <Box fontSize="1rem" opacity={0.9}>
                         {item.color}
                       </Box>
                     </Box>
@@ -375,7 +375,7 @@ export function BoxExamples() {
                       <Box fontSize="1.125rem" fontWeight="600" marginBottom="0.5rem">
                         {shadow.name} Shadow
                       </Box>
-                      <Box fontSize="0.75rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         Depth level {i + 1}
                       </Box>
                     </Box>
@@ -480,7 +480,7 @@ export function BoxExamples() {
                       color={button.color}
                       border={button.border || 'none'}
                       borderRadius="0.5rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       fontWeight="600"
                       cursor="pointer"
                       whileHover={{
@@ -551,13 +551,13 @@ export function BoxExamples() {
                             <Box fontSize="1.125rem" fontWeight="600" marginBottom="0.25rem">
                               Luxury Villa {i + 1}
                             </Box>
-                            <Box fontSize="0.875rem" color="#6b7280">
+                            <Box fontSize="1rem" color="#6b7280">
                               Dubai Marina, UAE
                             </Box>
                           </Box>
                           <Box textAlign="right">
-                            <Box fontSize="0.875rem" color="#f59e0b">★ 4.9</Box>
-                            <Box fontSize="0.75rem" color="#6b7280">(127 reviews)</Box>
+                            <Box fontSize="1rem" color="#f59e0b">★ 4.9</Box>
+                            <Box fontSize="1rem" color="#6b7280">(127 reviews)</Box>
                           </Box>
                         </Box>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -569,7 +569,7 @@ export function BoxExamples() {
                             backgroundColor="#3182ce"
                             color="white"
                             borderRadius="0.375rem"
-                            fontSize="0.875rem"
+                            fontSize="1rem"
                             fontWeight="600"
                             opacity={hoverStates[`card-${i}`] ? 1 : 0.8}
                           >
@@ -604,7 +604,7 @@ export function BoxExamples() {
                       alignItems="center"
                       justifyContent="space-between"
                     >
-                      <Box fontSize="0.875rem" fontWeight="500">
+                      <Box fontSize="1rem" fontWeight="500">
                         {toggle.label}
                       </Box>
                       <Box
@@ -685,10 +685,10 @@ export function BoxExamples() {
                       >
                         <FaHome />
                       </Box>
-                      <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.25rem">
+                      <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                         Property {i + 1}
                       </Box>
-                      <Box fontSize="0.75rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         Responsive Item
                       </Box>
                     </Box>
@@ -723,7 +723,7 @@ export function BoxExamples() {
                     display={'flex'}
                     alignItems="center"
                     gap="2rem"
-                    fontSize="0.875rem"
+                    fontSize="1rem"
                   >
                     {['Properties', 'Bookings', 'Analytics', 'Settings'].map((item) => (
                       <Box key={item} color="#6b7280" cursor="pointer" whileHover={{ color: '#3182ce' }}>
@@ -745,7 +745,7 @@ export function BoxExamples() {
                       backgroundColor="#3182ce"
                       color="white"
                       borderRadius="0.375rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       fontWeight="600"
                       cursor="pointer"
                     >
@@ -775,7 +775,7 @@ export function BoxExamples() {
                     <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem">
                       Main Content Area
                     </Box>
-                    <Box fontSize="0.875rem" color="#6b7280" lineHeight="1.6">
+                    <Box fontSize="1rem" color="#6b7280" lineHeight="1.6">
                       This is the main content area that takes up more space on larger screens
                       but stacks vertically on mobile devices. The responsive design ensures
                       optimal viewing experience across all device sizes.
@@ -799,7 +799,7 @@ export function BoxExamples() {
                           padding="0.75rem"
                           backgroundColor="#f9fafb"
                           borderRadius="0.5rem"
-                          fontSize="0.75rem"
+                          fontSize="1rem"
                           color="#6b7280"
                         >
                           {item}
@@ -859,7 +859,7 @@ export function BoxExamples() {
                       <Box fontSize="1rem" fontWeight="600" marginBottom="0.25rem">
                         {['Scale', 'Rotate Y', 'Translate', 'Skew', 'Rotate Z', 'Combined'][i]}
                       </Box>
-                      <Box fontSize="0.75rem" opacity={0.8}>
+                      <Box fontSize="1rem" opacity={0.8}>
                         Hover me!
                       </Box>
                     </Box>
@@ -893,7 +893,7 @@ export function BoxExamples() {
                         animation: 'spin 1s linear infinite'
                       }}
                     />
-                    <Box fontSize="0.875rem" color="#6b7280">Loading...</Box>
+                    <Box fontSize="1rem" color="#6b7280">Loading...</Box>
                   </Box>
 
                   {/* Progress Bar */}
@@ -903,7 +903,7 @@ export function BoxExamples() {
                     padding="2rem"
                     boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
                   >
-                    <Box fontSize="0.875rem" marginBottom="1rem" color="#374151">
+                    <Box fontSize="1rem" marginBottom="1rem" color="#374151">
                       Upload Progress: 67%
                     </Box>
                     <Box
@@ -948,7 +948,7 @@ export function BoxExamples() {
                     >
                       <FaBell />
                     </Box>
-                    <Box fontSize="0.875rem" color="#6b7280">Notification</Box>
+                    <Box fontSize="1rem" color="#6b7280">Notification</Box>
                   </Box>
                 </Box>
               </Box>
@@ -1027,7 +1027,7 @@ export function BoxExamples() {
                 <Box display="flex" flexDirection="column" gap="1.5rem">
                   {/* Text Input */}
                   <Box>
-                    <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block">
+                    <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
                       Property Name *
                     </Box>
                     <Box
@@ -1038,7 +1038,7 @@ export function BoxExamples() {
                       padding="0.75rem"
                       border="2px solid #e5e7eb"
                       borderRadius="0.5rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       whileFocus={{
                         borderColor: '#3182ce',
                         outline: 'none',
@@ -1049,7 +1049,7 @@ export function BoxExamples() {
 
                   {/* Select */}
                   <Box>
-                    <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block">
+                    <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
                       Property Type *
                     </Box>
                     <Box
@@ -1058,7 +1058,7 @@ export function BoxExamples() {
                       padding="0.75rem"
                       border="2px solid #e5e7eb"
                       borderRadius="0.5rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       backgroundColor="white"
                     >
                       <option>Select property type</option>
@@ -1072,7 +1072,7 @@ export function BoxExamples() {
                   {/* Grid Layout for Numbers */}
                   <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap="1rem">
                     <Box>
-                      <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block">
+                      <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
                         Bedrooms
                       </Box>
                       <Box
@@ -1083,11 +1083,11 @@ export function BoxExamples() {
                         padding="0.75rem"
                         border="2px solid #e5e7eb"
                         borderRadius="0.5rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                       />
                     </Box>
                     <Box>
-                      <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block">
+                      <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
                         Bathrooms
                       </Box>
                       <Box
@@ -1098,14 +1098,14 @@ export function BoxExamples() {
                         padding="0.75rem"
                         border="2px solid #e5e7eb"
                         borderRadius="0.5rem"
-                        fontSize="0.875rem"
+                        fontSize="1rem"
                       />
                     </Box>
                   </Box>
 
                   {/* Textarea */}
                   <Box>
-                    <Box as="label" fontSize="0.875rem" fontWeight="500" marginBottom="0.5rem" display="block">
+                    <Box as="label" fontSize="1rem" fontWeight="500" marginBottom="0.5rem" display="block">
                       Description
                     </Box>
                     <Box
@@ -1116,21 +1116,21 @@ export function BoxExamples() {
                       padding="0.75rem"
                       border="2px solid #e5e7eb"
                       borderRadius="0.5rem"
-                      fontSize="0.875rem"
+                      fontSize="1rem"
                       resize="vertical"
                     />
                   </Box>
 
                   {/* Checkbox Group */}
                   <Box>
-                    <Box fontSize="0.875rem" fontWeight="500" marginBottom="1rem">
+                    <Box fontSize="1rem" fontWeight="500" marginBottom="1rem">
                       Amenities
                     </Box>
                     <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap="0.75rem">
                       {['WiFi', 'Pool', 'Gym', 'Parking', 'Kitchen', 'Balcony'].map((amenity) => (
                         <Box key={amenity} display="flex" alignItems="center" gap="0.5rem">
                           <Box as="input" type="checkbox" />
-                          <Box fontSize="0.875rem">{amenity}</Box>
+                          <Box fontSize="1rem">{amenity}</Box>
                         </Box>
                       ))}
                     </Box>
@@ -1138,7 +1138,7 @@ export function BoxExamples() {
 
                   {/* Radio Group */}
                   <Box>
-                    <Box fontSize="0.875rem" fontWeight="500" marginBottom="1rem">
+                    <Box fontSize="1rem" fontWeight="500" marginBottom="1rem">
                       Booking Type
                     </Box>
                     <Box display="flex" flexDirection="column" gap="0.75rem">
@@ -1157,8 +1157,8 @@ export function BoxExamples() {
                           <Box display="flex" alignItems="center" gap="0.75rem">
                             <Box as="input" type="radio" name="bookingType" value={option.value} />
                             <Box>
-                              <Box fontSize="0.875rem" fontWeight="500">{option.label}</Box>
-                              <Box fontSize="0.75rem" color="#6b7280">{option.desc}</Box>
+                              <Box fontSize="1rem" fontWeight="500">{option.label}</Box>
+                              <Box fontSize="1rem" color="#6b7280">{option.desc}</Box>
                             </Box>
                           </Box>
                         </Box>

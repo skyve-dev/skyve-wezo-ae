@@ -179,7 +179,7 @@ export function SelectionPickerExamples() {
                 <Box fontWeight="600" color="#374151" marginBottom="0.25rem">
                   {item.title}
                 </Box>
-                <Box fontSize="0.875rem" color="#6b7280">
+                <Box fontSize="1rem" color="#6b7280">
                   {item.description}
                 </Box>
               </Box>
@@ -197,7 +197,7 @@ export function SelectionPickerExamples() {
               <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                 Select a property owner or manager from the user database. Features custom rendering with avatars, roles, and departments.
               </Box>
-              <Box fontSize="0.875rem" color="#059669" fontWeight="500">
+              <Box fontSize="1rem" color="#059669" fontWeight="500">
                 Selected: {selectedUserId ? users.find(u => u.id === selectedUserId)?.name : 'None'}
               </Box>
             </Box>
@@ -217,13 +217,13 @@ export function SelectionPickerExamples() {
                         <Box fontWeight={isSelected ? '700' : '500'} color="#1a202c" fontSize="1rem">
                           {user.name}
                         </Box>
-                        <Box fontSize="0.875rem" color="#6b7280">
+                        <Box fontSize="1rem" color="#6b7280">
                           {user.email}
                         </Box>
                       </Box>
                       <Box textAlign="right">
                         <Box 
-                          fontSize="0.75rem" 
+                          fontSize="1rem" 
                           fontWeight="600" 
                           color={user.role === 'Admin' ? '#dc2626' : user.role === 'Property Owner' ? '#059669' : '#3182ce'}
                           backgroundColor={user.role === 'Admin' ? '#fee2e2' : user.role === 'Property Owner' ? '#dcfce7' : '#dbeafe'}
@@ -233,7 +233,7 @@ export function SelectionPickerExamples() {
                         >
                           {user.role}
                         </Box>
-                        <Box fontSize="0.75rem" color="#9ca3af">
+                        <Box fontSize="1rem" color="#9ca3af">
                           {user.department}
                         </Box>
                       </Box>
@@ -257,7 +257,7 @@ export function SelectionPickerExamples() {
               <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                 Choose multiple property categories to showcase. Includes disabled items and count information.
               </Box>
-              <Box fontSize="0.875rem" color="#059669" fontWeight="500">
+              <Box fontSize="1rem" color="#059669" fontWeight="500">
                 Selected: {selectedCategories.length} categories
                 {selectedCategories.length > 0 && (
                   <Box as="span" color="#6b7280" fontWeight="400">
@@ -287,12 +287,12 @@ export function SelectionPickerExamples() {
                         >
                           {category.label}
                           {category.disabled && (
-                            <Box as="span" color="#f59e0b" fontSize="0.75rem" marginLeft="0.5rem">
+                            <Box as="span" color="#f59e0b" fontSize="1rem" marginLeft="0.5rem">
                               (Coming Soon)
                             </Box>
                           )}
                         </Box>
-                        <Box fontSize="0.875rem" color="#6b7280">
+                        <Box fontSize="1rem" color="#6b7280">
                           {category.description}
                         </Box>
                       </Box>
@@ -300,7 +300,7 @@ export function SelectionPickerExamples() {
                         <Box fontSize="1.25rem" fontWeight="700" color="#059669">
                           {category.count}
                         </Box>
-                        <Box fontSize="0.75rem" color="#6b7280">
+                        <Box fontSize="1rem" color="#6b7280">
                           properties
                         </Box>
                       </Box>
@@ -328,7 +328,7 @@ export function SelectionPickerExamples() {
               <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                 Select property amenities and features. Essential features are pre-selected and highlighted differently.
               </Box>
-              <Box display="flex" gap="2rem" fontSize="0.875rem">
+              <Box display="flex" gap="2rem" fontSize="1rem">
                 <Box color="#059669" fontWeight="500">
                   Selected: {selectedFeatures.length} features
                 </Box>
@@ -357,7 +357,7 @@ export function SelectionPickerExamples() {
                       position="absolute"
                       top="-0.25rem"
                       right="-0.25rem"
-                      fontSize="0.625rem"
+                      fontSize="1rem"
                       fontWeight="700"
                       color="#f59e0b"
                       backgroundColor="#fef3c7"
@@ -405,7 +405,7 @@ export function SelectionPickerExamples() {
               <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                 Choose a subscription plan for property management. Popular plan is highlighted with special styling.
               </Box>
-              <Box fontSize="0.875rem" color="#059669" fontWeight="500">
+              <Box fontSize="1rem" color="#059669" fontWeight="500">
                 Selected: {selectedPlan ? plans.find(p => p.id === selectedPlan)?.name : 'None'}
               </Box>
             </Box>
@@ -424,7 +424,7 @@ export function SelectionPickerExamples() {
                       top="-0.5rem"
                       left="50%"
                       transform="translateX(-50%)"
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       fontWeight="700"
                       color="white"
                       backgroundColor="#3182ce"
@@ -449,7 +449,7 @@ export function SelectionPickerExamples() {
                           display="flex"
                           alignItems="center"
                           gap="0.5rem"
-                          fontSize="0.875rem"
+                          fontSize="1rem"
                           color="#374151"
                         >
                           <Box color="#10b981"><FaCheck /></Box>
@@ -506,7 +506,7 @@ export function SelectionPickerExamples() {
                       <Box fontWeight={isSelected ? '600' : '400'} color="#1a202c" marginBottom="0.25rem">
                         {option.label}
                       </Box>
-                      <Box fontSize="0.75rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         {option.description}
                       </Box>
                     </Box>
@@ -530,7 +530,7 @@ export function SelectionPickerExamples() {
                       <Box fontWeight={isSelected ? '600' : '400'} color="#1a202c" marginBottom="0.25rem">
                         {option.label}
                       </Box>
-                      <Box fontSize="0.75rem" color="#6b7280">
+                      <Box fontSize="1rem" color="#6b7280">
                         {option.description}
                       </Box>
                     </Box>
@@ -549,7 +549,7 @@ export function SelectionPickerExamples() {
               <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                 Assign multiple team members to a property management task with role-based styling.
               </Box>
-              <Box fontSize="0.875rem" color="#059669" fontWeight="500">
+              <Box fontSize="1rem" color="#059669" fontWeight="500">
                 Assigned: {selectedUsers.length} team members
               </Box>
             </Box>
@@ -567,7 +567,7 @@ export function SelectionPickerExamples() {
                     <Box fontWeight={isSelected ? '600' : '400'} color="#1a202c">
                       {user.name}
                     </Box>
-                    <Box fontSize="0.75rem" color="#6b7280">
+                    <Box fontSize="1rem" color="#6b7280">
                       {user.role} • {user.department}
                     </Box>
                   </Box>
@@ -581,7 +581,7 @@ export function SelectionPickerExamples() {
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
-                      fontSize="0.75rem"
+                      fontSize="1rem"
                       fontWeight="700"
                     >
                       <FaCheck />
@@ -607,7 +607,7 @@ export function SelectionPickerExamples() {
                 <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
                   Single Selections
                 </Box>
-                <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="0.875rem" color="#6b7280">
+                <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="1rem" color="#6b7280">
                   <Box>
                     <Box as="span" fontWeight="500">User:</Box> {selectedUserId ? users.find(u => u.id === selectedUserId)?.name : 'None'}
                   </Box>
@@ -626,7 +626,7 @@ export function SelectionPickerExamples() {
                 <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
                   Multiple Selections
                 </Box>
-                <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="0.875rem" color="#6b7280">
+                <Box display="flex" flexDirection="column" gap="0.5rem" fontSize="1rem" color="#6b7280">
                   <Box>
                     <Box as="span" fontWeight="500">Categories:</Box> {selectedCategories.length} selected
                   </Box>

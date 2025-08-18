@@ -51,7 +51,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <FaHome color="#3182ce" />
             Basic Information
           </Box>
-          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="1rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Property Name:</Box>
               <Box fontWeight="500" color="#374151">{data.name}</Box>
@@ -79,7 +79,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <FaMapMarkerAlt color="#3182ce" />
             Location
           </Box>
-          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="1rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">City:</Box>
               <Box fontWeight="500" color="#374151">{data.address.city}</Box>
@@ -115,7 +115,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <FaRulerCombined color="#3182ce" />
             Layout
           </Box>
-          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="1rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Maximum Guests:</Box>
               <Box fontWeight="500" color="#374151">{data.maximumGuest}</Box>
@@ -152,7 +152,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             </Box>
             <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumnsMd="1fr 1fr 1fr" gap="0.5rem">
               {data.amenities.map((amenity, index) => (
-                <Box key={index} fontSize="0.875rem" color="#374151">
+                <Box key={index} fontSize="1rem" color="#374151">
                   • {amenity.name}
                 </Box>
               ))}
@@ -196,7 +196,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <FaConciergeBell color="#3182ce" />
             Services
           </Box>
-          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="1rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Breakfast:</Box>
               <Box fontWeight="500" color="#374151">{data.serveBreakfast ? 'Available' : 'Not available'}</Box>
@@ -222,7 +222,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             <FaClipboardList color="#3182ce" />
             House Rules
           </Box>
-          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+          <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="1rem">
             <Box display="flex" justifyContent="space-between">
               <Box color="#6b7280">Smoking:</Box>
               <Box fontWeight="500" color="#374151">{data.smokingAllowed ? 'Allowed' : 'Not allowed'}</Box>
@@ -255,7 +255,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               <FaDollarSign color="#3182ce" />
               Pricing
             </Box>
-            <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="0.875rem">
+            <Box display="flex" flexDirection="column" gap="0.75rem" fontSize="1rem">
               <Box display="flex" justifyContent="space-between">
                 <Box color="#6b7280">Base Rate:</Box>
                 <Box fontWeight="500" color="#374151">{data.pricing.currency} {data.pricing.ratePerNight}/night</Box>

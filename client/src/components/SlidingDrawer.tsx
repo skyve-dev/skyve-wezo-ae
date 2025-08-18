@@ -117,12 +117,12 @@ interface SlidingDrawerProps {
   side: 'left' | 'right' | 'top' | 'bottom'
   
   /**
-   * Optional width for left/right drawers (default: '400px' for left/right, '100%' for top/bottom)
+   * Optional width for left/right drawers (default: '25rem' for left/right, '100%' for top/bottom)
    */
   width?: string
   
   /**
-   * Optional height for top/bottom drawers (default: '100%' for left/right, '400px' for top/bottom)
+   * Optional height for top/bottom drawers (default: '100%' for left/right, '25rem' for top/bottom)
    */
   height?: string
   
@@ -216,8 +216,8 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
   const getDrawerDimensions = () => {
     const isHorizontal = side === 'left' || side === 'right'
     return {
-      width: width || (isHorizontal ? '400px' : '100%'),
-      height: height || (isHorizontal ? '100%' : '400px')
+      width: width || (isHorizontal ? '25rem' : '100%'),
+      height: height || (isHorizontal ? '100%' : '25rem')
     }
   }
   

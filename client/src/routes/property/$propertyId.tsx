@@ -193,7 +193,7 @@ function PropertyDetailsPage() {
                 <Box fontSize="1.5rem" fontWeight="600" color="#1a202c">
                   {property.name}
                 </Box>
-                <Box fontSize="0.875rem" color="#718096">
+                <Box fontSize="1rem" color="#718096">
                   {property.address.city}, {property.address.countryOrRegion}
                 </Box>
               </Box>
@@ -294,7 +294,7 @@ function PropertyDetailsPage() {
                           color="white"
                           padding="0.25rem 0.75rem"
                           borderRadius="1rem"
-                          fontSize="0.875rem"
+                          fontSize="1rem"
                         >
                           {currentImageIndex + 1} / {property.photos.length}
                         </Box>
@@ -389,7 +389,7 @@ function PropertyDetailsPage() {
                       borderRadius="0.375rem"
                     >
                       <FaCheckCircle color="#10b981" size="1rem" />
-                      <Box fontSize="0.875rem" color="#374151">
+                      <Box fontSize="1rem" color="#374151">
                         {amenity.name}
                       </Box>
                     </Box>
@@ -411,7 +411,7 @@ function PropertyDetailsPage() {
                   ) : (
                     <FaSmokingBan color="#ef4444" size="1rem" />
                   )}
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Smoking {property.smokingAllowed ? 'allowed' : 'not allowed'}
                   </Box>
                 </Box>
@@ -421,7 +421,7 @@ function PropertyDetailsPage() {
                   ) : (
                     <FaBan color="#ef4444" size="1rem" />
                   )}
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Parties or events {property.partiesOrEventsAllowed ? 'allowed' : 'not allowed'}
                   </Box>
                 </Box>
@@ -433,7 +433,7 @@ function PropertyDetailsPage() {
                   ) : (
                     <FaQuestionCircle color="#f59e0b" size="1rem" />
                   )}
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Pets: {property.petsAllowed === 'Yes' ? 'Allowed' : property.petsAllowed === 'No' ? 'Not allowed' : 'Upon request'}
                   </Box>
                 </Box>
@@ -541,7 +541,7 @@ function PropertyDetailsPage() {
                         <FaTag color="#dc2626" size="0.875rem" />
                         Weekly discount
                       </Box>
-                      <Box fontSize="0.875rem" fontWeight="500" color="#dc2626">
+                      <Box fontSize="1rem" fontWeight="500" color="#dc2626">
                         -{property.pricing.discountPercentageForWeeklyRatePlan}%
                       </Box>
                     </Box>
@@ -565,7 +565,7 @@ function PropertyDetailsPage() {
                     <FaTimesCircle color="#ef4444" size="1rem" />
                   )}
                   <FaUtensils color="#3182ce" size="0.875rem" />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Breakfast {property.serveBreakfast ? 'included' : 'not included'}
                   </Box>
                 </Box>
@@ -578,7 +578,7 @@ function PropertyDetailsPage() {
                     <FaTimesCircle color="#ef4444" size="1rem" />
                   )}
                   <FaCar color="#3182ce" size="0.875rem" />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     Parking: {property.parking === 'YesFree' ? 'Free' : property.parking === 'YesPaid' ? 'Paid' : 'Not available'}
                   </Box>
                 </Box>
@@ -586,7 +586,7 @@ function PropertyDetailsPage() {
                   <Box display="flex" alignItems="center" gap="0.75rem">
                     <FaCheckCircle color="#10b981" size="1rem" />
                     <FaGlobe color="#3182ce" size="0.875rem" />
-                    <Box fontSize="0.875rem" color="#374151">
+                    <Box fontSize="1rem" color="#374151">
                       Languages: {property.languages.join(', ')}
                     </Box>
                   </Box>
@@ -602,7 +602,7 @@ function PropertyDetailsPage() {
               </Box>
               
               <Box display="flex" flexDirection="column" gap="0.5rem">
-                <Box fontSize="0.875rem" color="#374151">
+                <Box fontSize="1rem" color="#374151">
                   {property.address.apartmentOrFloorNumber && (
                     <Box>{property.address.apartmentOrFloorNumber}</Box>
                   )}

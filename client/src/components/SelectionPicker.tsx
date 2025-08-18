@@ -174,7 +174,7 @@ function SelectionPicker<T>({
               <Box
                 as="span"
                 color="white"
-                fontSize="0.75rem"
+                fontSize="1rem"
                 fontWeight="bold"
               >
                 ✓

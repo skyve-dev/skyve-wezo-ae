@@ -96,7 +96,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                 <FaUtensils color={data.serveBreakfast ? "#10b981" : "#6b7280"} />
                 Serve breakfast
               </Box>
-              <Box fontSize="0.875rem" color="#6b7280">
+              <Box fontSize="1rem" color="#6b7280">
                 Provide breakfast for guests (additional charges may apply)
               </Box>
             </Box>
@@ -134,13 +134,13 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                   accentColor="#3182ce"
                 />
                 <Box>
-                  <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" color="#374151" fontWeight="500">
+                  <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#374151" fontWeight="500">
                     {parkingType === ParkingType.YesFree && <FaCheckCircle color="#10b981" />}
                     {parkingType === ParkingType.YesPaid && <FaMoneyBillWave color="#f59e0b" />}
                     {parkingType === ParkingType.No && <FaBan color="#ef4444" />}
                     {ParkingTypeLabels[parkingType]}
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     {parkingType === ParkingType.YesFree && 'Guests can park their vehicle free of charge'}
                     {parkingType === ParkingType.YesPaid && 'Paid parking is available for guests'}
                     {parkingType === ParkingType.No && 'No parking is available at the property'}
@@ -157,7 +157,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
             <FaLanguage color="#3182ce" />
             Languages You Speak
           </Box>
-          <Box fontSize="0.75rem" color="#6b7280" marginBottom="1rem">
+          <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
             Select all languages you can communicate with guests in
           </Box>
           <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumnsMd="1fr 1fr 1fr" gap="0.75rem">
@@ -185,7 +185,7 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                     onChange={() => toggleLanguage(language)}
                     accentColor="#3182ce"
                   />
-                  <Box fontSize="0.875rem" color="#374151">
+                  <Box fontSize="1rem" color="#374151">
                     {language}
                   </Box>
                 </Box>

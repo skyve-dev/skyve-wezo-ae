@@ -62,7 +62,7 @@ function ExamplesLayout() {
                 </Box>
               </Link>
               
-              <Box fontSize="0.875rem" color="#6b7280" display={'block'}>
+              <Box fontSize="1rem" color="#6b7280" display={'block'}>
                 Interactive component showcase
               </Box>
             </Box>
@@ -86,7 +86,7 @@ function ExamplesLayout() {
                       gap: '0.5rem',
                       padding: '0.5rem 1rem',
                       borderRadius: '0.5rem',
-                      fontSize: '0.875rem',
+                      fontSize: '1rem',
                       fontWeight: '500',
                       textDecoration: 'none',
                       backgroundColor: isActive ? '#3182ce' : 'transparent',

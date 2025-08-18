@@ -91,7 +91,7 @@ export function TimePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">12-Hour Format</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">With AM/PM selector</Box>
+                  <Box fontSize="1rem" color="#6b7280">With AM/PM selector</Box>
                 </Box>
               </Box>
               
@@ -105,11 +105,11 @@ export function TimePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#fef3c7" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#92400e">
+                <Box fontSize="1rem" color="#92400e">
                   <Box fontWeight="600">Selected:</Box>
                   {formatDisplayTime(meetingTime, true)}
                   {meetingTime && (
-                    <Box fontSize="0.75rem" marginTop="0.25rem">
+                    <Box fontSize="1rem" marginTop="0.25rem">
                       {getTimeOfDay(meetingTime)} time
                     </Box>
                   )}
@@ -124,7 +124,7 @@ export function TimePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">24-Hour Format</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">Military time format</Box>
+                  <Box fontSize="1rem" color="#6b7280">Military time format</Box>
                 </Box>
               </Box>
               
@@ -138,11 +138,11 @@ export function TimePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#ede9fe" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#5b21b6">
+                <Box fontSize="1rem" color="#5b21b6">
                   <Box fontWeight="600">Selected:</Box>
                   {formatDisplayTime(alarmTime, false)}
                   {alarmTime && (
-                    <Box fontSize="0.75rem" marginTop="0.25rem">
+                    <Box fontSize="1rem" marginTop="0.25rem">
                       {getTimeOfDay(alarmTime)} time
                     </Box>
                   )}
@@ -219,24 +219,24 @@ export function TimePickerExamples() {
               
               <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap="1rem">
                 <Box textAlign="center" padding="1rem" backgroundColor="white" borderRadius="0.5rem">
-                  <Box fontSize="0.875rem" fontWeight="500" color="#6b7280">Guests can check-in</Box>
+                  <Box fontSize="1rem" fontWeight="500" color="#6b7280">Guests can check-in</Box>
                   <Box fontSize="1.25rem" fontWeight="700" color="#3182ce">
                     {formatDisplayTime(checkInTime || defaultCheckIn.toISOString())}
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">onwards</Box>
+                  <Box fontSize="1rem" color="#6b7280">onwards</Box>
                 </Box>
                 
                 <Box textAlign="center" padding="1rem" backgroundColor="white" borderRadius="0.5rem">
-                  <Box fontSize="0.875rem" fontWeight="500" color="#6b7280">Guests must check-out by</Box>
+                  <Box fontSize="1rem" fontWeight="500" color="#6b7280">Guests must check-out by</Box>
                   <Box fontSize="1.25rem" fontWeight="700" color="#dc2626">
                     {formatDisplayTime(checkOutTime || defaultCheckOut.toISOString())}
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">latest</Box>
+                  <Box fontSize="1rem" color="#6b7280">latest</Box>
                 </Box>
               </Box>
 
               <Box marginTop="1rem" padding="1rem" backgroundColor="#dcfce7" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#166534">
+                <Box fontSize="1rem" color="#166534">
                   <Box fontWeight="600">💡 Tip:</Box>
                   Standard check-in is 3:00 PM and check-out is 11:00 AM to allow cleaning time between guests.
                 </Box>
@@ -266,7 +266,7 @@ export function TimePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">Dinner Reservation</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">15-minute intervals</Box>
+                  <Box fontSize="1rem" color="#6b7280">15-minute intervals</Box>
                 </Box>
               </Box>
               
@@ -280,7 +280,7 @@ export function TimePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#fef2f2" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#991b1b">
+                <Box fontSize="1rem" color="#991b1b">
                   <Box fontWeight="600">Restaurant Hours:</Box>
                   6:00 PM - 11:00 PM
                   {dinnerTime && (
@@ -299,7 +299,7 @@ export function TimePickerExamples() {
                 </Box>
                 <Box>
                   <Box fontSize="1.125rem" fontWeight="600">Flight Departure</Box>
-                  <Box fontSize="0.875rem" color="#6b7280">5-minute precision</Box>
+                  <Box fontSize="1rem" color="#6b7280">5-minute precision</Box>
                 </Box>
               </Box>
               
@@ -313,7 +313,7 @@ export function TimePickerExamples() {
               />
               
               <Box marginTop="1rem" padding="1rem" backgroundColor="#f0f9ff" borderRadius="0.5rem">
-                <Box fontSize="0.875rem" color="#0c4a6e">
+                <Box fontSize="1rem" color="#0c4a6e">
                   <Box fontWeight="600">Flight EK203:</Box>
                   Dubai (DXB) → London (LHR)
                   {flightTime && (
@@ -352,13 +352,13 @@ export function TimePickerExamples() {
                   borderRadius="0.5rem"
                   border="1px solid #e2e8f0"
                 >
-                  <Box fontSize="0.75rem" fontWeight="600" color="#6b7280" marginBottom="0.5rem">
+                  <Box fontSize="1rem" fontWeight="600" color="#6b7280" marginBottom="0.5rem">
                     {item.label}
                   </Box>
                   <Box fontSize="1rem" fontWeight="700" color="#1a202c">
                     {item.time ? formatDisplayTime(item.time, item.format === '12-hour') : 'Not set'}
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">
+                  <Box fontSize="1rem" color="#6b7280">
                     {item.format}
                   </Box>
                 </Box>
@@ -420,13 +420,13 @@ export function TimePickerExamples() {
                   </Box>
                 </Box>
                 
-                <Box fontSize="0.875rem" color="#6b7280" marginBottom="1rem">
+                <Box fontSize="1rem" color="#6b7280" marginBottom="1rem">
                   {feature.description}
                 </Box>
                 
                 <Box display="flex" flexDirection="column" gap="0.5rem">
                   {feature.features.map((item, i) => (
-                    <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="0.75rem">
+                    <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="1rem">
                       <Box color="#059669">✓</Box>
                       <Box color="#374151">{item}</Box>
                     </Box>

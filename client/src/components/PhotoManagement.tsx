@@ -351,7 +351,7 @@ const PhotoManagement: React.FC = () => {
         </Box>
         
         {isUploading && (
-          <Box color="#666" fontSize={14}>
+          <Box color="#666" fontSize={'1rem'}>
             Uploading...
           </Box>
         )}
@@ -366,7 +366,7 @@ const PhotoManagement: React.FC = () => {
         alignItems="center"
       >
         <Box display="flex" alignItems="center" gap={8}>
-          <Box as="label" fontSize={14} fontWeight={500}>
+          <Box as="label" fontSize={'1rem'} fontWeight={500}>
             Sort by:
           </Box>
           <Box
@@ -377,7 +377,7 @@ const PhotoManagement: React.FC = () => {
             padding={5}
             borderRadius={4}
             border="1px solid #ddd"
-            fontSize={14}
+            fontSize={'1rem'}
           >
             <Box as="option" value="newest">Newest First</Box>
             <Box as="option" value="oldest">Oldest First</Box>
@@ -385,7 +385,7 @@ const PhotoManagement: React.FC = () => {
         </Box>
 
         <Box display="flex" alignItems="center" gap={8}>
-          <Box as="label" fontSize={14} fontWeight={500}>
+          <Box as="label" fontSize={'1rem'} fontWeight={500}>
             Filter:
           </Box>
           <Box
@@ -396,7 +396,7 @@ const PhotoManagement: React.FC = () => {
             padding={5}
             borderRadius={4}
             border="1px solid #ddd"
-            fontSize={14}
+            fontSize={'1rem'}
           >
             <Box as="option" value="all">All Photos</Box>
             <Box as="option" value="attached">Attached to Property</Box>
@@ -414,7 +414,7 @@ const PhotoManagement: React.FC = () => {
               padding={5}
               borderRadius={4}
               border="1px solid #ddd"
-              fontSize={14}
+              fontSize={'1rem'}
             >
               <Box as="option" value="">Select a property</Box>
               {properties.map(property => (
@@ -435,7 +435,7 @@ const PhotoManagement: React.FC = () => {
               border="none"
               borderRadius={4}
               cursor="pointer"
-              fontSize={14}
+              fontSize={'1rem'}
               fontWeight={500}
               transition="background-color 0.2s"
               whileHover={{ backgroundColor: '#0056b3' }}
@@ -509,7 +509,7 @@ const PhotoManagement: React.FC = () => {
             <Box padding={15}>
               {photo.propertyId && (
                 <Box 
-                  fontSize={12}
+                  fontSize={'1rem'}
                   color="#666"
                   marginBottom={10}
                   fontWeight={600}
@@ -520,7 +520,7 @@ const PhotoManagement: React.FC = () => {
               
               {photo.description && (
                 <Box 
-                  fontSize={14}
+                  fontSize={'1rem'}
                   color="#333"
                   marginBottom={10}
                 >
@@ -538,7 +538,7 @@ const PhotoManagement: React.FC = () => {
                   {photo.tags.map((tag, idx) => (
                     <Box 
                       key={idx}
-                      fontSize={11}
+                      fontSize={'1rem'}
                       backgroundColor="#e0e0e0"
                       padding={4}
                       paddingLeft={8}
@@ -564,7 +564,7 @@ const PhotoManagement: React.FC = () => {
                     border="none"
                     borderRadius={4}
                     cursor="pointer"
-                    fontSize={12}
+                    fontSize={'1rem'}
                     fontWeight={500}
                     transition="background-color 0.2s"
                     whileHover={{ backgroundColor: '#e0a800' }}
@@ -584,7 +584,7 @@ const PhotoManagement: React.FC = () => {
                   border="none"
                   borderRadius={4}
                   cursor="pointer"
-                  fontSize={12}
+                  fontSize={'1rem'}
                   fontWeight={500}
                   transition="background-color 0.2s"
                   whileHover={{ backgroundColor: '#c82333' }}
@@ -603,7 +603,7 @@ const PhotoManagement: React.FC = () => {
           padding={40}
           color="#666"
         >
-          <Box fontSize={16}>
+          <Box fontSize={'1rem'}>
             No photos found. Upload some photos to get started!
           </Box>
         </Box>

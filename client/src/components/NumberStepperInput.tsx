@@ -85,7 +85,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
   const sizeConfig = {
     small: {
       height: 36,
-      fontSize: 14,
+      fontSize: 16,
       buttonSize: 32,
       padding: 8,
     },
@@ -243,7 +243,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
         <Box
           as="label"
           htmlFor={id}
-          fontSize={14}
+          fontSize={'1rem'}
           fontWeight={500}
           color="#374151"
           marginBottom={4}
@@ -359,7 +359,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
       
       {helperText && (
         <Box
-          fontSize={12}
+          fontSize={'1rem'}
           color={error ? '#ef4444' : '#6b7280'}
           marginTop={4}
         >

@@ -324,7 +324,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
         <Box
           as="label"
           display="block"
-          fontSize="0.875rem"
+          fontSize="1rem"
           fontWeight="500"
           color="#374151"
           marginBottom="0.5rem"
@@ -361,7 +361,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
         <Box color={currentTime ? '#374151' : '#9ca3af'}>
           {currentTime ? formatDisplayTime(currentTime) : placeholder}
         </Box>
-        <Box color="#6b7280" fontSize="1.125rem">
+        <Box color="#6b7280" fontSize="1.25rem">
           <FaClock />
         </Box>
       </Box>
@@ -401,7 +401,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
           <Box display="grid" gridTemplateColumns={use12HourFormat ? '1fr 1fr 1fr' : '1fr 1fr'} gap="1rem" marginBottom="1.5rem">
             {/* Hour Selector */}
             <Box>
-              <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.75rem" textAlign="center">
+              <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.75rem" textAlign="center">
                 Hour
               </Box>
               <SelectionPicker
@@ -451,7 +451,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
 
             {/* Minute Selector */}
             <Box>
-              <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.75rem" textAlign="center">
+              <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.75rem" textAlign="center">
                 Minute
               </Box>
               <SelectionPicker
@@ -494,7 +494,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
             {/* Period Selector (AM/PM) */}
             {use12HourFormat && (
               <Box>
-                <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.75rem" textAlign="center">
+                <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.75rem" textAlign="center">
                   Period
                 </Box>
                 <SelectionPicker
@@ -545,7 +545,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
               color="#6b7280"
               border="1px solid #d1d5db"
               borderRadius="0.375rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="500"
               cursor="pointer"
               whileHover={{ backgroundColor: '#f9fafb', borderColor: '#9ca3af' }}
@@ -561,7 +561,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
               color="white"
               border="none"
               borderRadius="0.375rem"
-              fontSize="0.875rem"
+              fontSize="1rem"
               fontWeight="500"
               cursor="pointer"
               display="flex"

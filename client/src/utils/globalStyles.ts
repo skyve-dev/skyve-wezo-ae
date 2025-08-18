@@ -1,5 +1,18 @@
 /**
  * Global styling utilities for the application
+ * 
+ * CSS UNIT STANDARDS:
+ * ===================
+ * 1. fontSize: MUST use rem units with minimum 1rem (16px)
+ * 2. width, height, padding, margin: MUST use rem units in 0.25rem multiples
+ * 3. Base font size: 16px = 1rem (defined in body)
+ * 4. Spacing scale: 0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem, 1.5rem, etc.
+ * 
+ * Examples:
+ * - fontSize: '1rem' (minimum), '1.25rem', '1.5rem', '2rem'
+ * - padding: '0.25rem', '0.5rem', '1rem', '1.5rem'
+ * - margin: '0.25rem', '0.5rem', '1rem', '2rem'
+ * - width: '1rem', '2rem', '10rem', '20rem'
  */
 
 /**
@@ -35,7 +48,6 @@ export const applyGlobalStyles = (): void => {
     
     /* Reset body line height and font */
     body {
-      line-height: 1;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
@@ -111,21 +123,18 @@ export const applyGlobalStyles = (): void => {
     h1, h2, h3, h4, h5, h6 {
       font-size: inherit;
       font-weight: inherit;
-      line-height: 1;
       margin: 0;
       padding: 0;
     }
     
     /* Reset paragraph styles with minimal line-height */
     p {
-      line-height: 1;
       margin: 0;
       padding: 0;
     }
     
     /* Reset other text elements */
     span, div, section, article, aside, header, footer, nav, main {
-      line-height: 1;
       margin: 0;
       padding: 0;
     }
@@ -203,7 +212,6 @@ export const applyGlobalStyles = (): void => {
     #root {
       height: 100%;
       width: 100%;
-      line-height: 1;
       overflow : auto;
     }
     
