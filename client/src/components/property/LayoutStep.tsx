@@ -1,24 +1,23 @@
-import React, { useState } from 'react'
-import { WizardFormData, Room, Bed } from '../../types/property'
-import { Box } from '../Box'
-import { BedType, BedTypeLabels, RoomSpaceType, RoomSpaceTypeLabels } from '../../constants/propertyEnums'
+import React, {useState} from 'react'
+import {Bed, Room, WizardFormData} from '../../types/property'
+import {Box} from '../Box'
+import {BedType, BedTypeLabels, RoomSpaceType, RoomSpaceTypeLabels} from '../../constants/propertyEnums'
 import SelectionPicker from '../SelectionPicker'
 import SlidingDrawer from '../SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
-import { NumberStepperInput } from '../NumberStepperInput'
-import { 
-  FaUserFriends, 
-  FaUsers,
-  FaBath, 
-  FaRulerCombined, 
-  FaChild, 
-  FaBaby, 
-  FaBed, 
-  FaPlus, 
-  FaTrash,
+import {NumberStepperInput} from '../NumberStepperInput'
+import {
+  FaBaby,
+  FaBath,
+  FaBed,
+  FaChild,
+  FaDoorOpen,
   FaHome,
+  FaPlus,
+  FaRulerCombined,
   FaTimes,
-  FaDoorOpen
+  FaTrash,
+  FaUsers
 } from 'react-icons/fa'
 
 interface LayoutStepProps {
@@ -305,7 +304,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
             >
               <FaPlus size="0.875rem" />
-              <Box fontSize={'1rem'} fontSizeMd={'inherit'}>
+              <Box fontSize={'1rem'} fontSizeMd={'inherit'} display={'none'} displaySm={'flex'}>
                 Add Room
               </Box>
 
@@ -429,7 +428,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                   borderMd="2px solid #e2e8f0"
                   borderRadius="0.5rem"
                 >
-                  <Box display="flex" flexDirection="row" gap="1rem">
+                  <Box display="flex" flexDirection="row" gap="1rem" flexWrap={"wrap"}>
                     {/* Bed Type Selection */}
                     <Box flexGrow={'1'}>
                       <Box fontSize="1rem" fontWeight="500" color="#374151" marginBottom="0.5rem">
@@ -439,6 +438,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                         as="button"
                         onClick={() => openBedTypeSelection(roomIndex, bedIndex)}
                         width="100%"
+                        minWidth={"200px"}
                         padding="0.75rem"
                         border="2px solid #e5e7eb"
                         borderRadius="0.375rem"
@@ -468,9 +468,9 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
 
                     {/* Number of Beds */}
                     <Box display="flex" alignItems="flex-end" gap="0.5rem">
-                      <Box flex="1">
+                      <Box display={'flex'} flexDirection={'column'} flex="1">
                         <NumberStepperInput
-                          label="Number of Beds *"
+                          label="Number of Beds"
                           icon={FaBed}
                           value={bed.numberOfBed || 1}
                           onChange={(value) => handleBedChange(roomIndex, bedIndex, 'numberOfBed', value)}
@@ -478,7 +478,8 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                           min={1}
                           max={10}
                           format="integer"
-                          size="small"
+                          size="medium"
+                          width={160}
                           required
                         />
                       </Box>
