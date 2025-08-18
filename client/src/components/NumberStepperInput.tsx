@@ -91,19 +91,19 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
     const sizeConfig = {
         small: {
             height: 36,
-            fontSize: 16,
+            fontSize: '1rem',
             buttonSize: 32,
             padding: 8,
         },
         medium: {
             height: 44,
-            fontSize: 16,
+            fontSize: '1rem',
             buttonSize: 40,
             padding: 10,
         },
         large: {
             height: 52,
-            fontSize: 18,
+            fontSize: '1.125rem',
             buttonSize: 48,
             padding: 12,
         },
@@ -243,39 +243,58 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
 
     const containerStyle = variantStyles[variant];
 
+    // Size configurations for label and helper text matching Input component
+    const sizeStyles = {
+        small: { gap: '6px', labelFontSize: '0.875rem', iconSize: '0.875rem' },
+        medium: { gap: '8px', labelFontSize: '1rem', iconSize: '1rem' },
+        large: { gap: '10px', labelFontSize: '1.125rem', iconSize: '1.125rem' },
+    };
+    const currentSizeStyle = sizeStyles[size];
+
     return (
-        <Box display="flex" flexDirection="column" gap={4} className={className} {...props}>
+        <Box display="flex" flexDirection="column" gap={currentSizeStyle.gap} className={className} {...props}>
+            {/* Label - using same structure as Input component */}
             {label && (
                 <Box
                     as="label"
                     htmlFor={id}
-                    fontSize={'1rem'}
-                    fontWeight={700}
+                    fontSize={currentSizeStyle.labelFontSize}
+                    fontWeight={500}
                     color="#374151"
-                    marginBottom={4}
                     display="flex"
                     alignItems="center"
-                    gap={8}
+                    gap={currentSizeStyle.gap}
                 >
                     {IconComponent && (
-                        <Box color="#374151">
-                            <IconComponent size="1rem"/>
+                        <Box 
+                            color="#6b7280" 
+                            display="flex" 
+                            alignItems="center"
+                            fontSize={currentSizeStyle.iconSize}
+                        >
+                            <IconComponent size={currentSizeStyle.iconSize} />
                         </Box>
                     )}
                     <Box>
                         {label}
-                        {required && <Box as="span" color="#ef4444" marginLeft={4}>*</Box>}
+                        {required && (
+                            <Box as="span" color="#ef4444" marginLeft="4px">
+                                *
+                            </Box>
+                        )}
                     </Box>
                 </Box>
             )}
 
+            {/* Custom stepper input field */}
             <Box
                 display="flex"
                 alignItems="center"
-                borderRadius={8}
+                borderRadius="0.375rem"
                 overflow="hidden"
                 {...containerStyle}
                 opacity={disabled ? 0.6 : 1}
+                width="100%"
             >
                 {/* Decrement Button */}
                 <Box
@@ -373,11 +392,12 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                 </Box>
             </Box>
 
+            {/* Helper Text - using same structure as Input component */}
             {helperText && (
                 <Box
-                    fontSize={'1rem'}
+                    fontSize="0.875rem"
                     color={error ? '#ef4444' : '#6b7280'}
-                    marginTop={4}
+                    marginTop="4px"
                 >
                     {helperText}
                 </Box>

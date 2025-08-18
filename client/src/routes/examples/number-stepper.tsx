@@ -3,16 +3,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Box } from '@/components/Box';
 import { NumberStepperInput } from '@/components/NumberStepperInput';
 import { 
-  FaDollarSign, 
   FaUsers, 
-  FaShoppingCart, 
-  FaPercent, 
-  FaClock, 
-  FaWeight,
-  FaRuler,
-  FaThermometerHalf,
-  FaTachometerAlt,
-  FaBatteryHalf
+  FaShoppingCart
 } from 'react-icons/fa';
 
 function NumberStepperExample() {
@@ -29,8 +21,6 @@ function NumberStepperExample() {
   
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
     const values: Record<string, number> = {};
     
     // Collect form values

@@ -29,88 +29,47 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 const sizeConfig = {
     small: {
         height: '36px',
-        fontSize: '16px',
+        fontSize: '1rem',
         padding: '8px 12px',
-        iconSize: '14px',
+        iconSize: '0.875rem',
         gap: '6px',
-        labelFontSize: '14px',
+        labelFontSize: '0.875rem',
     },
     medium: {
         height: '44px',
-        fontSize: '16px',
+        fontSize: '1rem',
         padding: '10px 14px',
-        iconSize: '16px',
+        iconSize: '1rem',
         gap: '8px',
-        labelFontSize: '16px',
+        labelFontSize: '1rem',
     },
     large: {
         height: '52px',
-        fontSize: '18px',
+        fontSize: '1.125rem',
         padding: '12px 16px',
-        iconSize: '18px',
+        iconSize: '1.125rem',
         gap: '10px',
-        labelFontSize: '18px',
+        labelFontSize: '1.125rem',
     },
 };
 
 // Variant styles matching NumberStepperInput
 const getVariantStyles = (variant: InputProps['variant'], error?: boolean, disabled?: boolean) => {
-    const baseStyles = {
-        transition: 'all 0.2s ease',
-        outline: 'none',
-    };
-    
     switch (variant) {
         case 'outlined':
             return {
-                ...baseStyles,
                 backgroundColor: 'transparent',
                 border: error ? '2px solid #ef4444' : '2px solid #3b82f6',
-                '&:focus': {
-                    borderColor: error ? '#dc2626' : '#2563eb',
-                    boxShadow: error 
-                        ? '0 0 0 3px rgba(239, 68, 68, 0.1)' 
-                        : '0 0 0 3px rgba(59, 130, 246, 0.1)',
-                },
-                '&:disabled': {
-                    backgroundColor: '#f9fafb',
-                    borderColor: '#d1d5db',
-                    cursor: 'not-allowed',
-                },
             };
         case 'filled':
             return {
-                ...baseStyles,
                 backgroundColor: disabled ? '#e5e7eb' : '#f3f4f6',
                 border: error ? '1px solid #ef4444' : '1px solid transparent',
-                '&:focus': {
-                    backgroundColor: disabled ? '#e5e7eb' : '#ffffff',
-                    borderColor: error ? '#ef4444' : '#3b82f6',
-                    boxShadow: error 
-                        ? '0 0 0 3px rgba(239, 68, 68, 0.1)' 
-                        : '0 0 0 3px rgba(59, 130, 246, 0.1)',
-                },
-                '&:disabled': {
-                    backgroundColor: '#e5e7eb',
-                    cursor: 'not-allowed',
-                },
             };
         default:
             return {
-                ...baseStyles,
                 backgroundColor: disabled ? '#f5f5f5' : '#ffffff',
                 border: error ? '1px solid #ef4444' : '1px solid #d1d5db',
-                '&:focus': {
-                    borderColor: error ? '#ef4444' : '#3b82f6',
-                    boxShadow: error 
-                        ? '0 0 0 3px rgba(239, 68, 68, 0.1)' 
-                        : '0 0 0 3px rgba(59, 130, 246, 0.1)',
-                },
-                '&:disabled': {
-                    backgroundColor: '#f5f5f5',
-                    borderColor: '#e5e7eb',
-                    cursor: 'not-allowed',
-                },
             };
     }
 };
@@ -233,17 +192,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
                     color={disabled ? '#6b7280' : '#111827'}
                     backgroundColor={variantStyles.backgroundColor}
                     border={variantStyles.border}
-                    transition={variantStyles.transition}
-                    outline={variantStyles.outline}
-                    whileFocus={variantStyles['&:focus']}
-                    whileDisabled={variantStyles['&:disabled']}
+                    transition="all 0.2s ease"
+                    style={{ outline: 'none' }}
                     {...inputProps}
                 />
             </Box>
             
             {helperText && (
                 <Box
-                    fontSize="14px"
+                    fontSize="0.875rem"
                     color={error ? '#ef4444' : '#6b7280'}
                     marginTop="4px"
                     className={helperTextClassName}
