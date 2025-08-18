@@ -22,6 +22,7 @@ import { Route as ExamplesTimePickerRouteImport } from './routes/examples/time-p
 import { Route as ExamplesTestRouteImport } from './routes/examples/test'
 import { Route as ExamplesSlidingDrawerRouteImport } from './routes/examples/sliding-drawer'
 import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/selection-picker'
+import { Route as ExamplesNumberStepperRouteImport } from './routes/examples/number-stepper'
 import { Route as ExamplesDatePickerRouteImport } from './routes/examples/date-picker'
 import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
 import { Route as EditPropertyPropertyIdRouteImport } from './routes/edit-property.$propertyId'
@@ -94,6 +95,11 @@ const ExamplesSelectionPickerRoute = ExamplesSelectionPickerRouteImport.update({
   path: '/selection-picker',
   getParentRoute: () => ExamplesRoute,
 } as any)
+const ExamplesNumberStepperRoute = ExamplesNumberStepperRouteImport.update({
+  id: '/number-stepper',
+  path: '/number-stepper',
+  getParentRoute: () => ExamplesRoute,
+} as any)
 const ExamplesDatePickerRoute = ExamplesDatePickerRouteImport.update({
   id: '/date-picker',
   path: '/date-picker',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
+  '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
   '/examples/test': typeof ExamplesTestRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
+  '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
   '/examples/test': typeof ExamplesTestRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
+  '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
   '/examples/test': typeof ExamplesTestRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/edit-property/$propertyId'
     | '/examples/box'
     | '/examples/date-picker'
+    | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
     | '/examples/test'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/edit-property/$propertyId'
     | '/examples/box'
     | '/examples/date-picker'
+    | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
     | '/examples/test'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/edit-property/$propertyId'
     | '/examples/box'
     | '/examples/date-picker'
+    | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
     | '/examples/test'
@@ -355,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExamplesSelectionPickerRouteImport
       parentRoute: typeof ExamplesRoute
     }
+    '/examples/number-stepper': {
+      id: '/examples/number-stepper'
+      path: '/number-stepper'
+      fullPath: '/examples/number-stepper'
+      preLoaderRoute: typeof ExamplesNumberStepperRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
     '/examples/date-picker': {
       id: '/examples/date-picker'
       path: '/date-picker'
@@ -419,6 +438,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 interface ExamplesRouteChildren {
   ExamplesBoxRoute: typeof ExamplesBoxRoute
   ExamplesDatePickerRoute: typeof ExamplesDatePickerRoute
+  ExamplesNumberStepperRoute: typeof ExamplesNumberStepperRoute
   ExamplesSelectionPickerRoute: typeof ExamplesSelectionPickerRoute
   ExamplesSlidingDrawerRoute: typeof ExamplesSlidingDrawerRoute
   ExamplesTestRoute: typeof ExamplesTestRoute
@@ -429,6 +449,7 @@ interface ExamplesRouteChildren {
 const ExamplesRouteChildren: ExamplesRouteChildren = {
   ExamplesBoxRoute: ExamplesBoxRoute,
   ExamplesDatePickerRoute: ExamplesDatePickerRoute,
+  ExamplesNumberStepperRoute: ExamplesNumberStepperRoute,
   ExamplesSelectionPickerRoute: ExamplesSelectionPickerRoute,
   ExamplesSlidingDrawerRoute: ExamplesSlidingDrawerRoute,
   ExamplesTestRoute: ExamplesTestRoute,

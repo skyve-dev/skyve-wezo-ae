@@ -11,7 +11,8 @@ import {
   FaArrowUp,
   FaSearch,
   FaCalendarAlt,
-  FaClock
+  FaClock,
+  FaSort
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
@@ -26,6 +27,16 @@ function ExamplesIndex() {
   const [searchTerm, setSearchTerm] = useState('')
 
   const examples = [
+    {
+      id: 'number-stepper',
+      title: 'NumberStepperInput',
+      description: 'Mobile-friendly numeric input with increment/decrement buttons and formatting',
+      icon: <FaSort />,
+      color: '#10b981',
+      features: ['Currency Formatting', 'Custom Step Values', 'Min/Max Boundaries', 'Mobile Optimized'],
+      complexity: 'Intermediate',
+      path: '/examples/number-stepper'
+    },
     {
       id: 'selection-picker',
       title: 'SelectionPicker',
