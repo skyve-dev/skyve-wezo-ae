@@ -58,16 +58,15 @@ export const applyGlobalStyles = (): void => {
       background: #fff;
     }
     
+    
     /* Reset HTML and body to full height */
     html, body {
-      height: 100%;
-      width: 100%;
-      display : flex;
-      flex-direction : column;
-      overflow : auto;
       margin: 0;
       padding: 0;
+      /* Prevent overscroll behavior */
+      overscroll-behavior: none;
     }
+    
     
     /* Remove list styles */
     ol, ul {
@@ -208,12 +207,6 @@ export const applyGlobalStyles = (): void => {
       -webkit-tap-highlight-color: transparent;
     }
     
-    /* Root element consistency */
-    #root {
-      height: 100%;
-      width: 100%;
-      overflow : auto;
-    }
     
     /* ===== MOBILE OPTIMIZATIONS ===== */
     
@@ -229,11 +222,7 @@ export const applyGlobalStyles = (): void => {
       text-size-adjust: 100%;
     }
     
-    /* Prevent overscroll behavior */
-    html, body {
-      overscroll-behavior: none;
-      overflow-x: hidden;
-    }
+    
     
     /* Smooth scrolling for better mobile experience */
     html {

@@ -22,8 +22,9 @@ class PortalManager {
         container.style.position = 'fixed';
         container.style.top = '0px';
         container.style.left = '0px';
-        container.style.width = '100vw';
-        container.style.height = '100%';
+
+        container.style.width = '100%';
+        container.style.height = '100vh';
         container.style.overflow = 'hidden';
         container.style.zIndex = '-1';
         container.style.pointerEvents = 'none';
@@ -85,13 +86,14 @@ class PortalManager {
     const { container, activeDrawers } = portalInfo
 
     // Add smooth transition for portal container changes
-
     if (activeDrawers > 0) {
       // When drawer(s) are active: full viewport coverage for proper layering
-      container.style.zIndex = '9999'
+      container.style.top = window.scrollY+'px';
+      container.style.zIndex = '9999';
     } else {
       // When no drawers are active: minimal footprint to avoid blocking interactions
       container.style.zIndex = '-1'
+      container.style.top = '0px';
     }
   }
 }
