@@ -12,7 +12,8 @@ import {
   FaSearch,
   FaCalendarAlt,
   FaClock,
-  FaSort
+  FaSort,
+  FaKeyboard
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
@@ -27,6 +28,16 @@ function ExamplesIndex() {
   const [searchTerm, setSearchTerm] = useState('')
 
   const examples = [
+    {
+      id: 'input',
+      title: 'Input',
+      description: 'Versatile text input component with icons, validation, and multiple variants',
+      icon: <FaKeyboard />,
+      color: '#6366f1',
+      features: ['Icon Support', 'Size Variants', 'Style Variants', 'Native HTML Attributes'],
+      complexity: 'Beginner',
+      path: '/examples/input'
+    },
     {
       id: 'number-stepper',
       title: 'NumberStepperInput',
