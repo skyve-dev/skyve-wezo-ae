@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Box } from '@/components/Box';
 import { NumberStepperInput } from '@/components/NumberStepperInput';
+import { 
+  FaDollarSign, 
+  FaUsers, 
+  FaShoppingCart, 
+  FaPercent, 
+  FaClock, 
+  FaWeight,
+  FaRuler,
+  FaThermometerHalf,
+  FaTachometerAlt,
+  FaBatteryHalf
+} from 'react-icons/fa';
 
 function NumberStepperExample() {
   // State for controlled examples
@@ -74,6 +86,7 @@ function NumberStepperExample() {
               min={0}
               max={100}
               label="Quantity"
+              icon={FaShoppingCart}
               helperText="Select a quantity between 0 and 100"
             />
           </Box>
@@ -532,6 +545,7 @@ function NumberStepperExample() {
               onChange={setControlledValue4}
               name="quantity"
               label="Quantity"
+              icon={FaUsers}
               step={1}
               min={1}
               max={100}

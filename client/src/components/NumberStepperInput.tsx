@@ -22,6 +22,7 @@ export interface NumberStepperInputProps {
   
   // UI customization
   label?: string;
+  icon?: React.ComponentType<any>; // Icon component from react-icons
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
@@ -57,6 +58,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
   thousandsSeparator = ',',
   decimalSeparator = '.',
   label,
+  icon: IconComponent,
   placeholder,
   disabled = false,
   readOnly = false,
@@ -244,12 +246,22 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
           as="label"
           htmlFor={id}
           fontSize={'1rem'}
-          fontWeight={500}
+          fontWeight={700}
           color="#374151"
           marginBottom={4}
+          display="flex"
+          alignItems="center"
+          gap={8}
         >
-          {label}
-          {required && <Box as="span" color="#ef4444" marginLeft={4}>*</Box>}
+          {IconComponent && (
+            <Box color="#374151">
+              <IconComponent size="1rem" />
+            </Box>
+          )}
+          <Box>
+            {label}
+            {required && <Box as="span" color="#ef4444" marginLeft={4}>*</Box>}
+          </Box>
         </Box>
       )}
       

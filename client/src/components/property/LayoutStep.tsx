@@ -8,6 +8,7 @@ import useDrawerManager from '../../hooks/useDrawerManager'
 import { NumberStepperInput } from '../NumberStepperInput'
 import { 
   FaUserFriends, 
+  FaUsers,
   FaBath, 
   FaRulerCombined, 
   FaChild, 
@@ -159,6 +160,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
         <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1.5rem">
           <NumberStepperInput
             label="Maximum Guests *"
+            icon={FaUsers}
             value={data.maximumGuest}
             onChange={(value) => handleLayoutChange('maximumGuest', value)}
             step={1}
@@ -170,6 +172,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
 
           <NumberStepperInput
             label="Bathrooms *"
+            icon={FaBath}
             value={data.bathrooms}
             onChange={(value) => handleLayoutChange('bathrooms', value)}
             step={1}
@@ -183,6 +186,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
         {/* Property Size */}
         <NumberStepperInput
           label="Property Size (Square Meters) - Optional"
+          icon={FaRulerCombined}
           value={data.propertySizeSqMtr || 0}
           onChange={(value) => handleLayoutChange('propertySizeSqMtr', value > 0 ? value : undefined)}
           step={10}
@@ -467,6 +471,7 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                       <Box flex="1">
                         <NumberStepperInput
                           label="Number of Beds *"
+                          icon={FaBed}
                           value={bed.numberOfBed || 1}
                           onChange={(value) => handleBedChange(roomIndex, bedIndex, 'numberOfBed', value)}
                           step={1}

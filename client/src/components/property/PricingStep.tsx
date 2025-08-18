@@ -7,6 +7,8 @@ import {
   FaDollarSign,
   FaCalendarWeek,
   FaPercentage,
+  FaTag,
+  FaCalendarAlt,
   FaShieldAlt,
   FaEye
 } from 'react-icons/fa'
@@ -98,6 +100,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
             </Box>
             <NumberStepperInput
               label="Rate per night *"
+              icon={FaDollarSign}
               value={pricing.ratePerNight || 0}
               onChange={(value) => handlePricingChange('ratePerNight', value)}
               step={100}
@@ -121,6 +124,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
           </Box>
           <NumberStepperInput
             label="Weekend rate per night"
+            icon={FaCalendarWeek}
             value={pricing.ratePerNightWeekend || 0}
             onChange={(value) => handlePricingChange('ratePerNightWeekend', value > 0 ? value : undefined)}
             step={100}
@@ -144,6 +148,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
           <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <NumberStepperInput
               label="Weekly stay discount (%)"
+              icon={FaPercentage}
               value={pricing.discountPercentageForWeeklyRatePlan || 0}
               onChange={(value) => handlePricingChange('discountPercentageForWeeklyRatePlan', value > 0 ? value : undefined)}
               step={1}
@@ -155,6 +160,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
 
             <NumberStepperInput
               label="Non-refundable discount (%)"
+              icon={FaTag}
               value={pricing.discountPercentageForNonRefundableRatePlan || 0}
               onChange={(value) => handlePricingChange('discountPercentageForNonRefundableRatePlan', value > 0 ? value : undefined)}
               step={1}
@@ -175,6 +181,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
           <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <NumberStepperInput
               label="Free cancellation (days before arrival)"
+              icon={FaCalendarAlt}
               value={cancellation.daysBeforeArrivalFreeToCancel}
               onChange={(value) => handleCancellationChange('daysBeforeArrivalFreeToCancel', value)}
               step={1}
