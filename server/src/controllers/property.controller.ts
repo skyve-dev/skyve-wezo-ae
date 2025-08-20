@@ -13,16 +13,16 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Check if user has HOMEOWNER role, if not, upgrade them
-    if (req.user.role !== 'HOMEOWNER') {
+    // Check if user has HomeOwner role, if not, upgrade them
+    if (req.user.role !== 'HomeOwner') {
       try {
         await prisma.user.update({
           where: { id: req.user.id },
-          data: { role: 'HOMEOWNER' },
+          data: { role: 'HomeOwner' },
         });
         
         // Update the user object in the request for immediate use
-        req.user.role = 'HOMEOWNER';
+        req.user.role = 'HomeOwner';
       } catch (roleUpdateError: any) {
         // If user doesn't exist, the JWT token is invalid
         if (roleUpdateError.code === 'P2025') {

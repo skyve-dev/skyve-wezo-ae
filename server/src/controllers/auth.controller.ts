@@ -215,21 +215,21 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
     const { role } = req.body;
 
     // Validate role
-    if (!['TENANT', 'HOMEOWNER', 'MANAGER'].includes(role)) {
+    if (!['Tenant', 'HomeOwner', 'Manager'].includes(role)) {
       res.status(400).json({ error: 'Invalid role' });
       return;
     }
 
-    // For security, only allow upgrading to HOMEOWNER when user creates first property
-    // MANAGER role should only be set by admins (not implemented in this basic version)
-    if (role === 'HOMEOWNER') {
+    // For security, only allow upgrading to HomeOwner when user creates first property
+    // Manager role should only be set by admins (not implemented in this basic version)
+    if (role === 'HomeOwner') {
       // Check if user has at least one property
       const propertyCount = await prisma.property.count({
         where: { ownerId: req.user.id }
       });
 
       if (propertyCount === 0) {
-        res.status(400).json({ error: 'Can only upgrade to HOMEOWNER role after creating a property' });
+        res.status(400).json({ error: 'Can only upgrade to HomeOwner role after creating a property' });
         return;
       }
     }

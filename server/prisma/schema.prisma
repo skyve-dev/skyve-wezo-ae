@@ -68,7 +68,7 @@ enum KyuEntityType {
 /// KyuDocumentType specifies types of documents required for KYP form verification
 /// Purpose: Ensures proper identity and business verification through standardized documents
 enum KyuDocumentType {
-  GovermentId /// Official ID with photo (passport, driver's license, etc.)
+  GovernmentId /// Official ID with photo (passport, driver's license, etc.)
   ProofOfAddress /// Utility bill or bank statement (must be less than 6 months old)
   BusinessRegistration /// Official business registration document (required for business entities)
   Other /// Any other specific documents that may be required
@@ -77,9 +77,9 @@ enum KyuDocumentType {
 /// SecurityReportType categorizes security incidents that partners might report
 /// Purpose: Enables quick categorization and response to security threats
 enum SecurityReportType {
-  SuspiciusActivity /// General unusual behavior on the account
+  SuspiciousActivity /// General unusual behavior on the account
   SecurityBreach /// Suspected compromise of account or guest data
-  PhisingAttempt /// Attempts to trick users into revealing sensitive information
+  PhishingAttempt /// Attempts to trick users into revealing sensitive information
   SocialEngineeringAttempt /// Manipulation tactics to gain unauthorized access
   FraudulentBooking /// Suspected non-genuine or fraudulent reservations
   Other /// Incidents not covered by specific categories
@@ -407,7 +407,7 @@ model Availability {
 }
 
 /// RatePlan defines a rate plan with specific conditions and pricing options
-/// Purpose: Enables homeowners to create multiple pricing strategies to appeal to different traveler segments
+/// Purpose: Enables partners to create multiple pricing strategies to appeal to different traveler segments
 model RatePlan {
   id                 String       @id @default(uuid()) /// Unique identifier
   propertyId         String /// Foreign key to property
@@ -442,7 +442,7 @@ model Price {
 }
 
 /// Restriction represents booking limitations applied to properties or rate plans
-/// Purpose: Gives homeowners granular control over booking patterns and guest behavior
+/// Purpose: Gives partners granular control over booking patterns and guest behavior
 model Restriction {
   id         String          @id @default(uuid()) /// Unique identifier
   ratePlanId String? /// Optional: links to specific rate plan
@@ -490,7 +490,7 @@ model Reservation {
   updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-/// Message represents communications between homeowners, guests, and the platform
+/// Message represents communications between partners, guests, and the platform
 /// Purpose: Enables in-app messaging for reservations, notifications, and guest communications
 model Message {
   id            String       @id @default(uuid()) /// Unique identifier
@@ -498,9 +498,9 @@ model Message {
   reservation   Reservation? @relation(fields: [reservationId], references: [id]) /// Associated reservation if guest-related
 
   // Sender/Recipient Information
-  senderId      String /// ID of sender (homeowner/guest/system)
+  senderId      String /// ID of sender (partner/guest/system)
   senderType    UserRole /// Type of sender
-  recipientId   String /// ID of recipient (homeowner/guest/system)
+  recipientId   String /// ID of recipient (partner/guest/system)
   recipientType UserRole /// Type of recipient
   partner       User     @relation("PartnerMessages", fields: [recipientId], references: [id]) /// Associated partner
 
@@ -517,7 +517,7 @@ model Message {
 }
 
 /// Review represents guest feedback for a property based on a completed stay
-/// Purpose: Collects guest ratings and feedback, allows homeowner responses
+/// Purpose: Collects guest ratings and feedback, allows partner responses
 model Review {
   id            String      @id @default(uuid()) /// Unique identifier
   guestId       String /// Foreign key to guest user
@@ -530,7 +530,7 @@ model Review {
   // Review Content
   rating   Int /// Overall rating (1-10 scale)
   comment  String? /// Optional written feedback from guest
-  response String? /// homeowner's response to the review
+  response String? /// Partner's response to the review
 
   reviewedAt DateTime @default(now()) /// Review submission timestamp
   createdAt  DateTime @default(now()) /// Creation timestamp
@@ -555,7 +555,7 @@ model HomeOwnerBankDetails {
   updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-/// Invoice represents financial invoices issued to property homeowners by the platform
+/// Invoice represents financial invoices issued to property partners by the platform
 /// Purpose: Tracks earnings, commissions, and payment obligations for financial management
 model Invoice {
   id          String @id @default(uuid()) /// Unique identifier
@@ -620,7 +620,7 @@ model KyuDocument {
   kyuForm   KyuForm @relation(fields: [kyuFormId], references: [id]) /// Associated KYP form
 
   // Document Information
-  documentType KyuDocumentType /// Type of document (GovermentId/ProofOfAddress/etc.)
+  documentType KyuDocumentType /// Type of document (GovernmentId/ProofOfAddress/etc.)
   fileUrl      String /// Secure URL to stored document
   fileName     String? /// Original filename
 
@@ -631,12 +631,12 @@ model KyuDocument {
   // Note: Application logic enforces rules like 'proof of address not older than 6 months'
 }
 
-/// SecurityReport represents security incidents reported by property homeowners
+/// SecurityReport represents security incidents reported by property partners
 /// Purpose: Enables quick reporting and tracking of security breaches or suspicious activities
 model SecurityReport {
   id          String @id @default(uuid()) /// Unique identifier
   homeownerId String /// Foreign key to property owner
-  homeowner   User   @relation(fields: [homeownerId], references: [id]) /// Reporting homeowner
+  homeowner   User   @relation(fields: [homeownerId], references: [id]) /// Reporting partner
 
   // Report Details
   type        SecurityReportType /// Type of security incident

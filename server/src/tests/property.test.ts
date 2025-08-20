@@ -116,7 +116,7 @@ describe('Property API Tests', () => {
         username: `propertyowner_${timestamp}`,
         email: `owner_${timestamp}@example.com`,
         password: hashedPassword,
-        role: 'HOMEOWNER',
+        role: 'HomeOwner',
         isAdmin: false,
       },
     });
@@ -468,7 +468,7 @@ describe('Property API Tests', () => {
           username: 'otheruser',
           email: 'other@example.com',
           password: await hashPassword('Test@123'),
-          role: 'HOMEOWNER',
+          role: 'HomeOwner',
           isAdmin: false,
         },
       });
@@ -889,7 +889,7 @@ describe('Property API Tests', () => {
           username: 'newowner',
           email: 'newowner@example.com',
           password: await hashPassword('Test@123'),
-          role: 'HOMEOWNER',
+          role: 'HomeOwner',
           isAdmin: false,
         },
       });
@@ -978,7 +978,7 @@ describe('Property API Tests', () => {
           username: 'anotheruser',
           email: 'another@example.com',
           password: await hashPassword('Test@123'),
-          role: 'HOMEOWNER',
+          role: 'HomeOwner',
           isAdmin: false,
         },
       });
@@ -1070,7 +1070,7 @@ describe('Property API Tests', () => {
             username: 'photouser',
             email: 'photo@example.com',
             password: await hashPassword('Test@123'),
-            role: 'HOMEOWNER',
+            role: 'HomeOwner',
             isAdmin: false,
           },
         });
@@ -1163,7 +1163,7 @@ describe('Property API Tests', () => {
             username: 'photodelete',
             email: 'photodelete@example.com',
             password: await hashPassword('Test@123'),
-            role: 'HOMEOWNER',
+            role: 'HomeOwner',
             isAdmin: false,
           },
         });
@@ -1256,7 +1256,7 @@ describe('Property API Tests', () => {
             username: 'photoupdate',
             email: 'photoupdate@example.com',
             password: await hashPassword('Test@123'),
-            role: 'HOMEOWNER',
+            role: 'HomeOwner',
             isAdmin: false,
           },
         });
@@ -1616,7 +1616,7 @@ describe('Property API Tests', () => {
             username: `photoattach_${Date.now()}`,
             email: `photoattach_${Date.now()}@example.com`,
             password: await hashPassword('Test@123'),
-            role: 'HOMEOWNER',
+            role: 'HomeOwner',
             isAdmin: false,
           },
         });
@@ -1647,8 +1647,8 @@ describe('Property API Tests', () => {
   });
 
   describe('Role Upgrade Tests', () => {
-    it('should upgrade TENANT user to HOMEOWNER when creating first property', async () => {
-      // Create a user with TENANT role
+    it('should upgrade Tenant user to HomeOwner when creating first property', async () => {
+      // Create a user with Tenant role
       const hashedPassword = await hashPassword('Test@123');
       const timestamp = Date.now();
       const tenantUser = await prisma.user.create({
@@ -1656,15 +1656,15 @@ describe('Property API Tests', () => {
           username: `tenant_${timestamp}`,
           email: `tenant_${timestamp}@example.com`,
           password: hashedPassword,
-          role: 'TENANT', // Start as TENANT
+          role: 'Tenant', // Start as Tenant
           isAdmin: false,
         },
       });
       
       const tenantToken = generateToken(tenantUser);
 
-      // Verify the user starts as TENANT
-      expect(tenantUser.role).toBe('TENANT');
+      // Verify the user starts as Tenant
+      expect(tenantUser.role).toBe('Tenant');
 
       const propertyData = {
         name: 'First Property',
@@ -1737,7 +1737,7 @@ describe('Property API Tests', () => {
         firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
       };
 
-      // Create property as TENANT user
+      // Create property as Tenant user
       const response = await request(app)
         .post('/api/properties')
         .set('Authorization', `Bearer ${tenantToken}`)
@@ -1747,23 +1747,23 @@ describe('Property API Tests', () => {
       expect(response.body.message).toBe('Property created successfully');
       expect(response.body.property.ownerId).toBe(tenantUser.id);
 
-      // Verify that the user has been upgraded to HOMEOWNER in the database
+      // Verify that the user has been upgraded to HomeOwner in the database
       const updatedUser = await prisma.user.findUnique({
         where: { id: tenantUser.id },
         select: { role: true },
       });
 
-      expect(updatedUser?.role).toBe('HOMEOWNER');
+      expect(updatedUser?.role).toBe('HomeOwner');
     });
 
-    it('should not change role if user is already HOMEOWNER', async () => {
-      // Use the existing test user (already HOMEOWNER)
+    it('should not change role if user is already HomeOwner', async () => {
+      // Use the existing test user (already HomeOwner)
       const originalUser = await prisma.user.findUnique({
         where: { id: userId },
         select: { role: true },
       });
 
-      expect(originalUser?.role).toBe('HOMEOWNER');
+      expect(originalUser?.role).toBe('HomeOwner');
 
       // Create another property
       const testPropertyId = await createTestProperty();
@@ -1771,17 +1771,17 @@ describe('Property API Tests', () => {
       // Verify the property was created successfully
       expect(testPropertyId).toBeDefined();
 
-      // Verify that the user role remains HOMEOWNER
+      // Verify that the user role remains HomeOwner
       const userAfterPropertyCreation = await prisma.user.findUnique({
         where: { id: userId },
         select: { role: true },
       });
 
-      expect(userAfterPropertyCreation?.role).toBe('HOMEOWNER');
+      expect(userAfterPropertyCreation?.role).toBe('HomeOwner');
     });
 
-    it('should upgrade MANAGER user to HOMEOWNER when creating property', async () => {
-      // Create a user with MANAGER role
+    it('should upgrade Manager user to HomeOwner when creating property', async () => {
+      // Create a user with Manager role
       const hashedPassword = await hashPassword('Test@123');
       const timestamp = Date.now();
       const managerUser = await prisma.user.create({
@@ -1789,15 +1789,15 @@ describe('Property API Tests', () => {
           username: `manager_${timestamp}`,
           email: `manager_${timestamp}@example.com`,
           password: hashedPassword,
-          role: 'MANAGER', // Start as MANAGER
+          role: 'Manager', // Start as Manager
           isAdmin: false,
         },
       });
       
       const managerToken = generateToken(managerUser);
 
-      // Verify the user starts as MANAGER
-      expect(managerUser.role).toBe('MANAGER');
+      // Verify the user starts as Manager
+      expect(managerUser.role).toBe('Manager');
 
       const propertyData = {
         name: 'Manager Property',
@@ -1870,7 +1870,7 @@ describe('Property API Tests', () => {
         firstDateGuestCanCheckIn: new Date('2024-02-01').toISOString(),
       };
 
-      // Create property as MANAGER user
+      // Create property as Manager user
       const response = await request(app)
         .post('/api/properties')
         .set('Authorization', `Bearer ${managerToken}`)
@@ -1880,13 +1880,13 @@ describe('Property API Tests', () => {
       expect(response.body.message).toBe('Property created successfully');
       expect(response.body.property.ownerId).toBe(managerUser.id);
 
-      // Verify that the user has been upgraded to HOMEOWNER in the database
+      // Verify that the user has been upgraded to HomeOwner in the database
       const updatedUser = await prisma.user.findUnique({
         where: { id: managerUser.id },
         select: { role: true },
       });
 
-      expect(updatedUser?.role).toBe('HOMEOWNER');
+      expect(updatedUser?.role).toBe('HomeOwner');
     });
   });
 });

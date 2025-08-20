@@ -39,7 +39,9 @@
       "Bash(true)",
       "Bash(npx @tanstack/router-devtools:*)",
       "Bash(npx tsr:*)",
-      "Bash(timeout 5s npm run dev)"
+      "Bash(timeout 5s npm run dev)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx prisma migrate reset:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

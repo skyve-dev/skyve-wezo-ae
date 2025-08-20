@@ -318,8 +318,8 @@ describe('Authentication Tests', () => {
       authToken = response.body.token;
     });
 
-    it('should upgrade user role to HOMEOWNER after creating first property', async () => {
-      // First create a property to qualify for HOMEOWNER role
+    it('should upgrade user role to HomeOwner after creating first property', async () => {
+      // First create a property to qualify for HomeOwner role
       const propertyData = {
         name: 'Test Villa',
         address: {
@@ -381,21 +381,21 @@ describe('Authentication Tests', () => {
       const response = await request(app)
         .put('/api/auth/update-role')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ role: 'HOMEOWNER' })
+        .send({ role: 'HomeOwner' })
         .expect(200);
 
       expect(response.body.message).toBe('Role updated successfully');
-      expect(response.body.user.role).toBe('HOMEOWNER');
+      expect(response.body.user.role).toBe('HomeOwner');
     });
 
-    it('should reject role upgrade to HOMEOWNER without properties', async () => {
+    it('should reject role upgrade to HomeOwner without properties', async () => {
       const response = await request(app)
         .put('/api/auth/update-role')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ role: 'HOMEOWNER' })
+        .send({ role: 'HomeOwner' })
         .expect(400);
 
-      expect(response.body.error).toBe('Can only upgrade to HOMEOWNER role after creating a property');
+      expect(response.body.error).toBe('Can only upgrade to HomeOwner role after creating a property');
     });
 
     it('should reject role upgrade with invalid role', async () => {
@@ -411,7 +411,7 @@ describe('Authentication Tests', () => {
     it('should reject role upgrade without authentication', async () => {
       const response = await request(app)
         .put('/api/auth/update-role')
-        .send({ role: 'HOMEOWNER' })
+        .send({ role: 'HomeOwner' })
         .expect(401);
 
       expect(response.body.error).toBe('No token provided');
@@ -421,7 +421,7 @@ describe('Authentication Tests', () => {
       const response = await request(app)
         .put('/api/auth/update-role')
         .set('Authorization', 'Bearer invalidtoken')
-        .send({ role: 'HOMEOWNER' })
+        .send({ role: 'HomeOwner' })
         .expect(401);
 
       expect(response.body.error).toBe('Invalid or expired token');
@@ -437,15 +437,15 @@ describe('Authentication Tests', () => {
       expect(response.body.error).toBe('Invalid role');
     });
 
-    it('should allow TENANT to upgrade to MANAGER role without properties', async () => {
+    it('should allow Tenant to upgrade to Manager role without properties', async () => {
       const response = await request(app)
         .put('/api/auth/update-role')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ role: 'MANAGER' })
+        .send({ role: 'Manager' })
         .expect(200);
 
       expect(response.body.message).toBe('Role updated successfully');
-      expect(response.body.user.role).toBe('MANAGER');
+      expect(response.body.user.role).toBe('Manager');
     });
   });
 });

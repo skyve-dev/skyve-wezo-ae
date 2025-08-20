@@ -59,12 +59,24 @@ export async function cleanupDatabase() {
 
 beforeAll(async () => {
   process.env.DATABASE_URL = 'postgresql://postgres:123456@localhost:5432/wezo_db';
-  execSync('npx prisma migrate dev --name test-migration', {
-    env: {
-      ...process.env,
-      DATABASE_URL: 'postgresql://postgres:123456@localhost:5432/wezo_db',
-    },
-  });
+  
+  // Use migrate deploy in CI/test environment
+  try {
+    execSync('npx prisma migrate deploy', {
+      env: {
+        ...process.env,
+        DATABASE_URL: 'postgresql://postgres:123456@localhost:5432/wezo_db',
+      },
+    });
+  } catch (error) {
+    // If no migrations exist, push the schema directly
+    execSync('npx prisma db push --skip-generate', {
+      env: {
+        ...process.env,
+        DATABASE_URL: 'postgresql://postgres:123456@localhost:5432/wezo_db',
+      },
+    });
+  }
 });
 
 // beforeEach cleanup disabled - let individual tests handle cleanup
