@@ -11,539 +11,639 @@ datasource db {
 
 // Enums for clarity and data consistency based on MVP user stories
 
-// Status of a property listing, reflecting its visibility and bookability on the platform.
+/// PropertyStatus reflects a property listing's visibility and bookability on the platform
+/// Purpose: Controls whether properties appear in search results and can receive bookings
 enum PropertyStatus {
-  Draft // The initial state; the property is not yet live
-  Live //  The property is active and visible for bookings. This aligns with the need for a property to be "open and ready for bookings" to be visible in search results
-  Closed // The property is temporarily or permanently unavailable for bookings. This supports the user story for homeowners to block specific dates on their calendar, for instance, due to renovations or full occupancy
+  Draft /// Initial state - property is not yet live on the platform
+  Live /// Property is active, visible for bookings, and appears in search results (aligns with property being "open and ready for bookings")
+  Closed /// Property is temporarily/permanently unavailable (supports blocking dates for renovations or full occupancy)
 }
 
-// Types of rate plans, allowing homeowners to appeal to different traveler segments [3-5, 12-15].
+/// RatePlanType defines types of rate plans, allowing partners to appeal to different traveler segments
+/// Purpose: Enables property owners to offer different pricing strategies and cancellation policies
 enum RatePlanType {
-  FullyFlexible //  Offers guests flexibility for cancellations, typically at a higher price. This corresponds to user stories allowing homeowners to create and manage standard rate plans like "fully flexible" options, where guests can cancel free of charge until a certain number of days before arriva
-  NonRefundable //  Secures guaranteed bookings and revenue, typically at a lower price. This also supports creating "non-refundable" rate plans that secure guaranteed bookings and revenue, often at a lower price
-  Custom // Allows for unique rate plans based on specific needs. homeowners can create custom rate plans to appeal to specific guest segments or offer specific discounts
+  FullyFlexible /// Offers guests flexibility for cancellations (typically at higher price) - guests can cancel free until certain days before arrival
+  NonRefundable /// Secures guaranteed bookings and revenue (typically at lower price) - no refunds allowed
+  Custom /// Allows unique rate plans for specific guest segments or special discounts
 }
 
-// Defines types of booking restrictions that homeowners can apply to control received bookings.
+/// RestrictionType defines booking restrictions partners can apply to control received bookings
+/// Purpose: Gives property owners granular control over booking patterns and guest behavior
 enum RestrictionType {
-  MinLengthOfStay //  Minimum number of nights required for a booking. This supports the ability to set basic restrictions like minimum length of stay to control booking types
-  MaxLengthOfStay // Maximum number of nights accepted for a booking.
-  NoArrivals //  Prevents guests from checking in on specific dates. This allows homeowners to prevent check-ins on specific dates
-  NoDepartures // Prevents guests from checking out on specific dates. This allows homeowners to prevent check-outs on specific dates
-  MinAdvancedReservation // Specifies the minimum lead time required for a reservation
-  MaxAdvancedReservation // Specifies the maximum lead time allowed for a reservation
+  MinLengthOfStay /// Minimum number of nights required for a booking
+  MaxLengthOfStay /// Maximum number of nights accepted for a booking
+  NoArrivals /// Prevents guests from checking in on specific dates
+  NoDepartures /// Prevents guests from checking out on specific dates
+  MinAdvancedReservation /// Specifies minimum lead time required before arrival
+  MaxAdvancedReservation /// Specifies maximum lead time allowed for advance bookings
 }
 
-// Indicates the current state of a reservation in the booking lifecycle
+/// ReservationStatus indicates the current state of a reservation in the booking lifecycle
+/// Purpose: Tracks booking status from creation through completion for proper management
 enum ReservationStatus {
-  Confirmed // Booking is confirmed.
-  Pending // Booking is awaiting confirmation or payment.
-  Modified // Booking details have been changed [7, 13, 17, 26].
-  Cancelled // Booking has been cancelled by guest or homeowner [7, 8, 16, 17].
-  NoShow // Guest did not arrive for the reservation; reportable for commission waiver [8, 16, 23, 26, 29].
-  Completed // Stay has concluded.
+  Confirmed /// Booking is confirmed and guest is expected
+  Pending /// Booking awaits confirmation or payment
+  Modified /// Booking details have been changed (supports reservation modification user story)
+  Cancelled /// Booking cancelled by guest or partner
+  NoShow /// Guest didn't arrive - reportable within 48 hours for commission waiver
+  Completed /// Stay has concluded successfully
 }
 
-// Status of the Know Your User (KYU) form, indicating the verification progress [8, 11, 17, 19, 30-42].
+/// KyuStatus indicates the verification progress of the Know Your Partner (KYP) form
+/// Purpose: Tracks compliance and identity verification status for regulatory requirements
 enum KyuStatus {
-  PendingSubmission // Form has not yet been submitted.
-  Submitted // Form has been submitted and is awaiting review.
-  Verified // Identity and business details have been successfully verified [35, 39, 41, 42].
-  Rejected // Submission was rejected due to inconsistencies or missing information [35, 42].
+  PendingSubmission /// Form not yet submitted
+  Submitted /// Form submitted and awaiting review
+  Verified /// Identity and business details successfully verified
+  Rejected /// Submission rejected due to inconsistencies or missing information
 }
 
-// Type of entity for the KYU form, determining the required documents and information [34, 37, 39-42].
+/// KyuEntityType determines the type of entity for KYP form and required documents
+/// Purpose: Differentiates between individual and business entities for appropriate verification
 enum KyuEntityType {
-  Individual // Represents a sole trader or individual owner [34, 37, 39-42].
-  Business // Represents a homeownership, corporation, or non-profit organization [34, 37, 39, 41, 42].
+  Individual /// Sole trader or individual property owner
+  Business /// Partnership, corporation, or non-profit organization (requires different verification)
 }
 
-// Types of documents required for the KYU form [8, 19, 31, 33, 35, 37, 39, 41, 42].
+/// KyuDocumentType specifies types of documents required for KYP form verification
+/// Purpose: Ensures proper identity and business verification through standardized documents
 enum KyuDocumentType {
-  GovermentId // Official identification document with a picture [8, 19, 31, 33, 35, 37, 39, 41].
-  ProofOfAddress // Document like a utility bill or bank statement, typically not older than 6 months [8, 19, 31, 33, 35, 37, 39, 41, 42].
-  BusinessRegistration // Official document proving business registration [8, 19, 31, 33, 35].
-  Other // Category for any other specific documents required.
+  GovermentId /// Official ID with photo (passport, driver's license, etc.)
+  ProofOfAddress /// Utility bill or bank statement (must be less than 6 months old)
+  BusinessRegistration /// Official business registration document (required for business entities)
+  Other /// Any other specific documents that may be required
 }
 
-// Types of security incidents that a homeowner might report [37, 42-47].
+/// SecurityReportType categorizes security incidents that partners might report
+/// Purpose: Enables quick categorization and response to security threats
 enum SecurityReportType {
-  SuspiciusActivity // General report of unusual behavior on the account [42, 43].
-  SecurityBreach // Suspected compromise of the account or guest data [37, 42-45, 47].
-  PhisingAttempt // Attempt to trick users into revealing sensitive information [46, 48].
-  SocialEngineeringAttempt // Manipulation to gain access to data or accounts [44, 46].
-  FraudulentBooking // Suspected non-genuine reservations [8, 16].
-  Other // For incidents not covered by specific types.
+  SuspiciusActivity /// General unusual behavior on the account
+  SecurityBreach /// Suspected compromise of account or guest data
+  PhisingAttempt /// Attempts to trick users into revealing sensitive information
+  SocialEngineeringAttempt /// Manipulation tactics to gain unauthorized access
+  FraudulentBooking /// Suspected non-genuine or fraudulent reservations
+  Other /// Incidents not covered by specific categories
 }
 
 // end of new enum
+
+/// UserRole defines the different types of users in the system
+/// Purpose: Determines access levels and capabilities within the platform
 enum UserRole {
-  Tenant
-  HomeOwner
-  Manager
+  Tenant /// Guest/tenant who makes bookings
+  HomeOwner /// Property owner who manages listings
+  Manager /// Property manager with delegated access
 }
 
-// Represents a wezo.com property homeowner/users, who manages property listings [1, 20].
+/// User represents a Wezo.ae property partner or user who manages property listings
+/// Purpose: Central user entity for authentication, property management, and platform interactions
 model User {
-  id                   String     @id @default(cuid()) // Unique identifier for the user
-  username             String     @unique // Unique username for login
-  email                String     @unique // Unique email address for the user
-  firstName            String? //  Optional first and last names
-  lastName             String? //  Optional first and last names
-  password             String // Fields for password reset functionality
-  role                 UserRole   @default(Tenant)
-  isAdmin              Boolean    @default(false)
-  passwordResetToken   String?    @unique
-  passwordResetExpires DateTime? // Fields for password reset functionality
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-  properties           Property[] //  Relation to Property model, linking users to the properties they manage. This supports the user story for a partner to access their property's command center to manage their listing
+  id                   String    @id @default(cuid()) /// Unique identifier for the user
+  username             String    @unique /// Unique username for login authentication
+  email                String    @unique /// Unique email address for communications and login
+  firstName            String? /// Optional first name
+  lastName             String? /// Optional last name
+  password             String /// Hashed password for authentication
+  role                 UserRole  @default(Tenant) /// User's role determining access levels (Tenant/HomeOwner/Manager)
+  isAdmin              Boolean   @default(false) /// Boolean flag for administrator privileges
+  passwordResetToken   String?   @unique /// Token for secure password reset process
+  passwordResetExpires DateTime? /// Expiration time for password reset token
+  createdAt            DateTime  @default(now()) /// Timestamp of account creation
+  updatedAt            DateTime  @updatedAt /// Timestamp of last account update
 
-  bankDetails     HomeOwnerBankDetails? // Relation to HomeOwnerBankDetails, linking the user to their bank details for payments. This supports the user story to add or update bank details
-  kyuForms        KyuForm[] // Relationship to Know Your homeowner (KYU) forms for compliance [8, 11, 17, 19, 30-36].
-  securityReports SecurityReport[] // Relation to SecurityReport, enabling the user to report security breaches or suspicious activity. This supports the user story to report any suspected security breaches or suspicious activity immediately
-  invoices        Invoice[] // Relation to Invoice, representing financial invoices from Booking.com for the user. This supports the user story to settle invoices and view reservation statement
-  messages        Message[]             @relation("PartnerMessages") // Relation to Message, for messages sent or received by the partner. This supports receiving messages from Booking.com and communicating directly with guests through an in-app inbox
-  reviews         Review[] // Relation to Review, allowing users (guests) to leave reviews.
-
-  reservations Reservation[] // Relation to Reservation, allowing users (guests) to make reservations
+  // Relations
+  properties      Property[] /// Properties managed by this user (supports property command center access)
+  bankDetails     HomeOwnerBankDetails? /// Bank details for receiving payments
+  kyuForms        KyuForm[] /// Know Your User forms for regulatory compliance
+  securityReports SecurityReport[] /// Security incident reports filed by this user
+  invoices        Invoice[] /// Financial invoices from the platform
+  messages        Message[]             @relation("PartnerMessages") /// Messages in the in-app inbox (guest communications and platform notifications)
+  reviews         Review[] /// Reviews written by this user (when acting as guest)
+  reservations    Reservation[] /// Reservations made by this user (when acting as guest)
 }
 
-// Enums from your TypeScript model
+/// BedType specifies the types of beds available in property rooms
+/// Purpose: Provides detailed sleeping arrangement information for guests
 enum BedType {
-  TwinBed
-  FullBed
-  QueenBed
-  KingBed
-  BunkBed
-  SofaBed
-  FutonBed
+  TwinBed /// Single/twin size bed
+  FullBed /// Full/double size bed
+  QueenBed /// Queen size bed
+  KingBed /// King size bed
+  BunkBed /// Bunk bed (typically for children or budget accommodations)
+  SofaBed /// Convertible sofa bed
+  FutonBed /// Futon bed
 }
 
+/// RoomSpaceType categorizes different types of rooms/spaces within a property
+/// Purpose: Helps guests understand property layout and available spaces
 enum RoomSpaceType {
-  Bedroom
-  LivingRoom
-  Kitchen
-  DiningRoom
-  Other
+  Bedroom /// Sleeping room
+  LivingRoom /// Common living area
+  Kitchen /// Cooking area
+  DiningRoom /// Dedicated dining space
+  Other /// Any other type of space
 }
 
+/// ParkingType indicates parking availability and cost at the property
+/// Purpose: Informs guests about parking options before booking
 enum ParkingType {
-  YesFree
-  YesPaid
-  No
+  YesFree /// Free parking available
+  YesPaid /// Paid parking available
+  No /// No parking available
 }
 
+/// PetPolicy defines the property's stance on allowing pets
+/// Purpose: Helps pet owners find suitable accommodations
 enum PetPolicy {
-  Yes
-  No
-  UponRequest
+  Yes /// Pets allowed
+  No /// No pets allowed
+  UponRequest /// Pets may be allowed with prior approval
 }
 
+/// BookingType determines how bookings are processed
+/// Purpose: Gives property owners control over booking approval process
 enum BookingType {
-  BookInstantly
-  NeedToRequestBook
+  BookInstantly /// Instant booking without owner approval
+  NeedToRequestBook /// Requires owner approval before confirmation
 }
 
+/// PaymentType specifies available payment methods for bookings
+/// Purpose: Provides payment flexibility for guests and owners
 enum PaymentType {
-  Online
-  ByCreditCardAtProperty
+  Online /// Online payment at time of booking
+  ByCreditCardAtProperty /// Payment by credit card upon arrival
 }
 
+/// Currency defines supported currencies for pricing and transactions
+/// Purpose: Standardizes monetary values across the platform
 enum Currency {
-  AED
+  AED /// UAE Dirham (primary currency for UAE market)
 }
 
-// New model for a group of properties (e.g., a compound villa)
+/// PropertyGroup represents a collection of related properties (e.g., compound villas)
+/// Purpose: Groups multiple properties under single management or location
 model PropertyGroup {
-  id         String     @id @default(uuid())
-  name       String
-  properties Property[]
+  id         String     @id @default(uuid()) /// Unique identifier for the property group
+  name       String /// Name of the property group/compound
+  properties Property[] /// Properties belonging to this group
 }
 
-// Main Property model
+/// Property represents an individual listing on the platform
+/// Purpose: Core entity containing all property details, policies, and relationships
 model Property {
-  // Unique identifier for the property
-  propertyId String @id @default(uuid())
+  propertyId String @id @default(uuid()) /// Unique identifier for the property
 
-  name      String
-  addressId String  @unique
-  address   Address @relation(fields: [addressId], references: [id])
+  // Basic Information
+  name      String /// Property name/title
+  addressId String  @unique /// Foreign key to address
+  address   Address @relation(fields: [addressId], references: [id]) /// Physical location details
 
-  // Relation to the new PropertyGroup model
-  propertyGroupId String?
-  propertyGroup   PropertyGroup? @relation(fields: [propertyGroupId], references: [id])
+  // Property Grouping
+  propertyGroupId String? /// Optional link to property group
+  propertyGroup   PropertyGroup? @relation(fields: [propertyGroupId], references: [id]) /// Parent group if part of compound
 
-  // Layout
-  rooms             Room[]
-  maximumGuest      Int
-  bathrooms         Int
-  allowChildren     Boolean
-  offerCribs        Boolean
-  propertySizeSqMtr Int?
+  // Layout & Capacity
+  rooms             Room[] /// Rooms/units within the property
+  maximumGuest      Int /// Maximum occupancy
+  bathrooms         Int /// Number of bathrooms
+  allowChildren     Boolean /// Whether children are allowed
+  offerCribs        Boolean /// Whether cribs are available
+  propertySizeSqMtr Int? /// Optional property size in square meters
 
-  // Amenities
-  amenities Amenity[]
+  // Facilities & Services  
+  amenities      Amenity[] /// Available amenities (WiFi, pool, etc.)
+  serveBreakfast Boolean /// Whether breakfast is served
+  parking        ParkingType /// Parking availability and cost
+  languages      String[] /// Languages spoken by staff
 
-  // Services
-  serveBreakfast Boolean
-  parking        ParkingType
-  languages      String[]
+  // House Rules & Policies
+  smokingAllowed         Boolean /// Smoking policy
+  partiesOrEventsAllowed Boolean /// Events/parties policy
+  petsAllowed            PetPolicy /// Pet policy
+  checkInCheckout        CheckInOutTimes? /// Check-in/out time windows
 
-  // Rules
-  smokingAllowed         Boolean
-  partiesOrEventsAllowed Boolean
-  petsAllowed            PetPolicy
-  checkInCheckout        CheckInOutTimes?
+  // Descriptions
+  aboutTheProperty     String /// Property description (auto-generated on platform)
+  aboutTheNeighborhood String /// Neighborhood/area description
 
-  // Profile
-  aboutTheProperty     String
-  aboutTheNeighborhood String
+  // Media
+  photos Photo[] /// Property images (supports high-quality photo uploads)
 
-  // Photos
-  photos Photo[]
+  // Booking Configuration
+  bookingType BookingType /// Instant booking or request-based
+  paymentType PaymentType /// Online or at-property payment
 
-  // Booking & Payment
-  bookingType BookingType
-  paymentType PaymentType
-
-  // Pricing
-  pricing Pricing?
-
-  // Cancellation
-  cancellation Cancellation?
+  // Pricing & Policies
+  pricing      Pricing? /// Base pricing information
+  cancellation Cancellation? /// Cancellation policy details
 
   // Availability
-  firstDateGuestCanCheckIn String
+  firstDateGuestCanCheckIn String /// Earliest possible check-in date
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps
+  createdAt DateTime @default(now()) /// Property creation timestamp
+  updatedAt DateTime @updatedAt /// Last modification timestamp
 
-  // Property Owner
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id])
+  // Ownership
+  ownerId String /// Foreign key to property owner
+  owner   User   @relation(fields: [ownerId], references: [id]) /// Property owner relationship
 
-  status            PropertyStatus @default(Draft) // Current status of the property listing.
-  minPhotosRequired Int            @default(5) // Rule: at least five photos are recommended [10, 25, 49].
+  // Status & Requirements
+  status            PropertyStatus @default(Draft) /// Current listing status (Draft/Live/Closed)
+  minPhotosRequired Int            @default(5) /// Minimum photos required (platform recommendation)
 
-  reservationPolicy String?
-  paymentPolicy     String?
+  // Additional Policies
+  reservationPolicy      String? /// Custom reservation policy text
+  paymentPolicy          String? /// Custom payment policy text
+  cancellationPolicyType RatePlanType? /// Default cancellation type for property
+  houseRules             String? /// Additional house rules text
 
-  cancellationPolicyType RatePlanType? // Can be inherited from rate plans or set here.
-  houseRules             String?
-
-  availability Availability[] // Calendar availability for the property's rooms/units [2-6, 8, 13].
-  ratePlans    RatePlan[] // Pricing and condition plans for bookings [2-5, 12-15].
-  restrictions Restriction[] // Property-wide booking restrictions [3, 22, 23].
-  reservations Reservation[] // All bookings made for this property [7, 24, 26-28].
-  reviews      Review[] // Guest reviews for this property [7, 10-12, 14, 16, 26-28, 30-32, 42, 43, 50].
+  // Relations for Property Management
+  availability Availability[] /// Calendar availability (supports date blocking)
+  ratePlans    RatePlan[] /// Multiple rate plans for different traveler segments
+  restrictions Restriction[] /// Booking restrictions (min stay, etc.)
+  reservations Reservation[] /// All bookings for this property
+  reviews      Review[] /// Guest reviews and ratings
 }
 
+/// Address stores detailed location information for a property
+/// Purpose: Provides complete address details for property location and search
 model Address {
-  id                     String    @id @default(uuid())
-  apartmentOrFloorNumber String?
-  countryOrRegion        String
-  city                   String
-  zipCode                Int
-  latLong                LatLong?
-  property               Property?
+  id                     String    @id @default(uuid()) /// Unique identifier
+  apartmentOrFloorNumber String? /// Optional apartment/floor number
+  countryOrRegion        String /// Country or region name
+  city                   String /// City name
+  zipCode                Int /// Postal/ZIP code
+  latLong                LatLong? /// Geographic coordinates
+  property               Property? /// Associated property
 }
 
+/// LatLong stores geographic coordinates for an address
+/// Purpose: Enables map display and location-based search functionality
 model LatLong {
-  id        String  @id @default(uuid())
-  latitude  Float
-  longitude Float
-  addressId String  @unique
-  address   Address @relation(fields: [addressId], references: [id])
+  id        String  @id @default(uuid()) /// Unique identifier
+  latitude  Float /// Latitude coordinate
+  longitude Float /// Longitude coordinate
+  addressId String  @unique /// Foreign key to address
+  address   Address @relation(fields: [addressId], references: [id]) /// Associated address
 }
 
+/// Room defines a specific room or unit within a property
+/// Purpose: Provides detailed room configuration for guest understanding
 model Room {
-  id         String   @id @default(uuid())
-  spaceName  String
-  beds       Bed[]
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [propertyId])
+  id         String   @id @default(uuid()) /// Unique identifier
+  spaceName  String /// Name/type of the space
+  beds       Bed[] /// Beds available in this room
+  propertyId String /// Foreign key to property
+  property   Property @relation(fields: [propertyId], references: [propertyId]) /// Parent property
 }
 
+/// Bed describes sleeping arrangements within a room
+/// Purpose: Provides detailed bed configuration for accurate occupancy planning
 model Bed {
-  id          String  @id @default(uuid())
-  typeOfBed   BedType
-  numberOfBed Int
-  roomId      String
-  room        Room    @relation(fields: [roomId], references: [id])
+  id          String  @id @default(uuid()) /// Unique identifier
+  typeOfBed   BedType /// Type of bed (Twin/Queen/King etc.)
+  numberOfBed Int /// Quantity of this bed type
+  roomId      String /// Foreign key to room
+  room        Room    @relation(fields: [roomId], references: [id]) /// Parent room
 }
 
+/// CheckInOutTimes specifies check-in and check-out time windows for a property
+/// Purpose: Sets clear expectations for arrival and departure times
 model CheckInOutTimes {
-  id            String   @id @default(uuid())
-  checkInFrom   String
-  checkInUntil  String
-  checkOutFrom  String
-  checkOutUntil String
-  propertyId    String   @unique
-  property      Property @relation(fields: [propertyId], references: [propertyId])
+  id            String   @id @default(uuid()) /// Unique identifier
+  checkInFrom   String /// Earliest check-in time (e.g., "14:00")
+  checkInUntil  String /// Latest check-in time (e.g., "22:00")
+  checkOutFrom  String /// Earliest check-out time (e.g., "08:00")
+  checkOutUntil String /// Latest check-out time (e.g., "12:00")
+  propertyId    String   @unique /// Foreign key to property (one-to-one)
+  property      Property @relation(fields: [propertyId], references: [propertyId]) /// Associated property
 }
 
+/// Photo stores information about property images
+/// Purpose: Manages property photos for visual presentation to potential guests
 model Photo {
-  id          String    @id @default(uuid())
-  url         String
-  altText     String
-  description String?
-  tags        String[]
-  propertyId  String?
-  isMain      Boolean   @default(false) // Indicates if this is the primary display photo.
-  property    Property? @relation(fields: [propertyId], references: [propertyId])
-  uploadedAt  DateTime  @default(now())
+  id          String    @id @default(uuid()) /// Unique identifier
+  url         String /// URL to the photo file
+  altText     String /// Alt text for accessibility
+  description String? /// Optional photo description
+  tags        String[] /// Tags for categorization
+  propertyId  String? /// Foreign key to property
+  isMain      Boolean   @default(false) /// Primary display photo flag
+  property    Property? @relation(fields: [propertyId], references: [propertyId]) /// Associated property
+  uploadedAt  DateTime  @default(now()) /// Upload timestamp
 }
 
+/// Amenity lists facilities and features available at a property
+/// Purpose: Helps properties match traveler search criteria and expectations
 model Amenity {
-  id         String   @id @default(uuid())
-  name       String
-  category   String
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [propertyId])
+  id         String   @id @default(uuid()) /// Unique identifier
+  name       String /// Amenity name (e.g., "Wi-Fi", "Pool")
+  category   String /// Category for grouping (e.g., "Technology", "Recreation")
+  propertyId String /// Foreign key to property
+  property   Property @relation(fields: [propertyId], references: [propertyId]) /// Associated property
 }
 
+/// Pricing stores general pricing information for a property
+/// Purpose: Defines base rates and discounts for different booking scenarios
 model Pricing {
-  id                                         String              @id @default(uuid())
-  currency                                   Currency
-  ratePerNight                               Float
-  ratePerNightWeekend                        Float?
-  promotion                                  Promotion?
-  pricePerGroupSize                          PricePerGroupSize[]
-  discountPercentageForNonRefundableRatePlan Float?
-  discountPercentageForWeeklyRatePlan        Float?
-  propertyId                                 String              @unique
-  property                                   Property            @relation(fields: [propertyId], references: [propertyId])
+  id                                         String              @id @default(uuid()) /// Unique identifier
+  currency                                   Currency /// Currency for all prices
+  ratePerNight                               Float /// Standard nightly rate
+  ratePerNightWeekend                        Float? /// Optional weekend rate
+  promotion                                  Promotion? /// Active promotion if any
+  pricePerGroupSize                          PricePerGroupSize[] /// Variable pricing by group size
+  discountPercentageForNonRefundableRatePlan Float? /// Discount for non-refundable bookings
+  discountPercentageForWeeklyRatePlan        Float? /// Discount for weekly stays
+  propertyId                                 String              @unique /// Foreign key to property (one-to-one)
+  property                                   Property            @relation(fields: [propertyId], references: [propertyId]) /// Associated property
 }
 
+/// Promotion defines special offers for a property
+/// Purpose: Boosts visibility and bookings through targeted discounts
 model Promotion {
-  id          String  @id @default(uuid())
-  type        String
-  percentage  Float
-  description String
-  pricingId   String  @unique
-  pricing     Pricing @relation(fields: [pricingId], references: [id])
+  id          String  @id @default(uuid()) /// Unique identifier
+  type        String /// Promotion type (e.g., "Early Booker", "Last Minute")
+  percentage  Float /// Discount percentage
+  description String /// Promotion description for guests
+  pricingId   String  @unique /// Foreign key to pricing (one-to-one)
+  pricing     Pricing @relation(fields: [pricingId], references: [id]) /// Associated pricing
 }
 
+/// PricePerGroupSize allows different rates based on number of guests
+/// Purpose: Enables flexible pricing strategies for different group sizes
 model PricePerGroupSize {
-  id           String  @id @default(uuid())
-  groupSize    Int
-  ratePerNight Float
-  pricingId    String
-  pricing      Pricing @relation(fields: [pricingId], references: [id])
+  id           String  @id @default(uuid()) /// Unique identifier
+  groupSize    Int /// Number of guests
+  ratePerNight Float /// Rate for this group size
+  pricingId    String /// Foreign key to pricing
+  pricing      Pricing @relation(fields: [pricingId], references: [id]) /// Associated pricing
 }
 
+/// Cancellation defines cancellation policies for a property
+/// Purpose: Sets clear cancellation terms to manage guest expectations and owner revenue
 model Cancellation {
-  id                                     String   @id @default(uuid())
-  daysBeforeArrivalFreeToCancel          Int
-  waiveCancellationFeeAccidentalBookings Boolean
-  propertyId                             String   @unique
-  property                               Property @relation(fields: [propertyId], references: [propertyId])
+  id                                     String   @id @default(uuid()) /// Unique identifier
+  daysBeforeArrivalFreeToCancel          Int /// Days before arrival for free cancellation
+  waiveCancellationFeeAccidentalBookings Boolean /// Whether to waive fees for accidental bookings
+  propertyId                             String   @unique /// Foreign key to property (one-to-one)
+  property                               Property @relation(fields: [propertyId], references: [propertyId]) /// Associated property
 }
 
 /// ADDITIONAL SCHEMA
 
-// Represents the availability of a specific room type on a given date [2-6, 8, 13].
+/// Availability represents the availability of a property on a specific date
+/// Purpose: Manages calendar availability and supports date blocking for various reasons
 model Availability {
-  id          String   @id @default(uuid())
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [propertyId])
-  date        DateTime // The specific date for this availability entry.
-  isAvailable Boolean  @default(true) // True if available, false if blocked (e.g., for renovations or full occupancy) [3, 6, 9-11].
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String   @id @default(uuid()) /// Unique identifier
+  propertyId  String /// Foreign key to property
+  property    Property @relation(fields: [propertyId], references: [propertyId]) /// Associated property
+  date        DateTime /// Specific date for this availability entry
+  isAvailable Boolean  @default(true) /// True if available, false if blocked (renovations, full occupancy, etc.)
+  createdAt   DateTime @default(now()) /// Creation timestamp
+  updatedAt   DateTime @updatedAt /// Last update timestamp
 
-  @@unique([propertyId, date]) // Ensures unique availability entry per room type per date.
+  @@unique([propertyId, date]) /// Ensures one availability entry per property per date
 }
 
-// Defines a rate plan with specific conditions and pricing options [2-5, 12-15].
+/// RatePlan defines a rate plan with specific conditions and pricing options
+/// Purpose: Enables homeowners to create multiple pricing strategies to appeal to different traveler segments
 model RatePlan {
-  id                 String        @id @default(uuid())
-  propertyId         String
-  property           Property      @relation(fields: [propertyId], references: [propertyId])
-  name               String // Name of the rate plan, e.g., "Standard Rate", "Early Booker" [3-5, 15].
-  type               RatePlanType // Categorization of the rate plan (e.g., Fully Flexible, Non-Refundable) [15].
-  description        String?
-  cancellationPolicy String // Detailed description of the cancellation terms [15-18].
-  includesBreakfast  Boolean       @default(false) // Example of an included meal option [15].
-  restrictions       Restriction[] // Specific restrictions applied to this rate plan [3, 12, 15, 25].
-  prices             Price[] // Prices defined for this rate plan across different room types and dates.
-  reservations       Reservation[] // Reservations made under this rate plan.
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  id                 String       @id @default(uuid()) /// Unique identifier
+  propertyId         String /// Foreign key to property
+  property           Property     @relation(fields: [propertyId], references: [propertyId]) /// Associated property
+  name               String /// Rate plan name (e.g., "Standard Rate", "Early Booker")
+  type               RatePlanType /// Plan type (FullyFlexible/NonRefundable/Custom)
+  description        String? /// Optional description for guests
+  cancellationPolicy String /// Detailed cancellation terms
+  includesBreakfast  Boolean      @default(false) /// Whether breakfast is included
+
+  // Relations
+  restrictions Restriction[] /// Specific booking restrictions for this plan
+  prices       Price[] /// Daily prices for this rate plan
+  reservations Reservation[] /// Bookings made under this rate plan
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-// Defines the price per night for a specific room type under a given rate plan on a particular date [2-4, 6, 9, 12, 14, 21].
+/// Price defines the price per night for a rate plan on a specific date
+/// Purpose: Enables dynamic pricing adjustments based on demand, seasonality, and strategy
 model Price {
-  id         String   @id @default(uuid())
-  ratePlanId String
-  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id])
-  date       DateTime // The date to which this price applies.
-  amount     Decimal  @db.Decimal(10, 2) // The price per night [3, 4, 12].
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id         String   @id @default(uuid()) /// Unique identifier
+  ratePlanId String /// Foreign key to rate plan
+  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan
+  date       DateTime /// Date for which this price applies
+  amount     Decimal  @db.Decimal(10, 2) /// Price per night (supports 2 decimal places)
+  createdAt  DateTime @default(now()) /// Creation timestamp
+  updatedAt  DateTime @updatedAt /// Last update timestamp
 
-  @@unique([ratePlanId, date]) // Ensures unique price for a rate plan, room type, and date.
+  @@unique([ratePlanId, date]) /// Ensures one price per rate plan per date
 }
 
-// Represents a restriction applied to bookings, either property-wide or per rate plan [3, 22, 23].
+/// Restriction represents booking limitations applied to properties or rate plans
+/// Purpose: Gives homeowners granular control over booking patterns and guest behavior
 model Restriction {
-  id         String          @id @default(uuid())
-  ratePlanId String? // Optional: If the restriction applies to a specific rate plan [3, 12, 25].
-  ratePlan   RatePlan?       @relation(fields: [ratePlanId], references: [id])
-  propertyId String // Always linked to a property.
-  property   Property        @relation(fields: [propertyId], references: [propertyId])
-  type       RestrictionType // The type of restriction (e.g., MIN_LENGTH_OF_STAY).
-  value      Int // The numerical value for the restriction (e.g., 3 for 3 nights).
-  startDate  DateTime? // Optional: Start date for the restriction's validity.
-  endDate    DateTime? // Optional: End date for the restriction's validity.
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  id         String          @id @default(uuid()) /// Unique identifier
+  ratePlanId String? /// Optional: links to specific rate plan
+  ratePlan   RatePlan?       @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan if applicable
+  propertyId String /// Always linked to a property
+  property   Property        @relation(fields: [propertyId], references: [propertyId]) /// Associated property
+  type       RestrictionType /// Type of restriction (MinLengthOfStay, NoArrivals, etc.)
+  value      Int /// Numerical value (e.g., 3 for minimum 3 nights)
+  startDate  DateTime? /// Optional: when restriction starts
+  endDate    DateTime? /// Optional: when restriction ends
+  createdAt  DateTime        @default(now()) /// Creation timestamp
+  updatedAt  DateTime        @updatedAt /// Last update timestamp
 }
 
-// Represents a booking made by a guest for a property [7, 24, 26-28].
+/// Reservation represents a booking made by a guest for a property
+/// Purpose: Core booking entity tracking all reservation details and lifecycle
 model Reservation {
-  id               String            @id @default(uuid())
-  propertyId       String
-  property         Property          @relation(fields: [propertyId], references: [propertyId])
-  ratePlanId       String
-  ratePlan         RatePlan          @relation(fields: [ratePlanId], references: [id])
-  guestId          String
-  guest            User              @relation(fields: [guestId], references: [id])
-  checkInDate      DateTime
-  checkOutDate     DateTime
-  numGuests        Int // Number of guests in the reservation.
-  totalPrice       Decimal           @db.Decimal(10, 2) // Total price of the stay [7, 24, 26].
-  commissionAmount Decimal?          @db.Decimal(10, 2) // Commission due to Booking.com [7, 24, 26].
-  status           ReservationStatus @default(Confirmed) // Current status of the reservation [7, 24, 26].
-  paymentStatus    String? // E.g., "Paid", "Pending", "Failed" [7, 24, 26].
-  guestRequests    String? // Any special requests made by the guest [7, 24, 26].
-  isNoShowReported Boolean           @default(false) // Flag if a no-show has been reported [8, 16, 23, 26, 29].
-  notes            String? // Internal notes for the property homeowner.
-  messages         Message[] // Communication related to this specific reservation [7, 24, 26].
-  review           Review? // Optional: Link to the guest review for this reservation [10, 11, 43].
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id         String   @id @default(uuid()) /// Unique identifier
+  propertyId String /// Foreign key to property
+  property   Property @relation(fields: [propertyId], references: [propertyId]) /// Booked property
+  ratePlanId String /// Foreign key to rate plan
+  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Selected rate plan
+  guestId    String /// Foreign key to guest user
+  guest      User     @relation(fields: [guestId], references: [id]) /// Guest making the booking
+
+  // Booking Details
+  checkInDate      DateTime /// Check-in date
+  checkOutDate     DateTime /// Check-out date
+  numGuests        Int /// Number of guests
+  totalPrice       Decimal  @db.Decimal(10, 2) /// Total booking price
+  commissionAmount Decimal? @db.Decimal(10, 2) /// Platform commission amount
+
+  // Status Information
+  status           ReservationStatus @default(Confirmed) /// Current reservation status
+  paymentStatus    String? /// Payment status ("Paid", "Pending", "Failed")
+  guestRequests    String? /// Special requests from guest
+  isNoShowReported Boolean           @default(false) /// No-show flag (reportable within 48 hours)
+  notes            String? /// Internal notes for property owner
+
+  // Relations
+  messages Message[] /// Related communications
+  review   Review? /// Guest review if submitted
+
+  createdAt DateTime @default(now()) /// Booking creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-// Represents a message sent or received by a homeowner, including communication with guests and Booking.com [9, 20, 24, 26, 29, 43].
+/// Message represents communications between homeowners, guests, and the platform
+/// Purpose: Enables in-app messaging for reservations, notifications, and guest communications
 model Message {
-  id            String       @id @default(uuid())
-  reservationId String? // Optional: Links to a reservation if the message is guest-related [7, 24, 26].
-  reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  senderId      String // ID of the sender (homeowner, Guest, or System).
-  senderType    UserRole // Type of the sender (homeowner, GUEST, SYSTEM).
-  recipientId   String // ID of the recipient (homeowner, Guest, or System).
-  recipientType UserRole // Type of the recipient (homeowner, GUEST, SYSTEM).
-  partner       User         @relation("PartnerMessages", fields: [recipientId], references: [id]) // Assuming recipient is always a homeowner or messages are associated with homeowner.
-  // Note: For MVP, the sender/recipient IDs are generic strings. In a full system,
-  // these would ideally be foreign keys to a unified User table that includes homeowners, Guests, and System actors.
-  content       String // The message content.
-  sentAt        DateTime     @default(now())
-  isRead        Boolean      @default(false) // Indicates if the message has been read by the recipient.
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id            String       @id @default(uuid()) /// Unique identifier
+  reservationId String? /// Optional link to related reservation
+  reservation   Reservation? @relation(fields: [reservationId], references: [id]) /// Associated reservation if guest-related
+
+  // Sender/Recipient Information
+  senderId      String /// ID of sender (homeowner/guest/system)
+  senderType    UserRole /// Type of sender
+  recipientId   String /// ID of recipient (homeowner/guest/system)
+  recipientType UserRole /// Type of recipient
+  partner       User     @relation("PartnerMessages", fields: [recipientId], references: [id]) /// Associated partner
+
+  // Message Content
+  content String /// Message text content
+  sentAt  DateTime @default(now()) /// Send timestamp
+  isRead  Boolean  @default(false) /// Read status flag
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+
+  // Note: For MVP, sender/recipient IDs are generic strings. In production,
+  // these would be foreign keys to a unified User table
 }
 
-// Represents a guest review for a property based on a specific reservation [7, 10-12, 14, 16, 27, 28, 30-32, 42, 43, 50].
+/// Review represents guest feedback for a property based on a completed stay
+/// Purpose: Collects guest ratings and feedback, allows homeowner responses
 model Review {
-  id            String      @id @default(uuid())
-  guestId       String
-  guest         User        @relation(fields: [guestId], references: [id])
-  propertyId    String
-  property      Property    @relation(fields: [propertyId], references: [propertyId])
-  reservationId String      @unique // A review is tied to a specific unique reservation [11].
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
-  rating        Int // Guest's overall rating on a scale of 1-10 [11, 32].
-  comment       String? // Optional: Written feedback from the guest.
-  response      String? // homeowner's reply to the review [12, 14, 16, 30, 32, 43].
-  reviewedAt    DateTime    @default(now()) // When the review was submitted.
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id            String      @id @default(uuid()) /// Unique identifier
+  guestId       String /// Foreign key to guest user
+  guest         User        @relation(fields: [guestId], references: [id]) /// Guest who wrote the review
+  propertyId    String /// Foreign key to property
+  property      Property    @relation(fields: [propertyId], references: [propertyId]) /// Reviewed property
+  reservationId String      @unique /// Foreign key to reservation (one review per booking)
+  reservation   Reservation @relation(fields: [reservationId], references: [id]) /// Associated reservation
+
+  // Review Content
+  rating   Int /// Overall rating (1-10 scale)
+  comment  String? /// Optional written feedback from guest
+  response String? /// homeowner's response to the review
+
+  reviewedAt DateTime @default(now()) /// Review submission timestamp
+  createdAt  DateTime @default(now()) /// Creation timestamp
+  updatedAt  DateTime @updatedAt /// Last update timestamp
 }
 
-// Stores the bank details of a property owner for receiving payments [9, 24, 26, 29].
+/// HomeOwnerBankDetails stores bank account information for property owner payments
+/// Purpose: Enables secure payment processing and earnings transfers to property owners
 model HomeOwnerBankDetails {
-  id                String   @id @default(uuid())
-  homeownerId       String   @unique // One set of bank details per homeowner.
-  homeowner         User     @relation(fields: [homeownerId], references: [id])
-  bankName          String
-  accountNumber     String // In a production system, this would be encrypted.
-  accountHolderName String
-  sortCode          String? // Or equivalent routing number.
-  currency          String? // E.g., "USD", "EUR".
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id          String @id @default(uuid()) /// Unique identifier
+  homeownerId String @unique /// Foreign key to user (one-to-one)
+  homeowner   User   @relation(fields: [homeownerId], references: [id]) /// Property owner
+
+  // Banking Information
+  bankName          String /// Name of the bank
+  accountNumber     String /// Account number (should be encrypted in production)
+  accountHolderName String /// Name on the bank account
+  sortCode          String? /// Sort code or routing number
+  currency          String? /// Account currency (e.g., "AED", "USD")
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-// Represents an invoice issued to the property homeowner by Booking.com [9, 24, 26, 27, 29].
+/// Invoice represents financial invoices issued to property homeowners by the platform
+/// Purpose: Tracks earnings, commissions, and payment obligations for financial management
 model Invoice {
-  id            String   @id @default(uuid())
-  homeownerId   String
-  homeowner     User     @relation(fields: [homeownerId], references: [id])
-  invoiceNumber String   @unique // Unique identifier for each invoice.
-  amount        Decimal  @db.Decimal(10, 2) // Total amount of the invoice.
-  currency      String // Currency of the invoice.
-  issueDate     DateTime // Date the invoice was issued.
-  dueDate       DateTime // Date the invoice is due.
-  paymentStatus String // E.g., "Paid", "Pending", "Overdue".
-  description   String? // Description of services billed.
-  pdfUrl        String? // Optional: URL to a downloadable PDF of the invoice [27].
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String @id @default(uuid()) /// Unique identifier
+  homeownerId String /// Foreign key to property owner
+  homeowner   User   @relation(fields: [homeownerId], references: [id]) /// Property owner
+
+  // Invoice Details
+  invoiceNumber String   @unique /// Unique invoice number
+  amount        Decimal  @db.Decimal(10, 2) /// Total invoice amount
+  currency      String /// Invoice currency
+  issueDate     DateTime /// Date invoice was issued
+  dueDate       DateTime /// Payment due date
+  paymentStatus String /// Status ("Paid", "Pending", "Overdue")
+  description   String? /// Description of billed services
+  pdfUrl        String? /// URL to downloadable PDF invoice
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-// Represents the Know Your User (KYU) form, essential for regulatory compliance and secure payment processing [8, 11, 17, 19, 30-42].
+/// KyuForm represents the Know Your User (KYU) form for regulatory compliance
+/// Purpose: Ensures identity and business verification for secure payment processing
 model KyuForm {
-  id                           String        @id @default(uuid())
-  homeownerId                  String
-  homeowner                    User          @relation(fields: [homeownerId], references: [id])
-  status                       KyuStatus     @default(PendingSubmission) // Current status of the form.
-  entityType                   KyuEntityType // Whether the homeowner is an individual or a business entity [34, 37, 39, 41, 42].
-  // Fields for Individual Entity [39, 41].
-  individualFullName           String?
-  individualDateOfBirth        DateTime?
-  individualResidentialAddress String?
-  // Fields for Business Entity [34, 37, 39, 41].
-  businessLegalName            String?
-  businessRegisteredAddress    String?
-  businessRegistrationNumber   String?
-  businessDateOfRegistration   DateTime?
-  businessTaxIdNumber          String? // Tax identification number or VAT number [34, 37].
-  // Ultimate beneficial owners info (simplified to JSON for MVP, can be a separate model later) [34, 37, 39, 41].
-  ultimateBeneficialOwners     Json?
-  documents                    KyuDocument[] // Collection of documents uploaded for the KYU form [8, 19, 31, 33, 35].
-  submittedAt                  DateTime? // Timestamp when the form was submitted.
-  verifiedAt                   DateTime? // Timestamp when the form was verified.
-  rejectionReason              String? // Reason if the form was rejected [35, 42].
-  createdAt                    DateTime      @default(now())
-  updatedAt                    DateTime      @updatedAt
+  id          String @id @default(uuid()) /// Unique identifier
+  homeownerId String /// Foreign key to property owner
+  homeowner   User   @relation(fields: [homeownerId], references: [id]) /// Property owner
+
+  // Form Status
+  status     KyuStatus     @default(PendingSubmission) /// Current verification status
+  entityType KyuEntityType /// Individual or Business entity type
+
+  // Individual Entity Fields
+  individualFullName           String? /// Full legal name for individuals
+  individualDateOfBirth        DateTime? /// Date of birth for individuals
+  individualResidentialAddress String? /// Residential address for individuals
+
+  // Business Entity Fields
+  businessLegalName          String? /// Legal business name
+  businessRegisteredAddress  String? /// Registered business address
+  businessRegistrationNumber String? /// Business registration number
+  businessDateOfRegistration DateTime? /// Business registration date
+  businessTaxIdNumber        String? /// Tax ID or VAT number
+
+  // Additional Information
+  ultimateBeneficialOwners Json? /// Ultimate beneficial owners (JSON for MVP)
+  documents                KyuDocument[] /// Supporting documents
+
+  // Processing Information
+  submittedAt     DateTime? /// Form submission timestamp
+  verifiedAt      DateTime? /// Verification completion timestamp
+  rejectionReason String? /// Reason if rejected
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
 }
 
-// Represents a document uploaded as part of the KYU form submission [8, 19, 31, 33, 35].
+/// KyuDocument represents uploaded documents for KYP form verification
+/// Purpose: Stores and tracks required identity and business verification documents
 model KyuDocument {
-  id           String          @id @default(uuid())
-  kyuFormId    String
-  kyuForm      KyuForm         @relation(fields: [kyuFormId], references: [id])
-  documentType KyuDocumentType // Type of the document (e.g., GOVERNMENT_ID, PROOF_OF_ADDRESS).
-  fileUrl      String // Secure URL to the stored document file.
-  fileName     String? // Original file name.
-  uploadedAt   DateTime        @default(now())
-  // Note: Application logic will enforce rules like 'proof of address not older than 6 months' [35, 42].
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id        String  @id @default(uuid()) /// Unique identifier
+  kyuFormId String /// Foreign key to KYP form
+  kyuForm   KyuForm @relation(fields: [kyuFormId], references: [id]) /// Associated KYP form
+
+  // Document Information
+  documentType KyuDocumentType /// Type of document (GovermentId/ProofOfAddress/etc.)
+  fileUrl      String /// Secure URL to stored document
+  fileName     String? /// Original filename
+
+  uploadedAt DateTime @default(now()) /// Upload timestamp
+  createdAt  DateTime @default(now()) /// Creation timestamp
+  updatedAt  DateTime @updatedAt /// Last update timestamp
+
+  // Note: Application logic enforces rules like 'proof of address not older than 6 months'
 }
 
-// Represents a security report filed by a homeowner for suspicious activity or breaches [37, 42-45, 47].
+/// SecurityReport represents security incidents reported by property homeowners
+/// Purpose: Enables quick reporting and tracking of security breaches or suspicious activities
 model SecurityReport {
-  id          String             @id @default(uuid())
-  homeownerId String
-  homeowner   User               @relation(fields: [homeownerId], references: [id])
-  type        SecurityReportType // Type of security incident being reported.
-  description String // Detailed description of the incident.
-  reportedAt  DateTime           @default(now()) // Timestamp when the report was made.
-  status      String             @default("OPEN") // Current status of the report (e.g., "OPEN", "INVESTIGATING", "RESOLVED").
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id          String @id @default(uuid()) /// Unique identifier
+  homeownerId String /// Foreign key to property owner
+  homeowner   User   @relation(fields: [homeownerId], references: [id]) /// Reporting homeowner
+
+  // Report Details
+  type        SecurityReportType /// Type of security incident
+  description String /// Detailed incident description
+  reportedAt  DateTime           @default(now()) /// Report submission timestamp
+  status      String             @default("OPEN") /// Report status ("OPEN", "INVESTIGATING", "RESOLVED")
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
 }
