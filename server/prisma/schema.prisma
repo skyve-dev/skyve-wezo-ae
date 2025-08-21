@@ -120,6 +120,8 @@ model User {
   messages        Message[]             @relation("PartnerMessages") /// Messages in the in-app inbox (guest communications and platform notifications)
   reviews         Review[] /// Reviews written by this user (when acting as guest)
   reservations    Reservation[] /// Reservations made by this user (when acting as guest)
+  notifications   Notification[] /// Notifications received by this user
+  supportTickets  SupportTicket[] /// Support tickets created by this user
 }
 
 /// BedType specifies the types of beds available in property rooms
@@ -646,4 +648,175 @@ model SecurityReport {
 
   createdAt DateTime @default(now()) /// Creation timestamp
   updatedAt DateTime @updatedAt /// Last update timestamp
+}
+
+/// Notification represents system notifications sent to users
+/// Purpose: Manages push notifications, reservation alerts, and system messages
+model Notification {
+  id     String @id @default(uuid()) /// Unique identifier
+  userId String /// Foreign key to user
+  user   User   @relation(fields: [userId], references: [id]) /// Notification recipient
+
+  // Notification Details
+  type        NotificationType /// Type of notification
+  title       String /// Notification title
+  message     String /// Notification content
+  data        Json? /// Additional structured data
+  isRead      Boolean @default(false) /// Read status
+  isOfficial  Boolean @default(false) /// Whether from Wezo.ae official
+
+  // Timestamps
+  scheduledAt DateTime? /// When to send (for scheduled notifications)
+  sentAt      DateTime? /// When actually sent
+  readAt      DateTime? /// When marked as read
+  createdAt   DateTime  @default(now()) /// Creation timestamp
+  updatedAt   DateTime  @updatedAt /// Last update timestamp
+}
+
+/// SupportTicket represents support requests from users
+/// Purpose: Manages customer support tickets and communications
+model SupportTicket {
+  id     String @id @default(uuid()) /// Unique identifier
+  userId String /// Foreign key to user
+  user   User   @relation(fields: [userId], references: [id]) /// Ticket creator
+
+  // Ticket Details
+  subject     String /// Ticket subject
+  description String /// Initial problem description
+  category    SupportCategory /// Support category
+  priority    SupportPriority @default(Medium) /// Ticket priority
+  status      SupportStatus   @default(Open) /// Current status
+
+  // Assignment and Resolution
+  assignedTo   String? /// Assigned support agent ID
+  resolvedAt   DateTime? /// Resolution timestamp
+  resolution   String? /// Resolution description
+  satisfaction Int? /// User satisfaction rating (1-5)
+
+  // Additional Data
+  attachments Json? /// File attachments (URLs and metadata)
+  metadata    Json? /// Additional context data
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+
+  // Related Messages
+  messages SupportMessage[]
+}
+
+/// SupportMessage represents messages within a support ticket
+/// Purpose: Tracks conversation history in support tickets
+model SupportMessage {
+  id       String        @id @default(uuid()) /// Unique identifier
+  ticketId String /// Foreign key to support ticket
+  ticket   SupportTicket @relation(fields: [ticketId], references: [id]) /// Parent ticket
+
+  // Message Details
+  senderId   String /// ID of message sender
+  senderType SenderType /// Whether user or support agent
+  content    String /// Message content
+  isInternal Boolean @default(false) /// Internal note (not visible to user)
+
+  // Attachments
+  attachments Json? /// File attachments (URLs and metadata)
+
+  sentAt    DateTime @default(now()) /// Send timestamp
+  createdAt DateTime @default(now()) /// Creation timestamp
+}
+
+/// FAQ represents frequently asked questions
+/// Purpose: Stores knowledge base content for partner support
+model FAQ {
+  id String @id @default(uuid()) /// Unique identifier
+
+  // Content
+  question    String /// FAQ question
+  answer      String /// FAQ answer
+  category    String /// FAQ category
+  tags        String[] /// Search tags
+  isPublished Boolean @default(true) /// Publication status
+
+  // Metrics
+  viewCount  Int @default(0) /// Number of views
+  helpCount  Int @default(0) /// Number of "helpful" votes
+  orderIndex Int @default(0) /// Display order within category
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+}
+
+/// Guide represents step-by-step guides for partners
+/// Purpose: Stores educational content and how-to guides
+model Guide {
+  id String @id @default(uuid()) /// Unique identifier
+
+  // Content
+  title       String /// Guide title
+  description String? /// Guide description
+  content     String /// Guide content (markdown)
+  category    String /// Guide category
+  tags        String[] /// Search tags
+  isPublished Boolean @default(true) /// Publication status
+
+  // Metrics
+  viewCount  Int @default(0) /// Number of views
+  likeCount  Int @default(0) /// Number of likes
+  orderIndex Int @default(0) /// Display order within category
+
+  // Media
+  thumbnailUrl String? /// Guide thumbnail image
+  videoUrl     String? /// Optional video content
+
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+}
+
+// Enums for new models
+enum NotificationType {
+  ReservationConfirmed /// New reservation confirmed
+  ReservationCancelled /// Reservation cancelled
+  ReservationModified  /// Reservation modified
+  PaymentReceived      /// Payment received
+  ReviewReceived       /// New review received
+  PropertyApproved     /// Property listing approved
+  PropertyRejected     /// Property listing rejected
+  SystemMaintenance    /// System maintenance notice
+  SecurityAlert        /// Security-related alert
+  PromotionalOffer     /// Marketing/promotional content
+  PolicyUpdate         /// Platform policy updates
+  Other               /// Other notifications
+}
+
+enum SupportCategory {
+  Technical           /// Technical issues
+  Billing            /// Billing and payments
+  PropertyManagement /// Property management help
+  BookingIssues      /// Reservation problems
+  AccountAccess      /// Login/account issues
+  PolicyQuestions    /// Platform policy questions
+  FeatureRequest     /// Feature requests
+  BugReport          /// Bug reports
+  General            /// General inquiries
+  Other              /// Other categories
+}
+
+enum SupportPriority {
+  Low    /// Low priority
+  Medium /// Medium priority
+  High   /// High priority
+  Urgent /// Urgent issues
+}
+
+enum SupportStatus {
+  Open        /// Newly created ticket
+  InProgress  /// Being worked on
+  Waiting     /// Waiting for user response
+  Resolved    /// Issue resolved
+  Closed      /// Ticket closed
+}
+
+enum SenderType {
+  User    /// Message from user
+  Support /// Message from support agent
+  System  /// Automated system message
 }
