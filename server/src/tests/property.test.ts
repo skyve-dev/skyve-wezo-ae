@@ -40,6 +40,15 @@ describe('Property API Tests', () => {
               },
             ],
           },
+          {
+            spaceName: 'Guest Bedroom',
+            beds: [
+              {
+                typeOfBed: 'TwinBed',
+                numberOfBed: 2,
+              },
+            ],
+          },
         ],
       },
       amenities: [
@@ -50,6 +59,10 @@ describe('Property API Tests', () => {
         {
           name: 'Pool',
           category: 'Outdoor',
+        },
+        {
+          name: 'Air Conditioning',
+          category: 'Essential',
         },
       ],
       services: {
@@ -84,14 +97,141 @@ describe('Property API Tests', () => {
         ratePerNightWeekend: 1200,
         discountPercentageForNonRefundableRatePlan: 10,
         discountPercentageForWeeklyRatePlan: 15,
+        promotion: {
+          type: 'Early Bird',
+          percentage: 10,
+          description: 'Book 30 days in advance and save 10%',
+        },
+        pricePerGroupSize: [
+          {
+            groupSize: 2,
+            ratePerNight: 800,
+          },
+          {
+            groupSize: 4,
+            ratePerNight: 1000,
+          },
+          {
+            groupSize: 6,
+            ratePerNight: 1200,
+          },
+        ],
       },
       cancellation: {
         daysBeforeArrivalFreeToCancel: 7,
         waiveCancellationFeeAccidentalBookings: true,
       },
-      aboutTheProperty: 'A beautiful test villa',
-      aboutTheNeighborhood: 'Quiet neighborhood',
+      aboutTheProperty: 'A beautiful test villa with modern amenities and spacious rooms',
+      aboutTheNeighborhood: 'Quiet residential area with easy access to shopping and dining',
       firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+      availability: [
+        {
+          date: new Date('2024-01-01').toISOString(),
+          isAvailable: true,
+        },
+        {
+          date: new Date('2024-01-02').toISOString(),
+          isAvailable: true,
+        },
+        {
+          date: new Date('2024-01-03').toISOString(),
+          isAvailable: true,
+        },
+        {
+          date: new Date('2024-01-04').toISOString(),
+          isAvailable: false,
+        },
+        {
+          date: new Date('2024-01-05').toISOString(),
+          isAvailable: true,
+        },
+      ],
+      ratePlans: [
+        {
+          name: 'Standard Rate',
+          type: 'FullyFlexible',
+          description: 'Fully flexible rate with free cancellation',
+          cancellationPolicy: 'Free cancellation up to 24 hours before check-in',
+          includesBreakfast: true,
+          restrictions: [
+            {
+              type: 'MinLengthOfStay',
+              value: 2,
+              startDate: new Date('2024-01-01').toISOString(),
+              endDate: new Date('2024-12-31').toISOString(),
+            },
+            {
+              type: 'MaxLengthOfStay',
+              value: 14,
+            },
+          ],
+          prices: [
+            {
+              date: new Date('2024-01-01').toISOString(),
+              basePrice: 1000,
+              currency: 'AED',
+            },
+            {
+              date: new Date('2024-01-02').toISOString(),
+              basePrice: 1000,
+              currency: 'AED',
+            },
+            {
+              date: new Date('2024-01-03').toISOString(),
+              basePrice: 1200,
+              currency: 'AED',
+            },
+          ],
+        },
+        {
+          name: 'Non-Refundable Rate',
+          type: 'NonRefundable',
+          description: 'Save 10% with our non-refundable rate',
+          cancellationPolicy: 'No cancellation allowed. Full payment will be charged.',
+          includesBreakfast: false,
+          restrictions: [
+            {
+              type: 'MinLengthOfStay',
+              value: 1,
+            },
+            {
+              type: 'AdvancedBookingDays',
+              value: 7,
+            },
+          ],
+          prices: [
+            {
+              date: new Date('2024-01-01').toISOString(),
+              basePrice: 900,
+              currency: 'AED',
+            },
+            {
+              date: new Date('2024-01-02').toISOString(),
+              basePrice: 900,
+              currency: 'AED',
+            },
+            {
+              date: new Date('2024-01-03').toISOString(),
+              basePrice: 1080,
+              currency: 'AED',
+            },
+          ],
+        },
+      ],
+      restrictions: [
+        {
+          type: 'NoArrivals',
+          value: 1,
+          startDate: new Date('2024-12-24').toISOString(),
+          endDate: new Date('2024-12-25').toISOString(),
+        },
+        {
+          type: 'NoDepartures',
+          value: 1,
+          startDate: new Date('2024-12-31').toISOString(),
+          endDate: new Date('2025-01-01').toISOString(),
+        },
+      ],
     };
 
     const response = await request(app)
@@ -156,6 +296,15 @@ describe('Property API Tests', () => {
                 },
               ],
             },
+            {
+              spaceName: 'Guest Bedroom',
+              beds: [
+                {
+                  typeOfBed: 'TwinBed',
+                  numberOfBed: 2,
+                },
+              ],
+            },
           ],
         },
         amenities: [
@@ -166,6 +315,10 @@ describe('Property API Tests', () => {
           {
             name: 'Pool',
             category: 'Outdoor',
+          },
+          {
+            name: 'Air Conditioning',
+            category: 'Essential',
           },
         ],
         services: {
@@ -200,14 +353,141 @@ describe('Property API Tests', () => {
           ratePerNightWeekend: 1200,
           discountPercentageForNonRefundableRatePlan: 10,
           discountPercentageForWeeklyRatePlan: 15,
+          promotion: {
+            type: 'Early Bird',
+            percentage: 10,
+            description: 'Book 30 days in advance and save 10%',
+          },
+          pricePerGroupSize: [
+            {
+              groupSize: 2,
+              ratePerNight: 800,
+            },
+            {
+              groupSize: 4,
+              ratePerNight: 1000,
+            },
+            {
+              groupSize: 6,
+              ratePerNight: 1200,
+            },
+          ],
         },
         cancellation: {
           daysBeforeArrivalFreeToCancel: 7,
           waiveCancellationFeeAccidentalBookings: true,
         },
-        aboutTheProperty: 'A beautiful test villa',
-        aboutTheNeighborhood: 'Quiet neighborhood',
+        aboutTheProperty: 'A beautiful test villa with modern amenities and spacious rooms',
+        aboutTheNeighborhood: 'Quiet residential area with easy access to shopping and dining',
         firstDateGuestCanCheckIn: new Date('2024-01-01').toISOString(),
+        availability: [
+          {
+            date: new Date('2024-01-01').toISOString(),
+            isAvailable: true,
+          },
+          {
+            date: new Date('2024-01-02').toISOString(),
+            isAvailable: true,
+          },
+          {
+            date: new Date('2024-01-03').toISOString(),
+            isAvailable: true,
+          },
+          {
+            date: new Date('2024-01-04').toISOString(),
+            isAvailable: false,
+          },
+          {
+            date: new Date('2024-01-05').toISOString(),
+            isAvailable: true,
+          },
+        ],
+        ratePlans: [
+          {
+            name: 'Standard Rate',
+            type: 'FullyFlexible',
+            description: 'Fully flexible rate with free cancellation',
+            cancellationPolicy: 'Free cancellation up to 24 hours before check-in',
+            includesBreakfast: true,
+            restrictions: [
+              {
+                type: 'MinLengthOfStay',
+                value: 2,
+                startDate: new Date('2024-01-01').toISOString(),
+                endDate: new Date('2024-12-31').toISOString(),
+              },
+              {
+                type: 'MaxLengthOfStay',
+                value: 14,
+              },
+            ],
+            prices: [
+              {
+                date: new Date('2024-01-01').toISOString(),
+                basePrice: 1000,
+                currency: 'AED',
+              },
+              {
+                date: new Date('2024-01-02').toISOString(),
+                basePrice: 1000,
+                currency: 'AED',
+              },
+              {
+                date: new Date('2024-01-03').toISOString(),
+                basePrice: 1200,
+                currency: 'AED',
+              },
+            ],
+          },
+          {
+            name: 'Non-Refundable Rate',
+            type: 'NonRefundable',
+            description: 'Save 10% with our non-refundable rate',
+            cancellationPolicy: 'No cancellation allowed. Full payment will be charged.',
+            includesBreakfast: false,
+            restrictions: [
+              {
+                type: 'MinLengthOfStay',
+                value: 1,
+              },
+              {
+                type: 'AdvancedBookingDays',
+                value: 7,
+              },
+            ],
+            prices: [
+              {
+                date: new Date('2024-01-01').toISOString(),
+                basePrice: 900,
+                currency: 'AED',
+              },
+              {
+                date: new Date('2024-01-02').toISOString(),
+                basePrice: 900,
+                currency: 'AED',
+              },
+              {
+                date: new Date('2024-01-03').toISOString(),
+                basePrice: 1080,
+                currency: 'AED',
+              },
+            ],
+          },
+        ],
+        restrictions: [
+          {
+            type: 'NoArrivals',
+            value: 1,
+            startDate: new Date('2024-12-24').toISOString(),
+            endDate: new Date('2024-12-25').toISOString(),
+          },
+          {
+            type: 'NoDepartures',
+            value: 1,
+            startDate: new Date('2024-12-31').toISOString(),
+            endDate: new Date('2025-01-01').toISOString(),
+          },
+        ],
       };
 
       const response = await request(app)
@@ -220,8 +500,8 @@ describe('Property API Tests', () => {
       expect(response.body.message).toBe('Property created successfully');
       expect(response.body.property.name).toBe('Test Villa');
       expect(response.body.property.address.city).toBe('Dubai');
-      expect(response.body.property.rooms).toHaveLength(1);
-      expect(response.body.property.amenities).toHaveLength(2);
+      expect(response.body.property.rooms).toHaveLength(2);
+      expect(response.body.property.amenities).toHaveLength(3);
     });
 
     it('should reject property creation without authentication', async () => {
