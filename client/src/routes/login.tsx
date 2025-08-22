@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Box } from '../components/base/Box'
-import { LoginForm } from '@/components/forms/LoginForm'
-import { useAppSelector } from '@/store'
-import { selectIsAuthenticated } from '@/store/slices/authSlice'
-import { useEffect } from 'react'
+import {createFileRoute, useNavigate} from '@tanstack/react-router'
+import {Box} from '@/components'
+import {LoginForm} from '@/components/forms/LoginForm'
+import {useAppSelector} from '@/store'
+import {selectIsAuthenticated} from '@/store/slices/authSlice'
+import {useEffect} from 'react'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,

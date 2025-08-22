@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { WizardFormData } from '../../types/property'
+import { WizardFormData } from '@/types/property.ts'
 import { Box } from '../base/Box'
 import { Input } from '../base/Input'
 import SelectionPicker from '../base/SelectionPicker'
@@ -10,7 +10,7 @@ import {
   getSelectionPattern, 
   shouldShowSearch, 
   getDrawerHeight 
-} from '../../utils/selectionUtils'
+} from '@/utils/selectionUtils.ts'
 import { 
   FaHome, 
   FaSearch, 

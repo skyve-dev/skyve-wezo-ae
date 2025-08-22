@@ -19,12 +19,12 @@ import { Route as ExamplesIndexRouteImport } from './routes/examples/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property/$propertyId'
 import { Route as ExamplesTimePickerRouteImport } from './routes/examples/time-picker'
-import { Route as ExamplesTestRouteImport } from './routes/examples/test'
 import { Route as ExamplesSlidingDrawerRouteImport } from './routes/examples/sliding-drawer'
 import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/selection-picker'
 import { Route as ExamplesNumberStepperRouteImport } from './routes/examples/number-stepper'
 import { Route as ExamplesInputRouteImport } from './routes/examples/input'
 import { Route as ExamplesDatePickerRouteImport } from './routes/examples/date-picker'
+import { Route as ExamplesButtonRouteImport } from './routes/examples/button'
 import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
 import { Route as EditPropertyPropertyIdRouteImport } from './routes/edit-property.$propertyId'
 import { Route as DashboardPhotosRouteImport } from './routes/dashboard/photos'
@@ -80,11 +80,6 @@ const ExamplesTimePickerRoute = ExamplesTimePickerRouteImport.update({
   path: '/time-picker',
   getParentRoute: () => ExamplesRoute,
 } as any)
-const ExamplesTestRoute = ExamplesTestRouteImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => ExamplesRoute,
-} as any)
 const ExamplesSlidingDrawerRoute = ExamplesSlidingDrawerRouteImport.update({
   id: '/sliding-drawer',
   path: '/sliding-drawer',
@@ -108,6 +103,11 @@ const ExamplesInputRoute = ExamplesInputRouteImport.update({
 const ExamplesDatePickerRoute = ExamplesDatePickerRouteImport.update({
   id: '/date-picker',
   path: '/date-picker',
+  getParentRoute: () => ExamplesRoute,
+} as any)
+const ExamplesButtonRoute = ExamplesButtonRouteImport.update({
+  id: '/button',
+  path: '/button',
   getParentRoute: () => ExamplesRoute,
 } as any)
 const ExamplesBoxRoute = ExamplesBoxRouteImport.update({
@@ -142,12 +142,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
+  '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
   '/examples/input': typeof ExamplesInputRoute
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
-  '/examples/test': typeof ExamplesTestRoute
   '/examples/time-picker': typeof ExamplesTimePickerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -162,12 +162,12 @@ export interface FileRoutesByTo {
   '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
+  '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
   '/examples/input': typeof ExamplesInputRoute
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
-  '/examples/test': typeof ExamplesTestRoute
   '/examples/time-picker': typeof ExamplesTimePickerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -185,12 +185,12 @@ export interface FileRoutesById {
   '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
   '/examples/box': typeof ExamplesBoxRoute
+  '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
   '/examples/input': typeof ExamplesInputRoute
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
-  '/examples/test': typeof ExamplesTestRoute
   '/examples/time-picker': typeof ExamplesTimePickerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -209,12 +209,12 @@ export interface FileRouteTypes {
     | '/dashboard/photos'
     | '/edit-property/$propertyId'
     | '/examples/box'
+    | '/examples/button'
     | '/examples/date-picker'
     | '/examples/input'
     | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
-    | '/examples/test'
     | '/examples/time-picker'
     | '/property/$propertyId'
     | '/dashboard/'
@@ -229,12 +229,12 @@ export interface FileRouteTypes {
     | '/dashboard/photos'
     | '/edit-property/$propertyId'
     | '/examples/box'
+    | '/examples/button'
     | '/examples/date-picker'
     | '/examples/input'
     | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
-    | '/examples/test'
     | '/examples/time-picker'
     | '/property/$propertyId'
     | '/dashboard'
@@ -251,12 +251,12 @@ export interface FileRouteTypes {
     | '/dashboard/photos'
     | '/edit-property/$propertyId'
     | '/examples/box'
+    | '/examples/button'
     | '/examples/date-picker'
     | '/examples/input'
     | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
-    | '/examples/test'
     | '/examples/time-picker'
     | '/property/$propertyId'
     | '/dashboard/'
@@ -346,13 +346,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExamplesTimePickerRouteImport
       parentRoute: typeof ExamplesRoute
     }
-    '/examples/test': {
-      id: '/examples/test'
-      path: '/test'
-      fullPath: '/examples/test'
-      preLoaderRoute: typeof ExamplesTestRouteImport
-      parentRoute: typeof ExamplesRoute
-    }
     '/examples/sliding-drawer': {
       id: '/examples/sliding-drawer'
       path: '/sliding-drawer'
@@ -386,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/date-picker'
       fullPath: '/examples/date-picker'
       preLoaderRoute: typeof ExamplesDatePickerRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
+    '/examples/button': {
+      id: '/examples/button'
+      path: '/button'
+      fullPath: '/examples/button'
+      preLoaderRoute: typeof ExamplesButtonRouteImport
       parentRoute: typeof ExamplesRoute
     }
     '/examples/box': {
@@ -437,24 +437,24 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 interface ExamplesRouteChildren {
   ExamplesBoxRoute: typeof ExamplesBoxRoute
+  ExamplesButtonRoute: typeof ExamplesButtonRoute
   ExamplesDatePickerRoute: typeof ExamplesDatePickerRoute
   ExamplesInputRoute: typeof ExamplesInputRoute
   ExamplesNumberStepperRoute: typeof ExamplesNumberStepperRoute
   ExamplesSelectionPickerRoute: typeof ExamplesSelectionPickerRoute
   ExamplesSlidingDrawerRoute: typeof ExamplesSlidingDrawerRoute
-  ExamplesTestRoute: typeof ExamplesTestRoute
   ExamplesTimePickerRoute: typeof ExamplesTimePickerRoute
   ExamplesIndexRoute: typeof ExamplesIndexRoute
 }
 
 const ExamplesRouteChildren: ExamplesRouteChildren = {
   ExamplesBoxRoute: ExamplesBoxRoute,
+  ExamplesButtonRoute: ExamplesButtonRoute,
   ExamplesDatePickerRoute: ExamplesDatePickerRoute,
   ExamplesInputRoute: ExamplesInputRoute,
   ExamplesNumberStepperRoute: ExamplesNumberStepperRoute,
   ExamplesSelectionPickerRoute: ExamplesSelectionPickerRoute,
   ExamplesSlidingDrawerRoute: ExamplesSlidingDrawerRoute,
-  ExamplesTestRoute: ExamplesTestRoute,
   ExamplesTimePickerRoute: ExamplesTimePickerRoute,
   ExamplesIndexRoute: ExamplesIndexRoute,
 }
