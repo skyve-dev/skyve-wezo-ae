@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData, Pricing, Cancellation } from '../../types/property'
 import { Box } from '../base/Box'
+import { Input } from '../base/Input'
 import { NumberStepperInput } from '../base/NumberStepperInput'
 import { Currency } from '../../constants/propertyEnums'
 import { 
@@ -197,14 +198,18 @@ const PricingStep: React.FC<PricingStepProps> = ({
                 Accidental booking protection
               </Box>
               <Box display="flex" alignItems="center" gap="0.75rem">
-                <Box
-                  as="input"
+                <Input
                   type="checkbox"
                   checked={cancellation.waiveCancellationFeeAccidentalBookings}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                     handleCancellationChange('waiveCancellationFeeAccidentalBookings', e.target.checked)
                   }
-                  accentColor="#3182ce"
+                  style={{
+                    accentColor: '#3182ce',
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    margin: 0
+                  }}
                 />
                 <Box>
                   <Box fontSize="1rem" color="#374151" fontWeight="500">

@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../base/Box'
+import { Input } from '../base/Input'
 import { ParkingType, ParkingTypeLabels } from '../../constants/propertyEnums'
 import { 
   FaUtensils,
@@ -80,16 +81,18 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
             cursor="pointer"
             whileHover={{ backgroundColor: '#f1f5f9' }}
           >
-            <Box
-              as="input"
+            <Input
               type="checkbox"
               checked={data.serveBreakfast}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleServiceChange('serveBreakfast', e.target.checked)
               }
-              accentColor="#3182ce"
-              width="1.25rem"
-              height="1.25rem"
+              style={{
+                accentColor: '#3182ce',
+                width: '1.25rem',
+                height: '1.25rem',
+                margin: 0
+              }}
             />
             <Box>
               <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#374151" fontWeight="500">
@@ -124,14 +127,18 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                 cursor="pointer"
                 whileHover={{ borderColor: '#3182ce' }}
               >
-                <Box
-                  as="input"
+                <Input
                   type="radio"
                   name="parking"
                   value={parkingType}
                   checked={data.parking === parkingType}
                   onChange={() => handleServiceChange('parking', parkingType)}
-                  accentColor="#3182ce"
+                  style={{
+                    accentColor: '#3182ce',
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    margin: 0
+                  }}
                 />
                 <Box>
                   <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#374151" fontWeight="500">
@@ -178,12 +185,16 @@ const ServicesStep: React.FC<ServicesStepProps> = ({
                   backgroundColor={isSelected ? '#eff6ff' : 'white'}
                   whileHover={{ borderColor: '#3182ce', backgroundColor: isSelected ? '#eff6ff' : '#f8fafc' }}
                 >
-                  <Box
-                    as="input"
+                  <Input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleLanguage(language)}
-                    accentColor="#3182ce"
+                    style={{
+                      accentColor: '#3182ce',
+                      width: '1.25rem',
+                      height: '1.25rem',
+                      margin: 0
+                    }}
                   />
                   <Box fontSize="1rem" color="#374151">
                     {language}

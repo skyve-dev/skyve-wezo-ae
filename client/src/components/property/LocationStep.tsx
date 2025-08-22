@@ -288,20 +288,14 @@ const LocationStep: React.FC<LocationStepProps> = ({
               <FaMailBulk color="#3182ce" />
               ZIP/Postal Code *
             </Box>
-            <Box
-              as="input"
+            <Input
               type="number"
               value={data.address.zipCode || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleAddressChange('zipCode', parseInt(e.target.value, 10) || 0)
               }
               placeholder="e.g., 12345"
-              width="100%"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
-              fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+              fullWidth
             />
           </Box>
           
@@ -319,20 +313,14 @@ const LocationStep: React.FC<LocationStepProps> = ({
               <FaBuilding color="#3182ce" />
               Area/District (Optional)
             </Box>
-            <Box
-              as="input"
+            <Input
               type="text"
               value={data.address.apartmentOrFloorNumber || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 handleAddressChange('apartmentOrFloorNumber', e.target.value)
               }
               placeholder="e.g., Marina, Downtown, JBR"
-              width="100%"
-              padding="0.75rem"
-              border="1px solid #d1d5db"
-              borderRadius="0.375rem"
-              fontSize="1rem"
-              whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+              fullWidth
             />
           </Box>
         </Box>

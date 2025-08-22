@@ -102,14 +102,18 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="radio"
                 name="bookingType"
                 value={BookingType.BookInstantly}
                 checked={data.bookingType === BookingType.BookInstantly}
                 onChange={() => handleBookingTypeChange(BookingType.BookInstantly)}
-                accentColor="#3182ce"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
@@ -134,14 +138,18 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="radio"
                 name="bookingType"
                 value={BookingType.NeedToRequestBook}
                 checked={data.bookingType === BookingType.NeedToRequestBook}
                 onChange={() => handleBookingTypeChange(BookingType.NeedToRequestBook)}
-                accentColor="#3182ce"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
@@ -184,14 +192,18 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="radio"
                 name="paymentType"
                 value={PaymentType.Online}
                 checked={data.paymentType === PaymentType.Online}
                 onChange={() => handlePaymentTypeChange(PaymentType.Online)}
-                accentColor="#3182ce"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">
@@ -216,14 +228,18 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
               cursor="pointer"
               whileHover={{ borderColor: '#3182ce' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="radio"
                 name="paymentType"
                 value={PaymentType.ByCreditCardAtProperty}
                 checked={data.paymentType === PaymentType.ByCreditCardAtProperty}
                 onChange={() => handlePaymentTypeChange(PaymentType.ByCreditCardAtProperty)}
-                accentColor="#3182ce"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" fontWeight="500" color="#374151">

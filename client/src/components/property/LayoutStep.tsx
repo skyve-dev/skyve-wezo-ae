@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import {Bed, Room, WizardFormData} from '../../types/property'
 import {Box} from '../base/Box'
+import {Input} from '../base/Input'
 import {BedType, BedTypeLabels, RoomSpaceType, RoomSpaceTypeLabels} from '../../constants/propertyEnums'
 import SelectionPicker from '../base/SelectionPicker'
 import SlidingDrawer from '../base/SlidingDrawer'
@@ -221,16 +222,18 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
               cursor="pointer"
               whileHover={{ backgroundColor: '#f1f5f9' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="checkbox"
                 checked={data.allowChildren}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   handleLayoutChange('allowChildren', e.target.checked)
                 }
-                accentColor="#3182ce"
-                width="1.25rem"
-                height="1.25rem"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box fontSize="1rem" color="#374151" fontWeight="500">
                 Allow children (ages 2-12)
@@ -250,16 +253,18 @@ const LayoutStep: React.FC<LayoutStepProps> = ({
                 cursor="pointer"
                 whileHover={{ backgroundColor: '#f1f5f9' }}
               >
-                <Box
-                  as="input"
+                <Input
                   type="checkbox"
                   checked={data.offerCribs}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                     handleLayoutChange('offerCribs', e.target.checked)
                   }
-                  accentColor="#3182ce"
-                  width="1.25rem"
-                  height="1.25rem"
+                  style={{
+                    accentColor: '#3182ce',
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    margin: 0
+                  }}
                 />
                 <Box display="flex" alignItems="center" gap="0.5rem">
                   <FaBaby color="#10b981" />

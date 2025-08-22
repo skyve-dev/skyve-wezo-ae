@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Photo } from '@/types/property';
 import { api, resolvePhotoUrl } from '@/utils/api';
 import { Box } from './base/Box';
+import { Input } from './base/Input';
 
 interface ExtendedPhoto extends Photo {
   id: string;
@@ -338,15 +339,16 @@ const PhotoManagement: React.FC = () => {
         </Box>
         
         <Box>
-          <Box
-            as="input"
+          <Input
             ref={fileInputRef}
             type="file"
             multiple
             accept="image/*"
             onChange={handleFileUpload}
             disabled={isUploading}
-            marginBottom={10}
+            style={{
+              marginBottom: '10px'
+            }}
           />
         </Box>
         

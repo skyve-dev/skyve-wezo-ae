@@ -1,6 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
 import { Box } from '../base/Box'
+import { Input } from '../base/Input'
 import TimePicker from '../base/TimePicker'
 import { PetPolicy, PetPolicyLabels } from '../../constants/propertyEnums'
 import { 
@@ -93,16 +94,18 @@ const RulesStep: React.FC<RulesStepProps> = ({
               cursor="pointer"
               whileHover={{ backgroundColor: '#f1f5f9' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="checkbox"
                 checked={data.smokingAllowed}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   handleRuleChange('smokingAllowed', e.target.checked)
                 }
-                accentColor="#3182ce"
-                width="1.25rem"
-                height="1.25rem"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box display="flex" alignItems="center" gap="0.5rem">
                 {data.smokingAllowed ? (
@@ -135,16 +138,18 @@ const RulesStep: React.FC<RulesStepProps> = ({
               cursor="pointer"
               whileHover={{ backgroundColor: '#f1f5f9' }}
             >
-              <Box
-                as="input"
+              <Input
                 type="checkbox"
                 checked={data.partiesOrEventsAllowed}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   handleRuleChange('partiesOrEventsAllowed', e.target.checked)
                 }
-                accentColor="#3182ce"
-                width="1.25rem"
-                height="1.25rem"
+                style={{
+                  accentColor: '#3182ce',
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  margin: 0
+                }}
               />
               <Box display="flex" alignItems="center" gap="0.5rem">
                 {data.partiesOrEventsAllowed ? (
@@ -186,14 +191,18 @@ const RulesStep: React.FC<RulesStepProps> = ({
                     cursor="pointer"
                     whileHover={{ borderColor: '#3182ce' }}
                   >
-                    <Box
-                      as="input"
+                    <Input
                       type="radio"
                       name="petsAllowed"
                       value={policy}
                       checked={data.petsAllowed === policy}
                       onChange={() => handleRuleChange('petsAllowed', policy)}
-                      accentColor="#3182ce"
+                      style={{
+                        accentColor: '#3182ce',
+                        width: '1.25rem',
+                        height: '1.25rem',
+                        margin: 0
+                      }}
                     />
                     <Box>
                       <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#374151" fontWeight="500">
