@@ -10,7 +10,7 @@ import {
   updateProperty 
 } from '../store/slices/propertySlice'
 import { WizardStep } from '../types/property'
-import { Box } from '../components/Box'
+import { Box } from '../components/base/Box'
 
 // Import wizard step components
 import BasicInfoStep from '../components/property/BasicInfoStep'

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import SlidingDrawer from '../components/SlidingDrawer'
-import SelectionPicker from '../components/SelectionPicker'
-import { Box } from '../components/Box'
-import { Input } from '../components/Input'
+import SlidingDrawer from '../components/base/SlidingDrawer'
+import SelectionPicker from '../components/base/SelectionPicker'
+import { Box } from '../components/base/Box'
+import { Input } from '../components/base/Input'
 import useDrawerManager from '../hooks/useDrawerManager'
 import { ParkingType, PetPolicy } from '../constants/propertyEnums'
 import { 

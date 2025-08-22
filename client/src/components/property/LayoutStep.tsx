@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
 import {Bed, Room, WizardFormData} from '../../types/property'
-import {Box} from '../Box'
+import {Box} from '../base/Box'
 import {BedType, BedTypeLabels, RoomSpaceType, RoomSpaceTypeLabels} from '../../constants/propertyEnums'
-import SelectionPicker from '../SelectionPicker'
-import SlidingDrawer from '../SlidingDrawer'
+import SelectionPicker from '../base/SelectionPicker'
+import SlidingDrawer from '../base/SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
-import {NumberStepperInput} from '../NumberStepperInput'
+import {NumberStepperInput} from '../base/NumberStepperInput'
 import {
   FaBaby,
   FaBath,

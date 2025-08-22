@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { Box } from '../Box';
-import { Input } from '../Input';
+import { Box } from '../base/Box';
+import { Input } from '../base/Input';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { login, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
 

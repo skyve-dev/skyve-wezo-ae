@@ -1,7 +1,7 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
-import { Box } from '../Box'
-import TimePicker from '../TimePicker'
+import { Box } from '../base/Box'
+import TimePicker from '../base/TimePicker'
 import { PetPolicy, PetPolicyLabels } from '../../constants/propertyEnums'
 import { 
   FaSmokingBan, 

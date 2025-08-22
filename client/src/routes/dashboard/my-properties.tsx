@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchMyProperties, deleteProperty, clearError } from '../../store/slices/propertySlice'
-import { Box } from '../../components/Box'
+import { Box } from '../../components/base/Box'
 import { redirectToPropertyRegistration } from '../../utils/deviceDetection'
 import {resolvePhotoUrl} from "@/utils/api.ts";
 

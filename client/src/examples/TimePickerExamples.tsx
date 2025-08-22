@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import TimePicker from '../components/TimePicker'
-import { Box } from '../components/Box'
+import TimePicker from '../components/base/TimePicker'
+import { Box } from '../components/base/Box'
 import { 
   FaClock,
   FaSun,

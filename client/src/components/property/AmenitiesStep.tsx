@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { WizardFormData } from '../../types/property'
-import { Box } from '../Box'
-import { Input } from '../Input'
-import SelectionPicker from '../SelectionPicker'
-import SlidingDrawer from '../SlidingDrawer'
+import { Box } from '../base/Box'
+import { Input } from '../base/Input'
+import SelectionPicker from '../base/SelectionPicker'
+import SlidingDrawer from '../base/SlidingDrawer'
 import useDrawerManager from '../../hooks/useDrawerManager'
 import { 
   PROPERTY_AMENITIES, 

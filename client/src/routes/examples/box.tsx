@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import BoxExamples from '../../examples/BoxExamples'
+import { BoxExample } from '../../components/base/Box.example'
 
 export const Route = createFileRoute('/examples/box')({
-  component: BoxExamples,
+  component: BoxExample,
 })

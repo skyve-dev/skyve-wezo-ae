@@ -1,7 +1,7 @@
 import React from 'react'
 import { WizardFormData, Pricing, Cancellation } from '../../types/property'
-import { Box } from '../Box'
-import { NumberStepperInput } from '../NumberStepperInput'
+import { Box } from '../base/Box'
+import { NumberStepperInput } from '../base/NumberStepperInput'
 import { Currency } from '../../constants/propertyEnums'
 import { 
   FaDollarSign,

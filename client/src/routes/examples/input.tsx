@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Box } from '../../components/Box'
-import { Input } from '../../components/Input'
+import { Box } from '../../components/base/Box'
+import { Input } from '../../components/base/Input'
 import { 
     FaUser, 
     FaEnvelope, 

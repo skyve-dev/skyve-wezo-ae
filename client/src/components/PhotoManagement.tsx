@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Photo } from '@/types/property';
 import { api, resolvePhotoUrl } from '@/utils/api';
-import { Box } from './Box';
+import { Box } from './base/Box';
 
 interface ExtendedPhoto extends Photo {
   id: string;

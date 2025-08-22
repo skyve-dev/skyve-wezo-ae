@@ -1,6 +1,6 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
-import { Box } from '../Box'
+import { Box } from '../base/Box'
 import { ParkingType, ParkingTypeLabels } from '../../constants/propertyEnums'
 import { 
   FaUtensils,

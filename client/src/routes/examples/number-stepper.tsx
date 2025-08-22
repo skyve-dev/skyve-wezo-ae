@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Box } from '@/components/Box';
-import { NumberStepperInput } from '@/components/NumberStepperInput';
+import { Box } from '../../components/base/Box';
+import { NumberStepperInput } from '../../components/base/NumberStepperInput';
 import { 
   FaUsers, 
   FaShoppingCart

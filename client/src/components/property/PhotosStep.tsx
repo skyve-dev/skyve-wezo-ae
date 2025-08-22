@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { WizardFormData, Photo } from '../../types/property'
-import { Box } from '../Box'
-import { Input } from '../Input'
+import { Box } from '../base/Box'
+import { Input } from '../base/Input'
 import { api, resolvePhotoUrl } from '../../utils/api'
 import { 
   FaCloudUploadAlt,

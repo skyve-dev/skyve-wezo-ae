@@ -41,7 +41,8 @@
       "Bash(npx tsr:*)",
       "Bash(timeout 5s npm run dev)",
       "Bash(npx prisma db push:*)",
-      "Bash(npx prisma migrate reset:*)"
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

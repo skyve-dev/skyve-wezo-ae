@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import SelectionPicker from '../components/SelectionPicker'
-import { Box } from '../components/Box'
+import SelectionPicker from '../components/base/SelectionPicker'
+import { Box } from '../components/base/Box'
 import { ParkingType, PetPolicy } from '../constants/propertyEnums'
 import { 
   FaUser,

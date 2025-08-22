@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../store'
 import { initializeWizard, updateWizardData, setWizardStep, clearWizardData, createProperty } from '../store/slices/propertySlice'
 import { WizardStep } from '../types/property'
-import { Box } from '../components/Box'
+import { Box } from '../components/base/Box'
 
 // Import wizard step components (to be created)
 import BasicInfoStep from '../components/property/BasicInfoStep'

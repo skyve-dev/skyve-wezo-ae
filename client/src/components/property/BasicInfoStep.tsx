@@ -1,8 +1,8 @@
 import React from 'react'
 import { WizardFormData } from '../../types/property'
-import { Box } from '../Box'
-import { Input } from '../Input'
-import DatePicker from '../DatePicker'
+import { Box } from '../base/Box'
+import { Input } from '../base/Input'
+import DatePicker from '../base/DatePicker'
 import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '../../constants/propertyEnums'
 import { 
   FaHome, 

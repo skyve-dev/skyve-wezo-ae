@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react'
-import SlidingDrawer from '../components/SlidingDrawer'
-import {Box} from '../components/Box'
+import SlidingDrawer from '../components/base/SlidingDrawer'
+import {Box} from '../components/base/Box'
 import useDrawerManager from '../hooks/useDrawerManager'
 
 /**

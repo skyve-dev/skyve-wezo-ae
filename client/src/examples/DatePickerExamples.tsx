@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import DatePicker from '../components/DatePicker'
-import { Box } from '../components/Box'
+import DatePicker from '../components/base/DatePicker'
+import { Box } from '../components/base/Box'
 import { 
   FaCalendarAlt,
   FaCalendarCheck,

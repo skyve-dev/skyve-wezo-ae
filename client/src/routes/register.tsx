@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Box } from '@/components/Box'
+import { Box } from '../components/base/Box'
 import { RegisterForm } from '@/components/forms/RegisterForm'
 import { useAppSelector } from '@/store'
 import { selectIsAuthenticated } from '@/store/slices/authSlice'

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { fetchPropertyById, clearError } from '../../store/slices/propertySlice'
-import { Box } from '../../components/Box'
+import { Box } from '../../components/base/Box'
 import { resolvePhotoUrl } from '../../utils/api'
 import { 
   FaUserFriends, 

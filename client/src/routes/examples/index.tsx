@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { Box } from '../../components/Box'
+import { Box } from '../../components/base/Box'
 import { 
   FaCheckSquare, 
   FaMobileAlt, 

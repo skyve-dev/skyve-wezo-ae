@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
-import { Box } from '../components/Box'
+import { Box } from '../components/base/Box'
 import { 
   FaHome, 
   FaCheckSquare, 
