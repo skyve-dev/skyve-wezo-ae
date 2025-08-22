@@ -152,6 +152,15 @@ function ExamplesIndex() {
     )
   }))
 
+  const getComplexityColor = (complexity: string) => {
+    switch (complexity) {
+      case 'Beginner': return '#059669'
+      case 'Intermediate': return '#f59e0b'
+      case 'Advanced': return '#dc2626'
+      default: return '#6b7280'
+    }
+  }
+
   const filteredExamples = categorizedExamples.filter(example =>
     example.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     example.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -213,15 +222,6 @@ function ExamplesIndex() {
       )
     }
   ]
-
-  const getComplexityColor = (complexity: string) => {
-    switch (complexity) {
-      case 'Beginner': return '#059669'
-      case 'Intermediate': return '#f59e0b'
-      case 'Advanced': return '#dc2626'
-      default: return '#6b7280'
-    }
-  }
 
   return (
     <Box minHeight="100vh" backgroundColor="#f8fafc">

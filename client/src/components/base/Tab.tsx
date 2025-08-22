@@ -370,7 +370,6 @@ const Tab: React.FC<TabProps> = ({
                                     : `${activeColor}08`
                             } : undefined}
                             whileFocus={{
-                                outline: `2px solid ${activeColor}`,
                                 outlineOffset: '2px'
                             }}
                         >
