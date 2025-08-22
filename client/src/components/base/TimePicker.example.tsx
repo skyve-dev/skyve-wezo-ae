@@ -60,6 +60,11 @@ const TimePickerExample: React.FC = () => {
   const [intervalType, setIntervalType] = useState<number>(15)
   const [intervalTime, setIntervalTime] = useState<string>('')
 
+  // Format comparison states
+  const [formatTime1, setFormatTime1] = useState<string>('')
+  const [formatTime2, setFormatTime2] = useState<string>('')
+  const [formatTime3, setFormatTime3] = useState<string>('')
+
   // Time range validation
   useEffect(() => {
     if (checkInTime && checkOutTime) {
@@ -667,35 +672,65 @@ const TimePickerExample: React.FC = () => {
               </Box>
               
               <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" gap="1rem">
-                {[
-                  { format: true, interval: 15, title: '12-Hour, 15min' },
-                  { format: false, interval: 30, title: '24-Hour, 30min' },
-                  { format: true, interval: 5, title: '12-Hour, 5min' }
-                ].map((config, index) => {
-                  const [timeValue, setTimeValue] = useState<string>('')
+                <Box padding="1rem" backgroundColor="white" borderRadius="0.5rem" border="1px solid #e5e7eb">
+                  <Box fontSize="1rem" fontWeight="500" marginBottom="0.75rem" textAlign="center">
+                    12-Hour, 15min
+                  </Box>
                   
-                  return (
-                    <Box key={index} padding="1rem" backgroundColor="white" borderRadius="0.5rem" border="1px solid #e5e7eb">
-                      <Box fontSize="1rem" fontWeight="500" marginBottom="0.75rem" textAlign="center">
-                        {config.title}
-                      </Box>
-                      
-                      <TimePicker
-                        value={timeValue}
-                        onChange={setTimeValue}
-                        placeholder="Select time"
-                        use12HourFormat={config.format}
-                        interval={config.interval}
-                      />
-                      
-                      {timeValue && (
-                        <Box marginTop="0.75rem" fontSize="0.75rem" color="#6b7280" textAlign="center">
-                          {formatTimeDisplay(timeValue, config.format)}
-                        </Box>
-                      )}
+                  <TimePicker
+                    value={formatTime1}
+                    onChange={setFormatTime1}
+                    placeholder="Select time"
+                    use12HourFormat={true}
+                    interval={15}
+                  />
+                  
+                  {formatTime1 && (
+                    <Box marginTop="0.75rem" fontSize="0.75rem" color="#6b7280" textAlign="center">
+                      {formatTimeDisplay(formatTime1, true)}
                     </Box>
-                  )
-                })}
+                  )}
+                </Box>
+
+                <Box padding="1rem" backgroundColor="white" borderRadius="0.5rem" border="1px solid #e5e7eb">
+                  <Box fontSize="1rem" fontWeight="500" marginBottom="0.75rem" textAlign="center">
+                    24-Hour, 30min
+                  </Box>
+                  
+                  <TimePicker
+                    value={formatTime2}
+                    onChange={setFormatTime2}
+                    placeholder="Select time"
+                    use12HourFormat={false}
+                    interval={30}
+                  />
+                  
+                  {formatTime2 && (
+                    <Box marginTop="0.75rem" fontSize="0.75rem" color="#6b7280" textAlign="center">
+                      {formatTimeDisplay(formatTime2, false)}
+                    </Box>
+                  )}
+                </Box>
+
+                <Box padding="1rem" backgroundColor="white" borderRadius="0.5rem" border="1px solid #e5e7eb">
+                  <Box fontSize="1rem" fontWeight="500" marginBottom="0.75rem" textAlign="center">
+                    12-Hour, 5min
+                  </Box>
+                  
+                  <TimePicker
+                    value={formatTime3}
+                    onChange={setFormatTime3}
+                    placeholder="Select time"
+                    use12HourFormat={true}
+                    interval={5}
+                  />
+                  
+                  {formatTime3 && (
+                    <Box marginTop="0.75rem" fontSize="0.75rem" color="#6b7280" textAlign="center">
+                      {formatTimeDisplay(formatTime3, true)}
+                    </Box>
+                  )}
+                </Box>
               </Box>
             </Box>
           </Box>
