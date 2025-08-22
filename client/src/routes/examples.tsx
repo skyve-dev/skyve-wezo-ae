@@ -6,6 +6,7 @@ import {
     FaCalendarAlt,
     FaCheckSquare,
     FaClock,
+    FaComment,
     FaHome,
     FaMobileAlt,
     FaPuzzlePiece
@@ -22,6 +23,7 @@ function ExamplesLayout() {
         {path: '/examples', label: 'Overview', icon: <FaHome/>},
         {path: '/examples/selection-picker', label: 'SelectionPicker', icon: <FaCheckSquare/>},
         {path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: <FaMobileAlt/>},
+        {path: '/examples/dialog', label: 'Dialog', icon: <FaComment/>},
         {path: '/examples/date-picker', label: 'DatePicker', icon: <FaCalendarAlt/>},
         {path: '/examples/time-picker', label: 'TimePicker', icon: <FaClock/>},
         {path: '/examples/box', label: 'Box Component', icon: <FaBox/>}

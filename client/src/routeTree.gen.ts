@@ -23,6 +23,7 @@ import { Route as ExamplesSlidingDrawerRouteImport } from './routes/examples/sli
 import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/selection-picker'
 import { Route as ExamplesNumberStepperRouteImport } from './routes/examples/number-stepper'
 import { Route as ExamplesInputRouteImport } from './routes/examples/input'
+import { Route as ExamplesDialogRouteImport } from './routes/examples/dialog'
 import { Route as ExamplesDatePickerRouteImport } from './routes/examples/date-picker'
 import { Route as ExamplesButtonRouteImport } from './routes/examples/button'
 import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
@@ -100,6 +101,11 @@ const ExamplesInputRoute = ExamplesInputRouteImport.update({
   path: '/input',
   getParentRoute: () => ExamplesRoute,
 } as any)
+const ExamplesDialogRoute = ExamplesDialogRouteImport.update({
+  id: '/dialog',
+  path: '/dialog',
+  getParentRoute: () => ExamplesRoute,
+} as any)
 const ExamplesDatePickerRoute = ExamplesDatePickerRouteImport.update({
   id: '/date-picker',
   path: '/date-picker',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
+  '/examples/dialog': typeof ExamplesDialogRoute
   '/examples/input': typeof ExamplesInputRoute
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
+  '/examples/dialog': typeof ExamplesDialogRoute
   '/examples/input': typeof ExamplesInputRoute
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
+  '/examples/dialog': typeof ExamplesDialogRoute
   '/examples/input': typeof ExamplesInputRoute
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/examples/box'
     | '/examples/button'
     | '/examples/date-picker'
+    | '/examples/dialog'
     | '/examples/input'
     | '/examples/number-stepper'
     | '/examples/selection-picker'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/examples/box'
     | '/examples/button'
     | '/examples/date-picker'
+    | '/examples/dialog'
     | '/examples/input'
     | '/examples/number-stepper'
     | '/examples/selection-picker'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/examples/box'
     | '/examples/button'
     | '/examples/date-picker'
+    | '/examples/dialog'
     | '/examples/input'
     | '/examples/number-stepper'
     | '/examples/selection-picker'
@@ -374,6 +386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExamplesInputRouteImport
       parentRoute: typeof ExamplesRoute
     }
+    '/examples/dialog': {
+      id: '/examples/dialog'
+      path: '/dialog'
+      fullPath: '/examples/dialog'
+      preLoaderRoute: typeof ExamplesDialogRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
     '/examples/date-picker': {
       id: '/examples/date-picker'
       path: '/date-picker'
@@ -439,6 +458,7 @@ interface ExamplesRouteChildren {
   ExamplesBoxRoute: typeof ExamplesBoxRoute
   ExamplesButtonRoute: typeof ExamplesButtonRoute
   ExamplesDatePickerRoute: typeof ExamplesDatePickerRoute
+  ExamplesDialogRoute: typeof ExamplesDialogRoute
   ExamplesInputRoute: typeof ExamplesInputRoute
   ExamplesNumberStepperRoute: typeof ExamplesNumberStepperRoute
   ExamplesSelectionPickerRoute: typeof ExamplesSelectionPickerRoute
@@ -451,6 +471,7 @@ const ExamplesRouteChildren: ExamplesRouteChildren = {
   ExamplesBoxRoute: ExamplesBoxRoute,
   ExamplesButtonRoute: ExamplesButtonRoute,
   ExamplesDatePickerRoute: ExamplesDatePickerRoute,
+  ExamplesDialogRoute: ExamplesDialogRoute,
   ExamplesInputRoute: ExamplesInputRoute,
   ExamplesNumberStepperRoute: ExamplesNumberStepperRoute,
   ExamplesSelectionPickerRoute: ExamplesSelectionPickerRoute,

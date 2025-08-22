@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react'
 import ReactDOM from 'react-dom'
 import {Button} from './Button'
+import {Box} from './Box'
 import {IoClose} from "react-icons/io5";
 
 // Global portal manager to track multiple drawers using the same portal
@@ -269,49 +270,48 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
         }
     }
 
-    // Get positioning styles based on side
-    const getPositionStyles = (): React.CSSProperties => {
+    // Get positioning styles as Box props based on side
+    const getPositionStylesAsBoxProps = () => {
         const {width: drawerWidth, height: drawerHeight} = getDrawerDimensions()
-        const baseStyles: React.CSSProperties = {
-            position: 'fixed',
+        const baseProps = {
+            position: 'fixed' as const,
             width: drawerWidth,
             height: drawerHeight,
-            display: 'flex',
-            flexDirection: 'column',
-            boxSizing: 'border-box',
+            display: 'flex' as const,
+            flexDirection: 'column' as const,
             maxHeight: '100vh',
             backgroundColor,
             zIndex: zIndex + 1,
             transition: `transform ${animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             boxShadow: '0 0 20px rgba(0, 0, 0, 0.15)',
-            overflow: 'auto'
+            overflow: 'auto' as const
         }
 
         switch (side) {
             case 'left':
                 return {
-                    ...baseStyles,
+                    ...baseProps,
                     top: 0,
                     left: 0,
                     bottom: 0
                 }
             case 'right':
                 return {
-                    ...baseStyles,
+                    ...baseProps,
                     top: 0,
                     right: 0,
                     bottom: 0
                 }
             case 'top':
                 return {
-                    ...baseStyles,
+                    ...baseProps,
                     top: 0,
                     left: 0,
                     right: 0
                 }
             case 'bottom':
                 return {
-                    ...baseStyles,
+                    ...baseProps,
                     bottom: 0,
                     left: 0,
                     right: 0
@@ -413,30 +413,7 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
     }
 
     const portalContainer = PortalManager.getOrCreatePortal(portalId)
-
     const transformValues = getTransformValues()
-    const drawerStyles: React.CSSProperties = {
-        ...getPositionStyles(),
-        ...contentStyles,
-        transform: isAnimating ? transformValues.open : transformValues.closed,
-        pointerEvents: 'auto' // Drawer should capture clicks and interactions
-    }
-
-    const backdropStyles: React.CSSProperties = {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: backdropColor,
-        zIndex: zIndex - 1, // Backdrop should be behind the drawer
-        opacity: isAnimating ? 1 : 0,
-        transition: `opacity ${animationDuration}ms ease-in-out`,
-        cursor: disableBackdropClick ? 'default' : 'pointer',
-        pointerEvents: 'auto' // Backdrop should capture clicks
-    }
 
     const handleBackdropClick = (event: React.MouseEvent) => {
         if (!disableBackdropClick && event.target === event.currentTarget) {
@@ -473,27 +450,42 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
     const drawerContent = (
         <>
             {/* Backdrop */}
-            <div
-                style={backdropStyles}
+            <Box
+                position="fixed"
+                top={0}
+                left={0}
+                right={0}
+                bottom={0}
+                display="flex"
+                flexDirection="column"
+                backgroundColor={backdropColor}
+                zIndex={zIndex - 1}
+                opacity={isAnimating ? 1 : 0}
+                transition={`opacity ${animationDuration}ms ease-in-out`}
+                cursor={disableBackdropClick ? 'default' : 'pointer'}
+                pointerEvents="auto"
                 onClick={handleBackdropClick}
                 aria-hidden="true"
             />
 
             {/* Drawer */}
-            <div
+            <Box
                 ref={drawerRef}
                 className={className}
-                style={drawerStyles}
+                {...getPositionStylesAsBoxProps()}
+                transform={isAnimating ? transformValues.open : transformValues.closed}
+                pointerEvents="auto"
                 role="dialog"
                 aria-modal="true"
                 tabIndex={-1}
+                style={contentStyles}
             >
                 {/* Content */}
                 {children}
 
                 {/* Close button */}
                 {showCloseButton && (closeButton || defaultCloseButton)}
-            </div>
+            </Box>
         </>
     )
 
