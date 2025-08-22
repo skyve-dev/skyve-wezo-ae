@@ -119,10 +119,6 @@ const PricingStep: React.FC<PricingStepProps> = ({
 
         {/* Weekend Rate */}
         <Box>
-          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
-            <FaCalendarWeek color="#3182ce" />
-            Weekend Rate (Optional)
-          </Box>
           <NumberStepperInput
             label="Weekend rate per night"
             icon={FaCalendarWeek}
@@ -142,10 +138,7 @@ const PricingStep: React.FC<PricingStepProps> = ({
 
         {/* Discounts */}
         <Box>
-          <Box display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" fontWeight="500" color="#374151" marginBottom="1rem">
-            <FaPercentage color="#3182ce" />
-            Discounts (Optional)
-          </Box>
+
           <Box display="grid" gridTemplateColumnsSm="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1rem">
             <NumberStepperInput
               label="Weekly stay discount (%)"
