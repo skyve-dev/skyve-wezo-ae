@@ -9,7 +9,8 @@ import {
     FaComment,
     FaHome,
     FaMobileAlt,
-    FaPuzzlePiece
+    FaPuzzlePiece,
+    FaFolderOpen
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples')({
@@ -24,6 +25,7 @@ function ExamplesLayout() {
         {path: '/examples/selection-picker', label: 'SelectionPicker', icon: <FaCheckSquare/>},
         {path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: <FaMobileAlt/>},
         {path: '/examples/dialog', label: 'Dialog', icon: <FaComment/>},
+        {path: '/examples/tab', label: 'Tab', icon: <FaFolderOpen/>},
         {path: '/examples/date-picker', label: 'DatePicker', icon: <FaCalendarAlt/>},
         {path: '/examples/time-picker', label: 'TimePicker', icon: <FaClock/>},
         {path: '/examples/box', label: 'Box Component', icon: <FaBox/>}

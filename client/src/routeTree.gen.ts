@@ -19,6 +19,7 @@ import { Route as ExamplesIndexRouteImport } from './routes/examples/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property/$propertyId'
 import { Route as ExamplesTimePickerRouteImport } from './routes/examples/time-picker'
+import { Route as ExamplesTabRouteImport } from './routes/examples/tab'
 import { Route as ExamplesSlidingDrawerRouteImport } from './routes/examples/sliding-drawer'
 import { Route as ExamplesSelectionPickerRouteImport } from './routes/examples/selection-picker'
 import { Route as ExamplesNumberStepperRouteImport } from './routes/examples/number-stepper'
@@ -79,6 +80,11 @@ const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
 const ExamplesTimePickerRoute = ExamplesTimePickerRouteImport.update({
   id: '/time-picker',
   path: '/time-picker',
+  getParentRoute: () => ExamplesRoute,
+} as any)
+const ExamplesTabRoute = ExamplesTabRouteImport.update({
+  id: '/tab',
+  path: '/tab',
   getParentRoute: () => ExamplesRoute,
 } as any)
 const ExamplesSlidingDrawerRoute = ExamplesSlidingDrawerRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
+  '/examples/tab': typeof ExamplesTabRoute
   '/examples/time-picker': typeof ExamplesTimePickerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
+  '/examples/tab': typeof ExamplesTabRoute
   '/examples/time-picker': typeof ExamplesTimePickerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/examples/number-stepper': typeof ExamplesNumberStepperRoute
   '/examples/selection-picker': typeof ExamplesSelectionPickerRoute
   '/examples/sliding-drawer': typeof ExamplesSlidingDrawerRoute
+  '/examples/tab': typeof ExamplesTabRoute
   '/examples/time-picker': typeof ExamplesTimePickerRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
+    | '/examples/tab'
     | '/examples/time-picker'
     | '/property/$propertyId'
     | '/dashboard/'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
+    | '/examples/tab'
     | '/examples/time-picker'
     | '/property/$propertyId'
     | '/dashboard'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/examples/number-stepper'
     | '/examples/selection-picker'
     | '/examples/sliding-drawer'
+    | '/examples/tab'
     | '/examples/time-picker'
     | '/property/$propertyId'
     | '/dashboard/'
@@ -356,6 +368,13 @@ declare module '@tanstack/react-router' {
       path: '/time-picker'
       fullPath: '/examples/time-picker'
       preLoaderRoute: typeof ExamplesTimePickerRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
+    '/examples/tab': {
+      id: '/examples/tab'
+      path: '/tab'
+      fullPath: '/examples/tab'
+      preLoaderRoute: typeof ExamplesTabRouteImport
       parentRoute: typeof ExamplesRoute
     }
     '/examples/sliding-drawer': {
@@ -463,6 +482,7 @@ interface ExamplesRouteChildren {
   ExamplesNumberStepperRoute: typeof ExamplesNumberStepperRoute
   ExamplesSelectionPickerRoute: typeof ExamplesSelectionPickerRoute
   ExamplesSlidingDrawerRoute: typeof ExamplesSlidingDrawerRoute
+  ExamplesTabRoute: typeof ExamplesTabRoute
   ExamplesTimePickerRoute: typeof ExamplesTimePickerRoute
   ExamplesIndexRoute: typeof ExamplesIndexRoute
 }
@@ -476,6 +496,7 @@ const ExamplesRouteChildren: ExamplesRouteChildren = {
   ExamplesNumberStepperRoute: ExamplesNumberStepperRoute,
   ExamplesSelectionPickerRoute: ExamplesSelectionPickerRoute,
   ExamplesSlidingDrawerRoute: ExamplesSlidingDrawerRoute,
+  ExamplesTabRoute: ExamplesTabRoute,
   ExamplesTimePickerRoute: ExamplesTimePickerRoute,
   ExamplesIndexRoute: ExamplesIndexRoute,
 }
