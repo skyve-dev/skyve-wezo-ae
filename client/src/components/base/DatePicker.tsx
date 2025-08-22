@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
 import { Box } from './Box'
-import useDrawerManager from '../hooks/useDrawerManager'
+import useDrawerManager from '../../hooks/useDrawerManager'
 import { 
   FaCalendarAlt,
   FaChevronLeft,
