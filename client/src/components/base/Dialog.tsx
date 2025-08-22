@@ -9,14 +9,17 @@ const disableStyleId = 'disable-scroll-style'
 function disableScroller() {
     const style = document.createElement('style');
     style.id = disableStyleId;
+    style.setAttribute('data-scroll-y',window.scrollY+'')
     style.innerText = `html,body,#root{height:100%;overflow:hidden}`;
     document.head.append(style);
 }
 
 function enableScroller() {
     const style = document.getElementById(disableStyleId);
+    const top = parseInt(style?.getAttribute('data-scroll-y') ?? '0');
     if(style){
         style.remove();
+        window.scrollTo({top,behavior:'instant'})
     }
 }
 
