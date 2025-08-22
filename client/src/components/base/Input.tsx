@@ -1,6 +1,6 @@
-import React, { forwardRef, InputHTMLAttributes } from 'react';
-import { Box } from './Box';
-import { BoxProps } from '@/types/box';
+import React, {forwardRef, InputHTMLAttributes} from 'react';
+import {Box} from './Box';
+import {BoxProps} from '@/types/box';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
     Pick<BoxProps, 'width' | 'widthSm' | 'widthMd' | 'widthLg' | 'widthXl'

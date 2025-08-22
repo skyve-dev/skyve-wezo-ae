@@ -1,12 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
-import { Box } from './Box'
+import {Box} from './Box'
 import useDrawerManager from '../../hooks/useDrawerManager'
-import { 
-  FaClock,
-  FaCheck 
-} from 'react-icons/fa'
+import {FaCheck, FaClock} from 'react-icons/fa'
 
 interface TimePickerProps {
   /**
@@ -280,7 +277,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
 
     container.scrollTo({
       top: scrollTop,
-      behavior: 'smooth'
+      behavior: 'instant'
     })
   }, [])
 
@@ -373,6 +370,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
         height="auto"
         zIndex={drawerManager.getDrawerZIndex(drawerId)}
         showCloseButton={false}
+        contentStyles={{maxWidth:600,marginLeft:'auto',marginRight:'auto',borderTopLeftRadius:'1rem',borderTopRightRadius:'1rem'}}
         disableBackdropClick
       >
         <Box padding="1.5rem">

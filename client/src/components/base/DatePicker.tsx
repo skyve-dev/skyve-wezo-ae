@@ -1,14 +1,9 @@
-import React, { useState, useRef } from 'react'
+import React, {useRef, useState} from 'react'
 import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
-import { Box } from './Box'
+import {Box} from './Box'
 import useDrawerManager from '../../hooks/useDrawerManager'
-import { 
-  FaCalendarAlt,
-  FaChevronLeft,
-  FaChevronRight,
-  FaCheck 
-} from 'react-icons/fa'
+import {FaCalendarAlt, FaCheck, FaChevronLeft, FaChevronRight} from 'react-icons/fa'
 
 interface DatePickerProps {
   /**
@@ -265,6 +260,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         height="auto"
         zIndex={drawerManager.getDrawerZIndex(drawerId)}
         showCloseButton={false}
+        contentStyles={{maxWidth:600,marginLeft:'auto',marginRight:'auto',borderTopLeftRadius:'1rem',borderTopRightRadius:'1rem'}}
         disableBackdropClick
       >
         <Box padding="1.5rem" display={'flex'} flexDirection={'column'} overflow={'auto'}>
@@ -441,6 +437,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         side="bottom"
         height="70vh"
         zIndex={drawerManager.getDrawerZIndex(yearDrawerId)}
+        contentStyles={{maxWidth:600,marginLeft:'auto',marginRight:'auto',borderTopLeftRadius:'1rem',borderTopRightRadius:'1rem'}}
         showCloseButton
       >
         <Box padding="1.5rem" display="flex" flexDirection="column" overflow="auto">
@@ -474,12 +471,18 @@ const DatePicker: React.FC<DatePickerProps> = ({
               </Box>
             )}
             containerStyles={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+              display: 'flex',
+              flexDirection:'row',
+              flexWrap:'wrap',
+              justifyContent:'space-evenly',
+              // gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
               gap: '0.5rem',
               maxHeight: '400px',
               overflow: 'auto',
-              padding: '0.5rem'
+              padding: '0.5rem',
+              // maxWidth : '500px',
+              marginLeft : 'auto',
+              marginRight : 'auto',
             }}
             selectedItemStyles={{
               borderColor: '#3182ce',

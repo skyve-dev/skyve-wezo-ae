@@ -1,5 +1,5 @@
 import React, {CSSProperties} from 'react'
-import { Box } from './Box'
+import {Box} from './Box'
 import {BoxProps} from "@/types/box.ts";
 
 interface SelectionPickerProps<T> extends Omit<BoxProps<'div'>, 'onChange'>{
@@ -260,6 +260,8 @@ function SelectionPicker<T>({
         return (
           <Box
             key={itemId}
+            display={'flex'}
+            flexDirection={'column'}
             className={`${itemClassName || ''} ${selected ? selectedItemClassName || '' : ''}`}
             onClick={() => handleItemClick(itemId, item)}
             whileHover={

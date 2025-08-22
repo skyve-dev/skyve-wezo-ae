@@ -1,8 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import TimePickerExamples from '../../examples/TimePickerExamples'
+import TimePickerExample from '../../components/base/TimePicker.example'
 
 export const Route = createFileRoute('/examples/time-picker')({
-  component: TimePickerExamples,
+  component: TimePickerExample,
 })
-
-export default TimePickerExamples
