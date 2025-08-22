@@ -1,5 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../base/Box';
+import { Button } from '../base/Button';
 import { Input } from '../base/Input';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { login, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
@@ -128,62 +129,60 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           />
 
           <Box display="flex" justifyContent="flex-end">
-            <Box as="button"
+            <Button
+              label="Forgot password?"
               type="button"
               onClick={onSwitchToForgotPassword}
+              variant="normal"
+              size="small"
               style={{
                 background: 'none',
                 border: 'none',
                 color: '#007bff',
                 fontSize: '1rem',
-                cursor: 'pointer',
                 padding: '0.25rem 0.5rem',
                 textDecoration: 'underline',
+                height: 'auto',
+                minWidth: 'unset'
               }}
-            >
-              Forgot password?
-            </Box>
+            />
           </Box>
 
-          <Box as="button"
+          <Button
+            label={isLoading ? 'Signing In...' : 'Sign In'}
             type="submit"
             disabled={isLoading}
+            loading={isLoading}
+            variant="promoted"
+            size="medium"
+            fullWidth
             style={{
-              backgroundColor: isLoading ? '#6c757d' : '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
               padding: '0.75rem 1.5rem',
-              fontSize: '16px',
-              fontWeight: 500,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
+              fontSize: '16px'
             }}
-          >
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </Box>
+          />
         </Box>
 
         <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef">
           <Box as="p" fontSize={'1rem'} color="#6c757d" margin={0}>
             Don't have an account?{' '}
-            <Box as="button"
+            <Button
+              label="Create one"
               onClick={onSwitchToRegister}
+              variant="normal"
+              size="small"
               style={{
                 background: 'none',
                 border: 'none',
                 color: '#007bff',
                 fontSize: '1rem',
-                cursor: 'pointer',
                 textDecoration: 'underline',
+                display: 'inline',
+                padding: '0',
+                height: 'auto',
+                minWidth: 'unset'
               }}
-            >
-              Create one
-            </Box>
+            />
           </Box>
         </Box>
       </Box>

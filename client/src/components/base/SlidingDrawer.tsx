@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import ReactDOM from 'react-dom'
-import {Box} from './Box'
+import {Button} from './Button'
 import {IoClose} from "react-icons/io5";
 
 // Global portal manager to track multiple drawers using the same portal
@@ -445,31 +445,29 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
     }
 
     const defaultCloseButton = (
-        <Box
-            as="button"
+        <Button
+            label=""
+            icon={<IoClose />}
+            onClick={onClose}
+            variant="normal"
+            size="small"
             position="absolute"
             top="1rem"
             right="1rem"
             width="2rem"
             height="2rem"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
+            padding="0"
+            borderRadius="50%"
             backgroundColor="transparent"
             border="none"
-            borderRadius="50%"
-            cursor="pointer"
             fontSize="1.5rem"
             color="#6b7280"
             zIndex={zIndex + 2}
-            whileHover={{
-                backgroundColor: 'rgba(0, 0, 0, 0.1)'
-            }}
-            onClick={onClose}
             aria-label="Close drawer"
-        >
-            <IoClose/>
-        </Box>
+            style={{
+                minWidth: 'unset'
+            }}
+        />
     )
 
     const drawerContent = (

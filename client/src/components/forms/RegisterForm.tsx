@@ -1,5 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box } from '../base/Box';
+import { Button } from '../base/Button';
 import { Input } from '../base/Input';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { register, clearError, selectIsLoading, selectError } from '@/store/slices/authSlice';
@@ -172,71 +173,41 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             fullWidth
           />
 
-          <Box as="button"
+          <Button
+            label={isLoading ? 'Creating Account...' : 'Create Account'}
             type="submit"
             disabled={isLoading}
+            loading={isLoading}
+            variant="promoted"
+            size="medium"
+            fullWidth
             style={{
-              backgroundColor: isLoading ? '#6c757d' : '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
               padding: '0.75rem 1.5rem',
-              fontSize: '1rem',
-              fontWeight: 500,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
+              fontSize: '1rem'
             }}
-            onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.currentTarget.style.backgroundColor = '#0056b3';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isLoading) {
-                e.currentTarget.style.backgroundColor = '#007bff';
-              }
-            }}
-          >
-            {isLoading ? (
-              <>
-                <Box
-                  width={16}
-                  height={16}
-                  borderRadius="50%"
-                  border="2px solid currentColor"
-                  style={{
-                    borderTopColor: 'transparent',
-                    animation: 'spin 1s linear infinite',
-                  }}
-                />
-                Creating Account...
-              </>
-            ) : (
-              'Create Account'
-            )}
-          </Box>
+          />
         </Box>
 
         <Box textAlign="center" paddingTop={20} borderTop="1px solid #e9ecef" >
           <Box as="p" fontSize={16} color="#6c757d" margin={0} >
             Already have an account?{' '}
-            <Box as="button"
+            <Button
+              label="Sign in"
               onClick={onSwitchToLogin}
+              variant="normal"
+              size="small"
               style={{
                 background: 'none',
                 border: 'none',
                 color: '#007bff',
                 fontSize: '1rem',
-                cursor: 'pointer',
                 textDecoration: 'underline',
+                display: 'inline',
+                padding: '0',
+                height: 'auto',
+                minWidth: 'unset'
               }}
-            >
-              Sign in
-            </Box>
+            />
           </Box>
         </Box>
       </Box>

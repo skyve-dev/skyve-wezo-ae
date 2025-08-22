@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Box} from './Box';
+import {Button} from './Button';
 import {BoxProps} from "@/types/box.ts";
 
 export interface NumberStepperInputProps extends Pick<BoxProps, 'width' | 'widthSm' | 'widthMd' | 'widthLg' | 'widthXl'
@@ -289,7 +290,6 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
             {/* Custom stepper input field */}
             <Box
                 display="flex"
-                alignItems="center"
                 borderRadius="0.375rem"
                 overflow="hidden"
                 {...containerStyle}
@@ -297,36 +297,32 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                 width="100%"
             >
                 {/* Decrement Button */}
-                <Box
-                    as="button"
+                <Button
+                    label="−"
                     type="button"
                     onClick={handleDecrement}
                     disabled={disabled || readOnly || currentValue <= min}
+                    variant="normal"
+                    size="small"
                     width={config.buttonSize}
-                    height={config.height}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
+                    padding="0"
                     backgroundColor="transparent"
                     border="none"
-                    cursor={disabled || readOnly || currentValue <= min ? 'not-allowed' : 'pointer'}
                     color={disabled || readOnly || currentValue <= min ? '#9ca3af' : '#374151'}
-                    fontSize={20}
-                    fontWeight={500}
-                    whileHover={
-                        !disabled && !readOnly && currentValue > min
-                            ? {backgroundColor: '#f3f4f6'}
-                            : undefined
-                    }
-                    whileTap={
-                        !disabled && !readOnly && currentValue > min
-                            ? {transform: 'scale(0.95)'}
-                            : undefined
-                    }
+                    fontSize="20px"
+                    fontWeight="500"
                     tabIndex={-1}
-                >
-                    −
-                </Box>
+                    style={{
+                        minWidth: 'unset',
+                        borderTopRightRadius:0,
+                        borderBottomRightRadius:0,
+                        borderRight:' 1px solid rgb(209, 213, 219)',
+                        borderLeft :'unset',
+                        borderBottom : 'unset',
+                        borderTop : 'unset',
+                        height:'unset'
+                    }}
+                />
 
                 {/* Input Field */}
                 <Box
@@ -360,36 +356,32 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                 />
 
                 {/* Increment Button */}
-                <Box
-                    as="button"
+                <Button
+                    label="+"
                     type="button"
                     onClick={handleIncrement}
                     disabled={disabled || readOnly || currentValue >= max}
+                    variant="normal"
+                    size="small"
                     width={config.buttonSize}
-                    height={config.height}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
+                    padding="0"
                     backgroundColor="transparent"
                     border="none"
-                    cursor={disabled || readOnly || currentValue >= max ? 'not-allowed' : 'pointer'}
                     color={disabled || readOnly || currentValue >= max ? '#9ca3af' : '#374151'}
-                    fontSize={20}
-                    fontWeight={500}
-                    whileHover={
-                        !disabled && !readOnly && currentValue < max
-                            ? {backgroundColor: '#f3f4f6'}
-                            : undefined
-                    }
-                    whileTap={
-                        !disabled && !readOnly && currentValue < max
-                            ? {transform: 'scale(0.95)'}
-                            : undefined
-                    }
+                    fontSize="20px"
+                    fontWeight="500"
                     tabIndex={-1}
-                >
-                    +
-                </Box>
+                    style={{
+                        minWidth: 'unset',
+                        borderTopLeftRadius:0,
+                        borderBottomLeftRadius:0,
+                        borderLeft:' 1px solid rgb(209, 213, 219)',
+                        borderRight :'unset',
+                        borderBottom : 'unset',
+                        borderTop : 'unset',
+                        height:'unset'
+                    }}
+                />
             </Box>
 
             {/* Helper Text - using same structure as Input component */}

@@ -1,4 +1,5 @@
 import { Box } from './base/Box';
+import { Button } from './base/Button';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { logout, selectUser } from '@/store/slices/authSlice';
 import { useNavigate } from '@tanstack/react-router';
@@ -35,29 +36,17 @@ export const Dashboard: React.FC = () => {
             </Box>
           </Box>
           
-          <Box as="button"
+          <Button
+            label="Sign Out"
             onClick={() => dispatch(logout())}
+            variant="normal"
+            size="medium"
             style={{
-              backgroundColor: 'transparent',
               color: '#007bff',
               border: '1px solid #007bff',
-              borderRadius: '6px',
-              padding: '0.5rem 1rem',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
+              padding: '0.5rem 1rem'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#007bff';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#007bff';
-            }}
-          >
-            Sign Out
-          </Box>
+          />
         </Box>
 
         <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="1fr 1fr" gap={24}>
@@ -97,20 +86,17 @@ export const Dashboard: React.FC = () => {
               </Box>
 
               <Box paddingTop={16}>
-                <Box as="button"
+                <Button
+                  label="Edit Profile"
+                  onClick={() => {}}
+                  variant="normal"
+                  size="small"
                   style={{
-                    backgroundColor: 'transparent',
                     color: '#007bff',
                     border: '1px solid #007bff',
-                    borderRadius: '6px',
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    padding: '0.5rem 0.75rem'
                   }}
-                >
-                  Edit Profile
-                </Box>
+                />
               </Box>
             </Box>
           </Box>
@@ -125,83 +111,68 @@ export const Dashboard: React.FC = () => {
               <Box as="h2" margin={0} fontSize={20} fontWeight={600}>Quick Actions</Box>
               
               <Box display="flex" flexDirection="column" gap={12}>
-                <Box as="button"
+                <Button
+                  label="List a Property"
                   onClick={() => redirectToPropertyRegistration(navigate)}
+                  variant="promoted"
+                  size="medium"
+                  fullWidth
                   style={{
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '0.75rem 1rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s',
+                    padding: '0.75rem 1rem'
                   }}
-                >
-                  List a Property
-                </Box>
+                />
                 
-                <Box as="button"
+                <Button
+                  label="View My Properties"
                   onClick={() => navigate({ to: '/dashboard/my-properties' })}
+                  variant="normal"
+                  size="medium"
+                  fullWidth
                   style={{
-                    backgroundColor: 'transparent',
                     color: '#007bff',
                     border: '1px solid #007bff',
-                    borderRadius: '6px',
-                    padding: '0.75rem 1rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    padding: '0.75rem 1rem'
                   }}
-                >
-                  View My Properties
-                </Box>
+                />
                 
-                <Box as="button"
+                <Button
+                  label="Manage Photos"
                   onClick={() => navigate({ to: '/dashboard/photos' })}
+                  variant="normal"
+                  size="medium"
+                  fullWidth
                   style={{
-                    backgroundColor: 'transparent',
                     color: '#007bff',
                     border: '1px solid #007bff',
-                    borderRadius: '6px',
-                    padding: '0.75rem 1rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    padding: '0.75rem 1rem'
                   }}
-                >
-                  Manage Photos
-                </Box>
+                />
                 
-                <Box as="button"
+                <Button
+                  label="Booking History"
+                  onClick={() => {}}
+                  variant="normal"
+                  size="medium"
+                  fullWidth
                   style={{
-                    backgroundColor: 'transparent',
                     color: '#007bff',
                     border: '1px solid #007bff',
-                    borderRadius: '6px',
-                    padding: '0.75rem 1rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    padding: '0.75rem 1rem'
                   }}
-                >
-                  Booking History
-                </Box>
+                />
                 
-                <Box as="button"
+                <Button
+                  label="Messages"
+                  onClick={() => {}}
+                  variant="normal"
+                  size="medium"
+                  fullWidth
                   style={{
-                    backgroundColor: 'transparent',
                     color: '#007bff',
                     border: '1px solid #007bff',
-                    borderRadius: '6px',
-                    padding: '0.75rem 1rem',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    padding: '0.75rem 1rem'
                   }}
-                >
-                  Messages
-                </Box>
+                />
 
               </Box>
             </Box>

@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import { Box } from './Box'
 import { BoxProps } from '@/types/box.ts'
 
-export interface ButtonProps extends Omit<BoxProps<'button'>, 'onClick' | 'as' | 'size'> {
+export interface ButtonProps extends Omit<BoxProps, 'onClick' | 'as' | 'size'> {
   // Core functionality
   label: string
   icon?: React.ReactNode
@@ -110,7 +110,7 @@ export const Button = forwardRef<
   // Variant styles
   const getVariantStyles = () => {
     const baseStyles = {
-      display: 'inline-flex',
+      display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       gap: config.gap,
@@ -202,9 +202,11 @@ export const Button = forwardRef<
             {icon}
           </Box>
         )}
-        <Box as="span" display={loading ? 'none' : 'inline'}>
+        {((!loading) && label) &&
+        <Box as="span">
           {label}
         </Box>
+        }
       </>
     )
   }
@@ -212,14 +214,21 @@ export const Button = forwardRef<
   const buttonStyles = getVariantStyles()
   const interactiveStyles = getInteractiveStyles()
   
-  const commonProps = {
+  // Extract only style-related props that are safe for both button and anchor
+  const { 
+    // Exclude button/anchor specific props
+    type: _type,
+    style:_style,
+    ...safeProps
+  } = props as any
+  
+  const baseProps = {
     className: className,
-    onClick: (disabled || loading) ? undefined : onClick,
     'aria-disabled': disabled || loading,
     'aria-busy': loading,
-    style: buttonStyles,
     ...interactiveStyles,
-    ...props
+    ...safeProps,
+    style: {...buttonStyles,..._style}
   }
   
   // Render as link if href is provided
@@ -232,8 +241,9 @@ export const Button = forwardRef<
         rel={rel}
         role="button"
         tabIndex={disabled || loading ? -1 : 0}
+        onClick={(disabled || loading) ? undefined : onClick as any}
         ref={ref as React.Ref<HTMLAnchorElement>}
-        {...commonProps}
+        {...baseProps}
       >
         {renderContent()}
       </Box>
@@ -246,8 +256,9 @@ export const Button = forwardRef<
       as="button"
       type={type}
       disabled={disabled || loading}
+      onClick={(disabled || loading) ? undefined : onClick as any}
       ref={ref as React.Ref<HTMLButtonElement>}
-      {...commonProps}
+      {...baseProps}
     >
       {renderContent()}
     </Box>

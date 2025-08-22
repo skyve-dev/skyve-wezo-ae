@@ -15,7 +15,6 @@ import {
   FaEnvelope,
   FaPhone,
   FaExternalLinkAlt,
-  FaSearch,
   FaHome,
   FaImages,
   FaPlay,
@@ -24,9 +23,7 @@ import {
   FaArrowRight,
   FaCheck,
   FaCalendar,
-  FaCog,
-  FaUser,
-  FaDollarSign
+  FaCog
 } from 'react-icons/fa'
 
 // Example data interfaces
@@ -711,7 +708,7 @@ export function ButtonExample() {
                           fontSize="0.875rem"
                           fontWeight={currentStep === step.id ? '600' : '400'}
                           color={currentStep === step.id ? '#3b82f6' : step.completed ? '#10b981' : '#6b7280'}
-                          whiteSpace="nowrap"
+                          style={{ whiteSpace: 'nowrap' }}
                         >
                           {step.label}
                         </Box>
