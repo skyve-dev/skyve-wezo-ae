@@ -13,7 +13,8 @@ import {
   FaCalendarAlt,
   FaClock,
   FaSort,
-  FaKeyboard
+  FaKeyboard,
+  FaHandPointer
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
@@ -87,6 +88,16 @@ function ExamplesIndex() {
       features: ['12/24 Hour Format', 'Custom Intervals', 'Real-time Preview', 'Touch Optimized'],
       complexity: 'Intermediate',
       path: '/examples/time-picker'
+    },
+    {
+      id: 'button',
+      title: 'Button',
+      description: 'Comprehensive button component with variants, states, and link behavior',
+      icon: <FaHandPointer />,
+      color: '#dc2626',
+      features: ['Multiple Variants', 'Loading States', 'Icon Support', 'Link Behavior'],
+      complexity: 'Beginner',
+      path: '/examples/button'
     },
     {
       id: 'box',
