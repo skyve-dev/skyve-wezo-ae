@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Box } from '../../components/base/Box'
+import Tab, { TabItem } from '../../components/base/Tab'
 import { 
   FaCheckSquare, 
   FaMobileAlt, 
@@ -14,7 +15,12 @@ import {
   FaClock,
   FaSort,
   FaKeyboard,
-  FaHandPointer
+  FaHandPointer,
+  FaComment,
+  FaFolderOpen,
+  FaCode,
+  FaCalendar,
+  FaTools
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
@@ -27,6 +33,7 @@ export const Route = createFileRoute('/examples/')({
 function ExamplesIndex() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeTab, setActiveTab] = useState('all')
 
   const examples = [
     {
@@ -107,15 +114,105 @@ function ExamplesIndex() {
       color: '#f59e0b',
       features: ['Flexbox & Grid', 'Responsive Design', 'Animations', 'Form Elements'],
       complexity: 'Beginner',
+      category: 'layout',
       path: '/examples/box'
+    },
+    {
+      id: 'dialog',
+      title: 'Dialog',
+      description: 'Modal dialog component with animated transitions and accessibility',
+      icon: <FaComment />,
+      color: '#8b5cf6',
+      features: ['Animated Overlays', 'Focus Management', 'Backdrop Controls', 'Portal Rendering'],
+      complexity: 'Intermediate',
+      category: 'overlay',
+      path: '/examples/dialog'
+    },
+    {
+      id: 'tab',
+      title: 'Tab',
+      description: 'Tabbed interface with animated focus ring and multiple variants',
+      icon: <FaFolderOpen />,
+      color: '#06b6d4',
+      features: ['Animated Focus Ring', 'Multiple Variants', 'Keyboard Navigation', 'Icon Support'],
+      complexity: 'Intermediate',
+      category: 'navigation',
+      path: '/examples/tab'
     }
   ]
 
-  const filteredExamples = examples.filter(example =>
+  // Add category to existing examples
+  const categorizedExamples = examples.map(example => ({
+    ...example,
+    category: example.category || (
+      ['input', 'number-stepper', 'button'].includes(example.id) ? 'form' :
+      ['selection-picker', 'date-picker', 'time-picker'].includes(example.id) ? 'input' :
+      ['sliding-drawer'].includes(example.id) ? 'overlay' :
+      'layout'
+    )
+  }))
+
+  const filteredExamples = categorizedExamples.filter(example =>
     example.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     example.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     example.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  const getExamplesByCategory = (category: string) => {
+    if (category === 'all') return filteredExamples
+    return filteredExamples.filter(example => example.category === category)
+  }
+
+  const categoryTabs: TabItem[] = [
+    {
+      id: 'all',
+      label: 'All Components',
+      icon: <FaCode />,
+      content: (
+        <ExampleGrid examples={getExamplesByCategory('all')} navigate={navigate} getComplexityColor={getComplexityColor} />
+      )
+    },
+    {
+      id: 'form',
+      label: 'Form Controls',
+      icon: <FaKeyboard />,
+      content: (
+        <ExampleGrid examples={getExamplesByCategory('form')} navigate={navigate} getComplexityColor={getComplexityColor} />
+      )
+    },
+    {
+      id: 'input',
+      label: 'Input Components',
+      icon: <FaCalendar />,
+      content: (
+        <ExampleGrid examples={getExamplesByCategory('input')} navigate={navigate} getComplexityColor={getComplexityColor} />
+      )
+    },
+    {
+      id: 'navigation',
+      label: 'Navigation',
+      icon: <FaFolderOpen />,
+      content: (
+        <ExampleGrid examples={getExamplesByCategory('navigation')} navigate={navigate} getComplexityColor={getComplexityColor} />
+      )
+    },
+    {
+      id: 'overlay',
+      label: 'Overlays',
+      icon: <FaComment />,
+      content: (
+        <ExampleGrid examples={getExamplesByCategory('overlay')} navigate={navigate} getComplexityColor={getComplexityColor} />
+      )
+    },
+    {
+      id: 'layout',
+      label: 'Layout',
+      icon: <FaBox />,
+      content: (
+        <ExampleGrid examples={getExamplesByCategory('layout')} navigate={navigate} getComplexityColor={getComplexityColor} />
+      )
+    }
+  ]
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
@@ -243,119 +340,46 @@ function ExamplesIndex() {
           </Box>
         </Box>
 
-        {/* Examples Grid */}
+        {/* Examples Tabs */}
         <Box>
           <Box fontSize="2rem" fontWeight="bold" marginBottom="2rem" color="#1a202c">
             Available Examples
           </Box>
           
-          {filteredExamples.length === 0 ? (
-            <Box
-              backgroundColor="white"
-              borderRadius="1rem"
-              padding="3rem"
-              textAlign="center"
-              boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
-            >
-              <Box fontSize="3rem" marginBottom="1rem">
-                <FaSearch />
-              </Box>
-              <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" color="#374151">
-                No examples found
-              </Box>
-              <Box fontSize="1rem" color="#6b7280">
-                Try searching for different keywords or browse all examples
-              </Box>
-            </Box>
-          ) : (
-            <Box 
-              display="grid" 
-              gridTemplateColumns="repeat(auto-fit, minmax(350px, 1fr))" 
-              gap="2rem"
-            >
-              {filteredExamples.map((example) => (
-                <Box
-                  key={example.id}
-                  backgroundColor="white"
-                  borderRadius="1.5rem"
-                  overflow="hidden"
-                  boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-                  cursor="pointer"
-                  whileHover={{
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 12px 25px rgba(0, 0, 0, 0.15)'
-                  }}
-                  onClick={() => navigate({ to: example.path })}
-                >
-                  {/* Header */}
-                  <Box
-                    padding="2rem 2rem 1rem"
-                    background={`linear-gradient(135deg, ${example.color} 0%, ${example.color}dd 100%)`}
-                    color="white"
-                    position="relative"
-                  >
-                    <Box
-                      position="absolute"
-                      top="1rem"
-                      right="1rem"
-                      padding="0.25rem 0.75rem"
-                      backgroundColor="white"
-                      borderRadius="1rem"
-                      fontSize="1rem"
-                      fontWeight="600"
-                      color={getComplexityColor(example.complexity)}
-                    >
-                      {example.complexity}
-                    </Box>
-                    
-                    <Box fontSize="3rem" marginBottom="1rem">
-                      {example.icon}
-                    </Box>
-                    <Box fontSize="1.5rem" fontWeight="bold" marginBottom="0.5rem">
-                      {example.title}
-                    </Box>
-                    <Box fontSize="1rem" opacity={0.9}>
-                      {example.description}
-                    </Box>
-                  </Box>
-
-                  {/* Content */}
-                  <Box padding="2rem">
-                    <Box fontSize="1rem" fontWeight="600" marginBottom="1rem" color="#374151">
-                      Key Features
-                    </Box>
-                    <Box display="flex" flexDirection="column" gap="0.5rem" marginBottom="2rem">
-                      {example.features.map((feature, i) => (
-                        <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#6b7280">
-                          <Box color={example.color}>✓</Box>
-                          {feature}
-                        </Box>
-                      ))}
-                    </Box>
-
-                    <Link
-                      to={example.path}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        padding: '0.75rem 1.5rem',
-                        backgroundColor: example.color,
-                        color: 'white',
-                        borderRadius: '0.75rem',
-                        fontSize: '1rem',
-                        fontWeight: '600',
-                        textDecoration: 'none'
-                      }}
-                    >
-                      View Examples
-                      <span style={{ fontSize: '1rem' }}>→</span>
-                    </Link>
-                  </Box>
+          {searchTerm ? (
+            // Show filtered results when searching
+            filteredExamples.length === 0 ? (
+              <Box
+                backgroundColor="white"
+                borderRadius="1rem"
+                padding="3rem"
+                textAlign="center"
+                boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
+              >
+                <Box fontSize="3rem" marginBottom="1rem">
+                  <FaSearch />
                 </Box>
-              ))}
-            </Box>
+                <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" color="#374151">
+                  No examples found
+                </Box>
+                <Box fontSize="1rem" color="#6b7280">
+                  Try searching for different keywords or browse all examples
+                </Box>
+              </Box>
+            ) : (
+              <ExampleGrid examples={filteredExamples} navigate={navigate} getComplexityColor={getComplexityColor} />
+            )
+          ) : (
+            // Show categorized tabs when not searching
+            <Tab
+              items={categoryTabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              variant="underline"
+              size="medium"
+              fullWidth
+              animationDuration={250}
+            />
           )}
         </Box>
 
@@ -496,6 +520,105 @@ function ExamplesIndex() {
           </Box>
         </Box>
       </Box>
+    </Box>
+  )
+}
+
+// Extracted ExampleGrid component for reusability
+function ExampleGrid({ examples, navigate, getComplexityColor }: {
+  examples: any[],
+  navigate: any,
+  getComplexityColor: (complexity: string) => string
+}) {
+  return (
+    <Box 
+      display="grid" 
+      gridTemplateColumns="repeat(auto-fit, minmax(350px, 1fr))" 
+      gap="2rem"
+      marginTop="2rem"
+    >
+      {examples.map((example) => (
+        <Box
+          key={example.id}
+          backgroundColor="white"
+          borderRadius="1.5rem"
+          overflow="hidden"
+          boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+          cursor="pointer"
+          whileHover={{
+            transform: 'translateY(-4px)',
+            boxShadow: '0 12px 25px rgba(0, 0, 0, 0.15)'
+          }}
+          onClick={() => navigate({ to: example.path })}
+        >
+          {/* Header */}
+          <Box
+            padding="2rem 2rem 1rem"
+            background={`linear-gradient(135deg, ${example.color} 0%, ${example.color}dd 100%)`}
+            color="white"
+            position="relative"
+          >
+            <Box
+              position="absolute"
+              top="1rem"
+              right="1rem"
+              padding="0.25rem 0.75rem"
+              backgroundColor="white"
+              borderRadius="1rem"
+              fontSize="1rem"
+              fontWeight="600"
+              color={getComplexityColor(example.complexity)}
+            >
+              {example.complexity}
+            </Box>
+            
+            <Box fontSize="3rem" marginBottom="1rem">
+              {example.icon}
+            </Box>
+            <Box fontSize="1.5rem" fontWeight="bold" marginBottom="0.5rem">
+              {example.title}
+            </Box>
+            <Box fontSize="1rem" opacity={0.9}>
+              {example.description}
+            </Box>
+          </Box>
+
+          {/* Content */}
+          <Box padding="2rem">
+            <Box fontSize="1rem" fontWeight="600" marginBottom="1rem" color="#374151">
+              Key Features
+            </Box>
+            <Box display="flex" flexDirection="column" gap="0.5rem" marginBottom="2rem">
+              {example.features.map((feature: string, i: number) => (
+                <Box key={i} display="flex" alignItems="center" gap="0.5rem" fontSize="1rem" color="#6b7280">
+                  <Box color={example.color}>✓</Box>
+                  {feature}
+                </Box>
+              ))}
+            </Box>
+
+            <Link
+              to={example.path}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                padding: '0.75rem 1.5rem',
+                backgroundColor: example.color,
+                color: 'white',
+                borderRadius: '0.75rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                textDecoration: 'none'
+              }}
+            >
+              View Examples
+              <span style={{ fontSize: '1rem' }}>→</span>
+            </Link>
+          </Box>
+        </Box>
+      ))}
     </Box>
   )
 }
