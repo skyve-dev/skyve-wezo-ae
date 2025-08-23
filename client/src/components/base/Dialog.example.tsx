@@ -74,7 +74,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Open Basic Dialog"
                         onClick={() => setBasicDialog(true)}
-                        variant="primary"
+                        variant="promoted"
                         width="100%"
                     />
                 </Box>
@@ -112,7 +112,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Open Form"
                         onClick={() => setFormDialog(true)}
-                        variant="primary"
+                        variant="promoted"
                         width="100%"
                     />
                 </Box>
@@ -150,7 +150,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Start Loading"
                         onClick={handleLoading}
-                        variant="primary"
+                        variant="promoted"
                         width="100%"
                     />
                 </Box>
@@ -193,7 +193,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Open Large Dialog"
                         onClick={() => setSizedDialog(true)}
-                        variant="primary"
+                        variant="promoted"
                         width="100%"
                     />
                 </Box>
@@ -236,7 +236,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Close Dialog"
                         onClick={() => setBasicDialog(false)}
-                        variant="primary"
+                        variant="promoted"
                     />
                 </Box>
             </Dialog>
@@ -278,7 +278,7 @@ const DialogExample: React.FC = () => {
                                 console.log('Action confirmed')
                                 setAlertDialog(false)
                             }}
-                            variant="primary"
+                            variant="promoted"
                             style={{ backgroundColor: '#ef4444' }}
                         />
                     </Box>
@@ -369,7 +369,7 @@ const DialogExample: React.FC = () => {
                             <Button 
                                 type="submit"
                                 label="Create Item"
-                                variant="primary"
+                                variant="promoted"
                             />
                         </Box>
                     </form>
@@ -424,7 +424,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Close Dialog"
                         onClick={() => setCustomDialog(false)}
-                        variant="primary"
+                        variant="promoted"
                         style={{
                             background: 'linear-gradient(45deg, #60a5fa, #a78bfa)',
                             border: 'none'
@@ -506,7 +506,7 @@ const DialogExample: React.FC = () => {
                                 console.log('Item deleted')
                                 setConfirmDialog(false)
                             }}
-                            variant="primary"
+                            variant="promoted"
                             whileHover={{
                                 backgroundColor:'white',
                                 color : '#dc2626'
@@ -571,7 +571,7 @@ const DialogExample: React.FC = () => {
                         <Button 
                             label="Close Large Dialog"
                             onClick={() => setSizedDialog(false)}
-                            variant="primary"
+                            variant="promoted"
                         />
                     </Box>
                 </Box>
@@ -615,7 +615,7 @@ const DialogExample: React.FC = () => {
                     <Button 
                         label="Close Modal"
                         onClick={() => setNoBackdropDialog(false)}
-                        variant="primary"
+                        variant="promoted"
                     />
                 </Box>
             </Dialog>

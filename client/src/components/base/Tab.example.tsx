@@ -13,8 +13,6 @@ import {
     FaInbox,
     FaEdit,
     FaPaperPlane,
-    FaBell,
-    FaLock,
     FaPalette,
     FaCode,
     FaMobileAlt,
@@ -160,7 +158,7 @@ const TabExample: React.FC = () => {
                                 defaultValue="A comprehensive project management solution"
                             />
                         </Box>
-                        <Button label="Save Settings" variant="primary" />
+                        <Button label="Save Settings" variant="promoted" />
                     </Box>
                 </Box>
             )
@@ -680,7 +678,7 @@ const TabExample: React.FC = () => {
                     <Box marginTop="1.5rem">
                         <Button 
                             label="Submit Form" 
-                            variant="primary" 
+                            variant="promoted" 
                             onClick={() => console.log('Form submitted:', formData)}
                         />
                     </Box>

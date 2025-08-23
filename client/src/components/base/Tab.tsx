@@ -354,7 +354,7 @@ const Tab: React.FC<TabProps> = ({
                         <Box
                             key={item.id}
                             as="button"
-                            ref={(el) => (tabsRef.current[index] = el)}
+                            ref={(el: HTMLButtonElement | null) => (tabsRef.current[index] = el as any)}
                             role="tab"
                             aria-selected={isActive}
                             aria-controls={`tabpanel-${item.id}`}

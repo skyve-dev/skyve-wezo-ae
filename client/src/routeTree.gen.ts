@@ -28,6 +28,7 @@ import { Route as ExamplesDialogRouteImport } from './routes/examples/dialog'
 import { Route as ExamplesDatePickerRouteImport } from './routes/examples/date-picker'
 import { Route as ExamplesButtonRouteImport } from './routes/examples/button'
 import { Route as ExamplesBoxRouteImport } from './routes/examples/box'
+import { Route as ExamplesAppShellRouteImport } from './routes/examples/app-shell'
 import { Route as EditPropertyPropertyIdRouteImport } from './routes/edit-property.$propertyId'
 import { Route as DashboardPhotosRouteImport } from './routes/dashboard/photos'
 import { Route as DashboardMyPropertiesRouteImport } from './routes/dashboard/my-properties'
@@ -127,6 +128,11 @@ const ExamplesBoxRoute = ExamplesBoxRouteImport.update({
   path: '/box',
   getParentRoute: () => ExamplesRoute,
 } as any)
+const ExamplesAppShellRoute = ExamplesAppShellRouteImport.update({
+  id: '/app-shell',
+  path: '/app-shell',
+  getParentRoute: () => ExamplesRoute,
+} as any)
 const EditPropertyPropertyIdRoute = EditPropertyPropertyIdRouteImport.update({
   id: '/edit-property/$propertyId',
   path: '/edit-property/$propertyId',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
+  '/examples/app-shell': typeof ExamplesAppShellRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
+  '/examples/app-shell': typeof ExamplesAppShellRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/dashboard/my-properties': typeof DashboardMyPropertiesRoute
   '/dashboard/photos': typeof DashboardPhotosRoute
   '/edit-property/$propertyId': typeof EditPropertyPropertyIdRoute
+  '/examples/app-shell': typeof ExamplesAppShellRoute
   '/examples/box': typeof ExamplesBoxRoute
   '/examples/button': typeof ExamplesButtonRoute
   '/examples/date-picker': typeof ExamplesDatePickerRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/dashboard/my-properties'
     | '/dashboard/photos'
     | '/edit-property/$propertyId'
+    | '/examples/app-shell'
     | '/examples/box'
     | '/examples/button'
     | '/examples/date-picker'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/dashboard/my-properties'
     | '/dashboard/photos'
     | '/edit-property/$propertyId'
+    | '/examples/app-shell'
     | '/examples/box'
     | '/examples/button'
     | '/examples/date-picker'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/dashboard/my-properties'
     | '/dashboard/photos'
     | '/edit-property/$propertyId'
+    | '/examples/app-shell'
     | '/examples/box'
     | '/examples/button'
     | '/examples/date-picker'
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExamplesBoxRouteImport
       parentRoute: typeof ExamplesRoute
     }
+    '/examples/app-shell': {
+      id: '/examples/app-shell'
+      path: '/app-shell'
+      fullPath: '/examples/app-shell'
+      preLoaderRoute: typeof ExamplesAppShellRouteImport
+      parentRoute: typeof ExamplesRoute
+    }
     '/edit-property/$propertyId': {
       id: '/edit-property/$propertyId'
       path: '/edit-property/$propertyId'
@@ -474,6 +493,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 )
 
 interface ExamplesRouteChildren {
+  ExamplesAppShellRoute: typeof ExamplesAppShellRoute
   ExamplesBoxRoute: typeof ExamplesBoxRoute
   ExamplesButtonRoute: typeof ExamplesButtonRoute
   ExamplesDatePickerRoute: typeof ExamplesDatePickerRoute
@@ -488,6 +508,7 @@ interface ExamplesRouteChildren {
 }
 
 const ExamplesRouteChildren: ExamplesRouteChildren = {
+  ExamplesAppShellRoute: ExamplesAppShellRoute,
   ExamplesBoxRoute: ExamplesBoxRoute,
   ExamplesButtonRoute: ExamplesButtonRoute,
   ExamplesDatePickerRoute: ExamplesDatePickerRoute,

@@ -20,7 +20,7 @@ import {
   FaFolderOpen,
   FaCode,
   FaCalendar,
-  FaTools
+  FaShieldAlt
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples/')({
@@ -138,6 +138,17 @@ function ExamplesIndex() {
       complexity: 'Intermediate',
       category: 'navigation',
       path: '/examples/tab'
+    },
+    {
+      id: 'app-shell',
+      title: 'AppShell',
+      description: 'Complete application shell with navigation, routing, and dialog system',
+      icon: <FaShieldAlt />,
+      color: '#7c3aed',
+      features: ['Type-Safe Routing', 'Responsive Navigation', 'Async Dialogs', 'Splash Screen'],
+      complexity: 'Advanced',
+      category: 'layout',
+      path: '/examples/app-shell'
     }
   ]
 

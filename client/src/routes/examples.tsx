@@ -10,7 +10,8 @@ import {
     FaHome,
     FaMobileAlt,
     FaPuzzlePiece,
-    FaFolderOpen
+    FaFolderOpen,
+    FaShieldAlt
 } from 'react-icons/fa'
 
 export const Route = createFileRoute('/examples')({
@@ -26,6 +27,7 @@ function ExamplesLayout() {
         {path: '/examples/sliding-drawer', label: 'SlidingDrawer', icon: <FaMobileAlt/>},
         {path: '/examples/dialog', label: 'Dialog', icon: <FaComment/>},
         {path: '/examples/tab', label: 'Tab', icon: <FaFolderOpen/>},
+        {path: '/examples/app-shell', label: 'AppShell', icon: <FaShieldAlt/>},
         {path: '/examples/date-picker', label: 'DatePicker', icon: <FaCalendarAlt/>},
         {path: '/examples/time-picker', label: 'TimePicker', icon: <FaClock/>},
         {path: '/examples/box', label: 'Box Component', icon: <FaBox/>}
@@ -136,51 +138,6 @@ function ExamplesLayout() {
             {/* Page Content */}
             <Outlet/>
 
-            {/* Floating Navigation for Mobile */}
-            <Box
-                display={'flex'}
-                flexDirection={'column'}
-                displaySm={'none'}
-                position="fixed"
-                bottom="1rem"
-                left="50%"
-                transform="translateX(-50%)"
-                backgroundColor="white"
-                borderRadius="2rem"
-                padding="0.5rem"
-                boxShadow="0 10px 25px rgba(0, 0, 0, 0.15)"
-                zIndex={20}
-                border="1px solid #e5e7eb"
-            >
-                <Box display="flex" alignItems="center" gap="0.25rem">
-                    {navigationItems.map((item) => {
-                        const isActive = location.pathname === item.path
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '2.5rem',
-                                    height: '2.5rem',
-                                    borderRadius: '50%',
-                                    backgroundColor: isActive ? '#3182ce' : 'transparent',
-                                    color: isActive ? 'white' : '#6b7280',
-                                    fontSize: '1.25rem',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                {item.icon}
-                            </Link>
-                        )
-                    })}
-                </Box>
-            </Box>
-
-            {/* Bottom spacing for mobile navigation */}
-            <Box height="5rem" display={'none'}/>
         </Box>
     )
 }
