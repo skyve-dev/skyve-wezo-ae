@@ -21,27 +21,34 @@ export enum RoomSpaceType {
 export enum ParkingType {
   YesFree = 'YesFree',
   YesPaid = 'YesPaid',
-  No = 'No'
+  No = 'No',
+  Free = 'YesFree',
+  Paid = 'YesPaid'
 }
 
 export enum PetPolicy {
   Yes = 'Yes',
   No = 'No',
-  UponRequest = 'UponRequest'
+  UponRequest = 'UponRequest',
+  YesWithFee = 'UponRequest'
 }
 
 export enum BookingType {
   BookInstantly = 'BookInstantly',
-  NeedToRequestBook = 'NeedToRequestBook'
+  NeedToRequestBook = 'NeedToRequestBook',
+  CanBookInstantly = 'BookInstantly'
 }
 
 export enum PaymentType {
   Online = 'Online',
-  ByCreditCardAtProperty = 'ByCreditCardAtProperty'
+  ByCreditCardAtProperty = 'ByCreditCardAtProperty',
+  OnArrival = 'ByCreditCardAtProperty'
 }
 
 export enum Currency {
-  AED = 'AED'
+  AED = 'AED',
+  USD = 'USD',
+  EUR = 'EUR'
 }
 
 // Display labels for user-friendly UI
@@ -85,5 +92,7 @@ export const PaymentTypeLabels: Record<PaymentType, string> = {
 }
 
 export const CurrencyLabels: Record<Currency, string> = {
-  [Currency.AED]: 'AED (UAE Dirham)'
+  [Currency.AED]: 'AED (UAE Dirham)',
+  [Currency.USD]: 'USD (US Dollar)',
+  [Currency.EUR]: 'EUR (Euro)'
 }

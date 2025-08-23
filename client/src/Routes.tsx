@@ -1,5 +1,5 @@
 // Create routes configuration
-import {createRoutes} from "@/components/base/AppShell";
+import {createRoutes, useAppShell} from "@/components/base/AppShell";
 import {
     FaHome,
     FaTachometerAlt,
@@ -116,3 +116,7 @@ export const routes = createRoutes({
         showInFooter: false
     }
 })
+
+export const useAppRoute = () => {
+    return useAppShell<typeof routes>()
+}

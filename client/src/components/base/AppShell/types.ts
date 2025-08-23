@@ -90,8 +90,7 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     routes: T
 }
 
-// Splash screen animation phases
-export type SplashPhase = 'loading' | 'expanding' | 'complete'
+// Splash screen functionality removed
 
 // Responsive breakpoints
 export interface BreakpointConfig {
@@ -116,11 +115,6 @@ export interface FooterConfig {
 
 // AppShell configuration
 export interface AppShellConfig {
-    splash?: {
-        duration?: number
-        logo?: React.ReactNode
-        text?: string
-    }
     header?: HeaderConfig
     footer?: FooterConfig
     breakpoints?: BreakpointConfig

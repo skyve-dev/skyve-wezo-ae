@@ -42,11 +42,6 @@ const AppContent: React.FC = () => {
             onBeforeNavigate={handleBeforeNavigate}
             onAfterNavigate={handleAfterNavigate}
             config={{
-                splash: {
-                    duration: 0,
-                    logo: <FaHome/>,
-                    text: 'Loading Wezo.ae...'
-                },
                 header: {
                     title: 'Wezo.ae',
                     logo: <FaHome/>,

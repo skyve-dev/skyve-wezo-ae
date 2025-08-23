@@ -1,4 +1,4 @@
-import React, {ReactNode, useCallback, useEffect, useRef, useState} from 'react'
+import React, {ReactNode, useCallback, useEffect, useState} from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
@@ -14,8 +14,7 @@ import {
     OnAfterNavigateFunction,
     OnBeforeNavigateFunction,
     RouteDefinition,
-    RouteInfo,
-    SplashPhase
+    RouteInfo
 } from './types'
 import {FaBars, FaTimes} from 'react-icons/fa'
 import {getCurrentPath, isSamePath, navigateToUrl, pathToRouteKey, routeKeyToPath} from './urlUtils'
@@ -300,23 +299,16 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         closeDialog
     }
 
-    // Splash screen state
-    const [splashPhase, setSplashPhase] = useState<SplashPhase>('loading')
-    const [showContent, setShowContent] = useState(false)
+    // Content is always shown (splash screen removed)
 
     // Responsive state
     const [isMobile, setIsMobile] = useState(false)
     const [, setIsTablet] = useState(false)
 
-    // Refs
-    const splashRef = useRef<HTMLDivElement>(null)
+    // Refs removed - splash screen functionality eliminated
 
     // Configuration with defaults
     const {
-        splash = {
-            duration: 2000,
-            text: 'Loading...'
-        },
         header = {
             title: 'App',
             showQuickNav: true
@@ -350,20 +342,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         return () => window.removeEventListener('resize', handleResize)
     }, [breakpoints])
 
-    // Splash screen effect
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setSplashPhase('expanding')
-
-            // Start the circle expansion animation
-            setTimeout(() => {
-                setSplashPhase('complete')
-                setShowContent(true)
-            }, 800) // Animation duration
-        }, splash.duration)
-
-        return () => clearTimeout(timer)
-    }, [splash.duration])
+    // Splash screen removed - no effect needed
 
     // Get current route component
     const currentRouteData = routes[currentRoute as keyof T]
@@ -420,66 +399,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     return (
         <AppShellContext.Provider value={contextValue as AppShellContextType}>
             <>
-                {/* Splash Screen */}
-                {splashPhase !== 'complete' && (
-                    <Box
-                        ref={splashRef}
-                        position="fixed"
-                        top="0"
-                        left="0"
-                        width="100%"
-                        height="100%"
-                        backgroundColor="white"
-                        zIndex="9999"
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        style={{
-                            transform: splashPhase === 'expanding'
-                                ? 'scale(0)'
-                                : 'scale(1)',
-                            transformOrigin: 'center center',
-                            transition: splashPhase === 'expanding'
-                                ? 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
-                                : 'none',
-                            borderRadius: splashPhase === 'expanding' ? '50%' : '0%'
-                        }}
-                    >
-                        {/* Splash Logo */}
-                        {splash.logo && (
-                            <Box fontSize="4rem" marginBottom="2rem" color={theme.primaryColor}>
-                                {splash.logo}
-                            </Box>
-                        )}
-
-                        {/* Splash Text */}
-                        <Box
-                            fontSize="1.5rem"
-                            fontWeight="600"
-                            color="#374151"
-                            marginBottom="1rem"
-                        >
-                            {splash.text}
-                        </Box>
-
-                        {/* Loading Animation */}
-                        <Box
-                            width="40px"
-                            height="40px"
-                            border="4px solid #f3f4f6"
-                            borderTop={`4px solid ${theme.primaryColor}`}
-                            borderRadius="50%"
-                            animation="spin 1s linear infinite"
-                            style={{
-                                animation: 'spin 1s linear infinite'
-                            }}
-                        />
-                    </Box>
-                )}
-
-                {/* Main Content */}
-                {showContent && (
                     <>
                         {/* Header */}
                         <Box
@@ -790,7 +709,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                             </Box>
                         )}
                     </>
-                )}
 
                 {/* CSS Animations */}
                 <style>{`

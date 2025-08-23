@@ -760,11 +760,6 @@ const AppShellExample: React.FC = () => {
         routes={routes} 
         initialRoute="home"
           config={{
-            splash: {
-              duration: 1500,
-              logo: <FaRocket />,
-              text: 'Loading AppShell Demo...'
-            },
             header: {
               title: 'AppShell Demo',
               logo: <FaShieldAlt />,

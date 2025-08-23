@@ -229,11 +229,6 @@ const HooksExample: React.FC = () => {
         onBeforeNavigate={handleBeforeNavigate}
         onAfterNavigate={handleAfterNavigate}
         config={{
-          splash: {
-            duration: 1000,
-            logo: <FaExclamationTriangle />,
-            text: 'Loading Navigation Hooks Demo...'
-          },
           header: {
             title: 'Navigation Hooks Demo',
             logo: <FaExclamationTriangle />
