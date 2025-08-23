@@ -129,7 +129,6 @@ const AppContent: React.FC = () => {
             '/login': 'Sign In - Wezo.ae',
             '/register': 'Create Account - Wezo.ae'
         }
-
         document.title = titles[target.path as keyof typeof titles] || 'Wezo.ae'
     }
 
