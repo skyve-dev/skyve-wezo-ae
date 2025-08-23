@@ -23,7 +23,30 @@ export type RoutePaths<T extends Record<string, BaseRoute>> = keyof T
 export type NavigateToFunction<T extends Record<string, BaseRoute>> = <K extends RoutePaths<T>>(
     path: K,
     props: ComponentProps<T[K]['component']>
+) => Promise<void>
+
+// Navigation route info
+export interface RouteInfo {
+    path: string
+    params: Record<string, any>
+}
+
+// Navigation event hook types
+export type NextFunction<T extends Record<string, BaseRoute>> = <K extends RoutePaths<T>>(
+    path?: K,
+    params?: ComponentProps<T[K]['component']>
 ) => void
+
+export type OnBeforeNavigateFunction<T extends Record<string, BaseRoute>> = (
+    next: NextFunction<T>,
+    target: RouteInfo,
+    source: RouteInfo
+) => void | Promise<void>
+
+export type OnAfterNavigateFunction = (
+    target: RouteInfo,
+    source: RouteInfo
+) => void | Promise<void>
 
 // Dialog button interface
 export interface DialogButton {

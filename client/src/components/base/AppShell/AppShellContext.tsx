@@ -4,7 +4,10 @@ import {
   BaseRoute, 
   AlertDialogOptions, 
   NavigateToFunction,
-  RouteDefinition
+  RouteDefinition,
+  OnBeforeNavigateFunction,
+  OnAfterNavigateFunction,
+  RouteInfo
 } from './types'
 import {
   getCurrentPath,
@@ -22,6 +25,8 @@ interface AppShellProviderProps<T extends Record<string, BaseRoute>> {
   children: ReactNode
   routes: RouteDefinition<T>
   initialRoute?: keyof T
+  onBeforeNavigate?: OnBeforeNavigateFunction<T>
+  onAfterNavigate?: OnAfterNavigateFunction
 }
 
 // Global dialog state for the AppShell
@@ -40,7 +45,9 @@ let globalDialogState: {
 export function AppShellProvider<T extends Record<string, BaseRoute>>({
   children,
   routes,
-  initialRoute
+  initialRoute,
+  onBeforeNavigate,
+  onAfterNavigate
 }: AppShellProviderProps<T>) {
   
   // Helper function to get initial route from URL
@@ -131,29 +138,103 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
     }
   }, [currentRoute])
 
-  // Type-safe navigation function with URL synchronization
-  const navigateTo: NavigateToFunction<T> = useCallback((routeKey: any, props?: any) => {
+  // Type-safe navigation function with URL synchronization and event hooks
+  const navigateTo: NavigateToFunction<T> = useCallback(async (routeKey: any, props?: any) => {
     const route = routes[routeKey]
-    if (route) {
-      const routeKeyStr = routeKey as string
-      const urlPath = routeKeyToPath(routeKeyStr)
-      
-      // Update browser URL
-      navigateToUrl(urlPath)
-      
-      // Update internal state
-      setCurrentRoute(routeKeyStr)
-      setSideNavOpen(false) // Close side nav on navigation
-      
-      // Store props for the route if needed (you can expand this)
-      if (props) {
-        // You could store route props in a separate state or pass them through URL params
-        console.log('Route props:', props)
-      }
-    } else {
+    if (!route) {
       console.warn(`Route not found: ${routeKey}`)
+      return
     }
-  }, [routes])
+
+    // Create source route info (current route before navigation)
+    const sourceRouteInfo: RouteInfo = {
+      path: routeKeyToPath(currentRoute),
+      params: {} // You could store and retrieve current route params if needed
+    }
+
+    // Create target route info (where we're trying to navigate)
+    const targetRouteInfo: RouteInfo = {
+      path: routeKeyToPath(routeKey as string),
+      params: props || {}
+    }
+
+    // Track original navigation intent
+    let finalRouteKey = routeKey
+    let finalProps = props
+
+    // Execute onBeforeNavigate hook if provided
+    if (onBeforeNavigate) {
+      let shouldContinue = false
+      let redirectRequested = false
+
+      // Create the next function that the hook will call
+      const next = (newRouteKey?: any, newParams?: any) => {
+        if (newRouteKey !== undefined) {
+          // Redirect to different route
+          finalRouteKey = newRouteKey
+          finalProps = newParams
+          redirectRequested = true
+        }
+        shouldContinue = true
+      }
+
+      try {
+        await onBeforeNavigate(next, targetRouteInfo, sourceRouteInfo)
+      } catch (error) {
+        console.error('onBeforeNavigate error:', error)
+        return // Abort navigation on error
+      }
+
+      // If next() was never called, abort navigation
+      if (!shouldContinue) {
+        return
+      }
+
+      // If redirect was requested, validate the new route and update target info
+      if (redirectRequested) {
+        if (!routes[finalRouteKey]) {
+          console.warn(`Redirect route not found: ${finalRouteKey}`)
+          return
+        }
+        // Update target route info for the redirect
+        targetRouteInfo.path = routeKeyToPath(finalRouteKey as string)
+        targetRouteInfo.params = finalProps || {}
+      }
+    }
+
+    // Proceed with navigation (original or redirected)
+    const routeKeyStr = finalRouteKey as string
+    const urlPath = routeKeyToPath(routeKeyStr)
+    
+    // Update browser URL
+    navigateToUrl(urlPath)
+    
+    // Update internal state
+    setCurrentRoute(routeKeyStr)
+    setSideNavOpen(false) // Close side nav on navigation
+    
+    // Store props for the route if needed (you can expand this)
+    if (finalProps) {
+      // You could store route props in a separate state or pass them through URL params
+      console.log('Route props:', finalProps)
+    }
+
+    // Create final target route info (in case of redirect)
+    const finalTargetRouteInfo: RouteInfo = {
+      path: urlPath,
+      params: finalProps || {}
+    }
+
+    // Execute onAfterNavigate hook if provided
+    if (onAfterNavigate) {
+      try {
+        await onAfterNavigate(finalTargetRouteInfo, sourceRouteInfo)
+      } catch (error) {
+        console.error('onAfterNavigate error:', error)
+        // Don't abort navigation, just log error
+      }
+    }
+  }, [routes, currentRoute, onBeforeNavigate, onAfterNavigate])
 
   // Alert dialog function
   const alertDialog = useCallback((options: AlertDialogOptions): Promise<void> => {

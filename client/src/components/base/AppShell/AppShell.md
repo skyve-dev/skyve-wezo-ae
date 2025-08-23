@@ -7,6 +7,7 @@ A comprehensive and reusable application shell component designed for modern web
 - **Splash Screen**: Animated splash screen with circle expansion reveal animation
 - **Adaptive Navigation**: Responsive navigation with SlidingDrawer and Tab components
 - **Type-Safe Routing**: Internal routing system with full TypeScript type safety
+- **Navigation Event Hooks**: Lifecycle hooks for before and after navigation events
 - **Dialog System**: Async alert/confirmation dialogs with customizable buttons
 - **Responsive Design**: Mobile-first design with adaptive layouts
 - **Context Management**: Centralized state management with AppShellContext
@@ -183,6 +184,278 @@ setSideNavOpen(false)
 setLoading(true)
 setLoading(false)
 ```
+
+## Navigation Event Hooks
+
+The AppShell provides powerful navigation lifecycle hooks that allow you to intercept and control navigation events throughout your application.
+
+### onBeforeNavigate Hook
+
+The `onBeforeNavigate` hook is called before every navigation attempt and gives you complete control over whether navigation proceeds, gets redirected, or is blocked entirely. It receives the target and source route information.
+
+```tsx
+import { AppShellProvider } from './AppShell'
+
+const handleBeforeNavigate = async (next, target, source) => {
+  // Access source and target route information
+  console.log('Navigating from:', source.path, source.params)
+  console.log('Navigating to:', target.path, target.params)
+  
+  // Your pre-navigation logic here
+  
+  // Option 1: Proceed with original navigation
+  next()
+  
+  // Option 2: Redirect to different route
+  next('login', { returnUrl: target.path })
+  
+  // Option 3: Block navigation (don't call next at all)
+  // return; // Navigation is blocked
+}
+
+function App() {
+  return (
+    <AppShellProvider
+      routes={routes}
+      onBeforeNavigate={handleBeforeNavigate}
+    >
+      <AppShell routes={routes} />
+    </AppShellProvider>
+  )
+}
+```
+
+### onAfterNavigate Hook
+
+The `onAfterNavigate` hook is called after successful navigation completion, perfect for analytics, cleanup, or other side effects. It receives both the target and source route information.
+
+```tsx
+const handleAfterNavigate = async (target, source) => {
+  // Post-navigation logic with route information
+  console.log('Navigation completed')
+  console.log('From:', source.path, 'To:', target.path)
+  
+  // Analytics tracking with detailed route info
+  analytics.track('page_view', {
+    from: source.path,
+    to: target.path,
+    params: target.params,
+    timestamp: Date.now()
+  })
+  
+  // Cleanup or setup tasks based on routes
+  if (source.path === '/form') {
+    clearFormData()
+  }
+  if (target.path === '/dashboard') {
+    loadDashboardData()
+  }
+}
+
+<AppShellProvider
+  routes={routes}
+  onAfterNavigate={handleAfterNavigate}
+>
+  <AppShell routes={routes} />
+</AppShellProvider>
+```
+
+### Authentication Guard Example
+
+```tsx
+const authGuard = async (next, target, source) => {
+  // Check if user is trying to access protected route
+  const protectedRoutes = ['/profile', '/settings', '/admin']
+  
+  if (protectedRoutes.includes(target.path) && !user.isAuthenticated) {
+    // Redirect to login with return URL
+    next('login', { returnUrl: target.path })
+    return
+  }
+  
+  // Continue with original navigation
+  next()
+}
+
+<AppShellProvider
+  routes={routes}
+  onBeforeNavigate={authGuard}
+>
+  <AppShell routes={routes} />
+</AppShellProvider>
+```
+
+### Confirmation Dialog Example
+
+```tsx
+const confirmationGuard = async (next) => {
+  // Show confirmation for destructive actions
+  const destructiveRoutes = ['delete-account', 'reset-data']
+  const targetRoute = getCurrentNavigationTarget()
+  
+  if (destructiveRoutes.includes(targetRoute)) {
+    const confirmed = await showConfirmDialog(
+      'Are you sure?',
+      'This action cannot be undone.'
+    )
+    
+    if (!confirmed) {
+      return // Block navigation
+    }
+  }
+  
+  next() // Proceed
+}
+```
+
+### Analytics Tracking Example
+
+```tsx
+const analyticsTracker = async () => {
+  const route = getCurrentRoute()
+  const user = getCurrentUser()
+  
+  // Track page view
+  analytics.page(route, {
+    userId: user.id,
+    timestamp: Date.now(),
+    referrer: document.referrer
+  })
+  
+  // Track user engagement
+  startEngagementTimer()
+  
+  // Update user activity
+  updateLastActiveTime()
+}
+
+<AppShellProvider
+  routes={routes}
+  onAfterNavigate={analyticsTracker}
+>
+  <AppShell routes={routes} />
+</AppShellProvider>
+```
+
+### Complex Navigation Flow
+
+```tsx
+const navigationManager = async (next) => {
+  const user = getCurrentUser()
+  const targetRoute = getCurrentNavigationTarget()
+  
+  // Step 1: Authentication check
+  if (!user.isAuthenticated && isProtectedRoute(targetRoute)) {
+    next('login', { returnUrl: targetRoute })
+    return
+  }
+  
+  // Step 2: Role-based access control
+  if (!hasPermission(user.role, targetRoute)) {
+    next('unauthorized', {})
+    return
+  }
+  
+  // Step 3: Feature flags check
+  if (!isFeatureEnabled(targetRoute)) {
+    next('coming-soon', { feature: targetRoute })
+    return
+  }
+  
+  // Step 4: Business logic validation
+  if (targetRoute === 'checkout' && !hasItemsInCart()) {
+    next('cart', { message: 'Add items before checkout' })
+    return
+  }
+  
+  // All checks passed
+  next()
+}
+
+const postNavigationTasks = async () => {
+  // Update breadcrumbs
+  updateBreadcrumbs()
+  
+  // Load route-specific data
+  await loadRouteData()
+  
+  // Update document title
+  updateDocumentTitle()
+  
+  // Track analytics
+  trackPageView()
+  
+  // Scroll to top
+  window.scrollTo(0, 0)
+}
+
+<AppShellProvider
+  routes={routes}
+  onBeforeNavigate={navigationManager}
+  onAfterNavigate={postNavigationTasks}
+>
+  <AppShell routes={routes} />
+</AppShellProvider>
+```
+
+### Hook Function Signatures
+
+```tsx
+// Route information passed to hooks
+interface RouteInfo {
+  path: string                    // The route path (e.g., '/profile')
+  params: Record<string, any>     // Route parameters/props
+}
+
+// Next function type - controls navigation flow
+type NextFunction<T> = <K extends keyof T>(
+  path?: K,                              // Optional redirect path
+  params?: ComponentProps<T[K]['component']> // Params for redirect target
+) => void
+
+// Before navigate hook type
+type OnBeforeNavigateFunction<T> = (
+  next: NextFunction<T>,
+  target: RouteInfo,              // Where navigation is going
+  source: RouteInfo               // Where navigation is coming from
+) => void | Promise<void>
+
+// After navigate hook type  
+type OnAfterNavigateFunction = (
+  target: RouteInfo,              // Where navigation went
+  source: RouteInfo               // Where navigation came from
+) => void | Promise<void>
+
+// AppShellProvider props
+interface AppShellProviderProps<T> {
+  routes: T
+  initialRoute?: keyof T
+  onBeforeNavigate?: OnBeforeNavigateFunction<T>
+  onAfterNavigate?: OnAfterNavigateFunction
+  children: ReactNode
+}
+```
+
+### Best Practices
+
+1. **Error Handling**: Always wrap hook logic in try-catch blocks
+2. **Performance**: Keep hooks lightweight to avoid blocking navigation
+3. **User Experience**: Provide feedback for blocked or redirected navigation
+4. **Logging**: Log navigation events for debugging and analytics
+5. **Testing**: Test all navigation paths including edge cases
+
+### Common Use Cases
+
+- **Authentication Guards**: Redirect unauthenticated users to login
+- **Authorization Checks**: Block access to unauthorized routes
+- **Confirmation Dialogs**: Confirm destructive or important actions
+- **Analytics Tracking**: Track page views and user behavior
+- **Data Loading**: Preload data for target routes
+- **Cleanup Tasks**: Clean up resources when leaving routes
+- **Error Boundaries**: Handle navigation errors gracefully
+- **Feature Flags**: Control access to experimental features
+- **A/B Testing**: Route users to different variants
+- **Maintenance Mode**: Redirect during maintenance windows
 
 ## Dialog System
 

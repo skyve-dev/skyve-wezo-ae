@@ -2,7 +2,7 @@ import {Provider} from 'react-redux'
 import {store, useAppDispatch} from '@/store'
 import {useEffect} from 'react'
 import {checkAuth} from '@/store/slices/authSlice'
-import AppShellExample from "@/components/base/AppShell/AppShell.example.tsx";
+import AppShellExample from "@/components/base/AppShell/AppShell.hooks.example.tsx";
 
 function AppContent() {
   const dispatch = useAppDispatch()
