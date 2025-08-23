@@ -1,0 +1,542 @@
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { api } from '../../utils/api'
+
+// Types
+export interface RatePlan {
+  id: string
+  name: string
+  type: 'flexible' | 'non-refundable' | 'advance-purchase' | 'last-minute'
+  description: string
+  cancellationPolicy: {
+    daysBeforeFreeCancel: number
+    refundPercentage: number
+    noShowPolicy: 'no-refund' | 'partial-refund' | 'full-refund'
+  }
+  bookingRestrictions: {
+    minimumStay: number
+    maximumStay?: number
+    advanceBookingDays: number
+    cutoffHours: number
+    checkInDays: number[] // 0=Sunday, 1=Monday, etc.
+    checkOutDays: number[]
+  }
+  inclusions: string[]
+  isActive: boolean
+  priority: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AvailabilitySlot {
+  id: string
+  propertyId: string
+  date: string // YYYY-MM-DD format
+  status: 'available' | 'blocked' | 'booked' | 'maintenance'
+  blockReason?: string
+  ratePlans: {
+    ratePlanId: string
+    basePrice: number
+    discountPercent?: number
+    finalPrice: number
+    currency: string
+    isAvailable: boolean
+  }[]
+  minimumStay: number
+  maximumStay?: number
+  availableUnits: number
+  totalUnits: number
+  lastUpdated: string
+}
+
+export interface CalendarMonth {
+  year: number
+  month: number // 1-based (1=January)
+  days: AvailabilitySlot[]
+}
+
+export interface BulkPriceUpdate {
+  propertyId?: string
+  ratePlanId?: string
+  dateRange: {
+    start: string
+    end: string
+  }
+  priceChange: {
+    type: 'fixed' | 'percentage' | 'increase' | 'decrease'
+    amount: number
+  }
+  applyToWeekends?: boolean
+  applyToWeekdays?: boolean
+  excludeDates?: string[]
+}
+
+export interface BulkAvailabilityUpdate {
+  propertyId?: string
+  dateRange: {
+    start: string
+    end: string
+  }
+  action: 'block' | 'unblock' | 'set-available'
+  reason?: string
+  affectedDays?: number[] // 0=Sunday, 1=Monday, etc.
+  excludeDates?: string[]
+}
+
+export interface AvailabilityState {
+  ratePlans: RatePlan[]
+  currentRatePlan: RatePlan | null
+  calendar: {
+    [propertyId: string]: CalendarMonth[]
+  }
+  currentPropertyId: string | null
+  currentMonth: { year: number; month: number }
+  viewMode: 'calendar' | 'list'
+  loading: boolean
+  error: string | null
+  filters: {
+    status: string | null
+    ratePlanId: string | null
+    dateRange: {
+      start: string | null
+      end: string | null
+    }
+  }
+  bulkOperation: {
+    isOpen: boolean
+    type: 'price' | 'availability' | null
+    selectedDates: string[]
+  }
+}
+
+const initialState: AvailabilityState = {
+  ratePlans: [],
+  currentRatePlan: null,
+  calendar: {},
+  currentPropertyId: null,
+  currentMonth: {
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1
+  },
+  viewMode: 'calendar',
+  loading: false,
+  error: null,
+  filters: {
+    status: null,
+    ratePlanId: null,
+    dateRange: {
+      start: null,
+      end: null
+    }
+  },
+  bulkOperation: {
+    isOpen: false,
+    type: null,
+    selectedDates: []
+  }
+}
+
+// Async thunks
+export const fetchRatePlans = createAsyncThunk(
+  'availability/fetchRatePlans',
+  async (propertyId: string, { rejectWithValue }) => {
+    try {
+      const response = await api.get<{ ratePlans: RatePlan[] }>(`/api/properties/${propertyId}/rate-plans`)
+      return response.ratePlans
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch rate plans')
+    }
+  }
+)
+
+export const createRatePlan = createAsyncThunk(
+  'availability/createRatePlan',
+  async ({ propertyId, ratePlanData }: { propertyId: string; ratePlanData: Omit<RatePlan, 'id' | 'createdAt' | 'updatedAt'> }, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ ratePlan: RatePlan }>(`/api/properties/${propertyId}/rate-plans`, ratePlanData)
+      return response.ratePlan
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to create rate plan')
+    }
+  }
+)
+
+export const updateRatePlan = createAsyncThunk(
+  'availability/updateRatePlan',
+  async ({ propertyId, ratePlanId, updates }: { propertyId: string; ratePlanId: string; updates: Partial<RatePlan> }, { rejectWithValue }) => {
+    try {
+      const response = await api.patch<{ ratePlan: RatePlan }>(`/api/properties/${propertyId}/rate-plans/${ratePlanId}`, updates)
+      return response.ratePlan
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to update rate plan')
+    }
+  }
+)
+
+export const deleteRatePlan = createAsyncThunk(
+  'availability/deleteRatePlan',
+  async ({ propertyId, ratePlanId }: { propertyId: string; ratePlanId: string }, { rejectWithValue }) => {
+    try {
+      await api.delete(`/api/properties/${propertyId}/rate-plans/${ratePlanId}`)
+      return ratePlanId
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to delete rate plan')
+    }
+  }
+)
+
+export const fetchAvailability = createAsyncThunk(
+  'availability/fetchAvailability',
+  async ({ propertyId, year, month, months = 3 }: { propertyId: string; year: number; month: number; months?: number }, { rejectWithValue }) => {
+    try {
+      const params = new URLSearchParams()
+      params.append('year', year.toString())
+      params.append('month', month.toString())
+      params.append('months', months.toString())
+      const response = await api.get<{ availability: CalendarMonth[] }>(`/api/properties/${propertyId}/availability?${params}`)
+      return { propertyId, availability: response.availability }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch availability')
+    }
+  }
+)
+
+export const updateAvailability = createAsyncThunk(
+  'availability/updateAvailability',
+  async ({ 
+    propertyId, 
+    date, 
+    updates 
+  }: { 
+    propertyId: string
+    date: string
+    updates: Partial<AvailabilitySlot> 
+  }, { rejectWithValue }) => {
+    try {
+      const response = await api.patch<{ availability: AvailabilitySlot }>(`/api/properties/${propertyId}/availability/${date}`, updates)
+      return { propertyId, availability: response.availability }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to update availability')
+    }
+  }
+)
+
+export const bulkUpdatePrices = createAsyncThunk(
+  'availability/bulkUpdatePrices',
+  async (bulkUpdate: BulkPriceUpdate, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>('/api/availability/bulk-update-prices', bulkUpdate)
+      return { propertyId: bulkUpdate.propertyId, updatedSlots: response.updatedSlots }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to bulk update prices')
+    }
+  }
+)
+
+export const bulkUpdateAvailability = createAsyncThunk(
+  'availability/bulkUpdateAvailability',
+  async (bulkUpdate: BulkAvailabilityUpdate, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>('/api/availability/bulk-update-availability', bulkUpdate)
+      return { propertyId: bulkUpdate.propertyId, updatedSlots: response.updatedSlots }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to bulk update availability')
+    }
+  }
+)
+
+export const blockDates = createAsyncThunk(
+  'availability/blockDates',
+  async ({ 
+    propertyId, 
+    dates, 
+    reason 
+  }: { 
+    propertyId: string
+    dates: string[]
+    reason?: string 
+  }, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>(`/api/properties/${propertyId}/availability/block`, {
+        dates,
+        reason: reason || 'Blocked by host'
+      })
+      return { propertyId, updatedSlots: response.updatedSlots }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to block dates')
+    }
+  }
+)
+
+export const unblockDates = createAsyncThunk(
+  'availability/unblockDates',
+  async ({ propertyId, dates }: { propertyId: string; dates: string[] }, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>(`/api/properties/${propertyId}/availability/unblock`, {
+        dates
+      })
+      return { propertyId, updatedSlots: response.updatedSlots }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to unblock dates')
+    }
+  }
+)
+
+export const syncExternalCalendar = createAsyncThunk(
+  'availability/syncExternalCalendar',
+  async ({ propertyId, calendarUrl }: { propertyId: string; calendarUrl: string }, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ syncedSlots: AvailabilitySlot[]; syncStats: any }>(`/api/properties/${propertyId}/availability/sync-external`, {
+        calendarUrl
+      })
+      return { propertyId, syncedSlots: response.syncedSlots, syncStats: response.syncStats }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to sync external calendar')
+    }
+  }
+)
+
+// Helper function to update calendar data
+const updateCalendarSlots = (calendar: CalendarMonth[], updatedSlots: AvailabilitySlot[]) => {
+  return calendar.map(month => ({
+    ...month,
+    days: month.days.map(day => {
+      const updatedSlot = updatedSlots.find(slot => slot.date === day.date)
+      return updatedSlot || day
+    })
+  }))
+}
+
+const availabilitySlice = createSlice({
+  name: 'availability',
+  initialState,
+  reducers: {
+    clearError: (state) => {
+      state.error = null
+    },
+    setCurrentRatePlan: (state, action: PayloadAction<RatePlan | null>) => {
+      state.currentRatePlan = action.payload
+    },
+    setCurrentPropertyId: (state, action: PayloadAction<string | null>) => {
+      state.currentPropertyId = action.payload
+      // Clear calendar when switching properties
+      if (action.payload && !state.calendar[action.payload]) {
+        state.calendar[action.payload] = []
+      }
+    },
+    setCurrentMonth: (state, action: PayloadAction<{ year: number; month: number }>) => {
+      state.currentMonth = action.payload
+    },
+    setViewMode: (state, action: PayloadAction<'calendar' | 'list'>) => {
+      state.viewMode = action.payload
+    },
+    updateFilters: (state, action: PayloadAction<Partial<AvailabilityState['filters']>>) => {
+      state.filters = { ...state.filters, ...action.payload }
+    },
+    clearFilters: (state) => {
+      state.filters = {
+        status: null,
+        ratePlanId: null,
+        dateRange: { start: null, end: null }
+      }
+    },
+    toggleBulkOperation: (state, action: PayloadAction<{ type?: 'price' | 'availability'; isOpen: boolean }>) => {
+      state.bulkOperation = {
+        ...state.bulkOperation,
+        ...action.payload,
+        selectedDates: action.payload.isOpen ? state.bulkOperation.selectedDates : []
+      }
+    },
+    toggleDateSelection: (state, action: PayloadAction<string>) => {
+      const date = action.payload
+      const index = state.bulkOperation.selectedDates.indexOf(date)
+      
+      if (index === -1) {
+        state.bulkOperation.selectedDates.push(date)
+      } else {
+        state.bulkOperation.selectedDates.splice(index, 1)
+      }
+    },
+    clearDateSelection: (state) => {
+      state.bulkOperation.selectedDates = []
+    },
+    selectDateRange: (state, action: PayloadAction<{ start: string; end: string }>) => {
+      const { start, end } = action.payload
+      const startDate = new Date(start)
+      const endDate = new Date(end)
+      const dates: string[] = []
+      
+      const currentDate = new Date(startDate)
+      while (currentDate <= endDate) {
+        dates.push(currentDate.toISOString().split('T')[0])
+        currentDate.setDate(currentDate.getDate() + 1)
+      }
+      
+      state.bulkOperation.selectedDates = dates
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch rate plans
+      .addCase(fetchRatePlans.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchRatePlans.fulfilled, (state, action) => {
+        state.loading = false
+        state.ratePlans = action.payload
+        // Set first rate plan as current if none selected
+        if (!state.currentRatePlan && action.payload.length > 0) {
+          state.currentRatePlan = action.payload[0]
+        }
+      })
+      .addCase(fetchRatePlans.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Create rate plan
+      .addCase(createRatePlan.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(createRatePlan.fulfilled, (state, action) => {
+        state.loading = false
+        state.ratePlans.push(action.payload)
+      })
+      .addCase(createRatePlan.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Update rate plan
+      .addCase(updateRatePlan.fulfilled, (state, action) => {
+        const index = state.ratePlans.findIndex(rp => rp.id === action.payload.id)
+        if (index !== -1) {
+          state.ratePlans[index] = action.payload
+        }
+        if (state.currentRatePlan?.id === action.payload.id) {
+          state.currentRatePlan = action.payload
+        }
+      })
+      
+      // Delete rate plan
+      .addCase(deleteRatePlan.fulfilled, (state, action) => {
+        state.ratePlans = state.ratePlans.filter(rp => rp.id !== action.payload)
+        if (state.currentRatePlan?.id === action.payload) {
+          state.currentRatePlan = state.ratePlans[0] || null
+        }
+      })
+      
+      // Fetch availability
+      .addCase(fetchAvailability.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchAvailability.fulfilled, (state, action) => {
+        state.loading = false
+        const { propertyId, availability } = action.payload
+        state.calendar[propertyId] = availability
+      })
+      .addCase(fetchAvailability.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Update availability
+      .addCase(updateAvailability.fulfilled, (state, action) => {
+        const { propertyId, availability } = action.payload
+        if (state.calendar[propertyId]) {
+          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], [availability])
+        }
+      })
+      
+      // Bulk update prices
+      .addCase(bulkUpdatePrices.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(bulkUpdatePrices.fulfilled, (state, action) => {
+        state.loading = false
+        const { propertyId, updatedSlots } = action.payload
+        if (propertyId && state.calendar[propertyId]) {
+          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], updatedSlots)
+        }
+        // Clear selection after successful bulk operation
+        state.bulkOperation.selectedDates = []
+        state.bulkOperation.isOpen = false
+      })
+      .addCase(bulkUpdatePrices.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Bulk update availability
+      .addCase(bulkUpdateAvailability.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(bulkUpdateAvailability.fulfilled, (state, action) => {
+        state.loading = false
+        const { propertyId, updatedSlots } = action.payload
+        if (propertyId && state.calendar[propertyId]) {
+          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], updatedSlots)
+        }
+        // Clear selection after successful bulk operation
+        state.bulkOperation.selectedDates = []
+        state.bulkOperation.isOpen = false
+      })
+      .addCase(bulkUpdateAvailability.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Block dates
+      .addCase(blockDates.fulfilled, (state, action) => {
+        const { propertyId, updatedSlots } = action.payload
+        if (state.calendar[propertyId]) {
+          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], updatedSlots)
+        }
+      })
+      
+      // Unblock dates
+      .addCase(unblockDates.fulfilled, (state, action) => {
+        const { propertyId, updatedSlots } = action.payload
+        if (state.calendar[propertyId]) {
+          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], updatedSlots)
+        }
+      })
+      
+      // Sync external calendar
+      .addCase(syncExternalCalendar.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(syncExternalCalendar.fulfilled, (state, action) => {
+        state.loading = false
+        const { propertyId, syncedSlots } = action.payload
+        if (state.calendar[propertyId]) {
+          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], syncedSlots)
+        }
+      })
+      .addCase(syncExternalCalendar.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+  }
+})
+
+export const {
+  clearError,
+  setCurrentRatePlan,
+  setCurrentPropertyId,
+  setCurrentMonth,
+  setViewMode,
+  updateFilters,
+  clearFilters,
+  toggleBulkOperation,
+  toggleDateSelection,
+  clearDateSelection,
+  selectDateRange
+} = availabilitySlice.actions
+
+export default availabilitySlice.reducer

@@ -2,11 +2,23 @@ import { configureStore } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux'
 import authReducer from './slices/authSlice'
 import propertyReducer from './slices/propertySlice'
+import reservationReducer from './slices/reservationSlice'
+import reviewReducer from './slices/reviewSlice'
+import messageReducer from './slices/messageSlice'
+import financeReducer from './slices/financeSlice'
+import availabilityReducer from './slices/availabilitySlice'
+import dashboardReducer from './slices/dashboardSlice'
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     property: propertyReducer,
+    reservations: reservationReducer,
+    reviews: reviewReducer,
+    messages: messageReducer,
+    finance: financeReducer,
+    availability: availabilityReducer,
+    dashboard: dashboardReducer,
   },
 })
 
