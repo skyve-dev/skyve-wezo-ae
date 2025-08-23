@@ -5,6 +5,13 @@ export {
   createRoutes, 
   createAppShell 
 } from './AppShellContext'
+export {
+  getBasePath,
+  getCurrentPath,
+  buildFullUrl,
+  pathToRouteKey,
+  routeKeyToPath
+} from './urlUtils'
 export type {
   BaseRoute,
   RouteDefinition,

@@ -711,7 +711,6 @@ const NotificationsPage: React.FC = () => {
 // Define the routes with type safety
 const routes = createRoutes({
   home: {
-    path: 'home',
     component: HomePage,
     icon: <FaHome />,
     label: 'Home',
@@ -720,7 +719,6 @@ const routes = createRoutes({
     showInFooter: true
   },
   profile: {
-    path: 'profile',
     component: ProfilePage,
     icon: <FaUser />,
     label: 'Profile',
@@ -729,7 +727,6 @@ const routes = createRoutes({
     showInFooter: true
   },
   dashboard: {
-    path: 'dashboard',
     component: DashboardPage,
     icon: <FaChartBar />,
     label: 'Dashboard',
@@ -738,7 +735,6 @@ const routes = createRoutes({
     showInFooter: true
   },
   settings: {
-    path: 'settings',
     component: SettingsPage,
     icon: <FaCog />,
     label: 'Settings',
@@ -747,7 +743,6 @@ const routes = createRoutes({
     showInFooter: true
   },
   notifications: {
-    path: 'notifications',
     component: NotificationsPage,
     icon: <FaBell />,
     label: 'Notifications',

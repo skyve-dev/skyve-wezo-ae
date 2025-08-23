@@ -1,10 +1,8 @@
-import { RouterProvider } from '@tanstack/react-router'
-import { Provider } from 'react-redux'
-import { store } from '@/store'
-import { router } from './router'
-import { useEffect } from 'react'
-import { useAppDispatch } from '@/store'
-import { checkAuth } from '@/store/slices/authSlice'
+import {Provider} from 'react-redux'
+import {store, useAppDispatch} from '@/store'
+import {useEffect} from 'react'
+import {checkAuth} from '@/store/slices/authSlice'
+import AppShellExample from "@/components/base/AppShell/AppShell.example.tsx";
 
 function AppContent() {
   const dispatch = useAppDispatch()
@@ -13,7 +11,7 @@ function AppContent() {
     dispatch(checkAuth())
   }, [dispatch])
 
-  return <RouterProvider router={router} />
+  return <AppShellExample></AppShellExample>
 }
 
 function App() {

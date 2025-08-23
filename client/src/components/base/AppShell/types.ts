@@ -2,7 +2,6 @@ import React from 'react'
 
 // Base route interface
 export interface BaseRoute {
-    path: string
     component: React.FC<any>
     icon?: React.ReactNode
     label: string

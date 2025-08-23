@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
 import { 
   AppShellContextType, 
   BaseRoute, 
@@ -6,6 +6,13 @@ import {
   NavigateToFunction,
   RouteDefinition
 } from './types'
+import {
+  getCurrentPath,
+  pathToRouteKey,
+  routeKeyToPath,
+  navigateToUrl,
+  isSamePath
+} from './urlUtils'
 
 // Create the context with a default value
 const AppShellContext = createContext<AppShellContextType | null>(null)
@@ -35,10 +42,27 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
   routes,
   initialRoute
 }: AppShellProviderProps<T>) {
-  // Navigation state
-  const [currentRoute, setCurrentRoute] = useState<string>(
-    (initialRoute as string) || Object.keys(routes)[0] || ''
-  )
+  
+  // Helper function to get initial route from URL
+  const getInitialRoute = useCallback((): string => {
+    if (typeof window === 'undefined') {
+      return (initialRoute as string) || Object.keys(routes)[0] || ''
+    }
+    
+    const currentPath = getCurrentPath()
+    const routeKey = pathToRouteKey(currentPath)
+    
+    // Check if the route key exists in our routes
+    if (routes[routeKey]) {
+      return routeKey
+    }
+    
+    // Fallback to initialRoute or first route
+    return (initialRoute as string) || Object.keys(routes)[0] || ''
+  }, [routes, initialRoute])
+  
+  // Navigation state - initialize from URL
+  const [currentRoute, setCurrentRoute] = useState<string>(getInitialRoute())
   
   // UI state
   const [isSideNavOpen, setSideNavOpen] = useState(false)
@@ -60,11 +84,65 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
     globalDialogState.setDialog = setDialogState
   }, [])
 
-  // Type-safe navigation function
-  const navigateTo: NavigateToFunction<T> = useCallback((path: any, props?: any) => {
-    const route = routes[path]
+  // Handle URL changes and popstate events (back/forward navigation)
+  useEffect(() => {
+    const handlePopState = () => {
+      const currentPath = getCurrentPath()
+      const routeKey = pathToRouteKey(currentPath)
+      
+      // Check if the route key exists in our routes
+      if (routes[routeKey]) {
+        setCurrentRoute(routeKey)
+      } else {
+        // If route doesn't exist, navigate to first available route
+        const fallbackRoute = Object.keys(routes)[0]
+        if (fallbackRoute) {
+          const fallbackPath = routeKeyToPath(fallbackRoute)
+          navigateToUrl(fallbackPath, true) // Replace current URL
+          setCurrentRoute(fallbackRoute)
+        }
+      }
+    }
+
+    // Listen for browser back/forward navigation
+    window.addEventListener('popstate', handlePopState)
+
+    // Initial URL sync - ensure URL matches current route
+    const currentPath = getCurrentPath()
+    const expectedPath = routeKeyToPath(currentRoute)
+    
+    if (!isSamePath(currentPath, expectedPath)) {
+      // URL doesn't match current route, update URL to match
+      navigateToUrl(expectedPath, true)
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [routes, currentRoute])
+
+  // Sync URL when current route changes programmatically
+  useEffect(() => {
+    const currentPath = getCurrentPath()
+    const expectedPath = routeKeyToPath(currentRoute)
+    
+    if (!isSamePath(currentPath, expectedPath)) {
+      navigateToUrl(expectedPath, true)
+    }
+  }, [currentRoute])
+
+  // Type-safe navigation function with URL synchronization
+  const navigateTo: NavigateToFunction<T> = useCallback((routeKey: any, props?: any) => {
+    const route = routes[routeKey]
     if (route) {
-      setCurrentRoute(path as string)
+      const routeKeyStr = routeKey as string
+      const urlPath = routeKeyToPath(routeKeyStr)
+      
+      // Update browser URL
+      navigateToUrl(urlPath)
+      
+      // Update internal state
+      setCurrentRoute(routeKeyStr)
       setSideNavOpen(false) // Close side nav on navigation
       
       // Store props for the route if needed (you can expand this)
@@ -73,7 +151,7 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
         console.log('Route props:', props)
       }
     } else {
-      console.warn(`Route not found: ${path}`)
+      console.warn(`Route not found: ${routeKey}`)
     }
   }, [routes])
 

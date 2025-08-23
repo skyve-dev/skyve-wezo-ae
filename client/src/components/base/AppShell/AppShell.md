@@ -38,19 +38,16 @@ const SettingsPage = () => <div>Settings Page</div>
 // Create type-safe routes
 const routes = createRoutes({
   home: {
-    path: 'home',
     component: HomePage,
     icon: <FaHome />,
     label: 'Home'
   },
   profile: {
-    path: 'profile',
     component: ProfilePage,
     icon: <FaUser />,
     label: 'Profile'
   },
   settings: {
-    path: 'settings',
     component: SettingsPage,
     icon: <FaCog />,
     label: 'Settings'
@@ -85,7 +82,6 @@ function App() {
 
 ```tsx
 interface BaseRoute {
-  path: string
   component: React.ComponentType<any>
   icon?: React.ReactNode
   label: string
@@ -316,7 +312,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId, tab = 'info' }) => {
 // Route definition
 const routes = createRoutes({
   userProfile: {
-    path: 'user-profile',
     component: UserProfile,
     icon: <FaUser />,
     label: 'Profile'
@@ -333,7 +328,6 @@ navigateTo('userProfile', { userId: '123', tab: 'settings' })
 ```tsx
 const routes = createRoutes({
   home: {
-    path: 'home',
     component: HomePage,
     icon: <FaHome />,
     label: 'Home',
@@ -342,7 +336,6 @@ const routes = createRoutes({
     showInFooter: true
   },
   admin: {
-    path: 'admin',
     component: AdminPage,
     icon: <FaShield />,
     label: 'Admin',
@@ -351,7 +344,6 @@ const routes = createRoutes({
     showInFooter: false
   },
   settings: {
-    path: 'settings',
     component: SettingsPage,
     icon: <FaCog />,
     label: 'Settings',
@@ -503,8 +495,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AppShell, AppShellProvider, createRoutes } from './AppShell'
 
 const routes = createRoutes({
-  home: { path: 'home', component: HomePage, label: 'Home', icon: <FaHome /> },
-  about: { path: 'about', component: AboutPage, label: 'About', icon: <FaInfo /> }
+  home: { component: HomePage, label: 'Home', icon: <FaHome /> },
+  about: { component: AboutPage, label: 'About', icon: <FaInfo /> }
 })
 ```
 
@@ -517,7 +509,6 @@ const MyApp = () => {
   
   const routes = createRoutes({
     profile: {
-      path: 'profile',
       component: ProfilePage,
       label: 'Profile',
       showInNav: !!user
