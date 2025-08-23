@@ -125,7 +125,6 @@ export const applyGlobalStyles = (): void => {
       margin: 0;
       padding: 0;
     }
-    
     /* Reset paragraph styles with minimal line-height */
     p {
       margin: 0;
@@ -188,7 +187,6 @@ export const applyGlobalStyles = (): void => {
       -webkit-appearance: none;
       appearance: none;
     }
-    
     /* Reset textarea resize */
     textarea {
       resize: vertical;
@@ -267,13 +265,13 @@ export const applyGlobalStyles = (): void => {
       font-size: 16px;
     }
     
-    /* Improve mobile performance */
-    * {
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
+    /*Improve mobile performance - causing bug*/
+    // * {
+    //   -webkit-backface-visibility: hidden;
+    //   backface-visibility: hidden;
+    //   -webkit-transform: translateZ(0);
+    //   transform: translateZ(0);
+    // }
     
     /* Safe area handling for devices with notches */
     @supports (padding: max(0px)) {

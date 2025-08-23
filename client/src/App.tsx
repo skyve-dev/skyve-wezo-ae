@@ -2,22 +2,24 @@ import {Provider} from 'react-redux'
 import {store, useAppDispatch} from '@/store'
 import {useEffect} from 'react'
 import {checkAuth} from '@/store/slices/authSlice'
-import AppShellExample from "@/components/base/AppShell/AppShell.hooks.example.tsx";
+import AppContent from "@/AppContent.tsx";
+import {applyGlobalStyles} from "@/utils/globalStyles.ts";
 
-function AppContent() {
+function AppWrapper() {
   const dispatch = useAppDispatch()
-
   useEffect(() => {
     dispatch(checkAuth())
   }, [dispatch])
-
-  return <AppShellExample></AppShellExample>
+  useEffect(() => {
+    applyGlobalStyles()
+  }, [])
+  return <AppContent />
 }
 
 function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <AppWrapper />
     </Provider>
   )
 }
