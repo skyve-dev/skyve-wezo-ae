@@ -38,7 +38,7 @@ const AppContent: React.FC = () => {
     return (
         <AppShell
             routes={routes}
-            initialRoute="home"
+            initialRoute="dashboard"
             onBeforeNavigate={handleBeforeNavigate}
             onAfterNavigate={handleAfterNavigate}
             config={{
