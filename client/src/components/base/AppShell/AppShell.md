@@ -28,7 +28,7 @@ The AppShell component was designed with the following principles:
 
 ```tsx
 import React from 'react'
-import { AppShell, AppShellProvider, createRoutes } from './AppShell'
+import { AppShell, createRoutes } from './AppShell'
 import { FaHome, FaUser, FaCog } from 'react-icons/fa'
 
 // Define your app's components
@@ -57,22 +57,21 @@ const routes = createRoutes({
 
 function App() {
   return (
-    <AppShellProvider routes={routes} initialRoute="home">
-      <AppShell 
-        routes={routes}
-        config={{
-          splash: {
-            duration: 2000,
-            logo: <FaHome />,
-            text: 'Welcome to MyApp'
-          },
-          header: {
-            title: 'My Application',
-            logo: <FaHome />
-          }
-        }}
-      />
-    </AppShellProvider>
+    <AppShell 
+      routes={routes}
+      initialRoute="home"
+      config={{
+        splash: {
+          duration: 2000,
+          logo: <FaHome />,
+          text: 'Welcome to MyApp'
+        },
+        header: {
+          title: 'My Application',
+          logo: <FaHome />
+        }
+      }}
+    />
   )
 }
 ```
@@ -194,7 +193,7 @@ The AppShell provides powerful navigation lifecycle hooks that allow you to inte
 The `onBeforeNavigate` hook is called before every navigation attempt and gives you complete control over whether navigation proceeds, gets redirected, or is blocked entirely. It receives the target and source route information.
 
 ```tsx
-import { AppShellProvider } from './AppShell'
+import { AppShell } from './AppShell'
 
 const handleBeforeNavigate = async (next, target, source) => {
   // Access source and target route information
@@ -215,12 +214,10 @@ const handleBeforeNavigate = async (next, target, source) => {
 
 function App() {
   return (
-    <AppShellProvider
+    <AppShell
       routes={routes}
       onBeforeNavigate={handleBeforeNavigate}
-    >
-      <AppShell routes={routes} />
-    </AppShellProvider>
+    />
   )
 }
 ```
@@ -252,12 +249,10 @@ const handleAfterNavigate = async (target, source) => {
   }
 }
 
-<AppShellProvider
+<AppShell
   routes={routes}
   onAfterNavigate={handleAfterNavigate}
->
-  <AppShell routes={routes} />
-</AppShellProvider>
+/>
 ```
 
 ### Authentication Guard Example
@@ -277,12 +272,10 @@ const authGuard = async (next, target, source) => {
   next()
 }
 
-<AppShellProvider
+<AppShell
   routes={routes}
   onBeforeNavigate={authGuard}
->
-  <AppShell routes={routes} />
-</AppShellProvider>
+/>
 ```
 
 ### Confirmation Dialog Example
@@ -329,12 +322,10 @@ const analyticsTracker = async () => {
   updateLastActiveTime()
 }
 
-<AppShellProvider
+<AppShell
   routes={routes}
   onAfterNavigate={analyticsTracker}
->
-  <AppShell routes={routes} />
-</AppShellProvider>
+/>
 ```
 
 ### Complex Navigation Flow
@@ -389,13 +380,11 @@ const postNavigationTasks = async () => {
   window.scrollTo(0, 0)
 }
 
-<AppShellProvider
+<AppShell
   routes={routes}
   onBeforeNavigate={navigationManager}
   onAfterNavigate={postNavigationTasks}
->
-  <AppShell routes={routes} />
-</AppShellProvider>
+/>
 ```
 
 ### Hook Function Signatures
@@ -426,13 +415,14 @@ type OnAfterNavigateFunction = (
   source: RouteInfo               // Where navigation came from
 ) => void | Promise<void>
 
-// AppShellProvider props
-interface AppShellProviderProps<T> {
+// AppShell props
+interface AppShellProps<T> {
   routes: T
   initialRoute?: keyof T
   onBeforeNavigate?: OnBeforeNavigateFunction<T>
   onAfterNavigate?: OnAfterNavigateFunction
-  children: ReactNode
+  config?: AppShellConfig
+  children?: ReactNode
 }
 ```
 
@@ -765,7 +755,7 @@ The AppShell component supports all modern browsers:
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 // After: AppShell
-import { AppShell, AppShellProvider, createRoutes } from './AppShell'
+import { AppShell, createRoutes } from './AppShell'
 
 const routes = createRoutes({
   home: { component: HomePage, label: 'Home', icon: <FaHome /> },
@@ -798,7 +788,7 @@ const MyApp = () => {
 
 1. **TypeScript Errors**: Ensure route props match component props exactly
 2. **Navigation Not Working**: Check that routes are properly defined
-3. **Dialog Not Showing**: Verify AppShellProvider wraps your app
+3. **Dialog Not Showing**: Verify AppShell component is properly configured
 4. **Responsive Issues**: Check breakpoint configuration
 5. **Animation Problems**: Ensure CSS transforms are supported
 

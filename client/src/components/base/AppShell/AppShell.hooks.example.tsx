@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { AppShell, AppShellProvider, createRoutes, useAppShell } from './index'
+import { AppShell, createRoutes, useAppShell } from './index'
 import { Box } from '../Box'
 import { Button } from '../Button'
 import { FaHome, FaUser, FaCog, FaLock, FaExclamationTriangle } from 'react-icons/fa'
@@ -223,27 +223,23 @@ const HooksExample: React.FC = () => {
         </Box>
       </Box>
 
-      <AppShellProvider 
-        routes={routes} 
+      <AppShell 
+        routes={routes}
         initialRoute="home"
         onBeforeNavigate={handleBeforeNavigate}
         onAfterNavigate={handleAfterNavigate}
-      >
-        <AppShell 
-          routes={routes}
-          config={{
-            splash: {
-              duration: 1000,
-              logo: <FaExclamationTriangle />,
-              text: 'Loading Navigation Hooks Demo...'
-            },
-            header: {
-              title: 'Navigation Hooks Demo',
-              logo: <FaExclamationTriangle />
-            }
-          }}
-        />
-      </AppShellProvider>
+        config={{
+          splash: {
+            duration: 1000,
+            logo: <FaExclamationTriangle />,
+            text: 'Loading Navigation Hooks Demo...'
+          },
+          header: {
+            title: 'Navigation Hooks Demo',
+            logo: <FaExclamationTriangle />
+          }
+        }}
+      />
 
       {/* Instructions */}
       <Box

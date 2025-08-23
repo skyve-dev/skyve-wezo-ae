@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { AppShell, AppShellProvider, createRoutes, useAppShell } from './index'
+import { AppShell, createRoutes, useAppShell } from './index'
 import { Box } from '../Box'
 import { Button } from '../Button'
 import { Input } from '../Input'
@@ -756,9 +756,9 @@ const routes = createRoutes({
 const AppShellExample: React.FC = () => {
   return (
     <Box minHeight="100vh" backgroundColor="#f8fafc">
-      <AppShellProvider routes={routes} initialRoute="home">
-        <AppShell 
-          routes={routes}
+      <AppShell 
+        routes={routes} 
+        initialRoute="home"
           config={{
             splash: {
               duration: 1500,
@@ -814,7 +814,6 @@ const AppShellExample: React.FC = () => {
             }
           }}
         />
-      </AppShellProvider>
       
       {/* Instructions overlay for demo */}
       <Box

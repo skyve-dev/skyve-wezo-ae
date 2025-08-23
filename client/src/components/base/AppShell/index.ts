@@ -1,6 +1,5 @@
 export { default as AppShell } from './AppShell'
 export { 
-  AppShellProvider, 
   useAppShell, 
   createRoutes, 
   createAppShell 
