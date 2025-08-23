@@ -4,9 +4,8 @@ import { Button } from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
 import Tab, { TabItem } from '../Tab'
 import Dialog from '../Dialog'
-import { useAppShell } from './AppShellContext.tsx'
-import { AppShellConfig, SplashPhase } from './types'
-import type { BaseRoute } from './types.enhanced'
+import { useAppShell } from './AppShellContext'
+import { AppShellConfig, BaseRoute, SplashPhase } from './types'
 import { FaBars, FaTimes } from 'react-icons/fa'
 
 interface AppShellProps<T extends Record<string, BaseRoute>> {
@@ -30,8 +29,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     setSideNavOpen,
     isLoading,
     dialogState,
-    closeDialog,
-    renderOutlet
+    closeDialog
   } = useAppShell<T>()
 
   // Splash screen state
@@ -100,9 +98,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
   }, [splash.duration])
 
   // Get current route component
-  const currentRouteData = Object.values(routes).find(route => 
-    route.path === currentRoute || route.fullPath === currentRoute
-  )
+  const currentRouteData = routes[currentRoute as keyof T]
   const CurrentComponent = currentRouteData?.component
 
   // Get navigation items
@@ -112,7 +108,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
       id: path,
       label: route.label,
       icon: route.icon,
-      onClick: () => navigateTo(route.path || `/${path}`)
+      onClick: () => navigateTo(path as keyof T, {} as any)
     }))
 
   // Get header quick nav items
@@ -134,7 +130,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
       id: path,
       label: route.label,
       icon: route.icon,
-      onClick: () => navigateTo(route.path || `/${path}`)
+      onClick: () => navigateTo(path as keyof T, {} as any)
     }))
 
   // Handle dialog button clicks
@@ -276,15 +272,8 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                 <Box flex="1" maxWidth="600px" margin="0 2rem">
                   <Tab
                     items={headerNavItems}
-                    activeTab={Object.keys(routes).find(key => 
-                      routes[key].path === currentRoute || routes[key].fullPath === currentRoute
-                    ) || String(currentRoute)}
-                    onTabChange={(tabId) => {
-                      const route = Object.values(routes).find(r => r.path === tabId || `/${tabId}` === r.path)
-                      if (route) {
-                        navigateTo(route.path)
-                      }
-                    }}
+                    activeTab={currentRoute}
+                    onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
                     variant="minimal"
                     size="small"
                     fullWidth
@@ -308,7 +297,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
             paddingBottom={isMobile && footer.showOnMobile ? "4rem" : "0"}
             minHeight="calc(100vh - 4rem)"
           >
-            {renderOutlet ? renderOutlet() : (CurrentComponent && <CurrentComponent />)}
+            {CurrentComponent && <CurrentComponent />}
           </Box>
 
           {/* Footer (Mobile Only) */}
@@ -342,8 +331,8 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                     size="small"
                     backgroundColor="transparent"
                     border="none"
-                    color={routes[item.id]?.path === currentRoute ? theme.primaryColor : '#6b7280'}
-                    fontWeight={routes[item.id]?.path === currentRoute ? '600' : '400'}
+                    color={currentRoute === item.id ? theme.primaryColor : '#6b7280'}
+                    fontWeight={currentRoute === item.id ? '600' : '400'}
                     fontSize="0.75rem"
                     flexDirection="column"
                     gap="0.25rem"
@@ -410,17 +399,17 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                     onClick={item.onClick}
                     variant="normal"
                     size="medium"
-                    backgroundColor={routes[item.id]?.path === currentRoute ? `${theme.primaryColor}15` : 'transparent'}
+                    backgroundColor={currentRoute === item.id ? `${theme.primaryColor}15` : 'transparent'}
                     border="none"
-                    color={routes[item.id]?.path === currentRoute ? theme.primaryColor : '#374151'}
-                    fontWeight={routes[item.id]?.path === currentRoute ? '600' : '500'}
+                    color={currentRoute === item.id ? theme.primaryColor : '#374151'}
+                    fontWeight={currentRoute === item.id ? '600' : '500'}
                     justifyContent="flex-start"
                     width="100%"
                     borderRadius="8px"
                     padding="0.75rem 1rem"
                     textAlign="left"
                     whileHover={{
-                      backgroundColor: routes[item.id]?.path === currentRoute 
+                      backgroundColor: currentRoute === item.id 
                         ? `${theme.primaryColor}20` 
                         : `${theme.primaryColor}08`
                     }}
@@ -486,7 +475,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                       key={index}
                       label={button.label}
                       onClick={() => handleDialogButton(button.onClick)}
-                      variant={button.variant === 'danger' ? 'normal' : button.variant || 'normal'}
+                      variant={button.variant === 'primary' ? 'promoted' : button.variant === 'danger' ? 'normal' : button.variant || 'normal'}
                       size="medium"
                     />
                   ))}
