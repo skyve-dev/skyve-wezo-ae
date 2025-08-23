@@ -7,9 +7,13 @@ export {
 export {
   getBasePath,
   getCurrentPath,
+  getCurrentUrl,
   buildFullUrl,
   pathToRouteKey,
-  routeKeyToPath
+  pathToRouteKeyWithParams,
+  routeKeyToPath,
+  parseQueryParams,
+  serializeQueryParams
 } from './urlUtils'
 export type {
   BaseRoute,

@@ -105,7 +105,7 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
         const fallbackRoute = Object.keys(routes)[0]
         if (fallbackRoute) {
           const fallbackPath = routeKeyToPath(fallbackRoute)
-          navigateToUrl(fallbackPath, true) // Replace current URL
+          navigateToUrl(fallbackPath, {}, true) // Replace current URL
           setCurrentRoute(fallbackRoute)
         }
       }
@@ -120,7 +120,7 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
     
     if (!isSamePath(currentPath, expectedPath)) {
       // URL doesn't match current route, update URL to match
-      navigateToUrl(expectedPath, true)
+      navigateToUrl(expectedPath, {}, true)
     }
 
     return () => {
@@ -134,7 +134,7 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
     const expectedPath = routeKeyToPath(currentRoute)
     
     if (!isSamePath(currentPath, expectedPath)) {
-      navigateToUrl(expectedPath, true)
+      navigateToUrl(expectedPath, {}, true)
     }
   }, [currentRoute])
 
@@ -207,7 +207,7 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
     const urlPath = routeKeyToPath(routeKeyStr)
     
     // Update browser URL
-    navigateToUrl(urlPath)
+    navigateToUrl(urlPath, {})
     
     // Update internal state
     setCurrentRoute(routeKeyStr)
@@ -288,6 +288,7 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
   const contextValue: AppShellContextType<T> = {
     navigateTo,
     currentRoute,
+    currentParams: {},
     isSideNavOpen,
     setSideNavOpen,
     alertDialog,

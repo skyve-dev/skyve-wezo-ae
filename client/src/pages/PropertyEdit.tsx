@@ -22,15 +22,24 @@ interface TabConfig {
     icon: React.ReactNode
 }
 
-const PropertyEdit: React.FC<{ propertyId?: string }> = (params) => {
-    const {navigateTo} = useAppShell()
+interface PropertyEditProps {
+    propertyId?: string
+    tab?: TabId
+    mode?: 'view' | 'edit'
+}
+
+const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
+    const {navigateTo, currentParams} = useAppShell()
+    
+    // Combine props from navigation and URL query parameters
+    const params = { ...props, ...currentParams }
     const dispatch = useAppDispatch()
 
     // Redux state
     const {currentProperty, wizardData, loading, error} = useAppSelector((state) => state.property)
 
-    // Local state
-    const [activeTab, setActiveTab] = useState<TabId>('details')
+    // Local state - initialize from URL params or default to 'details'
+    const [activeTab, setActiveTab] = useState<TabId>(params.tab || 'details')
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [formData, setFormData] = useState<Partial<WizardFormData>>({})
 
@@ -427,7 +436,14 @@ const PropertyEdit: React.FC<{ propertyId?: string }> = (params) => {
                                 fontWeight: activeTab === tab.id ? '600' : 'normal',
                                 backgroundColor: activeTab === tab.id ? '#f8fafc' : 'transparent'
                             }}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                setActiveTab(tab.id)
+                                // Update URL with new tab parameter
+                                navigateTo('property-edit', { 
+                                    ...params, 
+                                    tab: tab.id 
+                                })
+                            }}
                         >
                             <Box display="flex" alignItems="center" gap="0.5rem">
                                 {tab.icon}

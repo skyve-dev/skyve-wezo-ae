@@ -68,6 +68,7 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     // Navigation
     navigateTo: NavigateToFunction<T>
     currentRoute: string
+    currentParams: Record<string, any>
 
     // UI State
     isSideNavOpen: boolean

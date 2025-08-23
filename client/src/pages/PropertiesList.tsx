@@ -59,9 +59,12 @@ const PropertiesList: React.FC = () => {
   }
 
   // Handle property navigation
-  const handleEditProperty = (property: Property) => {
+  const handleEditProperty = (property: Property, tab?: string) => {
     dispatch(setCurrentProperty(property))
-    navigateTo('property-edit', { propertyId: property.propertyId })
+    navigateTo('property-edit', { 
+      propertyId: property.propertyId,
+      ...(tab && { tab })
+    })
   }
 
   const handleViewProperty = (property: Property) => {
@@ -174,6 +177,14 @@ const PropertiesList: React.FC = () => {
             onClick={() => handleEditProperty(property)} 
             variant="normal" 
             size="small" 
+          />
+          <Button 
+            label="Edit Photos" 
+            icon={<FaEdit />} 
+            onClick={() => handleEditProperty(property, 'photos')} 
+            variant="normal" 
+            size="small" 
+            style={{ fontSize: '0.75rem' }}
           />
           <Button 
             label="Calendar" 

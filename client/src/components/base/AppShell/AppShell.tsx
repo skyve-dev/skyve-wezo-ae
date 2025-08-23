@@ -17,7 +17,7 @@ import {
     RouteInfo
 } from './types'
 import {FaBars, FaTimes} from 'react-icons/fa'
-import {getCurrentPath, isSamePath, navigateToUrl, pathToRouteKey, routeKeyToPath} from './urlUtils'
+import {getCurrentPath, isSamePath, navigateToUrl, pathToRouteKeyWithParams, routeKeyToPath, parseQueryParams} from './urlUtils'
 
 interface AppShellProps<T extends Record<string, BaseRoute>> {
     routes: RouteDefinition<T>
@@ -50,26 +50,34 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                                            onAfterNavigate,
                                                            children
                                                        }: AppShellProps<T>) => {
-    // Helper function to get initial route from URL
-    const getInitialRoute = useCallback((): string => {
+    // Helper function to get initial route and params from URL
+    const getInitialRouteAndParams = useCallback((): { route: string; params: Record<string, any> } => {
         if (typeof window === 'undefined') {
-            return (initialRoute as string) || Object.keys(routes)[0] || ''
+            return {
+                route: (initialRoute as string) || Object.keys(routes)[0] || '',
+                params: {}
+            }
         }
 
-        const currentPath = getCurrentPath()
-        const routeKey = pathToRouteKey(currentPath)
+        const fullPath = getCurrentPath() + window.location.search
+        const { routeKey, params } = pathToRouteKeyWithParams(fullPath)
 
         // Check if the route key exists in our routes
         if (routes[routeKey]) {
-            return routeKey
+            return { route: routeKey, params }
         }
 
         // Fallback to initialRoute or first route
-        return (initialRoute as string) || Object.keys(routes)[0] || ''
+        return {
+            route: (initialRoute as string) || Object.keys(routes)[0] || '',
+            params: {}
+        }
     }, [routes, initialRoute])
 
     // Navigation state - initialize from URL
-    const [currentRoute, setCurrentRoute] = useState<string>(getInitialRoute())
+    const initialRouteData = getInitialRouteAndParams()
+    const [currentRoute, setCurrentRoute] = useState<string>(initialRouteData.route)
+    const [currentParams, setCurrentParams] = useState<Record<string, any>>(initialRouteData.params)
 
     // UI state
     const [isSideNavOpen, setSideNavOpen] = useState(false)
@@ -94,19 +102,21 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     // Handle URL changes and popstate events (back/forward navigation)
     useEffect(() => {
         const handlePopState = () => {
-            const currentPath = getCurrentPath()
-            const routeKey = pathToRouteKey(currentPath)
+            const fullPath = getCurrentPath() + window.location.search
+            const { routeKey, params } = pathToRouteKeyWithParams(fullPath)
 
             // Check if the route key exists in our routes
             if (routes[routeKey]) {
                 setCurrentRoute(routeKey)
+                setCurrentParams(params)
             } else {
                 // If route doesn't exist, navigate to first available route
                 const fallbackRoute = Object.keys(routes)[0]
                 if (fallbackRoute) {
                     const fallbackPath = routeKeyToPath(fallbackRoute)
-                    navigateToUrl(fallbackPath, true) // Replace current URL
+                    navigateToUrl(fallbackPath, {}, true) // Replace current URL
                     setCurrentRoute(fallbackRoute)
+                    setCurrentParams({})
                 }
             }
         }
@@ -114,29 +124,38 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         // Listen for browser back/forward navigation
         window.addEventListener('popstate', handlePopState)
 
-        // Initial URL sync - ensure URL matches current route
+        // Initial URL sync - ensure URL matches current route and params
         const currentPath = getCurrentPath()
         const expectedPath = routeKeyToPath(currentRoute)
+        const currentQueryParams = parseQueryParams()
+        
+        // Check if path or params are different
+        const pathChanged = !isSamePath(currentPath, expectedPath)
+        const paramsChanged = JSON.stringify(currentQueryParams) !== JSON.stringify(currentParams)
 
-        if (!isSamePath(currentPath, expectedPath)) {
-            // URL doesn't match current route, update URL to match
-            navigateToUrl(expectedPath, true)
+        if (pathChanged || paramsChanged) {
+            // URL doesn't match current route/params, update URL to match
+            navigateToUrl(expectedPath, currentParams, true)
         }
 
         return () => {
             window.removeEventListener('popstate', handlePopState)
         }
-    }, [routes, currentRoute])
+    }, [routes, currentRoute, currentParams])
 
-    // Sync URL when current route changes programmatically
+    // Sync URL when current route or params change programmatically
     useEffect(() => {
         const currentPath = getCurrentPath()
         const expectedPath = routeKeyToPath(currentRoute)
+        const currentQueryParams = parseQueryParams()
+        
+        const pathChanged = !isSamePath(currentPath, expectedPath)
+        const paramsChanged = JSON.stringify(currentQueryParams) !== JSON.stringify(currentParams)
 
-        if (!isSamePath(currentPath, expectedPath)) {
-            navigateToUrl(expectedPath, true)
+        if (pathChanged || paramsChanged) {
+            navigateToUrl(expectedPath, currentParams, true)
         }
-    }, [currentRoute])
+    }, [currentRoute, currentParams])
 
     // Type-safe navigation function with URL synchronization and event hooks
     const navigateTo: NavigateToFunction<T> = useCallback(async (routeKey: any, props?: any) => {
@@ -149,7 +168,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         // Create source route info (current route before navigation)
         const sourceRouteInfo: RouteInfo = {
             path: routeKeyToPath(currentRoute),
-            params: {} // You could store and retrieve current route params if needed
+            params: currentParams
         }
 
         // Create target route info (where we're trying to navigate)
@@ -205,24 +224,20 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         // Proceed with navigation (original or redirected)
         const routeKeyStr = finalRouteKey as string
         const urlPath = routeKeyToPath(routeKeyStr)
+        const routeParams = finalProps || {}
 
-        // Update browser URL
-        navigateToUrl(urlPath)
+        // Update browser URL with query parameters
+        navigateToUrl(urlPath, routeParams)
 
         // Update internal state
         setCurrentRoute(routeKeyStr)
+        setCurrentParams(routeParams)
         setSideNavOpen(false) // Close side nav on navigation
-
-        // Store props for the route if needed (you can expand this)
-        if (finalProps) {
-            // You could store route props in a separate state or pass them through URL params
-            console.log('Route props:', finalProps)
-        }
 
         // Create final target route info (in case of redirect)
         const finalTargetRouteInfo: RouteInfo = {
             path: urlPath,
-            params: finalProps || {}
+            params: routeParams
         }
 
         // Execute onAfterNavigate hook if provided
@@ -288,6 +303,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     const contextValue: AppShellContextType<T> = {
         navigateTo,
         currentRoute,
+        currentParams,
         isSideNavOpen,
         setSideNavOpen,
         alertDialog,
@@ -481,7 +497,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                             paddingBottom={isMobile && footer.showOnMobile ? "4rem" : "0"}
                             minHeight="calc(100vh - 4rem)"
                         >
-                            {children || (CurrentComponent && <CurrentComponent/>)}
+                            {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
                         </Box>
 
                         {/* Footer (Mobile Only) */}
