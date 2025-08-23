@@ -1,7 +1,7 @@
-import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
-import { useAppSelector } from '@/store'
-import { selectIsAuthenticated, selectIsLoading } from '@/store/slices/authSlice'
-import { Box } from '../components/base/Box'
+import {createFileRoute, Navigate, Outlet} from '@tanstack/react-router'
+import {useAppSelector} from '@/store'
+import {selectIsAuthenticated, selectIsLoading} from '@/store/slices/authSlice'
+import {Box} from '../components/base/Box'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardLayout,
