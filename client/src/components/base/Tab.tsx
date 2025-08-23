@@ -324,7 +324,7 @@ const Tab: React.FC<TabProps> = ({
     const activeItem = items.find(item => item.id === activeTab)
 
     return (
-        <Box className={className} display={'flex'} alignItems={'center'} style={style}>
+        <Box className={className} display={'flex'} flexDirection={'column'} style={style}>
             {/* Tab Navigation */}
             <Box
                 ref={containerRef}
