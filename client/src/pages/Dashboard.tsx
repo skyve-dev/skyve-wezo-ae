@@ -25,8 +25,6 @@ const Dashboard: React.FC = () => {
         visibility,
         hideHeader,
         showHeader,
-        hideSideNav,
-        showSideNav,
         hideFooter,
         showFooter,
         hideAll,

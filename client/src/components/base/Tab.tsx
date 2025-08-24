@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Box } from './Box'
+import { useTheme } from '@/components/base/AppShell'
 
 export interface TabItem {
     /**
@@ -138,13 +139,18 @@ const Tab: React.FC<TabProps> = ({
     animationDuration = 200,
     centered = false,
     backgroundColor = 'transparent',
-    activeColor = '#3b82f6',
+    activeColor = '#D52122',
     inactiveColor = '#6b7280',
     tabBarOnly = false,
     iconLayout = 'row',
     iconSize,
     tabBarStyle
 }) => {
+    const theme = useTheme()
+    
+    // Override activeColor with theme if not explicitly provided
+    const resolvedActiveColor = activeColor === '#D52122' ? (theme?.primaryColor || '#D52122') : activeColor
+    
     const tabsRef = useRef<(HTMLButtonElement | null)[]>([])
     const containerRef = useRef<HTMLDivElement>(null)
     const focusRingRef = useRef<HTMLDivElement>(null)
@@ -269,7 +275,7 @@ const Tab: React.FC<TabProps> = ({
             transition: `all ${animationDuration}ms ease`,
             outline: 'none',
             textDecoration: 'none',
-            color: disabled ? '#9ca3af' : (isActive ? activeColor : inactiveColor),
+            color: disabled ? '#9ca3af' : (isActive ? resolvedActiveColor : inactiveColor),
             zIndex: 1
         }
 
@@ -278,8 +284,8 @@ const Tab: React.FC<TabProps> = ({
                 return {
                     ...baseStyles,
                     borderRadius: '9999px',
-                    backgroundColor: isActive ? activeColor : 'transparent',
-                    color: isActive ? 'white' : inactiveColor
+                    backgroundColor: isActive ? resolvedActiveColor : 'transparent',
+                    color: isActive ? theme?.primaryContrast || 'white' : inactiveColor
                 }
             case 'underline':
                 return {
@@ -296,7 +302,7 @@ const Tab: React.FC<TabProps> = ({
             default:
                 return {
                     ...baseStyles,
-                    backgroundColor: isActive ? `${activeColor}10` : 'transparent',
+                    backgroundColor: isActive ? `${resolvedActiveColor}10` : 'transparent',
                     borderRadius: '6px'
                 }
         }
@@ -315,7 +321,7 @@ const Tab: React.FC<TabProps> = ({
             case 'pills':
                 return {
                     ...baseStyles,
-                    backgroundColor: activeColor,
+                    backgroundColor: resolvedActiveColor,
                     borderRadius: '9999px'
                 }
             case 'underline':
@@ -323,21 +329,21 @@ const Tab: React.FC<TabProps> = ({
                     ...baseStyles,
                     //backgroundColor: activeColor,
                     borderRadius: 0,
-                    borderBottom : orientation === 'horizontal' ? `2px solid ${activeColor}` : `2px solid transparent`,
-                    borderLeft : orientation === 'vertical' ? `2px solid ${activeColor}` : `2px solid transparent`,
+                    borderBottom : orientation === 'horizontal' ? `2px solid ${resolvedActiveColor}` : `2px solid transparent`,
+                    borderLeft : orientation === 'vertical' ? `2px solid ${resolvedActiveColor}` : `2px solid transparent`,
                 }
             case 'minimal':
                 return {
                     ...baseStyles,
-                    backgroundColor: `${activeColor}20`,
+                    backgroundColor: `${resolvedActiveColor}20`,
                     borderRadius: '4px'
                 }
             default:
                 return {
                     ...baseStyles,
-                    backgroundColor: `${activeColor}15`,
+                    backgroundColor: `${resolvedActiveColor}15`,
                     borderRadius: '6px',
-                    border: `1px solid ${activeColor}30`
+                    border: `1px solid ${resolvedActiveColor}30`
                 }
         }
     }
@@ -389,8 +395,8 @@ const Tab: React.FC<TabProps> = ({
                             flex={fullWidth ? 1 : 'none'}
                             whileHover={!item.disabled ? {
                                 backgroundColor: variant === 'pills' 
-                                    ? (isActive ? activeColor : `${activeColor}10`)
-                                    : `${activeColor}08`
+                                    ? (isActive ? resolvedActiveColor : `${resolvedActiveColor}10`)
+                                    : `${resolvedActiveColor}08`
                             } : undefined}
                             whileFocus={{
                                 outlineOffset: '2px'
@@ -419,8 +425,8 @@ const Tab: React.FC<TabProps> = ({
                                     as="span"
                                     fontSize="0.75rem"
                                     fontWeight="700"
-                                    backgroundColor={isActive ? 'rgba(255,255,255,0.3)' : activeColor}
-                                    color={isActive && variant === 'pills' ? 'white' : 'white'}
+                                    backgroundColor={isActive ? theme?.withOpacity?.(theme.primaryContrast || '#ffffff', 0.3) || 'rgba(255,255,255,0.3)' : resolvedActiveColor}
+                                    color={theme?.primaryContrast || 'white'}
                                     borderRadius="9999px"
                                     padding="0.125rem 0.375rem"
                                     minWidth="1.25rem"

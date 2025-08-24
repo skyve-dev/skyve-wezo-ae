@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Box} from './Box';
 import {Button} from './Button';
 import {BoxProps} from "@/types/box.ts";
+import {useTheme} from '@/components/base/AppShell';
 
 export interface NumberStepperInputProps extends Pick<BoxProps, 'width' | 'widthSm' | 'widthMd' | 'widthLg' | 'widthXl'
     | 'minWidth' | 'minWidthSm' | 'minWidthMd' | 'minWidthLg' | 'minWidthXl'
@@ -80,6 +81,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                                                                           onFocus,
                                                                           ...props
                                                                       }) => {
+    const theme = useTheme();
     const isControlled = controlledValue !== undefined;
     const [internalValue, setInternalValue] = useState(defaultValue);
     const [inputValue, setInputValue] = useState('');
@@ -230,11 +232,11 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
     const variantStyles = {
         default: {
             backgroundColor: disabled ? '#f5f5f5' : '#ffffff',
-            border: error ? '1px solid #ef4444' : '1px solid #d1d5db',
+            border: error ? '1px solid #ef4444' : `1px solid ${theme.withOpacity(theme.primaryColor, 0.2)}`,
         },
         outlined: {
             backgroundColor: 'transparent',
-            border: error ? '2px solid #ef4444' : '2px solid #3b82f6',
+            border: error ? '2px solid #ef4444' : `2px solid ${theme.primaryColor}`,
         },
         filled: {
             backgroundColor: disabled ? '#e5e7eb' : '#f3f4f6',
@@ -261,14 +263,14 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                     htmlFor={id}
                     fontSize={currentSizeStyle.labelFontSize}
                     fontWeight={500}
-                    color="#374151"
+                    color={theme.darken(theme.primaryColor, 15)}
                     display="flex"
                     alignItems="center"
                     gap={currentSizeStyle.gap}
                 >
                     {IconComponent && (
                         <Box
-                            color="#3182ce"
+                            color={theme.primaryColor}
                             display="flex" 
                             alignItems="center"
                             fontSize={currentSizeStyle.iconSize}
@@ -308,7 +310,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                     padding="0"
                     backgroundColor="transparent"
                     border="none"
-                    color={disabled || readOnly || currentValue <= min ? '#9ca3af' : '#374151'}
+                    color={disabled || readOnly || currentValue <= min ? '#9ca3af' : theme.darken(theme.primaryColor, 15)}
                     fontSize="20px"
                     fontWeight="500"
                     tabIndex={-1}
@@ -367,7 +369,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                     padding="0"
                     backgroundColor="transparent"
                     border="none"
-                    color={disabled || readOnly || currentValue >= max ? '#9ca3af' : '#374151'}
+                    color={disabled || readOnly || currentValue >= max ? '#9ca3af' : theme.darken(theme.primaryColor, 15)}
                     fontSize="20px"
                     fontWeight="500"
                     tabIndex={-1}

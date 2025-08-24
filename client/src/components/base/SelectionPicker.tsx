@@ -1,6 +1,7 @@
 import React, {CSSProperties} from 'react'
 import {Box} from './Box'
 import {BoxProps} from "@/types/box.ts";
+import {useTheme} from '@/components/base/AppShell';
 
 interface SelectionPickerProps<T> extends Omit<BoxProps<'div'>, 'onChange'>{
   /**
@@ -105,6 +106,7 @@ function SelectionPicker<T>({
   isItemDisabled,
   containerRef
 }: SelectionPickerProps<T>) {
+  const theme = useTheme();
   
   // Normalize value to always work with an array internally
   const selectedIds = React.useMemo(() => {
@@ -165,9 +167,9 @@ function SelectionPicker<T>({
             justifyContent="center"
             width="1.25rem"
             height="1.25rem"
-            border={`2px solid ${isSelected ? '#3182ce' : '#d1d5db'}`}
+            border={`2px solid ${isSelected ? theme.primaryColor : theme.withOpacity(theme.primaryColor, 0.2)}`}
             borderRadius={isMultiSelect ? '0.25rem' : '50%'}
-            backgroundColor={isSelected ? '#3182ce' : 'transparent'}
+            backgroundColor={isSelected ? theme.primaryColor : 'transparent'}
             transition="all 0.2s"
           >
             {isSelected && (
@@ -191,9 +193,9 @@ function SelectionPicker<T>({
             justifyContent="center"
             width="1.25rem"
             height="1.25rem"
-            border={`2px solid ${isSelected ? '#3182ce' : '#d1d5db'}`}
+            border={`2px solid ${isSelected ? theme.primaryColor : theme.withOpacity(theme.primaryColor, 0.2)}`}
             borderRadius="50%"
-            backgroundColor={isSelected ? '#3182ce' : 'transparent'}
+            backgroundColor={isSelected ? theme.primaryColor : 'transparent'}
             transition="all 0.2s"
           >
             {isSelected && (
@@ -228,8 +230,8 @@ function SelectionPicker<T>({
       transition: 'all 0.2s',
       opacity: disabled || itemDisabled ? 0.5 : 1,
       border: '2px solid',
-      borderColor: selected ? '#3182ce' : '#e5e7eb',
-      backgroundColor: selected ? '#ebf8ff' : 'white',
+      borderColor: selected ? theme.primaryColor : theme.withOpacity(theme.primaryColor, 0.15),
+      backgroundColor: selected ? theme.withOpacity(theme.primaryColor, 0.05) : 'white',
       ...itemStyles
     }
     
@@ -267,8 +269,8 @@ function SelectionPicker<T>({
             whileHover={
               !disabled && !itemDisabled
                 ? {
-                    borderColor: selected ? '#2563eb' : '#9ca3af',
-                    backgroundColor: selected ? '#dbeafe' : '#f9fafb'
+                    borderColor: selected ? theme.primaryColor : theme.withOpacity(theme.primaryColor, 0.25),
+                    backgroundColor: selected ? theme.withOpacity(theme.primaryColor, 0.1) : theme.withOpacity(theme.primaryColor, 0.02)
                   }
                 : {}
             }

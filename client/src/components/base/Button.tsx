@@ -1,6 +1,7 @@
 import React, {forwardRef} from 'react'
 import {Box} from './Box'
 import {BoxProps} from '@/types/box.ts'
+import {useTheme} from '@/components/base/AppShell'
 
 export interface ButtonProps extends Omit<BoxProps, 'onClick' | 'as' | 'size'> {
   // Core functionality
@@ -9,7 +10,7 @@ export interface ButtonProps extends Omit<BoxProps, 'onClick' | 'as' | 'size'> {
   onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void
   
   // Visual variants
-  variant?: 'promoted' | 'normal'
+  variant?: 'promoted' | 'normal' | 'plain'
   size?: 'small' | 'medium' | 'large'
   
   // States
@@ -79,6 +80,8 @@ export const Button = forwardRef<
   className,
   ...props
 }, ref) => {
+  const theme = useTheme()
+  
   // Size configurations that match Input component heights
   const sizeConfig = {
     small: {
@@ -131,9 +134,19 @@ export const Button = forwardRef<
     if (variant === 'promoted') {
       return {
         ...baseStyles,
-        backgroundColor:  '#3b82f6',
-        color: '#ffffff',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+        backgroundColor: theme.primaryColor,
+        color: theme.primaryContrast,
+        boxShadow: `0 2px 8px ${theme.withOpacity(theme.primaryColor, 0.15)}`
+      }
+    }
+    
+    if (variant === 'plain') {
+      return {
+        ...baseStyles,
+        backgroundColor: 'transparent',
+        color: theme.primaryColor,
+        border: 'none',
+        boxShadow: 'none'
       }
     }
     
@@ -141,9 +154,9 @@ export const Button = forwardRef<
     return {
       ...baseStyles,
       backgroundColor: '#ffffff',
-      color: '#374151',
-      border: '1px solid #d1d5db',
-      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+      color: theme.darken(theme.primaryColor, 10),
+      border: `1px solid ${theme.withOpacity(theme.primaryColor, 0.15)}`,
+      boxShadow: `0 1px 2px ${theme.withOpacity(theme.primaryColor, 0.08)}`
     }
   }
   
@@ -154,14 +167,27 @@ export const Button = forwardRef<
     if (variant === 'promoted') {
       return {
         whileHover: {
-          backgroundColor: '#2563eb',
-          boxShadow: '0 4px 8px 0 rgba(59, 130, 246, 0.3)',
+          backgroundColor: theme.primaryLight,
+          boxShadow: `0 4px 12px ${theme.withOpacity(theme.primaryColor, 0.25)}`,
           transform: 'translateY(-1px)'
         },
         whileActive: {
-          backgroundColor: '#1d4ed8',
-          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
+          backgroundColor: theme.primaryDark,
+          boxShadow: `0 1px 2px ${theme.withOpacity(theme.primaryColor, 0.15)}`,
           transform: 'translateY(0px)'
+        }
+      }
+    }
+    
+    if (variant === 'plain') {
+      return {
+        whileHover: {
+          backgroundColor: theme.withOpacity(theme.primaryColor, 0.05),
+          color: theme.primaryDark
+        },
+        whileActive: {
+          backgroundColor: theme.withOpacity(theme.primaryColor, 0.1),
+          color: theme.primaryDark
         }
       }
     }
@@ -169,15 +195,15 @@ export const Button = forwardRef<
     // Normal variant
     return {
       whileHover: {
-        backgroundColor: '#f9fafb',
-        borderColor: '#9ca3af',
-        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.1)',
+        backgroundColor: theme.subtlePrimaryGradient,
+        borderColor: theme.withOpacity(theme.primaryColor, 0.3),
+        boxShadow: `0 4px 8px ${theme.withOpacity(theme.primaryColor, 0.12)}`,
         transform: 'translateY(-1px)'
       },
       whileActive: {
-        backgroundColor: '#f3f4f6',
-        borderColor: '#6b7280',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
+        backgroundColor: theme.withOpacity(theme.primaryColor, 0.08),
+        borderColor: theme.withOpacity(theme.primaryColor, 0.4),
+        boxShadow: `0 1px 2px ${theme.withOpacity(theme.primaryColor, 0.1)}`,
         transform: 'translateY(0px)'
       }
     }

@@ -368,6 +368,28 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     // Check if we can navigate back
     const canNavigateBack = window.history.length > 1 || navigationHistory.length > 1
 
+    // Configuration with defaults (moved up for theme access)
+    const {
+        header = {
+            title: 'App',
+            showQuickNav: true
+        },
+        footer = {
+            showOnMobile: true,
+            maxItems: 4
+        },
+        breakpoints = {
+            mobile: 768,
+            tablet: 1024,
+            desktop: 1200
+        },
+        theme = {
+            primaryColor: '#3b82f6',
+            backgroundColor: '#f8fafc',
+            navBackgroundColor: '#ffffff'
+        }
+    } = config || {}
+
     const contextValue: AppShellContextType<T> = {
         navigateTo,
         navigateBack,
@@ -389,9 +411,9 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         resetVisibility,
         // Theme
         theme: {
-            primaryColor: theme.primaryColor,
-            backgroundColor: theme.backgroundColor,
-            navBackgroundColor: theme.navBackgroundColor
+            primaryColor: theme.primaryColor || '#D52122',
+            backgroundColor: theme.backgroundColor || '#FAFAFA',
+            navBackgroundColor: theme.navBackgroundColor || '#ffffff'
         }
     }
 
@@ -408,28 +430,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     const scrollAccumulator = useRef(0)
     const headerRef = useRef<HTMLDivElement>(null)
     const footerRef = useRef<HTMLDivElement>(null)
-
-    // Configuration with defaults
-    const {
-        header = {
-            title: 'App',
-            showQuickNav: true
-        },
-        footer = {
-            showOnMobile: true,
-            maxItems: 4
-        },
-        breakpoints = {
-            mobile: 768,
-            tablet: 1024,
-            desktop: 1200
-        },
-        theme = {
-            primaryColor: '#3b82f6',
-            backgroundColor: '#f8fafc',
-            navBackgroundColor: '#ffffff'
-        }
-    } = config || {}
 
     // Handle responsive breakpoints
     useEffect(() => {
@@ -626,17 +626,13 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 label=""
                                 icon={<FaBars fontSize={'1.2rem'}/>}
                                 onClick={() => setSideNavOpen(true)}
-                                variant="normal"
+                                variant="plain"
                                 size="small"
                                 border="1px solid #CCC"
-
                                 borderRadius="8px"
-                                background={'transparent'}
                                 aria-label="Open navigation menu"
-
                                 style={{
                                     color:'white',
-                                    border:'none',
                                     padding : 0
                                 }}
                                 whileHover={{
@@ -685,8 +681,10 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 tabBarOnly
                                 iconSize={'1.5rem'}
                                 iconLayout={'column'}
-                                activeColor={theme.primaryColor}
-                                inactiveColor="#9ca3af"
+                                activeColor={'rgba(255,255,255,1)'}
+
+                                inactiveColor="rgba(255,255,255,0.5)"
+                                tabBarStyle={{background:theme.primaryColor,borderRadius:0}}
                             />
                         </Box>
                     )}
