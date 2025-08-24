@@ -18,9 +18,9 @@ export interface TabItem {
     icon?: React.ReactNode
     
     /**
-     * Content to display when tab is active
+     * Content to display when tab is active (optional if using as tab bar only)
      */
-    content: React.ReactNode
+    content?: React.ReactNode
     
     /**
      * Whether the tab is disabled
@@ -103,6 +103,21 @@ export interface TabProps {
      * Inactive tab color
      */
     inactiveColor?: string
+    
+    /**
+     * Display only as tab bar without content area
+     */
+    tabBarOnly?: boolean
+    
+    /**
+     * Layout for icon and label arrangement
+     */
+    iconLayout?: 'row' | 'column'
+    
+    /**
+     * Custom icon size (takes priority over size config)
+     */
+    iconSize?: string
 }
 
 const Tab: React.FC<TabProps> = ({
@@ -119,7 +134,10 @@ const Tab: React.FC<TabProps> = ({
     centered = false,
     backgroundColor = 'transparent',
     activeColor = '#3b82f6',
-    inactiveColor = '#6b7280'
+    inactiveColor = '#6b7280',
+    tabBarOnly = false,
+    iconLayout = 'row',
+    iconSize
 }) => {
     const tabsRef = useRef<(HTMLButtonElement | null)[]>([])
     const containerRef = useRef<HTMLDivElement>(null)
@@ -236,9 +254,10 @@ const Tab: React.FC<TabProps> = ({
         const baseStyles = {
             position: 'relative' as const,
             display: 'flex',
+            flexDirection: iconLayout as 'row' | 'column',
             alignItems: 'center',
             justifyContent: centered ? 'center' : 'flex-start',
-            gap: currentSize.gap,
+            gap: iconLayout === 'column' ? '0.25rem' : currentSize.gap,
             padding: currentSize.padding,
             fontSize: currentSize.fontSize,
             fontWeight: isActive ? '600' : '500',
@@ -377,7 +396,7 @@ const Tab: React.FC<TabProps> = ({
                             {/* Icon */}
                             {item.icon && (
                                 <Box 
-                                    fontSize={currentSize.iconSize}
+                                    fontSize={iconSize || currentSize.iconSize}
                                     display="flex"
                                     alignItems="center"
                                     justifyContent="center"
@@ -416,13 +435,15 @@ const Tab: React.FC<TabProps> = ({
             </Box>
 
             {/* Tab Content */}
-            <Box
-                id={`tabpanel-${activeTab}`}
-                role="tabpanel"
-                aria-labelledby={`tab-${activeTab}`}
-            >
-                {activeItem?.content}
-            </Box>
+            {!tabBarOnly && activeItem?.content && (
+                <Box
+                    id={`tabpanel-${activeTab}`}
+                    role="tabpanel"
+                    aria-labelledby={`tab-${activeTab}`}
+                >
+                    {activeItem.content}
+                </Box>
+            )}
         </Box>
     )
 }

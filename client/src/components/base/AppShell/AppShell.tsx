@@ -385,15 +385,15 @@ const AppShell = <T extends Record<string, BaseRoute>>({
             content: <></>
         }))
 
-    // Get footer nav items (mobile only)
-    const footerNavItems = Object.entries(routes)
+    // Get footer nav items (mobile only) - formatted as TabItem[]
+    const footerNavItems: TabItem[] = Object.entries(routes)
         .filter(([_, route]) => route.showInFooter !== false)
         .slice(0, footer.maxItems)
         .map(([path, route]) => ({
             id: path,
             label: route.label,
-            icon: route.icon,
-            onClick: () => navigateTo(path as keyof T, {} as any)
+            icon: route.icon
+            // content is optional since we're using tabBarOnly
         }))
 
     // Handle dialog button clicks
@@ -510,41 +510,22 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 backgroundColor={theme.navBackgroundColor}
                                 borderTop="1px solid #e5e7eb"
                                 zIndex="90"
-                                paddingY="0.5rem"
                                 boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
                             >
-                                <Box
-                                    display="flex"
-                                    justifyContent="space-around"
-                                    alignItems="center"
-                                    maxWidth="100%"
-                                    margin="0 auto"
-                                    paddingX="1rem"
-                                >
-                                    {footerNavItems.map((item) => (
-                                        <Button
-                                            key={item.id}
-                                            label={item.label}
-                                            icon={item.icon}
-                                            onClick={item.onClick}
-                                            variant="normal"
-                                            size="small"
-                                            backgroundColor="transparent"
-                                            border="none"
-                                            color={currentRoute === item.id ? theme.primaryColor : '#6b7280'}
-                                            fontWeight={currentRoute === item.id ? '600' : '400'}
-                                            fontSize="0.75rem"
-
-                                            flexDirection="column"
-                                            gap="0.25rem"
-                                            padding="0.5rem"
-                                            style={{
-                                                minWidth: 'auto',
-                                                flex: 1
-                                            }}
-                                        />
-                                    ))}
-                                </Box>
+                                <Tab
+                                    items={footerNavItems}
+                                    activeTab={currentRoute}
+                                    onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
+                                    variant="minimal"
+                                    size="small"
+                                    fullWidth
+                                    centered
+                                    tabBarOnly
+                                    iconSize={'2rem'}
+                                    iconLayout={'column'}
+                                    activeColor={theme.primaryColor}
+                                    inactiveColor="#6b7280"
+                                />
                             </Box>
                         )}
 
