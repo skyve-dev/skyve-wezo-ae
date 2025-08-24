@@ -1,5 +1,19 @@
 import React, {useEffect, useState} from 'react'
-import {FaArrowLeft, FaBed, FaBuilding, FaCamera, FaCog, FaDollarSign, FaGavel, FaMapMarkerAlt, FaSave, FaSpinner, FaWifi, FaExclamationTriangle, FaTimes} from 'react-icons/fa'
+import {
+    FaArrowLeft,
+    FaBed,
+    FaBuilding,
+    FaCamera,
+    FaCog,
+    FaDollarSign,
+    FaExclamationTriangle,
+    FaGavel,
+    FaMapMarkerAlt,
+    FaSave,
+    FaSpinner,
+    FaTimes,
+    FaWifi
+} from 'react-icons/fa'
 import {useAppShell} from '@/components/base/AppShell'
 import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box, Tab} from '@/components'
@@ -7,13 +21,13 @@ import Button from '@/components/base/Button.tsx'
 import {TabItem} from '@/components/base/Tab'
 import {useAppDispatch, useAppSelector} from '@/store'
 import {
+    clearValidationErrors,
+    createProperty,
     fetchPropertyById,
     initializeWizardForEdit,
-    createProperty,
+    setCurrentProperty,
     updateProperty,
     updateWizardData,
-    clearValidationErrors,
-    setCurrentProperty,
 } from '@/store/slices/propertySlice'
 import {WizardFormData} from '@/types/property'
 
@@ -37,9 +51,9 @@ interface PropertyEditProps {
 
 const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     const {navigateTo, currentParams} = useAppShell()
-    
+
     // Combine props from navigation and URL query parameters
-    const params = { ...props, ...currentParams }
+    const params = {...props, ...currentParams}
     const dispatch = useAppDispatch()
 
     // Redux state
@@ -49,12 +63,12 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     const [activeTab, setActiveTab] = useState<TabId>(params.tab || 'details')
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [formData, setFormData] = useState<Partial<WizardFormData>>({})
-    
+
     // Scroll to top when tab changes via URL parameters
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+        window.scrollTo({top: 0, behavior: 'smooth'})
     }, [activeTab])
-    
+
     // Fetch property data on mount
     useEffect(() => {
         if (params.propertyId && params.propertyId !== 'new') {
@@ -88,7 +102,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
         setFormData(newData)
         dispatch(updateWizardData(updates))
         setHasUnsavedChanges(true)
-        
+
         // Clear validation errors when user starts editing
         if (validationErrors) {
             dispatch(clearValidationErrors())
@@ -103,7 +117,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
             if (createProperty.fulfilled.match(result)) {
                 setHasUnsavedChanges(false)
                 // Navigate to edit mode with the new property ID
-                navigateTo('property-edit', { propertyId: result.payload.propertyId })
+                navigateTo('property-edit', {propertyId: result.payload.propertyId})
             }
         } else if (currentProperty?.propertyId && wizardData) {
             // Update existing property
@@ -118,52 +132,59 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     // Tab configuration using extracted components
     const tabs: TabItem[] = [
         {
-            id: 'details', 
-            label: 'Details', 
+            id: 'details',
+            label: 'Details',
             icon: <FaBuilding/>,
-            content: <DetailsTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <DetailsTab formData={formData} updateFormData={updateFormData}
+                                 validationErrors={validationErrors}/>
         },
         {
-            id: 'location', 
-            label: 'Location', 
+            id: 'location',
+            label: 'Location',
             icon: <FaMapMarkerAlt/>,
-            content: <LocationTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <LocationTab formData={formData} updateFormData={updateFormData}
+                                  validationErrors={validationErrors}/>
         },
         {
-            id: 'layout', 
-            label: 'Layout', 
+            id: 'layout',
+            label: 'Layout',
             icon: <FaBed/>,
-            content: <LayoutTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <LayoutTab formData={formData} updateFormData={updateFormData}
+                                validationErrors={validationErrors}/>
         },
         {
-            id: 'amenities', 
-            label: 'Amenities', 
+            id: 'amenities',
+            label: 'Amenities',
             icon: <FaWifi/>,
-            content: <AmenitiesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <AmenitiesTab formData={formData} updateFormData={updateFormData}
+                                   validationErrors={validationErrors}/>
         },
         {
-            id: 'photos', 
-            label: 'Photos', 
+            id: 'photos',
+            label: 'Photos',
             icon: <FaCamera/>,
-            content: <PhotosTab formData={formData} currentProperty={currentProperty} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <PhotosTab formData={formData} currentProperty={currentProperty} updateFormData={updateFormData}
+                                validationErrors={validationErrors}/>
         },
         {
-            id: 'services', 
-            label: 'Services', 
+            id: 'services',
+            label: 'Services',
             icon: <FaCog/>,
-            content: <ServicesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <ServicesTab formData={formData} updateFormData={updateFormData}
+                                  validationErrors={validationErrors}/>
         },
         {
-            id: 'rules', 
-            label: 'Rules', 
+            id: 'rules',
+            label: 'Rules',
             icon: <FaGavel/>,
-            content: <RulesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <RulesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors}/>
         },
         {
-            id: 'pricing', 
-            label: 'Pricing', 
+            id: 'pricing',
+            label: 'Pricing',
             icon: <FaDollarSign/>,
-            content: <PricingTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
+            content: <PricingTab formData={formData} updateFormData={updateFormData}
+                                 validationErrors={validationErrors}/>
         }
     ]
 
@@ -225,17 +246,10 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                 {/* Header - Mobile Optimized */}
                 <Box marginBottom="1.5rem">
                     <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                        <Button
-                            label=""
-                            icon={<FaArrowLeft/>}
-                            onClick={() => navigateTo('properties', {})}
-                            variant="normal"
-                            size="small"
-                        />
                         <Box flex="1">
                             <h1 style={{
                                 fontSize: '1.5rem',
-                                fontWeight: 'bold', 
+                                fontWeight: 'bold',
                                 margin: 0,
                                 lineHeight: '1.2'
                             }}>
@@ -243,9 +257,6 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                             </h1>
                         </Box>
                     </Box>
-                    <p style={{color: '#666', margin: 0, fontSize: '0.875rem', paddingLeft: '2.5rem'}}>
-                        Mobile-optimized editing experience
-                    </p>
                 </Box>
 
                 {/* Error Display */}
@@ -259,12 +270,13 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                         fontSize="0.875rem"
                     >
                         <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                            {validationErrors ? <FaExclamationTriangle style={{color: '#dc2626'}} /> : <FaTimes style={{color: '#dc2626'}} />}
-                            <h4 style={{ margin: 0, fontWeight: '600' }}>
+                            {validationErrors ? <FaExclamationTriangle style={{color: '#dc2626'}}/> :
+                                <FaTimes style={{color: '#dc2626'}}/>}
+                            <h4 style={{margin: 0, fontWeight: '600'}}>
                                 {validationErrors ? 'Validation Errors' : 'Error'}
                             </h4>
                         </Box>
-                        <p style={{ margin: '0 0 1rem 0' }}>{error}</p>
+                        <p style={{margin: '0 0 1rem 0'}}>{error}</p>
                         {validationErrors && (
                             <Box
                                 backgroundColor="rgba(255,255,255,0.7)"
@@ -272,10 +284,10 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                                 borderRadius="6px"
                                 fontSize="0.8125rem"
                             >
-                                <strong style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                <strong style={{display: 'block', marginBottom: '0.5rem'}}>
                                     Please fix these issues:
                                 </strong>
-                                <ul style={{ margin: '0', paddingLeft: '1.25rem', lineHeight: '1.4' }}>
+                                <ul style={{margin: '0', paddingLeft: '1.25rem', lineHeight: '1.4'}}>
                                     {Object.entries(validationErrors).map(([field, message]) => (
                                         <li key={field}>
                                             <strong>{field}:</strong> {message}
@@ -288,23 +300,31 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                 )}
 
                 {/* Mobile-Optimized Tabs */}
-                <Tab 
+                <Tab
                     items={tabs}
                     activeTab={activeTab}
                     onTabChange={(tabId) => {
                         setActiveTab(tabId as TabId)
                         // Update URL with new tab parameter
-                        navigateTo('property-edit', { 
-                            ...params, 
-                            tab: tabId 
+                        navigateTo('property-edit', {
+                            ...params,
+                            tab: tabId
                         })
                         // Scroll to top when changing tabs
-                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                        window.scrollTo({top: 0, behavior: 'smooth'})
                     }}
-                    variant="pills"
+                    variant="default"
                     size="medium"
                     fullWidth={false}
-                    style={{ 
+                    tabBarStyle={{
+                        backgroundColor: 'white',
+                        borderBottom: '1px solid #e5e5e5',
+                        marginBottom:'2rem',
+                        justifyContent : 'space-evenly',
+                        borderRadius : 0,
+                        padding: '0 1rem'
+                    }}
+                    style={{
                         marginBottom: '1rem',
                         overflowX: 'auto',
                         scrollbarWidth: 'none',
@@ -355,7 +375,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                 )}
 
                 {/* Bottom spacing for floating button */}
-                <Box height="5rem" />
+                <Box height="5rem"/>
             </Box>
         </SecuredPage>
     )

@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
-import { Box } from '@/components'
+import React, {useState} from 'react'
+import {Box} from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
 import Input from '@/components/base/Input.tsx'
 import Button from '@/components/base/Button.tsx'
-import { WizardFormData, Room, Bed, ValidationErrors } from '@/types/property'
-import { BedType, BedTypeLabels } from '@/constants/propertyEnums'
-import { FaPlus, FaTrash, FaBed, FaUsers, FaBath } from 'react-icons/fa'
+import {Bed, Room, ValidationErrors, WizardFormData} from '@/types/property'
+import {BedType, BedTypeLabels} from '@/constants/propertyEnums'
+import {FaBath, FaBed, FaPlus, FaTrash, FaUsers} from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface LayoutTabProps {
@@ -14,7 +14,7 @@ interface LayoutTabProps {
     validationErrors?: ValidationErrors | null
 }
 
-const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
+const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validationErrors: _validationErrors}) => {
     const [showAddRoom, setShowAddRoom] = useState(false)
     const [newRoomName, setNewRoomName] = useState('')
     const addRoom = () => {
@@ -26,7 +26,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
             // Create a completely new array to avoid mutating Redux state
             const currentRooms = formData.rooms ? JSON.parse(JSON.stringify(formData.rooms)) : []
             const updatedRooms = [...currentRooms, newRoom]
-            updateFormData({ rooms: updatedRooms })
+            updateFormData({rooms: updatedRooms})
             setNewRoomName('')
             setShowAddRoom(false)
         }
@@ -36,7 +36,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
         // Create a deep copy to avoid mutating Redux state
         const currentRooms = formData.rooms ? JSON.parse(JSON.stringify(formData.rooms)) : []
         const updatedRooms = currentRooms.filter((_: Room, index: number) => index !== roomIndex)
-        updateFormData({ rooms: updatedRooms })
+        updateFormData({rooms: updatedRooms})
     }
 
     const addBedToRoom = (roomIndex: number) => {
@@ -51,7 +51,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
             numberOfBed: 1
         }
         updatedRooms[roomIndex].beds.push(newBed)
-        updateFormData({ rooms: updatedRooms })
+        updateFormData({rooms: updatedRooms})
     }
 
     const updateBed = (roomIndex: number, bedIndex: number, field: keyof Bed, value: any) => {
@@ -63,7 +63,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                 ...updatedRooms[roomIndex].beds[bedIndex],
                 [field]: value
             }
-            updateFormData({ rooms: updatedRooms })
+            updateFormData({rooms: updatedRooms})
         }
     }
 
@@ -73,14 +73,14 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
         const updatedRooms = JSON.parse(JSON.stringify(formData.rooms))
         if (updatedRooms[roomIndex].beds) {
             updatedRooms[roomIndex].beds = updatedRooms[roomIndex].beds.filter((_: Bed, index: number) => index !== bedIndex)
-            updateFormData({ rooms: updatedRooms })
+            updateFormData({rooms: updatedRooms})
         }
     }
 
     return (
         <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-                <FaBed style={{color: '#374151', fontSize: '1.25rem'}} />
+                <FaBed style={{color: '#374151', fontSize: '1.25rem'}}/>
                 <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                     Layout & Capacity
                 </h3>
@@ -140,7 +140,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                             <Box display="flex" gap="1rem">
                                 <Box
                                     as="button"
-                                    onClick={() => updateFormData({ allowChildren: true })}
+                                    onClick={() => updateFormData({allowChildren: true})}
                                     padding="0.75rem 1.5rem"
                                     border={formData.allowChildren ? '2px solid #3b82f6' : '1px solid #d1d5db'}
                                     backgroundColor={formData.allowChildren ? '#eff6ff' : 'white'}
@@ -155,7 +155,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                                 </Box>
                                 <Box
                                     as="button"
-                                    onClick={() => updateFormData({ allowChildren: false })}
+                                    onClick={() => updateFormData({allowChildren: false})}
                                     padding="0.75rem 1.5rem"
                                     border={!formData.allowChildren ? '2px solid #3b82f6' : '1px solid #d1d5db'}
                                     backgroundColor={!formData.allowChildren ? '#eff6ff' : 'white'}
@@ -170,7 +170,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                                 </Box>
                             </Box>
                         </Box>
-                        
+
                         <Box>
                             <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                                 Cribs Available
@@ -178,7 +178,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                             <Box display="flex" gap="1rem">
                                 <Box
                                     as="button"
-                                    onClick={() => updateFormData({ offerCribs: true })}
+                                    onClick={() => updateFormData({offerCribs: true})}
                                     padding="0.75rem 1.5rem"
                                     border={formData.offerCribs ? '2px solid #3b82f6' : '1px solid #d1d5db'}
                                     backgroundColor={formData.offerCribs ? '#eff6ff' : 'white'}
@@ -193,7 +193,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                                 </Box>
                                 <Box
                                     as="button"
-                                    onClick={() => updateFormData({ offerCribs: false })}
+                                    onClick={() => updateFormData({offerCribs: false})}
                                     padding="0.75rem 1.5rem"
                                     border={!formData.offerCribs ? '2px solid #3b82f6' : '1px solid #d1d5db'}
                                     backgroundColor={!formData.offerCribs ? '#eff6ff' : 'white'}
@@ -219,7 +219,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                         </h4>
                         <Button
                             label="Add Room"
-                            icon={<FaPlus />}
+                            icon={<FaPlus/>}
                             onClick={() => setShowAddRoom(true)}
                             variant="promoted"
                             size="small"
@@ -276,9 +276,10 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                                     borderRadius="0.5rem"
                                     backgroundColor="white"
                                 >
-                                    <Box display="flex" alignItems="center" justifyContent="space-between" marginBottom="1rem">
+                                    <Box display="flex" alignItems="center" justifyContent="space-between"
+                                         marginBottom="1rem">
                                         <Box display="flex" alignItems="center" gap="0.5rem">
-                                            <FaBed color="#6b7280" />
+                                            <FaBed color="#6b7280"/>
                                             <h5 style={{margin: 0, fontSize: '1rem', fontWeight: '500'}}>
                                                 {room.spaceName}
                                             </h5>
@@ -298,14 +299,14 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                                         <Box display="flex" gap="0.5rem">
                                             <Button
                                                 label=""
-                                                icon={<FaPlus />}
+                                                icon={<FaPlus/>}
                                                 onClick={() => addBedToRoom(roomIndex)}
                                                 variant="normal"
                                                 size="small"
                                             />
                                             <Button
                                                 label=""
-                                                icon={<FaTrash />}
+                                                icon={<FaTrash/>}
                                                 onClick={() => removeRoom(roomIndex)}
                                                 variant="normal"
                                                 size="small"
@@ -349,7 +350,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                                                     />
                                                     <Button
                                                         label=""
-                                                        icon={<FaTrash />}
+                                                        icon={<FaTrash/>}
                                                         onClick={() => removeBedFromRoom(roomIndex, bedIndex)}
                                                         variant="normal"
                                                         size="small"
@@ -365,39 +366,19 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validat
                         <Box
                             padding="2rem"
                             textAlign="center"
+                            display={'flex'}
+                            flexDirection={'column'}
+                            alignItems={'center'}
                             border="2px dashed #d1d5db"
                             borderRadius="8px"
                             color="#666"
                         >
-                            <FaBed size={32} style={{marginBottom: '1rem', color: '#9ca3af'}} />
+                            <FaBed size={'5rem'} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
                             <p style={{margin: 0, fontSize: '0.875rem'}}>
                                 No rooms added yet. Click "Add Room" to start defining your property layout.
                             </p>
                         </Box>
                     )}
-                </Box>
-
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                        🏠 Layout Management Tips
-                    </h4>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Use stepper controls for mobile-friendly input</li>
-                        <li>Add detailed room information to help guests understand your space</li>
-                        <li>Accurate bed counts help with booking and guest expectations</li>
-                        <li>Child-friendly properties often receive more bookings</li>
-                    </ul>
                 </Box>
             </Box>
         </Box>

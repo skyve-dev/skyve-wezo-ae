@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {FaBath, FaBed, FaCalendarAlt, FaEdit, FaEye, FaMapMarkerAlt, FaPlus, FaTrash} from 'react-icons/fa'
 import {useAppShell} from '@/components/base/AppShell'
 import {SecuredPage} from '@/components/SecuredPage.tsx'
-import {Box} from '@/components'
+import {Box, Input} from '@/components'
 import Button from '@/components/base/Button.tsx'
 import {useAppDispatch, useAppSelector} from '@/store'
 import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty, initializeWizard} from '@/store/slices/propertySlice'
@@ -18,7 +18,6 @@ const PropertiesList: React.FC = () => {
 
     // Local state
     const [searchTerm, setSearchTerm] = useState('')
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; property: Property | null }>({
         isOpen: false,
         property: null
@@ -76,10 +75,13 @@ const PropertiesList: React.FC = () => {
     const renderPropertyCard = (property: Property) => (
         <Box
             key={property.propertyId}
-            padding="1.5rem"
+            padding="0rem"
+            paddingSm="1.5rem"
             backgroundColor="white"
-            borderRadius="8px"
-            boxShadow="0 2px 4px rgba(0,0,0,0.1)"
+            borderRadius="0px"
+            borderRadiusSm="8px"
+            boxShadow="0 0px 0px rgba(0,0,0,0)"
+            boxShadowSm="0 2px 4px rgba(0,0,0,0.1)"
             position="relative"
         >
             {/* Property Photo */}
@@ -217,7 +219,7 @@ const PropertiesList: React.FC = () => {
         <SecuredPage>
             <Box padding="2rem" maxWidth="1200px" margin="0 auto">
                 {/* Header */}
-                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="2rem">
+                <Box display="flex" flexDirection={'column'} flexDirectionSm={'row'} justifyContent="space-between" gap={'1rem'} marginBottom="2rem">
                     <Box>
                         <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>My Properties</h1>
                         <p style={{color: '#666', margin: '0.5rem 0 0 0'}}>
@@ -250,43 +252,23 @@ const PropertiesList: React.FC = () => {
 
                 {/* Search and View Toggle */}
                 <Box
-                    padding="1.5rem"
                     backgroundColor="white"
-                    borderRadius="8px"
-                    boxShadow="0 2px 4px rgba(0,0,0,0.1)"
                     marginBottom="2rem"
                 >
-                    <Box display="flex" gap="1rem" alignItems="center" flexWrap="wrap">
-                        <Box flex="1" minWidth="300px">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search properties by name or location..."
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '4px',
-                                    fontSize: '0.875rem'
-                                }}
-                            />
-                        </Box>
-
-                        <Box display="flex" gap="0.5rem">
-                            <Button
-                                label="Grid"
-                                variant={viewMode === 'grid' ? 'promoted' : 'normal'}
-                                size="small"
-                                onClick={() => setViewMode('grid')}
-                            />
-                            <Button
-                                label="List"
-                                variant={viewMode === 'list' ? 'promoted' : 'normal'}
-                                size="small"
-                                onClick={() => setViewMode('list')}
-                            />
-                        </Box>
+                    <Box flex="1" minWidth="300px">
+                        <Input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search properties by name or location..."
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '4px',
+                                fontSize: '0.875rem'
+                            }}
+                        />
                     </Box>
                 </Box>
 
