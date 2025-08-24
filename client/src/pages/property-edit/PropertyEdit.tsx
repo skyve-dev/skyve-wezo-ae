@@ -46,7 +46,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     const [activeTab, setActiveTab] = useState<TabId>(params.tab || 'details')
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [formData, setFormData] = useState<Partial<WizardFormData>>({})
-
+    console.log('WE HAVE FORM DATA',formData);
     // Fetch property data on mount
     useEffect(() => {
         if (params.propertyId && params.propertyId !== 'new') {
@@ -54,12 +54,12 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
         }
     }, [dispatch, params.propertyId])
 
-    // Initialize wizard data when property is loaded
+    // Initialize wizard data when property is loaded or changes
     useEffect(() => {
-        if (currentProperty && !wizardData) {
+        if (currentProperty) {
             dispatch(initializeWizardForEdit({property: currentProperty, mode: 'edit'}))
         }
-    }, [currentProperty, wizardData, dispatch])
+    }, [currentProperty, dispatch])
 
     // Sync wizard data with form data
     useEffect(() => {

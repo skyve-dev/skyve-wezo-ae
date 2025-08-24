@@ -33,7 +33,6 @@ const DialogExample: React.FC = () => {
     // Form handlers
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log('Form submitted:', formData)
         setFormDialog(false)
         setFormData({ title: '', description: '', email: '' })
     }
@@ -275,7 +274,6 @@ const DialogExample: React.FC = () => {
                         <Button 
                             label="Continue"
                             onClick={() => {
-                                console.log('Action confirmed')
                                 setAlertDialog(false)
                             }}
                             variant="promoted"
@@ -503,7 +501,6 @@ const DialogExample: React.FC = () => {
                         <Button 
                             label="Delete"
                             onClick={() => {
-                                console.log('Item deleted')
                                 setConfirmDialog(false)
                             }}
                             variant="promoted"

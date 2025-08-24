@@ -20,11 +20,7 @@ const AppContent: React.FC = () => {
 
     // Post-navigation analytics and setup
     const handleAfterNavigate: OnAfterNavigateFunction = async (target, source) => {
-        console.log('Navigation completed:', {
-            from: source.path,
-            to: target.path,
-            authenticated: isAuthenticated
-        })
+
 
         // Update document title based on route
         const titles = {
