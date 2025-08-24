@@ -491,14 +491,14 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     const currentRouteData = routes[currentRoute as keyof T]
     const CurrentComponent = currentRouteData?.component
 
-    // Get navigation items
-    const navItems = Object.entries(routes)
+    // Get navigation items for side drawer (Tab format)
+    const navTabItems: TabItem[] = Object.entries(routes)
         .filter(([_, route]) => route.showInNav !== false)
         .map(([path, route]) => ({
             id: path,
             label: route.label,
             icon: route.icon,
-            onClick: () => navigateTo(path as keyof T, {} as any)
+            content: <></> // Not needed for navigation tabs
         }))
 
     // Get header quick nav items
@@ -712,33 +712,31 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 />
                             </Box>
 
-                            {/* Navigation Items */}
-                            <Box display="flex" flexDirection="column" gap="0.5rem">
-                                {navItems.map((item) => (
-                                    <Button
-                                        key={item.id}
-                                        label={item.label}
-                                        icon={item.icon}
-                                        onClick={item.onClick}
-                                        variant="normal"
-                                        size="medium"
-                                        backgroundColor={currentRoute === item.id ? `${theme.primaryColor}15` : 'transparent'}
-                                        border="none"
-                                        color={currentRoute === item.id ? theme.primaryColor : '#374151'}
-                                        fontWeight={currentRoute === item.id ? '600' : '500'}
-                                        justifyContent="flex-start"
-                                        width="100%"
-                                        borderRadius="8px"
-                                        padding="0.75rem 1rem"
-                                        textAlign="left"
-                                        whileHover={{
-                                            backgroundColor: currentRoute === item.id
-                                                ? `${theme.primaryColor}20`
-                                                : `${theme.primaryColor}08`
-                                        }}
-                                    />
-                                ))}
-                            </Box>
+                            {/* Navigation Items - Vertical Tab */}
+                            <Tab
+                                items={navTabItems}
+                                activeTab={currentRoute}
+                                onTabChange={(tabId) => {
+                                    navigateTo(tabId as keyof T, {} as any)
+                                    setSideNavOpen(false) // Close drawer after navigation
+                                }}
+                                orientation="vertical"
+                                variant="pills"
+                                size="medium"
+                                fullWidth
+                                tabBarOnly
+                                activeColor={theme.primaryColor}
+                                inactiveColor="#4b5563"
+                                backgroundColor="transparent"
+                                iconSize="1.25rem"
+                                iconLayout="row"
+                                style={{
+                                    width: '100%'
+                                }}
+                                tabBarStyle={{
+                                    gap: '0.5rem'
+                                }}
+                            />
                         </Box>
                     </SlidingDrawer>
 
