@@ -176,32 +176,6 @@ const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData, val
                         />
                     </Box>
                 </Box>
-
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                        <FaConciergeBell style={{color: '#0369a1', fontSize: '0.875rem'}} />
-                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                            Services Tips
-                        </h4>
-                    </Box>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Breakfast service can increase bookings and revenue</li>
-                        <li>Free parking is a major advantage in UAE cities</li>
-                        <li>Multiple languages help international guests feel welcome</li>
-                        <li>Tap language tags to remove them easily</li>
-                    </ul>
-                </Box>
             </Box>
         </Box>
     )

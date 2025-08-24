@@ -149,31 +149,6 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                     </Box>
                 )}
 
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                        <FaStar style={{color: '#0369a1', fontSize: '0.875rem'}} />
-                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                            Amenity Tips
-                        </h4>
-                    </Box>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Select all amenities your property offers - it helps with bookings</li>
-                        <li>Basic amenities like Wi-Fi and AC are expected by most guests</li>
-                        <li>Unique amenities like pools or gyms can set you apart</li>
-                        <li>You can always add or remove amenities later</li>
-                    </ul>
-                </Box>
             </Box>
 
             {/* Amenity Selection Drawer */}
@@ -187,8 +162,8 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                     maxWidth: 600,
                     marginLeft: 'auto',
                     marginRight: 'auto',
-                    borderTopLeftRadius: '1rem',
-                    borderTopRightRadius: '1rem'
+                    borderTopLeftRadius: '0rem',
+                    borderTopRightRadius: '0rem'
                 }}
                 showCloseButton
             >

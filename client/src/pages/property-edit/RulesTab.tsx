@@ -192,33 +192,6 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                         />
                     </Box>
                 </Box>
-
-
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                        <FaGavel style={{color: '#0369a1', fontSize: '0.875rem'}} />
-                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                            Rules & Policies Tips
-                        </h4>
-                    </Box>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Clear rules prevent misunderstandings with guests</li>
-                        <li>Standard check-in: 3:00 PM, check-out: 11:00 AM</li>
-                        <li>Minimum nights can improve booking value</li>
-                        <li>Use mobile-friendly time pickers for accurate scheduling</li>
-                    </ul>
-                </Box>
             </Box>
         </Box>
     )

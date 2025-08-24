@@ -373,9 +373,6 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                         Unsaved changes
                     </Box>
                 )}
-
-                {/* Bottom spacing for floating button */}
-                <Box height="5rem"/>
             </Box>
         </SecuredPage>
     )

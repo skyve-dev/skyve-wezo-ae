@@ -357,29 +357,7 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                 </Box>
             )}
 
-            <Box
-                padding="1rem"
-                backgroundColor="#f0f9ff"
-                borderRadius="0.5rem"
-                border="1px solid #bae6fd"
-            >
-                <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                    📸 Photo Management Tips
-                </h4>
-                <ul style={{
-                    margin: 0,
-                    paddingLeft: '1rem',
-                    fontSize: '0.875rem',
-                    color: '#0c4a6e',
-                    lineHeight: '1.5'
-                }}>
-                    <li>Photos are automatically resized for optimal loading</li>
-                    <li>First photo automatically becomes the main photo</li>
-                    <li>You can upload multiple photos at once</li>
-                    <li>Click the trash icon to delete unwanted photos</li>
-                    <li>Minimum 5 photos recommended for better visibility</li>
-                </ul>
-            </Box>
+
             
             <style>{`
                 @keyframes spin {

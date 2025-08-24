@@ -175,30 +175,6 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, valid
                         </Box>
                     </Box>
                 </Box>
-
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                        💰 Pricing Tips
-                    </h4>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Weekend rates can be 20-30% higher than weekday rates</li>
-                        <li>Weekly discounts encourage longer bookings</li>
-                        <li>Non-refundable rates can help secure bookings</li>
-                        <li>Flexible cancellation policies attract more bookings</li>
-                        <li>Use stepper controls for precise pricing on mobile</li>
-                    </ul>
-                </Box>
             </Box>
         </Box>
     )
