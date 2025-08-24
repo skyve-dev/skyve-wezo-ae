@@ -240,7 +240,7 @@ model Property {
   cancellation Cancellation? /// Cancellation policy details
 
   // Availability
-  firstDateGuestCanCheckIn String /// Earliest possible check-in date
+  firstDateGuestCanCheckIn String? /// Earliest possible check-in date
 
   // Timestamps
   createdAt DateTime @default(now()) /// Property creation timestamp
@@ -274,8 +274,8 @@ model Address {
   id                     String    @id @default(uuid()) /// Unique identifier
   apartmentOrFloorNumber String? /// Optional apartment/floor number
   countryOrRegion        String /// Country or region name
-  city                   String /// City name
-  zipCode                Int /// Postal/ZIP code
+  city                   String? /// City name
+  zipCode                Int? /// Postal/ZIP code
   latLong                LatLong? /// Geographic coordinates
   property               Property? /// Associated property
 }

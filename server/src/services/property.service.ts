@@ -23,8 +23,8 @@ export class PropertyService {
     const addressData: Prisma.AddressCreateWithoutPropertyInput = {
       apartmentOrFloorNumber: address.apartmentOrFloorNumber,
       countryOrRegion: address.countryOrRegion,
-      city: address.city,
-      zipCode: parseInt(address.zipCode, 10),
+      city: address.city || null,
+      zipCode: address.zipCode ? parseInt(address.zipCode, 10) : null,
     };
 
     if (address.latLong) {
@@ -43,7 +43,7 @@ export class PropertyService {
       },
       aboutTheProperty: aboutTheProperty || '',
       aboutTheNeighborhood: aboutTheNeighborhood || '',
-      firstDateGuestCanCheckIn,
+      firstDateGuestCanCheckIn: firstDateGuestCanCheckIn || null,
       bookingType,
       paymentType,
       maximumGuest: layout.maximumGuest,
@@ -51,12 +51,12 @@ export class PropertyService {
       allowChildren: layout.allowChildren,
       offerCribs: layout.offerCribs,
       propertySizeSqMtr: layout.propertySizeSqMtr,
-      serveBreakfast: services.serveBreakfast,
-      parking: services.parking,
-      languages: services.languages,
-      smokingAllowed: rules.smokingAllowed,
-      partiesOrEventsAllowed: rules.partiesOrEventsAllowed,
-      petsAllowed: rules.petsAllowed,
+      serveBreakfast: services?.serveBreakfast || false,
+      parking: services?.parking || 'No',
+      languages: services?.languages || [],
+      smokingAllowed: rules?.smokingAllowed || false,
+      partiesOrEventsAllowed: rules?.partiesOrEventsAllowed || false,
+      petsAllowed: rules?.petsAllowed || 'No',
       address: {
         create: addressData,
       },
@@ -239,8 +239,8 @@ export class PropertyService {
       const addressUpdate: any = {
         apartmentOrFloorNumber: address.apartmentOrFloorNumber,
         countryOrRegion: address.countryOrRegion,
-        city: address.city,
-        zipCode: parseInt(address.zipCode, 10),
+        city: address.city || null,
+        zipCode: address.zipCode ? parseInt(address.zipCode, 10) : null,
       };
 
       // Handle latLong update

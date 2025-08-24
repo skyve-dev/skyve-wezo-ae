@@ -28,7 +28,7 @@ const returnValidationResponse = (res: Response, errors: ValidationErrors): void
 };
 
 export const validatePropertyCreation = (req: Request, res: Response, next: NextFunction): void => {
-  const { name, address, layout, bookingType, paymentType, firstDateGuestCanCheckIn } = req.body;
+  const { name, address, layout, bookingType, paymentType } = req.body;
 
   const validations = [
     () => !name ? 'name: Property name is required' : null,
@@ -36,12 +36,11 @@ export const validatePropertyCreation = (req: Request, res: Response, next: Next
     () => !layout ? 'layout: Layout information is required' : null,
     () => !bookingType ? 'bookingType: Booking type is required' : null,
     () => !paymentType ? 'paymentType: Payment type is required' : null,
-    () => !firstDateGuestCanCheckIn ? 'firstDateGuestCanCheckIn: First check-in date is required' : null,
+    // firstDateGuestCanCheckIn is now optional
     
     // Address validations
     () => address && !address.countryOrRegion ? 'countryOrRegion: Country or region is required' : null,
-    () => address && !address.city ? 'city: City is required' : null,
-    () => address && !address.zipCode ? 'zipCode: Zip code is required' : null,
+    // city and zipCode are now optional
     
     // Layout validations
     () => layout && !layout.maximumGuest ? 'maximumGuest: Maximum guest count is required' : null,

@@ -21,6 +21,7 @@ export class RatePlanService {
         description: data.description,
         cancellationPolicy: data.cancellationPolicy,
         includesBreakfast: data.includesBreakfast || false,
+        percentage: data.percentage || 0,
         restrictions: data.restrictions
           ? {
               create: data.restrictions.map((r: any) => ({
@@ -137,6 +138,7 @@ export class RatePlanService {
         description: data.description,
         cancellationPolicy: data.cancellationPolicy,
         includesBreakfast: data.includesBreakfast,
+        percentage: data.percentage,
       },
       include: {
         restrictions: true,
