@@ -430,10 +430,11 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
             size="small"
             position="absolute"
 
+            display={'flex'}
+            alignItems={'center'}
+            justifyContent={'center'}
             top="1rem"
             right="1rem"
-            width="2rem"
-            height="2rem"
             padding="0"
 
             backgroundColor="transparent"
@@ -444,7 +445,9 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
             aria-label="Close drawer"
             style={{
                 minWidth: 'unset',
-                borderRadius :'50%'
+                borderRadius :'50%',
+                height:'2rem',
+                width : '2rem'
             }}
         />
     )

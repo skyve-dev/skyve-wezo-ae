@@ -332,14 +332,52 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                     }}
                 />
 
-                {/* Mobile-Friendly Save Button - Floating for easy access */}
+                {/* Mobile-Friendly Save Button with Circulating Text */}
                 {hasUnsavedChanges && (
                     <Box
                         position="fixed"
-                        bottom="1rem"
-                        right="1rem"
+                        bottom="2rem"
+                        right="2rem"
                         zIndex={1000}
                     >
+                        {/* Circulating Text Animation */}
+                        <Box
+                            style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                width: '5rem',
+                                height: '5rem',
+                                transform: 'translate(-50%, -50%)',
+                                pointerEvents: 'none',
+                                zIndex: -1
+                            }}
+                        >
+                            <svg
+                                width="80"
+                                height="80"
+                                style={{
+                                    position: 'absolute',
+                                    top: '0',
+                                    left: '0',
+                                    animation: 'rotate 8s linear infinite'
+                                }}
+                            >
+                                <defs>
+                                    <path
+                                        id="circle"
+                                        d="M 40, 40 m -30, 0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0"
+                                    />
+                                </defs>
+                                <text fontSize="10" fontWeight="600" fill="#dc2626">
+                                    <textPath href="#circle">
+                                        UNSAVED CHANGES • UNSAVED CHANGES • 
+                                    </textPath>
+                                </text>
+                            </svg>
+                        </Box>
+                        
+                        {/* Save Button */}
                         <Button
                             label=""
                             icon={<FaSave/>}
@@ -350,29 +388,21 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                                 borderRadius: '50%',
                                 width: '3.5rem',
                                 height: '3.5rem',
-                                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
+                                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+                                position: 'relative',
+                                zIndex: 1
                             }}
                         />
                     </Box>
                 )}
-
-                {/* Unsaved changes indicator */}
-                {hasUnsavedChanges && (
-                    <Box
-                        position="fixed"
-                        bottom="5.5rem"
-                        right="1rem"
-                        backgroundColor="rgba(220, 38, 38, 0.9)"
-                        color="white"
-                        padding="0.5rem 1rem"
-                        borderRadius="1.5rem"
-                        fontSize="0.75rem"
-                        fontWeight="500"
-                        zIndex={999}
-                    >
-                        Unsaved changes
-                    </Box>
-                )}
+                
+                {/* CSS Animations */}
+                <style>{`
+                    @keyframes rotate {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}</style>
             </Box>
         </SecuredPage>
     )

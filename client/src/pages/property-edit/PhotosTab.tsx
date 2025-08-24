@@ -340,8 +340,10 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                 </Box>
             ) : (
                 <Box
+                    display={'flex'}
+                    flexDirection={'column'}
                     padding="4rem 2rem"
-                    textAlign="center"
+                    alignItems="center"
                     border="2px dashed #d1d5db"
                     borderRadius="8px"
                     color="#666"
@@ -349,7 +351,7 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                 >
                     <FaCamera size={48} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
                     <h4 style={{margin: '0 0 0.5rem 0', color: '#4b5563'}}>No photos uploaded</h4>
-                    <p style={{margin: 0}}>
+                    <p style={{margin: 0,textAlign:'center'}}>
                         {currentProperty?.propertyId 
                             ? 'Click the upload button above to add photos'
                             : 'Save the property first to enable photo upload'}
