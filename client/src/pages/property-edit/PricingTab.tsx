@@ -1,8 +1,8 @@
 import React from 'react'
-import { Box } from '@/components'
+import {Box} from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
-import { WizardFormData, ValidationErrors } from '@/types/property'
-import { Currency, CurrencyLabels } from '@/constants/propertyEnums'
+import {ValidationErrors, WizardFormData} from '@/types/property'
+import {Currency, CurrencyLabels} from '@/constants/propertyEnums'
 import MobileSelect from './MobileSelect'
 
 interface PricingTabProps {

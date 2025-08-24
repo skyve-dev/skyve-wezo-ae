@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { Box } from '@/components'
+import React, {useState} from 'react'
+import {Box} from '@/components'
 import Input from '@/components/base/Input.tsx'
 import Button from '@/components/base/Button.tsx'
-import { WizardFormData, ValidationErrors } from '@/types/property'
-import { ParkingType, ParkingTypeLabels } from '@/constants/propertyEnums'
-import { FaPlus, FaTrash, FaCoffee, FaCar, FaGlobe, FaConciergeBell } from 'react-icons/fa'
+import {ValidationErrors, WizardFormData} from '@/types/property'
+import {ParkingType, ParkingTypeLabels} from '@/constants/propertyEnums'
+import {FaCar, FaCoffee, FaConciergeBell, FaGlobe, FaPlus, FaTrash} from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface ServicesTabProps {

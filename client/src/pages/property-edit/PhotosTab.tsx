@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react'
-import { FaCamera, FaUpload, FaTrash, FaSpinner } from 'react-icons/fa'
-import { Box } from '@/components'
+import React, {useRef, useState} from 'react'
+import {FaCamera, FaSpinner, FaTrash, FaUpload} from 'react-icons/fa'
+import {Box} from '@/components'
 import Button from '@/components/base/Button'
-import { WizardFormData, Property, ValidationErrors } from '@/types/property'
-import { resolvePhotoUrl, api } from '@/utils/api'
-import { useAppDispatch } from '@/store'
-import { fetchPropertyById } from '@/store/slices/propertySlice'
+import {Property, ValidationErrors, WizardFormData} from '@/types/property'
+import {api, resolvePhotoUrl} from '@/utils/api'
+import {useAppDispatch} from '@/store'
+import {fetchPropertyById} from '@/store/slices/propertySlice'
 
 interface PhotosTabProps {
     formData: Partial<WizardFormData>

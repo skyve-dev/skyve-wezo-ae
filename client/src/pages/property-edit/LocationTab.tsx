@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { Box } from '@/components'
-import { FaMapMarkerAlt, FaGlobe, FaBuilding, FaMapPin, FaSearchLocation, FaLocationArrow } from 'react-icons/fa'
+import React, {useEffect, useState} from 'react'
+import {Box} from '@/components'
+import {FaBuilding, FaGlobe, FaLocationArrow, FaMapMarkerAlt, FaMapPin, FaSearchLocation} from 'react-icons/fa'
 import Input from '@/components/base/Input.tsx'
-import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
 import Button from '@/components/base/Button.tsx'
-import { WizardFormData, ValidationErrors } from '@/types/property'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import {ValidationErrors, WizardFormData} from '@/types/property'
+import {MapContainer, Marker, TileLayer, useMapEvents} from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -177,7 +176,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
                             value={searchAddress}
                             onChange={(e) => setSearchAddress(e.target.value)}
                             placeholder="Enter address to search on map"
-                            width="70%"
+                            fullWidth={true}
                             onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
                                     e.preventDefault()
@@ -194,7 +193,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
                             style={{ marginBottom: '0.125rem' }}
                         />
                     </Box>
-                    <Box marginTop="0.5rem">
+                    <Box marginTop="0.5rem" >
                         <Button
                             label={isDetectingLocation ? "Detecting Location..." : "Use My Current Location"}
                             icon={<FaLocationArrow />}
@@ -202,7 +201,8 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
                             variant="normal"
                             size="small"
                             disabled={isDetectingLocation}
-                            style={{ fontSize: '0.875rem' }}
+                            fullWidth={true}
+                            style={{ fontSize: '0.875rem',maxWidth:500 }}
                         />
                     </Box>
                 </Box>
@@ -298,105 +298,28 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
                     width="100%"
                 />
 
-                <NumberStepperInput
+                <Input
                     label="Zip Code"
+                    type={'number'}
+                    inputMode={'numeric'}
                     icon={FaMapPin}
-                    value={formData.address?.zipCode || 0}
-                    onChange={(value) => updateFormData({
+                    value={formData.address?.zipCode}
+                    onChange={(event) => updateFormData({
                         address: {
                             countryOrRegion: formData.address?.countryOrRegion || 'UAE',
                             city: formData.address?.city || '',
-                            zipCode: value,
+                            zipCode: parseInt(event.target.value),
                             apartmentOrFloorNumber: formData.address?.apartmentOrFloorNumber,
                             latLong: formData.address?.latLong
                         }
                     })}
                     placeholder="Enter zip code"
-                    min={0}
                     max={999999}
-                    format="integer"
                     width="100%"
                     error={!!validationErrors?.zipCode}
                     helperText={validationErrors?.zipCode}
                 />
 
-                <Box>
-                    <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                        GPS Coordinates (Optional)
-                    </label>
-                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
-                        <NumberStepperInput
-                            label="Latitude"
-                            value={formData.address?.latLong?.latitude || 0}
-                            onChange={(value) => updateFormData({
-                                address: {
-                                    countryOrRegion: formData.address?.countryOrRegion || 'UAE',
-                                    city: formData.address?.city || '',
-                                    zipCode: formData.address?.zipCode || 0,
-                                    apartmentOrFloorNumber: formData.address?.apartmentOrFloorNumber,
-                                    latLong: {
-                                        latitude: value,
-                                        longitude: formData.address?.latLong?.longitude || 0
-                                    }
-                                }
-                            })}
-                            placeholder="25.276987"
-                            min={-90}
-                            max={90}
-                            format="decimal"
-                            step={0.000001}
-                            width="100%"
-                        />
-                        <NumberStepperInput
-                            label="Longitude"
-                            value={formData.address?.latLong?.longitude || 0}
-                            onChange={(value) => updateFormData({
-                                address: {
-                                    countryOrRegion: formData.address?.countryOrRegion || 'UAE',
-                                    city: formData.address?.city || '',
-                                    zipCode: formData.address?.zipCode || 0,
-                                    apartmentOrFloorNumber: formData.address?.apartmentOrFloorNumber,
-                                    latLong: {
-                                        latitude: formData.address?.latLong?.latitude || 0,
-                                        longitude: value
-                                    }
-                                }
-                            })}
-                            placeholder="55.296249"
-                            min={-180}
-                            max={180}
-                            format="decimal"
-                            step={0.000001}
-                            width="100%"
-                        />
-                    </Box>
-                </Box>
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                        <FaMapMarkerAlt style={{color: '#0369a1', fontSize: '0.875rem'}} />
-                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                            Location Tips
-                        </h4>
-                    </Box>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Location is automatically detected when creating new properties</li>
-                        <li>Use "My Current Location" button to update to your current position</li>
-                        <li>Search for addresses to quickly locate areas on the map</li>
-                        <li>Click anywhere on the map to set precise coordinates</li>
-                        <li>GPS coordinates help guests find your property easily</li>
-                    </ul>
-                </Box>
             </Box>
             
             {/* Map Styles */}

@@ -189,22 +189,12 @@ const Tab: React.FC<TabProps> = ({
             // Calculate both X and Y positions relative to container
             const translateX = tabRect.left - containerRect.left
             const translateY = tabRect.top - containerRect.top
-            
-            if (orientation === 'horizontal') {
-                setFocusRingStyle({
-                    width: `${tabRect.width}px`,
-                    height: variant === 'underline' ? '2px' : `${tabRect.height}px`,
-                    transform: `translate(${translateX}px, ${translateY}px)`,
-                    transition: `all ${animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
-                })
-            } else {
-                setFocusRingStyle({
-                    width: variant === 'underline' ? '2px' : `${tabRect.width}px`,
-                    height: `${tabRect.height}px`,
-                    transform: `translate(${translateX}px, ${translateY}px)`,
-                    transition: `all ${animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
-                })
-            }
+            setFocusRingStyle({
+                width: `${tabRect.width}px`,
+                height: `${tabRect.height}px`,
+                transform: `translate(${translateX}px, ${translateY}px)`,
+                transition: `all ${animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`
+            })
         }
     }, [activeTab, items, orientation, variant, animationDuration])
 
@@ -294,7 +284,8 @@ const Tab: React.FC<TabProps> = ({
             case 'underline':
                 return {
                     ...baseStyles,
-                    borderBottom: isActive ? `2px solid ${activeColor}` : '2px solid transparent'
+                    // borderBottom: isActive && orientation === 'horizontal' ? `2px solid ${activeColor}` : '2px solid transparent',
+                    // borderLeft: isActive && orientation === 'vertical' ? `2px solid ${activeColor}` : '2px solid transparent'
                 }
             case 'minimal':
                 return {
@@ -330,9 +321,10 @@ const Tab: React.FC<TabProps> = ({
             case 'underline':
                 return {
                     ...baseStyles,
-                    backgroundColor: activeColor,
-                    bottom: 0,
-                    borderRadius: 0
+                    //backgroundColor: activeColor,
+                    borderRadius: 0,
+                    borderBottom : orientation === 'horizontal' ? `2px solid ${activeColor}` : `2px solid transparent`,
+                    borderLeft : orientation === 'vertical' ? `2px solid ${activeColor}` : `2px solid transparent`,
                 }
             case 'minimal':
                 return {

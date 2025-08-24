@@ -6,7 +6,7 @@ import SlidingDrawer from '@/components/base/SlidingDrawer'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import useDrawerManager from '@/hooks/useDrawerManager'
 import {AVAILABLE_AMENITIES, getAmenitiesByCategory} from '@/constants/amenities'
-import {FaCheck, FaPlus, FaTimes, FaStar, FaCheckCircle} from 'react-icons/fa'
+import {FaCheck, FaCheckCircle, FaPlus, FaStar, FaTimes} from 'react-icons/fa'
 
 interface AmenitiesTabProps {
     formData: Partial<WizardFormData>
@@ -181,7 +181,7 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                 isOpen={drawerManager.isDrawerOpen(drawerId)}
                 onClose={handleCancel}
                 side="bottom"
-                height="80vh"
+                height="100%"
                 zIndex={drawerManager.getDrawerZIndex(drawerId)}
                 contentStyles={{
                     maxWidth: 600,
@@ -230,6 +230,7 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                                 value={tempSelectedAmenities}
                                 onChange={handleAmenitySelectionChange}
                                 isMultiSelect={true}
+                                itemStyles={{paddingTop:'0.25rem',paddingBottom:'0.25rem'}}
                                 renderItem={(amenity, isSelected) => (
                                     <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
                                         <Box

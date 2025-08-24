@@ -1,9 +1,9 @@
 import React from 'react'
-import { Box } from '@/components'
+import {Box} from '@/components'
 import TimePicker from '@/components/base/TimePicker.tsx'
-import { WizardFormData, ValidationErrors } from '@/types/property'
-import { PetPolicy, PetPolicyLabels } from '@/constants/propertyEnums'
-import { FaGavel, FaClock, FaSmokingBan, FaCocktail } from 'react-icons/fa'
+import {ValidationErrors, WizardFormData} from '@/types/property'
+import {PetPolicy, PetPolicyLabels} from '@/constants/propertyEnums'
+import {FaClock, FaCocktail, FaGavel, FaSmokingBan} from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface RulesTabProps {

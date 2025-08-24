@@ -313,16 +313,16 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                         // Scroll to top when changing tabs
                         window.scrollTo({top: 0, behavior: 'smooth'})
                     }}
-                    variant="default"
+                    orientation={'horizontal'}
+                    variant="underline"
                     size="medium"
                     fullWidth={false}
                     tabBarStyle={{
                         backgroundColor: 'white',
                         borderBottom: '1px solid #e5e5e5',
+                        justifyContent : 'space-between',
                         marginBottom:'2rem',
-                        justifyContent : 'space-evenly',
                         borderRadius : 0,
-                        padding: '0 1rem'
                     }}
                     style={{
                         marginBottom: '1rem',

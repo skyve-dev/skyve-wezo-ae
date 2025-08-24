@@ -321,14 +321,18 @@ const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validati
                                                 <Box
                                                     key={bedIndex}
                                                     display="grid"
-                                                    gridTemplateColumns="2fr 1fr auto"
+                                                    gridTemplateColumns="1fr"
+                                                    gridTemplateColumnsSm="2fr 1fr auto"
                                                     gap="0.75rem"
                                                     alignItems="end"
-                                                    padding="0.75rem"
-                                                    backgroundColor="#f9fafb"
+                                                    padding="0rem"
+                                                    paddingSm="0.75rem"
+                                                    backgroundColor="transparent"
+                                                    backgroundColorSm="#f9fafb"
                                                     borderRadius="0.375rem"
                                                 >
-                                                    <MobileSelect<BedType>
+                                                    <MobileSelect
+
                                                         label="Bed Type"
                                                         value={bed.typeOfBed}
                                                         options={Object.values(BedType).map(type => ({

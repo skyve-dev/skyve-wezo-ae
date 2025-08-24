@@ -1,10 +1,10 @@
 import React from 'react'
-import { Box } from '@/components'
-import { FaFileAlt, FaHome, FaMapMarkerAlt } from 'react-icons/fa'
+import {Box} from '@/components'
+import {FaFileAlt, FaHome, FaMapMarkerAlt} from 'react-icons/fa'
 import Input from '@/components/base/Input.tsx'
 import DatePicker from '@/components/base/DatePicker.tsx'
-import { WizardFormData, ValidationErrors } from '@/types/property'
-import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '@/constants/propertyEnums'
+import {ValidationErrors, WizardFormData} from '@/types/property'
+import {BookingType, BookingTypeLabels, PaymentType, PaymentTypeLabels} from '@/constants/propertyEnums'
 import MobileSelect from './MobileSelect'
 
 interface DetailsTabProps {
@@ -80,7 +80,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     />
                 </Box>
 
-                <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
+                <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumns="1fr" gap="1rem">
                     <MobileSelect<BookingType>
                         label="Booking Type"
                         value={formData.bookingType || BookingType.BookInstantly}
@@ -113,31 +113,6 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     error={!!validationErrors?.firstDateGuestCanCheckIn}
                     helperText={validationErrors?.firstDateGuestCanCheckIn}
                 />
-                <Box
-                    padding="1rem"
-                    backgroundColor="#f0f9ff"
-                    borderRadius="0.5rem"
-                    border="1px solid #bae6fd"
-                >
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                        <FaFileAlt style={{color: '#0369a1', fontSize: '0.875rem'}} />
-                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                            Property Details Tips
-                        </h4>
-                    </Box>
-                    <ul style={{
-                        margin: 0,
-                        paddingLeft: '1rem',
-                        fontSize: '0.875rem',
-                        color: '#0c4a6e',
-                        lineHeight: '1.5'
-                    }}>
-                        <li>Write detailed descriptions to help guests understand your property</li>
-                        <li>Instant Book allows guests to book immediately without approval</li>
-                        <li>Online payment is recommended for faster booking confirmations</li>
-                        <li>Set the earliest check-in date to control availability</li>
-                    </ul>
-                </Box>
             </Box>
         </Box>
     )

@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react'
-import { Box } from '@/components'
+import {useCallback, useState} from 'react'
+import {Box} from '@/components'
 import SlidingDrawer from '@/components/base/SlidingDrawer.tsx'
 import SelectionPicker from '@/components/base/SelectionPicker.tsx'
 import Button from '@/components/base/Button.tsx'
-import { FaChevronDown, FaCheck } from 'react-icons/fa'
+import {FaCheck, FaChevronDown} from 'react-icons/fa'
 
 interface SelectOption<T = string> {
     value: T
