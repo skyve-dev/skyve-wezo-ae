@@ -50,6 +50,11 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [formData, setFormData] = useState<Partial<WizardFormData>>({})
     
+    // Scroll to top when tab changes via URL parameters
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, [activeTab])
+    
     // Fetch property data on mount
     useEffect(() => {
         if (params.propertyId && params.propertyId !== 'new') {
@@ -293,6 +298,8 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                             ...params, 
                             tab: tabId 
                         })
+                        // Scroll to top when changing tabs
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
                     }}
                     variant="pills"
                     size="medium"

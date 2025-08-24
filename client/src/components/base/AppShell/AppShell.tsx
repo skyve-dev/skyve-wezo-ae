@@ -534,6 +534,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                             color={currentRoute === item.id ? theme.primaryColor : '#6b7280'}
                                             fontWeight={currentRoute === item.id ? '600' : '400'}
                                             fontSize="0.75rem"
+
                                             flexDirection="column"
                                             gap="0.25rem"
                                             padding="0.5rem"
