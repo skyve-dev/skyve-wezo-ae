@@ -1,7 +1,5 @@
 import React from 'react'
 import {AppShell} from '@/components/base/AppShell'
-import {useAppSelector} from '@/store'
-import {selectIsAuthenticated} from '@/store/slices/authSlice'
 import {FaHome} from 'react-icons/fa'
 import type {OnAfterNavigateFunction, OnBeforeNavigateFunction} from '@/components/base/AppShell/types'
 import {routes} from "@/Routes.tsx";
@@ -9,16 +7,14 @@ import {routes} from "@/Routes.tsx";
 
 // Main AppContent Component
 const AppContent: React.FC = () => {
-    const isAuthenticated = useAppSelector(selectIsAuthenticated)
-
     // Authentication middleware for navigation control
-    const handleBeforeNavigate: OnBeforeNavigateFunction<typeof routes> = async (next, target, source) => {
+    const handleBeforeNavigate: OnBeforeNavigateFunction<typeof routes> = async (next) => {
         // Allow all other navigation
         next()
     }
 
     // Post-navigation analytics and setup
-    const handleAfterNavigate: OnAfterNavigateFunction = async (target, source) => {
+    const handleAfterNavigate: OnAfterNavigateFunction = async (target) => {
 
 
         // Update document title based on route

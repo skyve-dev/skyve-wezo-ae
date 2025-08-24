@@ -13,8 +13,9 @@ import {
     updateProperty,
     updateWizardData,
     clearValidationErrors,
+    setCurrentProperty,
 } from '@/store/slices/propertySlice'
-import {WizardFormData, ValidationErrors} from '@/types/property'
+import {WizardFormData} from '@/types/property'
 
 // Import tab components
 import DetailsTab from './DetailsTab'
@@ -53,6 +54,9 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     useEffect(() => {
         if (params.propertyId && params.propertyId !== 'new') {
             dispatch(fetchPropertyById(params.propertyId))
+        } else if (params.propertyId === 'new') {
+            // Clear currentProperty when creating a new property
+            dispatch(setCurrentProperty(null))
         }
     }, [dispatch, params.propertyId])
 

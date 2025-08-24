@@ -1,17 +1,17 @@
 import React from 'react'
 import { Box } from '@/components'
-import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
 import TimePicker from '@/components/base/TimePicker.tsx'
-import { WizardFormData } from '@/types/property'
+import { WizardFormData, ValidationErrors } from '@/types/property'
 import { PetPolicy, PetPolicyLabels } from '@/constants/propertyEnums'
 import MobileSelect from './MobileSelect'
 
 interface RulesTabProps {
     formData: Partial<WizardFormData>
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
-const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData }) => {
+const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
     const updateCheckInCheckout = (field: string, value: string) => {
         updateFormData({
             checkInCheckout: {

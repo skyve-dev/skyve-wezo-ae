@@ -3,17 +3,18 @@ import { Box } from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
 import Input from '@/components/base/Input.tsx'
 import Button from '@/components/base/Button.tsx'
-import { WizardFormData, Room, Bed } from '@/types/property'
+import { WizardFormData, Room, Bed, ValidationErrors } from '@/types/property'
 import { BedType, BedTypeLabels } from '@/constants/propertyEnums'
-import { FaPlus, FaTrash, FaBed, FaUsers, FaBath, FaChild, FaRulerCombined } from 'react-icons/fa'
+import { FaPlus, FaTrash, FaBed, FaUsers, FaBath } from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface LayoutTabProps {
     formData: Partial<WizardFormData>
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
-const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData }) => {
+const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
     const [showAddRoom, setShowAddRoom] = useState(false)
     const [newRoomName, setNewRoomName] = useState('')
     const addRoom = () => {

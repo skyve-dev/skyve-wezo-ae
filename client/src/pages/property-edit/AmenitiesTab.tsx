@@ -14,7 +14,7 @@ interface AmenitiesTabProps {
     validationErrors?: ValidationErrors | null
 }
 
-const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, validationErrors }) => {
+const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
     const drawerManager = useDrawerManager()
     const drawerId = useRef(`amenities-drawer-${Math.random().toString(36).substr(2, 9)}`).current
     const [selectedCategory, setSelectedCategory] = useState<string>('')

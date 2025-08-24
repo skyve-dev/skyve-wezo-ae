@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Box } from '@/components'
 import Input from '@/components/base/Input.tsx'
 import Button from '@/components/base/Button.tsx'
-import { WizardFormData } from '@/types/property'
+import { WizardFormData, ValidationErrors } from '@/types/property'
 import { ParkingType, ParkingTypeLabels } from '@/constants/propertyEnums'
 import { FaPlus, FaTrash, FaCoffee, FaCar, FaGlobe, FaConciergeBell } from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
@@ -10,9 +10,10 @@ import MobileSelect from './MobileSelect'
 interface ServicesTabProps {
     formData: Partial<WizardFormData>
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
-const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData }) => {
+const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
     const [newLanguage, setNewLanguage] = useState('')
 
     const addLanguage = () => {

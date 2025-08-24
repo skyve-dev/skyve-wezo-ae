@@ -2,15 +2,16 @@ import React, { useState, useRef } from 'react'
 import { FaCamera, FaUpload, FaTrash, FaSpinner } from 'react-icons/fa'
 import { Box } from '@/components'
 import Button from '@/components/base/Button'
-import { WizardFormData, Property } from '@/types/property'
+import { WizardFormData, Property, ValidationErrors } from '@/types/property'
 import { resolvePhotoUrl, api } from '@/utils/api'
 import { useAppDispatch } from '@/store'
 import { fetchPropertyById } from '@/store/slices/propertySlice'
 
 interface PhotosTabProps {
     formData: Partial<WizardFormData>
-    currentProperty?: Property
+    currentProperty?: Property | null
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
 const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
@@ -20,6 +21,13 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
     const [uploadError, setUploadError] = useState<string>('')
     const [uploadSuccess, setUploadSuccess] = useState<string>('')
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Clear upload messages when currentProperty changes (e.g., switching from edit to create)
+    React.useEffect(() => {
+        setUploadError('')
+        setUploadSuccess('')
+        setIsDeletingPhoto(null)
+    }, [currentProperty?.propertyId])
 
     // Image resizing function - same as PhotoManagement
     const resizeImage = (file: File): Promise<Blob> => {
@@ -167,9 +175,12 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
 
     return (
         <Box>
-            <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                Property Photos
-            </h3>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+                <FaCamera style={{color: '#374151', fontSize: '1.25rem'}} />
+                <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                    Property Photos
+                </h3>
+            </Box>
             <p style={{color: '#666', marginBottom: '2rem'}}>
                 Upload high-quality photos to showcase your property. Minimum 5 photos recommended.
             </p>
@@ -202,28 +213,32 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
             )}
 
             {/* Upload Section */}
-            {currentProperty?.propertyId && (
-                <Box marginBottom="2rem">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                    />
-                    <Button
-                        label={isUploading ? "Uploading..." : "Upload Photos"}
-                        icon={isUploading ? <FaSpinner className="spin" /> : <FaUpload />}
-                        onClick={triggerFileUpload}
-                        variant="promoted"
-                        disabled={isUploading}
-                        fullWidth
-                    />
-                </Box>
-            )}
+            <Box marginBottom="2rem">
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                />
+                <Button
+                    label={
+                        !currentProperty?.propertyId 
+                            ? "Save Property First" 
+                            : isUploading 
+                                ? "Uploading..." 
+                                : "Upload Photos"
+                    }
+                    icon={isUploading ? <FaSpinner className="spin" /> : <FaUpload />}
+                    onClick={currentProperty?.propertyId ? triggerFileUpload : undefined}
+                    variant={currentProperty?.propertyId ? "promoted" : "normal"}
+                    disabled={!currentProperty?.propertyId || isUploading}
+                    fullWidth
+                />
+            </Box>
 
-            {currentProperty?.photos && currentProperty.photos.length > 0 ? (
+            {currentProperty?.propertyId && currentProperty?.photos && currentProperty.photos.length > 0 ? (
                 <Box>
                     <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
                         <label style={{fontWeight: '500'}}>

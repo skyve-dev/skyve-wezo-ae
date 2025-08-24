@@ -41,8 +41,8 @@ const PropertiesList: React.FC = () => {
         if (!searchTerm) return properties
 
         return properties.filter(property =>
-            property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            property.address.city.toLowerCase().includes(searchTerm.toLowerCase())
+            property.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            property.address?.city?.toLowerCase().includes(searchTerm.toLowerCase())
         )
     }, [properties, searchTerm])
 
@@ -130,7 +130,7 @@ const PropertiesList: React.FC = () => {
 
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem" color="#666">
                     <FaMapMarkerAlt/>
-                    <span>{property.address.city}, {property.address.countryOrRegion}</span>
+                    <span>{property.address?.city ? `${property.address.city}, ` : ''}{property.address?.countryOrRegion || 'Location not set'}</span>
                 </Box>
 
                 <Box display="flex" gap="1rem" marginBottom="1rem" color="#666" fontSize="0.875rem">

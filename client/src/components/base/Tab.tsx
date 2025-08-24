@@ -420,8 +420,6 @@ const Tab: React.FC<TabProps> = ({
                 id={`tabpanel-${activeTab}`}
                 role="tabpanel"
                 aria-labelledby={`tab-${activeTab}`}
-                marginTop={orientation === 'horizontal' ? '1rem' : '0'}
-                marginLeft={orientation === 'vertical' ? '1rem' : '0'}
             >
                 {activeItem?.content}
             </Box>

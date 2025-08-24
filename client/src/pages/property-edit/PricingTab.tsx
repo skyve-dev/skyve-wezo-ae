@@ -1,16 +1,17 @@
 import React from 'react'
 import { Box } from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
-import { WizardFormData } from '@/types/property'
+import { WizardFormData, ValidationErrors } from '@/types/property'
 import { Currency, CurrencyLabels } from '@/constants/propertyEnums'
 import MobileSelect from './MobileSelect'
 
 interface PricingTabProps {
     formData: Partial<WizardFormData>
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
-const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData }) => {
+const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
     const updatePricing = (field: string, value: any) => {
         updateFormData({
             pricing: {
