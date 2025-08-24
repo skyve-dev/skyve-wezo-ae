@@ -1,4 +1,4 @@
-import React, {ReactNode, useCallback, useEffect, useState} from 'react'
+import React, {ReactNode, useCallback, useEffect, useState, useRef} from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
@@ -321,7 +321,13 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     const [isMobile, setIsMobile] = useState(false)
     const [, setIsTablet] = useState(false)
 
-    // Refs removed - splash screen functionality eliminated
+    // Scroll-based header/footer visibility
+    const [isHeaderVisible, setHeaderVisible] = useState(true)
+    const [isFooterVisible, setFooterVisible] = useState(true)
+    const lastScrollY = useRef(0)
+    const scrollAccumulator = useRef(0)
+    const headerRef = useRef<HTMLDivElement>(null)
+    const footerRef = useRef<HTMLDivElement>(null)
 
     // Configuration with defaults
     const {
@@ -357,6 +363,53 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         window.addEventListener('resize', handleResize)
         return () => window.removeEventListener('resize', handleResize)
     }, [breakpoints])
+
+    // Handle scroll-based header/footer visibility
+    useEffect(() => {
+        const SCROLL_THRESHOLD = 50 // Minimum scroll distance to trigger hide/show
+        const ACCUMULATOR_THRESHOLD = 10 // Accumulated scroll for gentle movements
+        
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY
+            const scrollDelta = currentScrollY - lastScrollY.current
+            
+            // Accumulate small scroll movements
+            scrollAccumulator.current += scrollDelta
+            
+            // Only act if accumulated scroll exceeds threshold or single scroll is large
+            if (Math.abs(scrollAccumulator.current) > ACCUMULATOR_THRESHOLD || Math.abs(scrollDelta) > SCROLL_THRESHOLD) {
+                // Scrolling down - hide header and footer
+                if (scrollAccumulator.current > 0 && currentScrollY > SCROLL_THRESHOLD) {
+                    setHeaderVisible(false)
+                    setFooterVisible(false)
+                }
+                // Scrolling up - show header and footer
+                else if (scrollAccumulator.current < 0) {
+                    setHeaderVisible(true)
+                    setFooterVisible(true)
+                }
+                
+                // Reset accumulator after action
+                scrollAccumulator.current = 0
+            }
+            
+            // Always show header/footer when at the top
+            if (currentScrollY <= 10) {
+                setHeaderVisible(true)
+                setFooterVisible(true)
+                scrollAccumulator.current = 0
+            }
+            
+            lastScrollY.current = currentScrollY
+        }
+
+        // Add scroll listener with passive flag for better performance
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [])
 
     // Splash screen removed - no effect needed
 
@@ -418,12 +471,19 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                     <>
                         {/* Header */}
                         <Box
-                            position="sticky"
+                            ref={headerRef}
+                            position="fixed"
                             top="0"
+                            left="0"
+                            right="0"
                             zIndex="100"
                             backgroundColor={theme.navBackgroundColor}
                             borderBottom="1px solid #e5e7eb"
                             boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
+                            style={{
+                                transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+                                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
                         >
                             <Box
                                 display="flex"
@@ -464,6 +524,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                             activeTab={currentRoute}
                                             onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
                                             variant="minimal"
+                                            tabBarOnly={true}
                                             size="small"
                                             fullWidth
                                             centered
@@ -494,8 +555,9 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                         {/* Main Content Area */}
                         <Box
                             flex="1"
+                            paddingTop="4rem" // Account for fixed header
                             paddingBottom={isMobile && footer.showOnMobile ? "4rem" : "0"}
-                            minHeight="calc(100vh - 4rem)"
+                            minHeight="100%"
                         >
                             {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
                         </Box>
@@ -503,7 +565,8 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                         {/* Footer (Mobile Only) */}
                         {isMobile && footer.showOnMobile && footerNavItems.length > 0 && (
                             <Box
-                                position="sticky"
+                                ref={footerRef}
+                                position="fixed"
                                 bottom="0"
                                 left="0"
                                 right="0"
@@ -511,6 +574,10 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 borderTop="1px solid #e5e7eb"
                                 zIndex="90"
                                 boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
+                                style={{
+                                    transform: isFooterVisible ? 'translateY(0)' : 'translateY(100%)',
+                                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                                }}
                             >
                                 <Tab
                                     items={footerNavItems}

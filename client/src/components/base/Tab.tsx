@@ -118,6 +118,11 @@ export interface TabProps {
      * Custom icon size (takes priority over size config)
      */
     iconSize?: string
+    
+    /**
+     * Custom styles for the tab bar navigation container
+     */
+    tabBarStyle?: React.CSSProperties
 }
 
 const Tab: React.FC<TabProps> = ({
@@ -137,7 +142,8 @@ const Tab: React.FC<TabProps> = ({
     inactiveColor = '#6b7280',
     tabBarOnly = false,
     iconLayout = 'row',
-    iconSize
+    iconSize,
+    tabBarStyle
 }) => {
     const tabsRef = useRef<(HTMLButtonElement | null)[]>([])
     const containerRef = useRef<HTMLDivElement>(null)
@@ -357,6 +363,7 @@ const Tab: React.FC<TabProps> = ({
                 width={fullWidth ? '100%' : 'auto'}
                 role="tablist"
                 aria-orientation={orientation}
+                style={tabBarStyle}
             >
                 {/* Animated Focus Ring */}
                 {variant !== 'pills' && (
