@@ -21,28 +21,23 @@ export enum RoomSpaceType {
 export enum ParkingType {
   YesFree = 'YesFree',
   YesPaid = 'YesPaid',
-  No = 'No',
-  Free = 'YesFree',
-  Paid = 'YesPaid'
+  No = 'No'
 }
 
 export enum PetPolicy {
   Yes = 'Yes',
   No = 'No',
-  UponRequest = 'UponRequest',
-  YesWithFee = 'UponRequest'
+  UponRequest = 'UponRequest'
 }
 
 export enum BookingType {
   BookInstantly = 'BookInstantly',
-  NeedToRequestBook = 'NeedToRequestBook',
-  CanBookInstantly = 'BookInstantly'
+  NeedToRequestBook = 'NeedToRequestBook'
 }
 
 export enum PaymentType {
   Online = 'Online',
-  ByCreditCardAtProperty = 'ByCreditCardAtProperty',
-  OnArrival = 'ByCreditCardAtProperty'
+  ByCreditCardAtProperty = 'ByCreditCardAtProperty'
 }
 
 export enum Currency {

@@ -332,6 +332,7 @@ const Tab: React.FC<TabProps> = ({
                 flexDirection={orientation === 'vertical' ? 'column' : 'row'}
                 position="relative"
                 backgroundColor={backgroundColor}
+                flexWrap="wrap"
                 borderRadius="8px"
                 //padding={variant === 'underline' ? '0' : '0.25rem'}
                 width={fullWidth ? '100%' : 'auto'}

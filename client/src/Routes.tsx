@@ -17,7 +17,7 @@ import {
 // Import page components
 import Dashboard from "@/pages/Dashboard";
 import PropertiesList from "@/pages/PropertiesList";
-import PropertyEdit from "@/pages/PropertyEdit";
+import PropertyEdit from "@/pages/property-edit/PropertyEdit";
 import Availability from "@/pages/Availability";
 import Reservations from "@/pages/Reservations";
 import Inbox from "@/pages/Inbox";
