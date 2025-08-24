@@ -1,55 +1,40 @@
 import { Request, Response, NextFunction } from 'express';
+import { validateAndCollectErrors, returnValidationResponse, ValidationErrors } from './validation-helpers';
+
+const validNotificationTypes = [
+  'ReservationConfirmed',
+  'ReservationCancelled',
+  'ReservationModified',
+  'PaymentReceived',
+  'ReviewReceived',
+  'PropertyApproved',
+  'PropertyRejected',
+  'SystemMaintenance',
+  'SecurityAlert',
+  'PromotionalOffer',
+  'PolicyUpdate',
+  'Other',
+];
 
 export const validateCreateNotification = (req: Request, res: Response, next: NextFunction): void => {
   const { userId, type, title, message } = req.body;
 
-  if (!userId) {
-    res.status(400).json({ error: 'userId is required' });
-    return;
-  }
-
-  if (!type) {
-    res.status(400).json({ error: 'type is required' });
-    return;
-  }
-
-  const validTypes = [
-    'ReservationConfirmed',
-    'ReservationCancelled',
-    'ReservationModified',
-    'PaymentReceived',
-    'ReviewReceived',
-    'PropertyApproved',
-    'PropertyRejected',
-    'SystemMaintenance',
-    'SecurityAlert',
-    'PromotionalOffer',
-    'PolicyUpdate',
-    'Other',
+  const validations = [
+    () => !userId ? 'userId: User ID is required' : null,
+    () => !type ? 'type: Notification type is required' : null,
+    () => type && !validNotificationTypes.includes(type) ? `type: Must be one of: ${validNotificationTypes.join(', ')}` : null,
+    () => !title ? 'title: Title is required' : null,
+    () => title && title.trim().length === 0 ? 'title: Title cannot be empty' : null,
+    () => title && title.length > 100 ? 'title: Title cannot exceed 100 characters' : null,
+    () => !message ? 'message: Message is required' : null,
+    () => message && message.trim().length === 0 ? 'message: Message cannot be empty' : null,
+    () => message && message.length > 500 ? 'message: Message cannot exceed 500 characters' : null,
   ];
 
-  if (!validTypes.includes(type)) {
-    res.status(400).json({ error: `type must be one of: ${validTypes.join(', ')}` });
-    return;
-  }
-
-  if (!title || title.trim().length === 0) {
-    res.status(400).json({ error: 'title is required and cannot be empty' });
-    return;
-  }
-
-  if (!message || message.trim().length === 0) {
-    res.status(400).json({ error: 'message is required and cannot be empty' });
-    return;
-  }
-
-  if (title.length > 100) {
-    res.status(400).json({ error: 'title cannot exceed 100 characters' });
-    return;
-  }
-
-  if (message.length > 500) {
-    res.status(400).json({ error: 'message cannot exceed 500 characters' });
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
 
@@ -58,32 +43,28 @@ export const validateCreateNotification = (req: Request, res: Response, next: Ne
 
 export const validateMarkAsRead = (req: Request, res: Response, next: NextFunction): void => {
   const { notificationIds } = req.body;
+  const errors: ValidationErrors = {};
 
   if (!notificationIds) {
-    res.status(400).json({ error: 'notificationIds is required' });
-    return;
+    errors['notificationIds'] = 'Notification IDs are required';
+  } else if (!Array.isArray(notificationIds)) {
+    errors['notificationIds'] = 'Must be an array';
+  } else if (notificationIds.length === 0) {
+    errors['notificationIds'] = 'Cannot be empty';
+  } else if (notificationIds.length > 100) {
+    errors['notificationIds'] = 'Cannot mark more than 100 notifications at once';
+  } else {
+    // Check individual notification IDs
+    notificationIds.forEach((id, index) => {
+      if (typeof id !== 'string' || id.trim().length === 0) {
+        errors[`notificationIds[${index}]`] = 'Must be a non-empty string';
+      }
+    });
   }
-
-  if (!Array.isArray(notificationIds)) {
-    res.status(400).json({ error: 'notificationIds must be an array' });
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
-  }
-
-  if (notificationIds.length === 0) {
-    res.status(400).json({ error: 'notificationIds cannot be empty' });
-    return;
-  }
-
-  if (notificationIds.length > 100) {
-    res.status(400).json({ error: 'Cannot mark more than 100 notifications at once' });
-    return;
-  }
-
-  for (const id of notificationIds) {
-    if (typeof id !== 'string' || id.trim().length === 0) {
-      res.status(400).json({ error: 'All notification IDs must be non-empty strings' });
-      return;
-    }
   }
 
   next();
@@ -91,43 +72,31 @@ export const validateMarkAsRead = (req: Request, res: Response, next: NextFuncti
 
 export const validateUpdatePreferences = (req: Request, res: Response, next: NextFunction): void => {
   const { types, emailEnabled, pushEnabled } = req.body;
+  const errors: ValidationErrors = {};
 
   if (types !== undefined) {
     if (!Array.isArray(types)) {
-      res.status(400).json({ error: 'types must be an array' });
-      return;
-    }
-
-    const validTypes = [
-      'ReservationConfirmed',
-      'ReservationCancelled',
-      'ReservationModified',
-      'PaymentReceived',
-      'ReviewReceived',
-      'PropertyApproved',
-      'PropertyRejected',
-      'SystemMaintenance',
-      'SecurityAlert',
-      'PromotionalOffer',
-      'PolicyUpdate',
-      'Other',
-    ];
-
-    for (const type of types) {
-      if (!validTypes.includes(type)) {
-        res.status(400).json({ error: `Invalid notification type: ${type}` });
-        return;
-      }
+      errors['types'] = 'Must be an array';
+    } else {
+      // Check each type
+      types.forEach((type, index) => {
+        if (!validNotificationTypes.includes(type)) {
+          errors[`types[${index}]`] = `Invalid notification type: ${type}`;
+        }
+      });
     }
   }
 
   if (emailEnabled !== undefined && typeof emailEnabled !== 'boolean') {
-    res.status(400).json({ error: 'emailEnabled must be a boolean' });
-    return;
+    errors['emailEnabled'] = 'Must be true or false';
   }
 
   if (pushEnabled !== undefined && typeof pushEnabled !== 'boolean') {
-    res.status(400).json({ error: 'pushEnabled must be a boolean' });
+    errors['pushEnabled'] = 'Must be true or false';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
 

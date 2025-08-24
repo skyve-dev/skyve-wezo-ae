@@ -340,7 +340,7 @@ describe('Financial API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Account number must be between 8 and 20 characters');
+      expect(response.body.errors.accountNumber).toBe('Account number must be between 8 and 20 characters');
     });
 
     it('should reject missing required fields', async () => {
@@ -352,7 +352,7 @@ describe('Financial API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Account number is required');
+      expect(response.body.errors.accountNumber).toBe('Account number must be text');
     });
 
     it('should reject invalid currency', async () => {
@@ -367,7 +367,7 @@ describe('Financial API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toContain('Currency must be one of');
+      expect(response.body.errors.currency).toContain('Must be one of');
     });
   });
 

@@ -159,7 +159,7 @@ describe('Availability API Tests', () => {
         .send({ isAvailable: false })
         .expect(400);
 
-      expect(response.body.error).toBe('Invalid date format');
+      expect(response.body.errors.date).toBe('Invalid date format');
     });
 
     it('should reject invalid isAvailable value', async () => {
@@ -169,7 +169,7 @@ describe('Availability API Tests', () => {
         .send({ isAvailable: 'not-boolean' })
         .expect(400);
 
-      expect(response.body.error).toBe('isAvailable must be a boolean');
+      expect(response.body.errors.isAvailable).toBe('isAvailable must be a boolean');
     });
   });
 
@@ -201,7 +201,7 @@ describe('Availability API Tests', () => {
         .send({ updates: [] })
         .expect(400);
 
-      expect(response.body.error).toBe('Updates array cannot be empty');
+      expect(response.body.errors.updates).toBe('Updates array cannot be empty');
     });
 
     it('should reject non-array updates', async () => {
@@ -211,7 +211,7 @@ describe('Availability API Tests', () => {
         .send({ updates: 'not-array' })
         .expect(400);
 
-      expect(response.body.error).toBe('Updates must be an array');
+      expect(response.body.errors.updates).toBe('Updates must be an array');
     });
 
     it('should reject too many updates', async () => {
@@ -226,7 +226,7 @@ describe('Availability API Tests', () => {
         .send({ updates })
         .expect(400);
 
-      expect(response.body.error).toBe('Cannot update more than 365 days at once');
+      expect(response.body.errors.updates).toBe('Cannot update more than 365 days at once');
     });
   });
 });

@@ -1,181 +1,226 @@
 import { Request, Response, NextFunction } from 'express';
-import { body, query, param, validationResult } from 'express-validator';
+import { validateAndCollectErrors, returnValidationResponse } from './validation-helpers';
 
-export const validateCreateTicket = [
-  body('subject')
-    .notEmpty()
-    .withMessage('Subject is required')
-    .isLength({ min: 5, max: 200 })
-    .withMessage('Subject must be between 5 and 200 characters'),
-  body('description')
-    .notEmpty()
-    .withMessage('Description is required')
-    .isLength({ min: 10, max: 2000 })
-    .withMessage('Description must be between 10 and 2000 characters'),
-  body('category')
-    .notEmpty()
-    .withMessage('Category is required')
-    .isIn(['Technical', 'Billing', 'General', 'PropertyManagement', 'BookingIssues'])
-    .withMessage('Invalid category'),
-  body('priority')
-    .optional()
-    .isIn(['Low', 'Medium', 'High', 'Urgent'])
-    .withMessage('Invalid priority'),
-  body('attachments')
-    .optional()
-    .isArray()
-    .withMessage('Attachments must be an array'),
-  body('metadata')
-    .optional()
-    .isObject()
-    .withMessage('Metadata must be an object'),
-  handleValidationErrors,
-];
+const validCategories = ['Technical', 'Billing', 'General', 'PropertyManagement', 'BookingIssues'];
+const validPriorities = ['Low', 'Medium', 'High', 'Urgent'];
+const validStatuses = ['Open', 'InProgress', 'Resolved', 'Closed'];
 
-export const validateTicketFilters = [
-  query('status')
-    .optional()
-    .isIn(['Open', 'InProgress', 'Resolved', 'Closed'])
-    .withMessage('Invalid status filter'),
-  query('category')
-    .optional()
-    .isIn(['Technical', 'Billing', 'General', 'PropertyManagement', 'BookingIssues'])
-    .withMessage('Invalid category filter'),
-  query('priority')
-    .optional()
-    .isIn(['Low', 'Medium', 'High', 'Urgent'])
-    .withMessage('Invalid priority filter'),
-  query('page')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('Page must be a positive integer'),
-  query('limit')
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage('Limit must be between 1 and 100'),
-  handleValidationErrors,
-];
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
 
-export const validateAddMessage = [
-  param('ticketId')
-    .notEmpty()
-    .withMessage('Ticket ID is required')
-    .isUUID()
-    .withMessage('Invalid ticket ID format'),
-  body('content')
-    .notEmpty()
-    .withMessage('Message content is required')
-    .isLength({ min: 1, max: 2000 })
-    .withMessage('Message content must be between 1 and 2000 characters'),
-  body('attachments')
-    .optional()
-    .isArray()
-    .withMessage('Attachments must be an array'),
-  handleValidationErrors,
-];
+export const validateCreateTicket = (req: Request, res: Response, next: NextFunction): void => {
+  const { subject, description, category, priority, attachments, metadata } = req.body;
 
-export const validateUpdateTicket = [
-  param('ticketId')
-    .notEmpty()
-    .withMessage('Ticket ID is required')
-    .isUUID()
-    .withMessage('Invalid ticket ID format'),
-  body('subject')
-    .optional()
-    .isLength({ min: 5, max: 200 })
-    .withMessage('Subject must be between 5 and 200 characters'),
-  body('priority')
-    .optional()
-    .isIn(['Low', 'Medium', 'High', 'Urgent'])
-    .withMessage('Invalid priority'),
-  body('status')
-    .optional()
-    .isIn(['Open', 'InProgress', 'Resolved', 'Closed'])
-    .withMessage('Invalid status'),
-  handleValidationErrors,
-];
+  const validations = [
+    () => !subject ? 'subject: Subject is required' : null,
+    () => subject && (subject.length < 5 || subject.length > 200) ? 'subject: Subject must be between 5 and 200 characters' : null,
+    () => !description ? 'description: Description is required' : null,
+    () => description && (description.length < 10 || description.length > 2000) ? 'description: Description must be between 10 and 2000 characters' : null,
+    () => !category ? 'category: Category is required' : null,
+    () => category && !validCategories.includes(category) ? `category: Must be one of: ${validCategories.join(', ')}` : null,
+    () => priority && !validPriorities.includes(priority) ? `priority: Must be one of: ${validPriorities.join(', ')}` : null,
+    () => attachments && !Array.isArray(attachments) ? 'attachments: Must be an array' : null,
+    () => metadata && typeof metadata !== 'object' ? 'metadata: Must be an object' : null,
+  ];
 
-export const validateCloseTicket = [
-  param('ticketId')
-    .notEmpty()
-    .withMessage('Ticket ID is required')
-    .isUUID()
-    .withMessage('Invalid ticket ID format'),
-  body('resolution')
-    .optional()
-    .isLength({ min: 10, max: 1000 })
-    .withMessage('Resolution must be between 10 and 1000 characters'),
-  handleValidationErrors,
-];
-
-export const validateSatisfactionRating = [
-  param('ticketId')
-    .notEmpty()
-    .withMessage('Ticket ID is required')
-    .isUUID()
-    .withMessage('Invalid ticket ID format'),
-  body('satisfaction')
-    .notEmpty()
-    .withMessage('Satisfaction rating is required')
-    .isInt({ min: 1, max: 5 })
-    .withMessage('Satisfaction rating must be between 1 and 5'),
-  handleValidationErrors,
-];
-
-export const validateFAQFilters = [
-  query('category')
-    .optional()
-    .isString()
-    .withMessage('Category must be a string'),
-  query('search')
-    .optional()
-    .isString()
-    .withMessage('Search term must be a string')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Search term must be between 2 and 100 characters'),
-  handleValidationErrors,
-];
-
-export const validateGuideFilters = [
-  query('category')
-    .optional()
-    .isString()
-    .withMessage('Category must be a string'),
-  query('search')
-    .optional()
-    .isString()
-    .withMessage('Search term must be a string')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Search term must be between 2 and 100 characters'),
-  handleValidationErrors,
-];
-
-export const validateGuideId = [
-  param('guideId')
-    .notEmpty()
-    .withMessage('Guide ID is required')
-    .isUUID()
-    .withMessage('Invalid guide ID format'),
-  handleValidationErrors,
-];
-
-export const validateFAQId = [
-  param('faqId')
-    .notEmpty()
-    .withMessage('FAQ ID is required')
-    .isUUID()
-    .withMessage('Invalid FAQ ID format'),
-  handleValidationErrors,
-];
-
-function handleValidationErrors(req: Request, res: Response, next: NextFunction): void {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({
-      error: 'Validation failed',
-      details: errors.array(),
-    });
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
+
   next();
-}
+};
+
+export const validateTicketFilters = (req: Request, res: Response, next: NextFunction): void => {
+  const { status, category, priority, page, limit } = req.query;
+
+  const validations = [
+    () => status && !validStatuses.includes(status as string) ? 'status: Invalid status filter' : null,
+    () => category && !validCategories.includes(category as string) ? 'category: Invalid category filter' : null,
+    () => priority && !validPriorities.includes(priority as string) ? 'priority: Invalid priority filter' : null,
+    () => page && (isNaN(Number(page)) || Number(page) < 1) ? 'page: Page must be a positive integer' : null,
+    () => limit && (isNaN(Number(limit)) || Number(limit) < 1 || Number(limit) > 100) ? 'limit: Limit must be between 1 and 100' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateAddMessage = (req: Request, res: Response, next: NextFunction): void => {
+  const { ticketId } = req.params;
+  const { content, attachments } = req.body;
+
+  const validations = [
+    () => !ticketId ? 'ticketId: Ticket ID is required' : null,
+    () => ticketId && !isValidUUID(ticketId) ? 'ticketId: Invalid ticket ID format' : null,
+    () => !content ? 'content: Message content is required' : null,
+    () => content && (content.length < 1 || content.length > 2000) ? 'content: Message content must be between 1 and 2000 characters' : null,
+    () => attachments && !Array.isArray(attachments) ? 'attachments: Must be an array' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateUpdateTicket = (req: Request, res: Response, next: NextFunction): void => {
+  const { ticketId } = req.params;
+  const { subject, priority, status } = req.body;
+
+  const validations = [
+    () => !ticketId ? 'ticketId: Ticket ID is required' : null,
+    () => ticketId && !isValidUUID(ticketId) ? 'ticketId: Invalid ticket ID format' : null,
+    () => subject && (subject.length < 5 || subject.length > 200) ? 'subject: Subject must be between 5 and 200 characters' : null,
+    () => priority && !validPriorities.includes(priority) ? `priority: Must be one of: ${validPriorities.join(', ')}` : null,
+    () => status && !validStatuses.includes(status) ? `status: Must be one of: ${validStatuses.join(', ')}` : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateCloseTicket = (req: Request, res: Response, next: NextFunction): void => {
+  const { ticketId } = req.params;
+  const { resolution } = req.body;
+
+  const validations = [
+    () => !ticketId ? 'ticketId: Ticket ID is required' : null,
+    () => ticketId && !isValidUUID(ticketId) ? 'ticketId: Invalid ticket ID format' : null,
+    () => resolution && (resolution.length < 10 || resolution.length > 1000) ? 'resolution: Resolution must be between 10 and 1000 characters' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateSatisfactionRating = (req: Request, res: Response, next: NextFunction): void => {
+  const { ticketId } = req.params;
+  const { satisfaction } = req.body;
+
+  const validations = [
+    () => !ticketId ? 'ticketId: Ticket ID is required' : null,
+    () => ticketId && !isValidUUID(ticketId) ? 'ticketId: Invalid ticket ID format' : null,
+    () => !satisfaction ? 'satisfaction: Satisfaction rating is required' : null,
+    () => satisfaction && (typeof satisfaction !== 'number' || satisfaction < 1 || satisfaction > 5) ? 'satisfaction: Satisfaction rating must be between 1 and 5' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateFAQFilters = (req: Request, res: Response, next: NextFunction): void => {
+  const { category, search } = req.query;
+
+  const validations = [
+    () => category && typeof category !== 'string' ? 'category: Category must be text' : null,
+    () => search && typeof search !== 'string' ? 'search: Search term must be text' : null,
+    () => {
+      if (search && typeof search === 'string') {
+        return (search.length < 2 || search.length > 100) ? 'search: Search term must be between 2 and 100 characters' : null;
+      }
+      return null;
+    },
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateGuideFilters = (req: Request, res: Response, next: NextFunction): void => {
+  const { category, search } = req.query;
+
+  const validations = [
+    () => category && typeof category !== 'string' ? 'category: Category must be text' : null,
+    () => search && typeof search !== 'string' ? 'search: Search term must be text' : null,
+    () => {
+      if (search && typeof search === 'string') {
+        return (search.length < 2 || search.length > 100) ? 'search: Search term must be between 2 and 100 characters' : null;
+      }
+      return null;
+    },
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateGuideId = (req: Request, res: Response, next: NextFunction): void => {
+  const { guideId } = req.params;
+
+  const validations = [
+    () => !guideId ? 'guideId: Guide ID is required' : null,
+    () => guideId && !isValidUUID(guideId) ? 'guideId: Invalid guide ID format' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
+export const validateFAQId = (req: Request, res: Response, next: NextFunction): void => {
+  const { faqId } = req.params;
+
+  const validations = [
+    () => !faqId ? 'faqId: FAQ ID is required' : null,
+    () => faqId && !isValidUUID(faqId) ? 'faqId: Invalid FAQ ID format' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};

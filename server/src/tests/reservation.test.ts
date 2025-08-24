@@ -276,7 +276,7 @@ describe('Reservation API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Check-in date must be before check-out date');
+      expect(response.body.errors.checkOutDate).toBe('Check-in date must be before check-out date');
     });
   });
 
@@ -305,7 +305,7 @@ describe('Reservation API Tests', () => {
         .send({ reason: 'short' })
         .expect(400);
 
-      expect(response.body.error).toBe('Reason must be at least 10 characters long');
+      expect(response.body.errors.reason).toBe('Reason must be at least 10 characters long');
     });
   });
 
@@ -334,7 +334,7 @@ describe('Reservation API Tests', () => {
         .send({ message: '   ' })
         .expect(400);
 
-      expect(response.body.error).toBe('Message cannot be empty');
+      expect(response.body.errors.message).toBe('Message cannot be empty');
     });
 
     it('should reject message that is too long', async () => {
@@ -346,7 +346,7 @@ describe('Reservation API Tests', () => {
         .send({ message: longMessage })
         .expect(400);
 
-      expect(response.body.error).toBe('Message cannot exceed 1000 characters');
+      expect(response.body.errors.message).toBe('Message cannot exceed 1000 characters');
     });
   });
 
@@ -423,7 +423,7 @@ describe('Reservation API Tests', () => {
         .send({ response: 'Thanks' })
         .expect(400);
 
-      expect(response.body.error).toBe('Response must be at least 10 characters long');
+      expect(response.body.errors.response).toBe('Response must be at least 10 characters long');
     });
 
     it('should return 404 for non-existent review', async () => {

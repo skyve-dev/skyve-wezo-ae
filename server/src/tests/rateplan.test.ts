@@ -122,7 +122,7 @@ describe('Rate Plan API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toContain('Type must be one of');
+      expect(response.body.errors.type).toBe('Rate plan type is required');
     });
 
     it('should reject invalid rate plan type', async () => {
@@ -136,7 +136,7 @@ describe('Rate Plan API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toContain('Type must be one of');
+      expect(response.body.errors.type).toContain('Must be one of');
     });
 
     it('should reject request without authentication', async () => {
@@ -275,7 +275,7 @@ describe('Rate Plan API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Each price must have a valid date');
+      expect(response.body.errors['prices[0].date']).toBe('Must have a valid date');
     });
 
     it('should reject negative prices', async () => {
@@ -292,7 +292,7 @@ describe('Rate Plan API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Each price must have a positive basePrice');
+      expect(response.body.errors['prices[0].basePrice']).toBe('Must be a positive number');
     });
   });
 
@@ -337,7 +337,7 @@ describe('Rate Plan API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toContain('Restriction type must be one of');
+      expect(response.body.errors['restrictions[0].type']).toContain('Must be one of');
     });
   });
 

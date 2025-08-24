@@ -1,21 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
+import { validateAndCollectErrors, returnValidationResponse, ValidationErrors } from './validation-helpers';
+
+function isValidDate(dateString: string): boolean {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+}
+
+const validRatePlanTypes = ['FullyFlexible', 'NonRefundable', 'Custom'];
+const validRestrictionTypes = [
+  'MinLengthOfStay',
+  'MaxLengthOfStay',
+  'NoArrivals',
+  'NoDepartures',
+  'MinAdvancedReservation',
+  'MaxAdvancedReservation',
+];
 
 export const validateRatePlanCreation = (req: Request, res: Response, next: NextFunction): void => {
   const { name, type, cancellationPolicy } = req.body;
 
-  if (!name || typeof name !== 'string') {
-    res.status(400).json({ error: 'Rate plan name is required' });
-    return;
-  }
+  const validations = [
+    () => !name ? 'name: Rate plan name is required' : null,
+    () => typeof name !== 'string' ? 'name: Rate plan name must be text' : null,
+    () => !type ? 'type: Rate plan type is required' : null,
+    () => type && !validRatePlanTypes.includes(type) ? `type: Must be one of: ${validRatePlanTypes.join(', ')}` : null,
+    () => !cancellationPolicy ? 'cancellationPolicy: Cancellation policy is required' : null,
+    () => typeof cancellationPolicy !== 'string' ? 'cancellationPolicy: Cancellation policy must be text' : null,
+  ];
 
-  const validTypes = ['FullyFlexible', 'NonRefundable', 'Custom'];
-  if (!type || !validTypes.includes(type)) {
-    res.status(400).json({ error: `Type must be one of: ${validTypes.join(', ')}` });
-    return;
-  }
-
-  if (!cancellationPolicy || typeof cancellationPolicy !== 'string') {
-    res.status(400).json({ error: 'Cancellation policy is required' });
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
 
@@ -25,21 +41,16 @@ export const validateRatePlanCreation = (req: Request, res: Response, next: Next
 export const validateRatePlanUpdate = (req: Request, res: Response, next: NextFunction): void => {
   const { name, type, cancellationPolicy } = req.body;
 
-  if (name && typeof name !== 'string') {
-    res.status(400).json({ error: 'Rate plan name must be a string' });
-    return;
-  }
+  const validations = [
+    () => name && typeof name !== 'string' ? 'name: Rate plan name must be text' : null,
+    () => type && !validRatePlanTypes.includes(type) ? `type: Must be one of: ${validRatePlanTypes.join(', ')}` : null,
+    () => cancellationPolicy && typeof cancellationPolicy !== 'string' ? 'cancellationPolicy: Cancellation policy must be text' : null,
+  ];
 
-  if (type) {
-    const validTypes = ['FullyFlexible', 'NonRefundable', 'Custom'];
-    if (!validTypes.includes(type)) {
-      res.status(400).json({ error: `Type must be one of: ${validTypes.join(', ')}` });
-      return;
-    }
-  }
-
-  if (cancellationPolicy && typeof cancellationPolicy !== 'string') {
-    res.status(400).json({ error: 'Cancellation policy must be a string' });
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
 
@@ -48,30 +59,30 @@ export const validateRatePlanUpdate = (req: Request, res: Response, next: NextFu
 
 export const validatePriceUpdate = (req: Request, res: Response, next: NextFunction): void => {
   const { prices } = req.body;
+  const errors: ValidationErrors = {};
 
   if (!Array.isArray(prices)) {
-    res.status(400).json({ error: 'Prices must be an array' });
-    return;
+    errors['prices'] = 'Must be an array';
+  } else if (prices.length === 0) {
+    errors['prices'] = 'Cannot be empty';
+  } else {
+    // Check each price entry
+    prices.forEach((price, index) => {
+      if (!price.date || !isValidDate(price.date)) {
+        errors[`prices[${index}].date`] = 'Must have a valid date';
+      }
+      if (typeof price.basePrice !== 'number' || price.basePrice <= 0) {
+        errors[`prices[${index}].basePrice`] = 'Must be a positive number';
+      }
+      if (price.currency && price.currency !== 'AED') {
+        errors[`prices[${index}].currency`] = 'Currency must be AED';
+      }
+    });
   }
-
-  if (prices.length === 0) {
-    res.status(400).json({ error: 'Prices array cannot be empty' });
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
-  }
-
-  for (const price of prices) {
-    if (!price.date || !isValidDate(price.date)) {
-      res.status(400).json({ error: 'Each price must have a valid date' });
-      return;
-    }
-    if (typeof price.basePrice !== 'number' || price.basePrice <= 0) {
-      res.status(400).json({ error: 'Each price must have a positive basePrice' });
-      return;
-    }
-    if (price.currency && price.currency !== 'AED') {
-      res.status(400).json({ error: 'Currency must be AED' });
-      return;
-    }
   }
 
   next();
@@ -79,44 +90,37 @@ export const validatePriceUpdate = (req: Request, res: Response, next: NextFunct
 
 export const validateRestrictionUpdate = (req: Request, res: Response, next: NextFunction): void => {
   const { restrictions } = req.body;
+  const errors: ValidationErrors = {};
 
   if (!Array.isArray(restrictions)) {
-    res.status(400).json({ error: 'Restrictions must be an array' });
-    return;
+    errors['restrictions'] = 'Must be an array';
+  } else {
+    // Check each restriction
+    restrictions.forEach((restriction, index) => {
+      if (!restriction.type) {
+        errors[`restrictions[${index}].type`] = 'Restriction type is required';
+      } else if (!validRestrictionTypes.includes(restriction.type)) {
+        errors[`restrictions[${index}].type`] = `Must be one of: ${validRestrictionTypes.join(', ')}`;
+      }
+      
+      if (typeof restriction.value !== 'number' || restriction.value < 0) {
+        errors[`restrictions[${index}].value`] = 'Must be a non-negative number';
+      }
+      
+      if (restriction.startDate && !isValidDate(restriction.startDate)) {
+        errors[`restrictions[${index}].startDate`] = 'Invalid start date format';
+      }
+      
+      if (restriction.endDate && !isValidDate(restriction.endDate)) {
+        errors[`restrictions[${index}].endDate`] = 'Invalid end date format';
+      }
+    });
   }
-
-  const validTypes = [
-    'MinLengthOfStay',
-    'MaxLengthOfStay',
-    'NoArrivals',
-    'NoDepartures',
-    'MinAdvancedReservation',
-    'MaxAdvancedReservation',
-  ];
-
-  for (const restriction of restrictions) {
-    if (!restriction.type || !validTypes.includes(restriction.type)) {
-      res.status(400).json({ error: `Restriction type must be one of: ${validTypes.join(', ')}` });
-      return;
-    }
-    if (typeof restriction.value !== 'number' || restriction.value < 0) {
-      res.status(400).json({ error: 'Restriction value must be a non-negative number' });
-      return;
-    }
-    if (restriction.startDate && !isValidDate(restriction.startDate)) {
-      res.status(400).json({ error: 'Invalid restriction start date' });
-      return;
-    }
-    if (restriction.endDate && !isValidDate(restriction.endDate)) {
-      res.status(400).json({ error: 'Invalid restriction end date' });
-      return;
-    }
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
   }
 
   next();
 };
-
-function isValidDate(dateString: string): boolean {
-  const date = new Date(dateString);
-  return date instanceof Date && !isNaN(date.getTime());
-}

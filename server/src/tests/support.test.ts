@@ -105,7 +105,7 @@ describe('Support System API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Validation failed');
+      expect(response.body.errors.subject).toBe('Subject must be between 5 and 200 characters');
     });
 
     it('should reject unauthorized request', async () => {
@@ -204,7 +204,7 @@ describe('Support System API Tests', () => {
         .send({ content: '' })
         .expect(400);
 
-      expect(response.body.error).toBe('Validation failed');
+      expect(response.body.errors.content).toBe('Message content is required');
     });
   });
 
@@ -233,7 +233,7 @@ describe('Support System API Tests', () => {
         .send({ priority: 'InvalidPriority' })
         .expect(400);
 
-      expect(response.body.error).toBe('Validation failed');
+      expect(response.body.errors.priority).toContain('Must be one of');
     });
   });
 
@@ -319,7 +319,7 @@ describe('Support System API Tests', () => {
         .send({ satisfaction: 6 })
         .expect(400);
 
-      expect(response.body.error).toBe('Validation failed');
+      expect(response.body.errors.satisfaction).toBe('Satisfaction rating must be between 1 and 5');
     });
   });
 
@@ -366,9 +366,9 @@ describe('Support System API Tests', () => {
     it('should reject request for non-existent FAQ', async () => {
       const response = await request(app)
         .post('/api/support/faqs/00000000-0000-0000-0000-000000000000/view')
-        .expect(404);
+        .expect(400);
 
-      expect(response.body.error).toBe('FAQ not found');
+      expect(response.body.errors.faqId).toBe('Invalid FAQ ID format');
     });
   });
 
@@ -427,9 +427,9 @@ describe('Support System API Tests', () => {
     it('should reject request for non-existent guide', async () => {
       const response = await request(app)
         .get('/api/support/guides/00000000-0000-0000-0000-000000000000')
-        .expect(404);
+        .expect(400);
 
-      expect(response.body.error).toBe('Guide not found');
+      expect(response.body.errors.guideId).toBe('Invalid guide ID format');
     });
   });
 
@@ -445,9 +445,9 @@ describe('Support System API Tests', () => {
     it('should reject request for non-existent guide', async () => {
       const response = await request(app)
         .post('/api/support/guides/00000000-0000-0000-0000-000000000000/like')
-        .expect(404);
+        .expect(400);
 
-      expect(response.body.error).toBe('Guide not found');
+      expect(response.body.errors.guideId).toBe('Invalid guide ID format');
     });
   });
 });

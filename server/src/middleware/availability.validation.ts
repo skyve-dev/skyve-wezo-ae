@@ -1,25 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
+import { validateAndCollectErrors, returnValidationResponse } from './validation-helpers';
 
 export const validateAvailabilityGet = (req: Request, res: Response, next: NextFunction): void => {
   const { startDate, endDate } = req.query;
 
-  if (startDate && !isValidDate(startDate as string)) {
-    res.status(400).json({ error: 'Invalid start date format' });
-    return;
-  }
+  const validations = [
+    () => startDate && !isValidDate(startDate as string) ? 'startDate: Invalid start date format' : null,
+    () => endDate && !isValidDate(endDate as string) ? 'endDate: Invalid end date format' : null,
+    () => {
+      if (startDate && endDate) {
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+        return start > end ? 'endDate: Start date must be before end date' : null;
+      }
+      return null;
+    },
+  ];
 
-  if (endDate && !isValidDate(endDate as string)) {
-    res.status(400).json({ error: 'Invalid end date format' });
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
-  }
-
-  if (startDate && endDate) {
-    const start = new Date(startDate as string);
-    const end = new Date(endDate as string);
-    if (start > end) {
-      res.status(400).json({ error: 'Start date must be before end date' });
-      return;
-    }
   }
 
   next();
@@ -29,13 +31,15 @@ export const validateAvailabilityUpdate = (req: Request, res: Response, next: Ne
   const { date } = req.params;
   const { isAvailable } = req.body;
 
-  if (!isValidDate(date)) {
-    res.status(400).json({ error: 'Invalid date format' });
-    return;
-  }
+  const validations = [
+    () => !isValidDate(date) ? 'date: Invalid date format' : null,
+    () => typeof isAvailable !== 'boolean' ? 'isAvailable: isAvailable must be a boolean' : null,
+  ];
 
-  if (typeof isAvailable !== 'boolean') {
-    res.status(400).json({ error: 'isAvailable must be a boolean' });
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
 
@@ -45,34 +49,31 @@ export const validateAvailabilityUpdate = (req: Request, res: Response, next: Ne
 export const validateBulkAvailabilityUpdate = (req: Request, res: Response, next: NextFunction): void => {
   const { updates } = req.body;
 
-  if (!updates) {
-    res.status(400).json({ error: 'Updates field is required' });
+  const validations = [
+    () => !updates ? 'updates: Updates field is required' : null,
+    () => updates && !Array.isArray(updates) ? 'updates: Updates must be an array' : null,
+    () => updates && Array.isArray(updates) && updates.length === 0 ? 'updates: Updates array cannot be empty' : null,
+    () => updates && Array.isArray(updates) && updates.length > 365 ? 'updates: Cannot update more than 365 days at once' : null,
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
     return;
   }
 
-  if (!Array.isArray(updates)) {
-    res.status(400).json({ error: 'Updates must be an array' });
-    return;
-  }
-
-  if (updates.length === 0) {
-    res.status(400).json({ error: 'Updates array cannot be empty' });
-    return;
-  }
-
-  if (updates.length > 365) {
-    res.status(400).json({ error: 'Cannot update more than 365 days at once' });
-    return;
-  }
-
-  for (const update of updates) {
-    if (!update.date || !isValidDate(update.date)) {
-      res.status(400).json({ error: 'Each update must have a valid date' });
-      return;
-    }
-    if (typeof update.isAvailable !== 'boolean') {
-      res.status(400).json({ error: 'Each update must have isAvailable as boolean' });
-      return;
+  // Additional validation for each update item
+  if (updates && Array.isArray(updates)) {
+    for (const update of updates) {
+      if (!update.date || !isValidDate(update.date)) {
+        returnValidationResponse(res, { updates: 'Each update must have a valid date' });
+        return;
+      }
+      if (typeof update.isAvailable !== 'boolean') {
+        returnValidationResponse(res, { updates: 'Each update must have isAvailable as boolean' });
+        return;
+      }
     }
   }
 

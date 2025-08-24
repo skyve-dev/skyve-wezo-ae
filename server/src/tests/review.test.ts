@@ -296,7 +296,7 @@ describe('Review Management API Tests', () => {
         .send({ response: 'Thanks' })
         .expect(400);
 
-      expect(response.body.error).toBe('Response must be at least 10 characters long');
+      expect(response.body.errors.response).toBe('Response must be at least 10 characters long');
     });
 
     it('should reject response to non-existent review', async () => {

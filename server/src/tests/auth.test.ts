@@ -71,7 +71,7 @@ describe('Authentication Tests', () => {
         .send(newUser)
         .expect(400);
 
-      expect(response.body.error).toBe('Invalid email format');
+      expect(response.body.errors.email).toBe('Invalid email format');
     });
 
     it('should reject registration with short password', async () => {
@@ -87,7 +87,7 @@ describe('Authentication Tests', () => {
         .send(newUser)
         .expect(400);
 
-      expect(response.body.error).toBe('Password must be at least 6 characters long');
+      expect(response.body.errors.password).toBe('Password must be at least 6 characters long');
     });
   });
 

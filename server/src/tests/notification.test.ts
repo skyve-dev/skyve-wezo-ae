@@ -130,7 +130,7 @@ describe('Notification API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toContain('type must be one of');
+      expect(response.body.errors.type).toContain('Must be one of');
     });
 
     it('should reject notification without required fields', async () => {
@@ -143,7 +143,7 @@ describe('Notification API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('title is required and cannot be empty');
+      expect(response.body.errors.title).toBe('Title is required');
     });
   });
 
@@ -172,7 +172,7 @@ describe('Notification API Tests', () => {
         .send({ notificationIds: [] })
         .expect(400);
 
-      expect(response.body.error).toBe('notificationIds cannot be empty');
+      expect(response.body.errors.notificationIds).toBe('Cannot be empty');
     });
   });
 
@@ -267,7 +267,7 @@ describe('Notification API Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toContain('Invalid notification type');
+      expect(response.body.errors['types[0]']).toContain('Invalid notification type');
     });
   });
 });

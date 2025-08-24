@@ -622,7 +622,8 @@ describe('Property API Tests', () => {
         .send(incompleteData)
         .expect(400);
 
-      expect(response.body.error).toContain('Required fields');
+      expect(response.body.errors).toBeDefined();
+      expect(Object.keys(response.body.errors).length).toBeGreaterThan(0);
     });
 
     it('should reject property creation with invalid booking type', async () => {
@@ -650,7 +651,7 @@ describe('Property API Tests', () => {
         .send(propertyData)
         .expect(400);
 
-      expect(response.body.error).toContain('Invalid bookingType');
+      expect(response.body.errors.bookingType).toContain('BookInstantly or NeedToRequestBook');
     });
 
     it('should reject property creation with invalid payment type', async () => {
@@ -678,7 +679,7 @@ describe('Property API Tests', () => {
         .send(propertyData)
         .expect(400);
 
-      expect(response.body.error).toContain('Invalid paymentType');
+      expect(response.body.errors.paymentType).toContain('Online or ByCreditCardAtProperty');
     });
   });
 
@@ -830,7 +831,7 @@ describe('Property API Tests', () => {
         .send(invalidLayout)
         .expect(400);
 
-      expect(response.body.error).toContain('maximumGuest and bathrooms must be numbers');
+      expect(response.body.errors.maximumGuest).toContain('Must be a number');
     });
   });
 
@@ -878,7 +879,7 @@ describe('Property API Tests', () => {
         .send(invalidAmenities)
         .expect(400);
 
-      expect(response.body.error).toBe('Amenities must be an array');
+      expect(response.body.errors.amenities).toBe('Must be an array');
     });
 
     it('should reject amenities with missing fields', async () => {
@@ -899,7 +900,7 @@ describe('Property API Tests', () => {
         .send(invalidAmenities)
         .expect(400);
 
-      expect(response.body.error).toBe('Each amenity must have a name and category');
+      expect(response.body.errors['amenities[0].category']).toBe('Amenity category is required');
     });
   });
 
@@ -939,7 +940,7 @@ describe('Property API Tests', () => {
         .send(invalidServices)
         .expect(400);
 
-      expect(response.body.error).toContain('Invalid parking type');
+      expect(response.body.errors.parking).toBe('Must be YesFree, YesPaid, or No');
     });
   });
 
@@ -985,7 +986,7 @@ describe('Property API Tests', () => {
         .send(invalidRules)
         .expect(400);
 
-      expect(response.body.error).toContain('Invalid petsAllowed value');
+      expect(response.body.errors.petsAllowed).toBe('Must be Yes, No, or UponRequest');
     });
   });
 
@@ -1032,7 +1033,7 @@ describe('Property API Tests', () => {
         .send(invalidPricing)
         .expect(400);
 
-      expect(response.body.error).toBe('Currency must be AED');
+      expect(response.body.errors.currency).toBe('Must be AED');
     });
 
     it('should reject pricing update with negative rates', async () => {
@@ -1050,7 +1051,7 @@ describe('Property API Tests', () => {
         .send(invalidPricing)
         .expect(400);
 
-      expect(response.body.error).toBe('ratePerNight must be a positive number');
+      expect(response.body.errors.ratePerNight).toBe('Must be greater than 0');
     });
   });
 
@@ -1095,7 +1096,7 @@ describe('Property API Tests', () => {
         .send(invalidCancellation)
         .expect(400);
 
-      expect(response.body.error).toBe('daysBeforeArrivalFreeToCancel must be a non-negative number');
+      expect(response.body.errors.daysBeforeArrivalFreeToCancel).toBe('Must be 0 or greater');
     });
   });
 

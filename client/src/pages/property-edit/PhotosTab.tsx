@@ -1,16 +1,170 @@
-import React from 'react'
-import { FaCamera } from 'react-icons/fa'
+import React, { useState, useRef } from 'react'
+import { FaCamera, FaUpload, FaTrash, FaSpinner } from 'react-icons/fa'
 import { Box } from '@/components'
-import { WizardFormData } from '@/types/property'
-import { resolvePhotoUrl } from '@/utils/api'
+import Button from '@/components/base/Button'
+import { WizardFormData, Property } from '@/types/property'
+import { resolvePhotoUrl, api } from '@/utils/api'
+import { useAppDispatch } from '@/store'
+import { fetchPropertyById } from '@/store/slices/propertySlice'
 
 interface PhotosTabProps {
     formData: Partial<WizardFormData>
-    currentProperty?: any // Replace with proper type
+    currentProperty?: Property
     updateFormData: (updates: Partial<WizardFormData>) => void
 }
 
 const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
+    const dispatch = useAppDispatch()
+    const [isUploading, setIsUploading] = useState(false)
+    const [isDeletingPhoto, setIsDeletingPhoto] = useState<string | null>(null)
+    const [uploadError, setUploadError] = useState<string>('')
+    const [uploadSuccess, setUploadSuccess] = useState<string>('')
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Image resizing function - same as PhotoManagement
+    const resizeImage = (file: File): Promise<Blob> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            
+            reader.onload = (e) => {
+                const img = new Image()
+                
+                img.onload = () => {
+                    const canvas = document.createElement('canvas')
+                    const ctx = canvas.getContext('2d')
+                    
+                    if (!ctx) {
+                        reject(new Error('Could not get canvas context'))
+                        return
+                    }
+                    
+                    // Calculate new dimensions - shorter side becomes 800px
+                    let newWidth: number
+                    let newHeight: number
+                    
+                    if (img.width < img.height) {
+                        // Width is the shorter side
+                        newWidth = 800
+                        newHeight = Math.round((img.height / img.width) * 800)
+                    } else {
+                        // Height is the shorter side (or they're equal)
+                        newHeight = 800
+                        newWidth = Math.round((img.width / img.height) * 800)
+                    }
+                    
+                    // Set canvas dimensions
+                    canvas.width = newWidth
+                    canvas.height = newHeight
+                    
+                    // Draw the resized image
+                    ctx.drawImage(img, 0, 0, newWidth, newHeight)
+                    
+                    // Convert to blob with JPEG compression for smaller file size
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                resolve(blob)
+                            } else {
+                                reject(new Error('Failed to convert canvas to blob'))
+                            }
+                        },
+                        'image/jpeg',
+                        0.85 // 85% quality
+                    )
+                }
+                
+                img.onerror = () => {
+                    reject(new Error('Failed to load image'))
+                }
+                
+                img.src = e.target?.result as string
+            }
+            
+            reader.onerror = () => {
+                reject(new Error('Failed to read file'))
+            }
+            
+            reader.readAsDataURL(file)
+        })
+    }
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files
+        if (!files || files.length === 0 || !currentProperty?.propertyId) return
+
+        setIsUploading(true)
+        setUploadError('')
+        setUploadSuccess('')
+
+        const formData = new FormData()
+        
+        // Resize each image before uploading
+        for (const file of Array.from(files)) {
+            try {
+                const resizedBlob = await resizeImage(file)
+                // Create a new File object from the resized blob with the original name
+                const resizedFile = new File(
+                    [resizedBlob], 
+                    file.name.replace(/\.[^/.]+$/, '.jpg'), // Change extension to .jpg
+                    { type: 'image/jpeg' }
+                )
+                formData.append('photos', resizedFile)
+            } catch (resizeError) {
+                console.error(`Failed to resize ${file.name}:`, resizeError)
+                // If resizing fails, upload the original file
+                formData.append('photos', file)
+            }
+        }
+
+        try {
+            await api.post(
+                `/api/properties/${currentProperty.propertyId}/photos`,
+                formData,
+                {}
+            )
+
+            setUploadSuccess(`Successfully uploaded ${files.length} photo(s)`)
+            
+            // Refresh property data to show new photos
+            dispatch(fetchPropertyById(currentProperty.propertyId))
+            
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+            }
+        } catch (err: any) {
+            setUploadError(err.message || 'Failed to upload photos')
+        } finally {
+            setIsUploading(false)
+        }
+    }
+
+    const handleDeletePhoto = async (photoId: string) => {
+        if (!currentProperty?.propertyId) return
+        
+        if (!window.confirm('Are you sure you want to delete this photo?')) return
+
+        setIsDeletingPhoto(photoId)
+        setUploadError('')
+        setUploadSuccess('')
+
+        try {
+            await api.delete(`/api/properties/${currentProperty.propertyId}/photos/${photoId}`)
+            
+            setUploadSuccess('Photo deleted successfully')
+            
+            // Refresh property data to reflect deletion
+            dispatch(fetchPropertyById(currentProperty.propertyId))
+        } catch (err: any) {
+            setUploadError(err.message || 'Failed to delete photo')
+        } finally {
+            setIsDeletingPhoto(null)
+        }
+    }
+
+    const triggerFileUpload = () => {
+        fileInputRef.current?.click()
+    }
+
     return (
         <Box>
             <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
@@ -19,6 +173,55 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
             <p style={{color: '#666', marginBottom: '2rem'}}>
                 Upload high-quality photos to showcase your property. Minimum 5 photos recommended.
             </p>
+
+            {/* Error/Success Messages */}
+            {uploadError && (
+                <Box
+                    padding="1rem"
+                    marginBottom="1rem"
+                    backgroundColor="#fee2e2"
+                    border="1px solid #fecaca"
+                    borderRadius="0.5rem"
+                    color="#dc2626"
+                >
+                    {uploadError}
+                </Box>
+            )}
+            
+            {uploadSuccess && (
+                <Box
+                    padding="1rem"
+                    marginBottom="1rem"
+                    backgroundColor="#dcfce7"
+                    border="1px solid #bbf7d0"
+                    borderRadius="0.5rem"
+                    color="#16a34a"
+                >
+                    {uploadSuccess}
+                </Box>
+            )}
+
+            {/* Upload Section */}
+            {currentProperty?.propertyId && (
+                <Box marginBottom="2rem">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                    />
+                    <Button
+                        label={isUploading ? "Uploading..." : "Upload Photos"}
+                        icon={isUploading ? <FaSpinner className="spin" /> : <FaUpload />}
+                        onClick={triggerFileUpload}
+                        variant="promoted"
+                        disabled={isUploading}
+                        fullWidth
+                    />
+                </Box>
+            )}
 
             {currentProperty?.photos && currentProperty.photos.length > 0 ? (
                 <Box>
@@ -71,10 +274,37 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                                     </Box>
                                 )}
                                 
-                                {/* Mobile-friendly photo index indicator */}
+                                {/* Delete button */}
                                 <Box
+                                    as="button"
                                     position="absolute"
                                     top="8px"
+                                    right="8px"
+                                    display="inline-flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    width="2rem"
+                                    height="2rem"
+                                    backgroundColor="rgba(239, 68, 68, 0.9)"
+                                    color="white"
+                                    borderRadius="50%"
+                                    border="none"
+                                    cursor="pointer"
+                                    onClick={() => handleDeletePhoto(photo.id)}
+                                    disabled={isDeletingPhoto === photo.id}
+                                    title="Delete photo"
+                                >
+                                    {isDeletingPhoto === photo.id ? (
+                                        <FaSpinner className="spin" size={12} />
+                                    ) : (
+                                        <FaTrash size={12} />
+                                    )}
+                                </Box>
+                                
+                                {/* Photo index indicator */}
+                                <Box
+                                    position="absolute"
+                                    bottom="8px"
                                     right="8px"
                                     display="inline-flex"
                                     alignItems="center"
@@ -104,7 +334,11 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                 >
                     <FaCamera size={48} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
                     <h4 style={{margin: '0 0 0.5rem 0', color: '#4b5563'}}>No photos uploaded</h4>
-                    <p style={{margin: 0}}>Photos can be uploaded using the property creation wizard</p>
+                    <p style={{margin: 0}}>
+                        {currentProperty?.propertyId 
+                            ? 'Click the upload button above to add photos'
+                            : 'Save the property first to enable photo upload'}
+                    </p>
                 </Box>
             )}
 
@@ -124,12 +358,23 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                     color: '#0c4a6e',
                     lineHeight: '1.5'
                 }}>
-                    <li>Use the property wizard for mobile-optimized photo upload</li>
+                    <li>Photos are automatically resized for optimal loading</li>
                     <li>First photo automatically becomes the main photo</li>
-                    <li>Tap photos to view full size on mobile devices</li>
-                    <li>Photos are numbered for easy reference</li>
+                    <li>You can upload multiple photos at once</li>
+                    <li>Click the trash icon to delete unwanted photos</li>
+                    <li>Minimum 5 photos recommended for better visibility</li>
                 </ul>
             </Box>
+            
+            <style>{`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .spin {
+                    animation: spin 1s linear infinite;
+                }
+            `}</style>
         </Box>
     )
 }
