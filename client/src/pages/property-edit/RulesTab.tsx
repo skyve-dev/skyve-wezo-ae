@@ -3,6 +3,7 @@ import { Box } from '@/components'
 import TimePicker from '@/components/base/TimePicker.tsx'
 import { WizardFormData, ValidationErrors } from '@/types/property'
 import { PetPolicy, PetPolicyLabels } from '@/constants/propertyEnums'
+import { FaGavel, FaClock, FaSmokingBan, FaCocktail } from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface RulesTabProps {
@@ -15,10 +16,10 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
     const updateCheckInCheckout = (field: string, value: string) => {
         updateFormData({
             checkInCheckout: {
-                checkInFrom: formData.checkInCheckout?.checkInFrom || '15:00',
-                checkInUntil: formData.checkInCheckout?.checkInUntil || '22:00',
-                checkOutFrom: formData.checkInCheckout?.checkOutFrom || '08:00',
-                checkOutUntil: formData.checkInCheckout?.checkOutUntil || '11:00',
+                checkInFrom: '15:00',
+                checkInUntil: '22:00',
+                checkOutFrom: '08:00',
+                checkOutUntil: '11:00',
                 ...formData.checkInCheckout,
                 [field]: value
             }
@@ -27,9 +28,12 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
 
     return (
         <Box>
-            <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                House Rules & Policies
-            </h3>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+                <FaGavel style={{color: '#374151', fontSize: '1.25rem'}} />
+                <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                    House Rules & Policies
+                </h3>
+            </Box>
             
             <Box display="grid" gap="1.5rem">
                 {/* Basic Rules */}
@@ -41,7 +45,10 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                         {/* Smoking */}
                         <Box>
                             <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                                Smoking Policy
+                                <Box display="flex" alignItems="center" gap="0.5rem">
+                                    <FaSmokingBan style={{color: '#374151', fontSize: '0.875rem'}} />
+                                    Smoking Policy
+                                </Box>
                             </label>
                             <Box display="flex" gap="1rem">
                                 <Box
@@ -78,7 +85,10 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                         {/* Parties/Events */}
                         <Box>
                             <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                                Parties & Events
+                                <Box display="flex" alignItems="center" gap="0.5rem">
+                                    <FaCocktail style={{color: '#374151', fontSize: '0.875rem'}} />
+                                    Parties & Events
+                                </Box>
                             </label>
                             <Box display="flex" gap="1rem">
                                 <Box
@@ -129,13 +139,16 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
 
                 {/* Check-in/Check-out Times */}
                 <Box>
-                    <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Check-in & Check-out Times
-                    </h4>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
+                        <FaClock style={{color: '#374151', fontSize: '0.875rem'}} />
+                        <h4 style={{margin: 0, fontSize: '1.125rem', fontWeight: '500'}}>
+                            Check-in & Check-out Times
+                        </h4>
+                    </Box>
                     <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
                         <TimePicker
                             label="Check-in From"
-                            value={formData.checkInCheckout?.checkInFrom ? `2025-01-01T${formData.checkInCheckout.checkInFrom}:00.000Z` : '2025-01-01T15:00:00.000Z'}
+                            value={formData.checkInCheckout?.checkInFrom ? `2025-01-01T${formData.checkInCheckout.checkInFrom}:00` : '2025-01-01T15:00:00'}
                             onChange={(value) => {
                                 const time = new Date(value).toTimeString().substring(0, 5)
                                 updateCheckInCheckout('checkInFrom', time)
@@ -146,7 +159,7 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                         />
                         <TimePicker
                             label="Check-in Until"
-                            value={formData.checkInCheckout?.checkInUntil ? `2025-01-01T${formData.checkInCheckout.checkInUntil}:00.000Z` : '2025-01-01T22:00:00.000Z'}
+                            value={formData.checkInCheckout?.checkInUntil ? `2025-01-01T${formData.checkInCheckout.checkInUntil}:00` : '2025-01-01T22:00:00'}
                             onChange={(value) => {
                                 const time = new Date(value).toTimeString().substring(0, 5)
                                 updateCheckInCheckout('checkInUntil', time)
@@ -157,7 +170,7 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                         />
                         <TimePicker
                             label="Check-out From"
-                            value={formData.checkInCheckout?.checkOutFrom ? `2025-01-01T${formData.checkInCheckout.checkOutFrom}:00.000Z` : '2025-01-01T08:00:00.000Z'}
+                            value={formData.checkInCheckout?.checkOutFrom ? `2025-01-01T${formData.checkInCheckout.checkOutFrom}:00` : '2025-01-01T08:00:00'}
                             onChange={(value) => {
                                 const time = new Date(value).toTimeString().substring(0, 5)
                                 updateCheckInCheckout('checkOutFrom', time)
@@ -168,7 +181,7 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                         />
                         <TimePicker
                             label="Check-out Until"
-                            value={formData.checkInCheckout?.checkOutUntil ? `2025-01-01T${formData.checkInCheckout.checkOutUntil}:00.000Z` : '2025-01-01T11:00:00.000Z'}
+                            value={formData.checkInCheckout?.checkOutUntil ? `2025-01-01T${formData.checkInCheckout.checkOutUntil}:00` : '2025-01-01T11:00:00'}
                             onChange={(value) => {
                                 const time = new Date(value).toTimeString().substring(0, 5)
                                 updateCheckInCheckout('checkOutUntil', time)
@@ -187,9 +200,12 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                     borderRadius="0.5rem"
                     border="1px solid #bae6fd"
                 >
-                    <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                        📋 Rules & Policies Tips
-                    </h4>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaGavel style={{color: '#0369a1', fontSize: '0.875rem'}} />
+                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
+                            Rules & Policies Tips
+                        </h4>
+                    </Box>
                     <ul style={{
                         margin: 0,
                         paddingLeft: '1rem',
