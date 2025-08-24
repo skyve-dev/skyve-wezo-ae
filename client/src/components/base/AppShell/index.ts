@@ -4,6 +4,8 @@ export {
   createRoutes, 
   createAppShell 
 } from './AppShellContext'
+export { useAppShellVisibility } from './useAppShellVisibility'
+export { useNavigation } from './useNavigation'
 export {
   getBasePath,
   getCurrentPath,
@@ -20,6 +22,8 @@ export type {
   RouteDefinition,
   AppShellConfig,
   AppShellContextType,
+  AppShellVisibility,
+  AppShellVisibilityOptions,
   AlertDialogOptions,
   DialogButton,
   NavigateToFunction,

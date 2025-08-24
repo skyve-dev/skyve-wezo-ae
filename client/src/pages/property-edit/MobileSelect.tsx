@@ -64,7 +64,7 @@ function MobileSelect<T = string>({
 
     return (
         <>
-            <Box>
+            <Box >
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                     {label}
                 </label>

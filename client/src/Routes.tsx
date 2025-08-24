@@ -117,6 +117,6 @@ export const routes = createRoutes({
     }
 })
 
-export const useAppRoute = () => {
+export const useAppShellRoutes = () => {
     return useAppShell<typeof routes>()
 }

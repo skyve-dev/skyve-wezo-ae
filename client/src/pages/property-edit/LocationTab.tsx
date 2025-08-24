@@ -154,7 +154,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
     }
 
     return (
-        <Box>
+        <Box paddingX={'1.5rem'}>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
                 <FaMapMarkerAlt style={{color: '#374151', fontSize: '1.25rem'}} />
                 <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>

@@ -14,7 +14,6 @@ import {
     FaTimes,
     FaWifi
 } from 'react-icons/fa'
-import {useAppShell} from '@/components/base/AppShell'
 import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box, Tab} from '@/components'
 import Button from '@/components/base/Button.tsx'
@@ -40,6 +39,7 @@ import PhotosTab from './PhotosTab'
 import ServicesTab from './ServicesTab'
 import RulesTab from './RulesTab'
 import PricingTab from './PricingTab'
+import {useAppShellRoutes} from "@/Routes.tsx";
 
 type TabId = 'details' | 'location' | 'layout' | 'amenities' | 'photos' | 'services' | 'rules' | 'pricing'
 
@@ -50,12 +50,17 @@ interface PropertyEditProps {
 }
 
 const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
-    const {navigateTo, currentParams} = useAppShell()
+    const {navigateTo, currentParams,setVisibility,resetVisibility} = useAppShellRoutes()
 
     // Combine props from navigation and URL query parameters
     const params = {...props, ...currentParams}
     const dispatch = useAppDispatch()
-
+    useEffect(() => {
+        setVisibility({footer:false,header:false,sideNav:false});
+        return () => {
+            resetVisibility();
+        }
+    },[])
     // Redux state
     const {currentProperty, wizardData, loading, error, validationErrors} = useAppSelector((state) => state.property)
 
@@ -242,10 +247,16 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
 
     return (
         <SecuredPage>
-            <Box padding="1rem" maxWidth="1200px" margin="0 auto">
+            <Box  maxWidth="1200px" margin="0 auto">
                 {/* Header - Mobile Optimized */}
-                <Box marginBottom="1.5rem" >
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                <Box borderBottom={'1px solid #CCC'} position={'sticky'} top={0} zIndex={10} background={'white'} paddingX={'1.5rem'} paddingY={'1rem'}>
+
+                    <Box display="flex" alignItems="center" gap="1rem" >
+                        <Button icon={<FaArrowLeft />} label={''} onClick={() => {
+                            navigateTo('home',{})
+                        }}>
+
+                        </Button>
                         <Box flex="1">
                             <h1 style={{
                                 fontSize: '1.5rem',
@@ -308,7 +319,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                         // Update URL with new tab parameter
                         navigateTo('property-edit', {
                             ...params,
-                            tab: tabId
+                            tab: tabId as TabId
                         })
                         // Scroll to top when changing tabs
                         window.scrollTo({top: 0, behavior: 'instant'})
@@ -317,6 +328,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                     variant="underline"
                     size="medium"
                     fullWidth={false}
+
                     tabBarStyle={{
                         backgroundColor: 'white',
                         borderBottom: '1px solid #e5e5e5',

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     FaBuilding,
     FaClipboardList,
@@ -7,9 +7,12 @@ import {
     FaPlus,
     FaCalendarAlt,
     FaEnvelope,
-    FaExclamationTriangle
+    FaExclamationTriangle,
+    FaEye,
+    FaEyeSlash,
+    FaArrowLeft
 } from 'react-icons/fa'
-import { useAppShell } from '@/components/base/AppShell'
+import { useAppShell, useAppShellVisibility, useNavigation } from '@/components/base/AppShell'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
 import { Box } from '@/components'
 import Button from '@/components/base/Button.tsx'
@@ -17,6 +20,21 @@ import Button from '@/components/base/Button.tsx'
 // Dashboard Component - Property Command Center
 const Dashboard: React.FC = () => {
     const {navigateTo} = useAppShell()
+    const { navigateBack, canNavigateBack } = useNavigation()
+    const {
+        visibility,
+        hideHeader,
+        showHeader,
+        hideSideNav,
+        showSideNav,
+        hideFooter,
+        showFooter,
+        hideAll,
+        showAll,
+        setVisibility
+    } = useAppShellVisibility()
+    
+    const [fullscreenMode, setFullscreenMode] = useState(false)
     
     const stats = {
         activeProperties: 3,
@@ -67,10 +85,69 @@ const Dashboard: React.FC = () => {
                     </Box>
                 </Box>
 
+                {/* Visibility Control Demo */}
+                <Box marginBottom="3rem" padding="1.5rem" backgroundColor="#f0f9ff" borderRadius="8px">
+                    <h2 style={{fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem'}}>AppShell Visibility Controls (Demo)</h2>
+                    <Box display="flex" gap="1rem" flexWrap="wrap" marginBottom="1rem">
+                        <Button 
+                            label={visibility.header ? "Hide Header" : "Show Header"} 
+                            icon={visibility.header ? <FaEyeSlash /> : <FaEye />} 
+                            onClick={() => visibility.header ? hideHeader() : showHeader()} 
+                            variant="normal" 
+                        />
+                        <Button 
+                            label={visibility.footer ? "Hide Footer" : "Show Footer"} 
+                            icon={visibility.footer ? <FaEyeSlash /> : <FaEye />} 
+                            onClick={() => visibility.footer ? hideFooter() : showFooter()} 
+                            variant="normal" 
+                        />
+                        <Button 
+                            label={fullscreenMode ? "Exit Fullscreen" : "Fullscreen Mode"} 
+                            icon={fullscreenMode ? <FaEye /> : <FaEyeSlash />} 
+                            onClick={() => {
+                                if (fullscreenMode) {
+                                    showAll()
+                                    setFullscreenMode(false)
+                                } else {
+                                    hideAll()
+                                    setFullscreenMode(true)
+                                }
+                            }} 
+                            variant="promoted" 
+                        />
+                        <Button 
+                            label="Custom (Header Only)" 
+                            onClick={() => setVisibility({ header: true, footer: false, sideNav: false })} 
+                            variant="normal" 
+                        />
+                        <Button 
+                            label="Reset All" 
+                            onClick={() => {
+                                showAll()
+                                setFullscreenMode(false)
+                            }} 
+                            variant="normal" 
+                        />
+                    </Box>
+                    <Box fontSize="0.875rem" color="#4b5563">
+                        Current visibility: Header: {visibility.header ? 'Visible' : 'Hidden'}, 
+                        Footer: {visibility.footer ? 'Visible' : 'Hidden'}, 
+                        SideNav: {visibility.sideNav ? 'Available' : 'Disabled'}
+                    </Box>
+                </Box>
+
                 {/* Quick Actions */}
                 <Box marginBottom="3rem">
                     <h2 style={{fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem'}}>Quick Actions</h2>
                     <Box display="flex" gap="1rem" flexWrap="wrap">
+                        {canNavigateBack && (
+                            <Button 
+                                label="Go Back" 
+                                icon={<FaArrowLeft />} 
+                                onClick={navigateBack} 
+                                variant="normal" 
+                            />
+                        )}
                         <Button label="Add Property" icon={<FaPlus />} onClick={() => navigateTo('property-add', {})} variant="promoted" />
                         <Button label="View Calendar" icon={<FaCalendarAlt />} onClick={() => navigateTo('availability', {})} variant="normal" />
                         <Button label="Check Messages" icon={<FaEnvelope />} onClick={() => navigateTo('inbox', {})} variant="normal" />

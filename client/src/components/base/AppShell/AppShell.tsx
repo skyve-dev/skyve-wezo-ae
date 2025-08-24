@@ -1,4 +1,4 @@
-import React, {ReactNode, useCallback, useEffect, useState, useRef} from 'react'
+import React, {ReactNode, useCallback, useEffect, useRef, useState} from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
@@ -9,6 +9,8 @@ import {
     AlertDialogOptions,
     AppShellConfig,
     AppShellContextType,
+    AppShellVisibility,
+    AppShellVisibilityOptions,
     BaseRoute,
     NavigateToFunction,
     OnAfterNavigateFunction,
@@ -17,7 +19,14 @@ import {
     RouteInfo
 } from './types'
 import {FaBars, FaTimes} from 'react-icons/fa'
-import {getCurrentPath, isSamePath, navigateToUrl, pathToRouteKeyWithParams, routeKeyToPath, parseQueryParams} from './urlUtils'
+import {
+    getCurrentPath,
+    isSamePath,
+    navigateToUrl,
+    parseQueryParams,
+    pathToRouteKeyWithParams,
+    routeKeyToPath
+} from './urlUtils'
 
 interface AppShellProps<T extends Record<string, BaseRoute>> {
     routes: RouteDefinition<T>
@@ -60,11 +69,11 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         }
 
         const fullPath = getCurrentPath() + window.location.search
-        const { routeKey, params } = pathToRouteKeyWithParams(fullPath)
+        const {routeKey, params} = pathToRouteKeyWithParams(fullPath)
 
         // Check if the route key exists in our routes
         if (routes[routeKey]) {
-            return { route: routeKey, params }
+            return {route: routeKey, params}
         }
 
         // Fallback to initialRoute or first route
@@ -78,10 +87,18 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     const initialRouteData = getInitialRouteAndParams()
     const [currentRoute, setCurrentRoute] = useState<string>(initialRouteData.route)
     const [currentParams, setCurrentParams] = useState<Record<string, any>>(initialRouteData.params)
+    const [navigationHistory, setNavigationHistory] = useState<Array<{route: string, params: Record<string, any>}>>([])    
 
     // UI state
     const [isSideNavOpen, setSideNavOpen] = useState(false)
     const [isLoading, setLoading] = useState(false)
+
+    // Visibility control state
+    const [visibility, setVisibilityState] = useState<AppShellVisibility>({
+        header: true,
+        sideNav: true,
+        footer: true
+    })
 
     // Dialog state
     const [dialogState, setDialogState] = useState<{
@@ -103,7 +120,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     useEffect(() => {
         const handlePopState = () => {
             const fullPath = getCurrentPath() + window.location.search
-            const { routeKey, params } = pathToRouteKeyWithParams(fullPath)
+            const {routeKey, params} = pathToRouteKeyWithParams(fullPath)
 
             // Check if the route key exists in our routes
             if (routes[routeKey]) {
@@ -128,7 +145,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         const currentPath = getCurrentPath()
         const expectedPath = routeKeyToPath(currentRoute)
         const currentQueryParams = parseQueryParams()
-        
+
         // Check if path or params are different
         const pathChanged = !isSamePath(currentPath, expectedPath)
         const paramsChanged = JSON.stringify(currentQueryParams) !== JSON.stringify(currentParams)
@@ -148,7 +165,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         const currentPath = getCurrentPath()
         const expectedPath = routeKeyToPath(currentRoute)
         const currentQueryParams = parseQueryParams()
-        
+
         const pathChanged = !isSamePath(currentPath, expectedPath)
         const paramsChanged = JSON.stringify(currentQueryParams) !== JSON.stringify(currentParams)
 
@@ -249,7 +266,16 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                 // Don't abort navigation, just log error
             }
         }
-    }, [routes, currentRoute, onBeforeNavigate, onAfterNavigate])
+
+        // Add to navigation history (but don't add duplicates of the same route)
+        setNavigationHistory(prev => {
+            const lastEntry = prev[prev.length - 1]
+            if (!lastEntry || lastEntry.route !== routeKeyStr) {
+                return [...prev, { route: routeKeyStr, params: routeParams }]
+            }
+            return prev
+        })
+    }, [routes, currentRoute, currentParams, onBeforeNavigate, onAfterNavigate])
 
     // Alert dialog function
     const alertDialog = useCallback((options: AlertDialogOptions): Promise<void> => {
@@ -300,8 +326,52 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         setDialogState({isOpen: false, options: null, resolver: null})
     }, [dialogState.resolver])
 
+    // Visibility control functions
+    const setVisibility = useCallback((options: AppShellVisibilityOptions) => {
+        setVisibilityState(prev => ({
+            header: options.header !== undefined ? options.header : prev.header,
+            sideNav: options.sideNav !== undefined ? options.sideNav : prev.sideNav,
+            footer: options.footer !== undefined ? options.footer : prev.footer
+        }))
+    }, [])
+
+    const resetVisibility = useCallback(() => {
+        setVisibilityState({
+            header: true,
+            sideNav: true,
+            footer: true
+        })
+    }, [])
+
+    // Navigate back function
+    const navigateBack = useCallback(() => {
+        // Try browser history first
+        if (window.history.length > 1) {
+            window.history.back()
+        } else if (navigationHistory.length > 1) {
+            // Fallback to our navigation history
+            const previousEntry = navigationHistory[navigationHistory.length - 2]
+            if (previousEntry) {
+                navigateTo(previousEntry.route as keyof T, previousEntry.params as any)
+                // Remove the last entry from history to avoid loops
+                setNavigationHistory(prev => prev.slice(0, -1))
+            }
+        } else {
+            // Fallback to first route if no history
+            const firstRoute = Object.keys(routes)[0]
+            if (firstRoute && firstRoute !== currentRoute) {
+                navigateTo(firstRoute as keyof T, {} as any)
+            }
+        }
+    }, [navigationHistory, routes, currentRoute, navigateTo])
+
+    // Check if we can navigate back
+    const canNavigateBack = window.history.length > 1 || navigationHistory.length > 1
+
     const contextValue: AppShellContextType<T> = {
         navigateTo,
+        navigateBack,
+        canNavigateBack,
         currentRoute,
         currentParams,
         isSideNavOpen,
@@ -312,7 +382,11 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         routes,
         // Expose dialog state for AppShell
         dialogState,
-        closeDialog
+        closeDialog,
+        // Visibility control
+        visibility,
+        setVisibility,
+        resetVisibility
     }
 
     // Content is always shown (splash screen removed)
@@ -368,14 +442,14 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     useEffect(() => {
         const SCROLL_THRESHOLD = 50 // Minimum scroll distance to trigger hide/show
         const ACCUMULATOR_THRESHOLD = 10 // Accumulated scroll for gentle movements
-        
+
         const handleScroll = () => {
             const currentScrollY = window.scrollY
             const scrollDelta = currentScrollY - lastScrollY.current
-            
+
             // Accumulate small scroll movements
             scrollAccumulator.current += scrollDelta
-            
+
             // Only act if accumulated scroll exceeds threshold or single scroll is large
             if (Math.abs(scrollAccumulator.current) > ACCUMULATOR_THRESHOLD || Math.abs(scrollDelta) > SCROLL_THRESHOLD) {
                 // Scrolling down - hide header and footer
@@ -388,24 +462,24 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                     setHeaderVisible(true)
                     setFooterVisible(true)
                 }
-                
+
                 // Reset accumulator after action
                 scrollAccumulator.current = 0
             }
-            
+
             // Always show header/footer when at the top
             if (currentScrollY <= 10) {
                 setHeaderVisible(true)
                 setFooterVisible(true)
                 scrollAccumulator.current = 0
             }
-            
+
             lastScrollY.current = currentScrollY
         }
 
         // Add scroll listener with passive flag for better performance
-        window.addEventListener('scroll', handleScroll, { passive: true })
-        
+        window.addEventListener('scroll', handleScroll, {passive: true})
+
         return () => {
             window.removeEventListener('scroll', handleScroll)
         }
@@ -468,312 +542,312 @@ const AppShell = <T extends Record<string, BaseRoute>>({
     return (
         <AppShellContext.Provider value={contextValue as AppShellContextType}>
             <>
-                    <>
-                        {/* Header */}
+                <>
+                    {/* Header */}
+                    <Box
+                        ref={headerRef}
+                        position="fixed"
+                        top="0"
+                        left="0"
+                        right="0"
+                        zIndex="100"
+                        backgroundColor={theme.navBackgroundColor}
+                        borderBottom="1px solid #e5e7eb"
+                        boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
+                        style={{
+                            transform: (isHeaderVisible && visibility.header) ? 'translateY(0)' : 'translateY(-100%)',
+                            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                    >
                         <Box
-                            ref={headerRef}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent={'center'}
+                            padding="1rem 1.5rem"
+                            maxWidth="1200px"
+                            margin="0 auto"
+                        >
+                            {/* Left: Menu Button + Logo/Title */}
+                            <Box display="flex" alignItems="center" gap="1rem">
+
+                                {header.logo && (
+                                    <Box fontSize="1.5rem" color={theme.primaryColor}>
+                                        {header.logo}
+                                    </Box>
+                                )}
+
+                                {header.title && (
+                                    <Box
+                                        fontSize="1.25rem"
+                                        fontWeight="bold"
+                                        color="#1a202c"
+                                    >
+                                        {header.title}
+                                    </Box>
+                                )}
+
+
+                            </Box>
+
+                            {/* Center: Quick Navigation (Desktop/Tablet) */}
+                            <Box display={'flex'} justifyContent={'flex-end'} paddingX={'1rem'} flexGrow={1}>
+                                {header.showQuickNav && !isMobile && headerNavItems.length > 0 && (
+
+                                    <Tab
+                                        items={headerNavItems}
+                                        activeTab={currentRoute}
+                                        onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
+                                        variant="minimal"
+                                        tabBarOnly={true}
+                                        size="small"
+                                        fullWidth
+                                        centered
+                                    />
+                                )}
+                            </Box>
+
+                            {/* Right: Actions */}
+                            {header.actions && (
+                                <Box display="flex" alignItems="center" gap="0.5rem">
+                                    {header.actions}
+                                </Box>
+                            )}
+                            <Button
+                                label=""
+                                icon={<FaBars/>}
+                                onClick={() => setSideNavOpen(true)}
+                                variant="normal"
+                                size="small"
+                                backgroundColor="transparent"
+                                border="none"
+                                color={theme.primaryColor}
+                                aria-label="Open navigation menu"
+                            />
+                        </Box>
+                    </Box>
+
+                    {/* Main Content Area */}
+                    <Box
+                        flex="1"
+                        paddingTop={visibility.header ? "4rem" : '0px'} // Account for fixed header
+                        paddingBottom={isMobile && footer.showOnMobile && visibility.footer ? "4rem" : "0"}
+                        minHeight="100%"
+                    >
+                        {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
+                    </Box>
+
+                    {/* Footer (Mobile Only) */}
+                    {isMobile && footer.showOnMobile && footerNavItems.length > 0 && (
+                        <Box
+                            ref={footerRef}
                             position="fixed"
-                            top="0"
+                            bottom="0"
                             left="0"
                             right="0"
-                            zIndex="100"
                             backgroundColor={theme.navBackgroundColor}
-                            borderBottom="1px solid #e5e7eb"
-                            boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
+                            borderTop="1px solid #e5e7eb"
+                            zIndex="90"
+                            boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
                             style={{
-                                transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+                                transform: (isFooterVisible && visibility.footer) ? 'translateY(0)' : 'translateY(100%)',
                                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
                         >
+                            <Tab
+                                items={footerNavItems}
+                                activeTab={currentRoute}
+                                onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
+                                variant="minimal"
+                                size="small"
+                                fullWidth
+                                centered
+                                tabBarOnly
+                                iconSize={'2rem'}
+                                iconLayout={'column'}
+                                activeColor={theme.primaryColor}
+                                inactiveColor="#6b7280"
+                            />
+                        </Box>
+                    )}
+
+                    {/* Side Navigation Drawer */}
+                    <SlidingDrawer
+                        isOpen={isSideNavOpen && visibility.sideNav}
+                        onClose={() => setSideNavOpen(false)}
+                        side="left"
+                        width="280px"
+                        backgroundColor={theme.navBackgroundColor}
+                    >
+                        <Box padding="1.5rem">
+                            {/* Drawer Header */}
                             <Box
                                 display="flex"
                                 alignItems="center"
-                                justifyContent={'center'}
-                                padding="1rem 1.5rem"
-                                maxWidth="1200px"
-                                margin="0 auto"
+                                justifyContent="space-between"
+                                marginBottom="2rem"
+                                paddingBottom="1rem"
+                                borderBottom="1px solid #e5e7eb"
                             >
-                                {/* Left: Menu Button + Logo/Title */}
-                                <Box display="flex" alignItems="center" gap="1rem">
-
+                                <Box display="flex" alignItems="center" gap="0.75rem">
                                     {header.logo && (
                                         <Box fontSize="1.5rem" color={theme.primaryColor}>
                                             {header.logo}
                                         </Box>
                                     )}
-
-                                    {header.title && (
-                                        <Box
-                                            fontSize="1.25rem"
-                                            fontWeight="bold"
-                                            color="#1a202c"
-                                        >
-                                            {header.title}
-                                        </Box>
-                                    )}
-
-
-                                </Box>
-
-                                {/* Center: Quick Navigation (Desktop/Tablet) */}
-                                <Box display={'flex'} justifyContent={'flex-end'} paddingX={'1rem'} flexGrow={1}>
-                                {header.showQuickNav && !isMobile && headerNavItems.length > 0 && (
-
-                                        <Tab
-                                            items={headerNavItems}
-                                            activeTab={currentRoute}
-                                            onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
-                                            variant="minimal"
-                                            tabBarOnly={true}
-                                            size="small"
-                                            fullWidth
-                                            centered
-                                        />
-                                )}
-                                </Box>
-
-                                {/* Right: Actions */}
-                                {header.actions && (
-                                    <Box display="flex" alignItems="center" gap="0.5rem">
-                                        {header.actions}
+                                    <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
+                                        {header.title || 'Navigation'}
                                     </Box>
-                                )}
+                                </Box>
+
                                 <Button
                                     label=""
-                                    icon={<FaBars/>}
-                                    onClick={() => setSideNavOpen(true)}
+                                    icon={<FaTimes/>}
+                                    onClick={() => setSideNavOpen(false)}
                                     variant="normal"
                                     size="small"
                                     backgroundColor="transparent"
                                     border="none"
-                                    color={theme.primaryColor}
-                                    aria-label="Open navigation menu"
+                                    color="#6b7280"
+                                    aria-label="Close navigation menu"
                                 />
                             </Box>
-                        </Box>
 
-                        {/* Main Content Area */}
-                        <Box
-                            flex="1"
-                            paddingTop="4rem" // Account for fixed header
-                            paddingBottom={isMobile && footer.showOnMobile ? "4rem" : "0"}
-                            minHeight="100%"
-                        >
-                            {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
-                        </Box>
-
-                        {/* Footer (Mobile Only) */}
-                        {isMobile && footer.showOnMobile && footerNavItems.length > 0 && (
-                            <Box
-                                ref={footerRef}
-                                position="fixed"
-                                bottom="0"
-                                left="0"
-                                right="0"
-                                backgroundColor={theme.navBackgroundColor}
-                                borderTop="1px solid #e5e7eb"
-                                zIndex="90"
-                                boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
-                                style={{
-                                    transform: isFooterVisible ? 'translateY(0)' : 'translateY(100%)',
-                                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                                }}
-                            >
-                                <Tab
-                                    items={footerNavItems}
-                                    activeTab={currentRoute}
-                                    onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
-                                    variant="minimal"
-                                    size="small"
-                                    fullWidth
-                                    centered
-                                    tabBarOnly
-                                    iconSize={'2rem'}
-                                    iconLayout={'column'}
-                                    activeColor={theme.primaryColor}
-                                    inactiveColor="#6b7280"
-                                />
-                            </Box>
-                        )}
-
-                        {/* Side Navigation Drawer */}
-                        <SlidingDrawer
-                            isOpen={isSideNavOpen}
-                            onClose={() => setSideNavOpen(false)}
-                            side="left"
-                            width="280px"
-                            backgroundColor={theme.navBackgroundColor}
-                        >
-                            <Box padding="1.5rem">
-                                {/* Drawer Header */}
-                                <Box
-                                    display="flex"
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                    marginBottom="2rem"
-                                    paddingBottom="1rem"
-                                    borderBottom="1px solid #e5e7eb"
-                                >
-                                    <Box display="flex" alignItems="center" gap="0.75rem">
-                                        {header.logo && (
-                                            <Box fontSize="1.5rem" color={theme.primaryColor}>
-                                                {header.logo}
-                                            </Box>
-                                        )}
-                                        <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
-                                            {header.title || 'Navigation'}
-                                        </Box>
-                                    </Box>
-
+                            {/* Navigation Items */}
+                            <Box display="flex" flexDirection="column" gap="0.5rem">
+                                {navItems.map((item) => (
                                     <Button
-                                        label=""
-                                        icon={<FaTimes/>}
-                                        onClick={() => setSideNavOpen(false)}
+                                        key={item.id}
+                                        label={item.label}
+                                        icon={item.icon}
+                                        onClick={item.onClick}
                                         variant="normal"
-                                        size="small"
-                                        backgroundColor="transparent"
+                                        size="medium"
+                                        backgroundColor={currentRoute === item.id ? `${theme.primaryColor}15` : 'transparent'}
                                         border="none"
-                                        color="#6b7280"
-                                        aria-label="Close navigation menu"
+                                        color={currentRoute === item.id ? theme.primaryColor : '#374151'}
+                                        fontWeight={currentRoute === item.id ? '600' : '500'}
+                                        justifyContent="flex-start"
+                                        width="100%"
+                                        borderRadius="8px"
+                                        padding="0.75rem 1rem"
+                                        textAlign="left"
+                                        whileHover={{
+                                            backgroundColor: currentRoute === item.id
+                                                ? `${theme.primaryColor}20`
+                                                : `${theme.primaryColor}08`
+                                        }}
                                     />
+                                ))}
+                            </Box>
+                        </Box>
+                    </SlidingDrawer>
+
+                    {/* Alert Dialog */}
+                    {dialogState?.isOpen && dialogState.options && (
+                        <Dialog
+                            isOpen={true}
+                            onClose={() => {
+                                if (closeDialog) {
+                                    closeDialog()
+                                }
+                            }}
+                            width="400px"
+                            disableBackdropClick
+                        >
+                            <Box padding="2rem" textAlign="center">
+                                {/* Icon */}
+                                {dialogState.options.icon && (
+                                    <Box
+                                        fontSize="3rem"
+                                        marginBottom="1rem"
+                                        color={theme.primaryColor}
+                                    >
+                                        {dialogState.options.icon}
+                                    </Box>
+                                )}
+
+                                {/* Title */}
+                                <Box
+                                    fontSize="1.5rem"
+                                    fontWeight="600"
+                                    marginBottom="1rem"
+                                    color="#1a202c"
+                                >
+                                    {dialogState.options.title}
                                 </Box>
 
-                                {/* Navigation Items */}
-                                <Box display="flex" flexDirection="column" gap="0.5rem">
-                                    {navItems.map((item) => (
+                                {/* Text */}
+                                <Box
+                                    fontSize="1rem"
+                                    color="#6b7280"
+                                    marginBottom="2rem"
+                                    lineHeight="1.5"
+                                >
+                                    {dialogState.options.text}
+                                </Box>
+
+                                {/* Buttons */}
+                                <Box
+                                    display="flex"
+                                    gap="1rem"
+                                    justifyContent="center"
+                                    flexWrap="wrap"
+                                >
+                                    {dialogState.options.buttons.map((button, index) => (
                                         <Button
-                                            key={item.id}
-                                            label={item.label}
-                                            icon={item.icon}
-                                            onClick={item.onClick}
-                                            variant="normal"
+                                            key={index}
+                                            label={button.label}
+                                            onClick={() => handleDialogButton(button.onClick)}
+                                            variant={button.variant === 'primary' ? 'promoted' : button.variant === 'danger' ? 'normal' : button.variant || 'normal'}
                                             size="medium"
-                                            backgroundColor={currentRoute === item.id ? `${theme.primaryColor}15` : 'transparent'}
-                                            border="none"
-                                            color={currentRoute === item.id ? theme.primaryColor : '#374151'}
-                                            fontWeight={currentRoute === item.id ? '600' : '500'}
-                                            justifyContent="flex-start"
-                                            width="100%"
-                                            borderRadius="8px"
-                                            padding="0.75rem 1rem"
-                                            textAlign="left"
-                                            whileHover={{
-                                                backgroundColor: currentRoute === item.id
-                                                    ? `${theme.primaryColor}20`
-                                                    : `${theme.primaryColor}08`
-                                            }}
                                         />
                                     ))}
                                 </Box>
                             </Box>
-                        </SlidingDrawer>
+                        </Dialog>
+                    )}
 
-                        {/* Alert Dialog */}
-                        {dialogState?.isOpen && dialogState.options && (
-                            <Dialog
-                                isOpen={true}
-                                onClose={() => {
-                                    if (closeDialog) {
-                                        closeDialog()
-                                    }
-                                }}
-                                width="400px"
-                                disableBackdropClick
-                            >
-                                <Box padding="2rem" textAlign="center">
-                                    {/* Icon */}
-                                    {dialogState.options.icon && (
-                                        <Box
-                                            fontSize="3rem"
-                                            marginBottom="1rem"
-                                            color={theme.primaryColor}
-                                        >
-                                            {dialogState.options.icon}
-                                        </Box>
-                                    )}
-
-                                    {/* Title */}
-                                    <Box
-                                        fontSize="1.5rem"
-                                        fontWeight="600"
-                                        marginBottom="1rem"
-                                        color="#1a202c"
-                                    >
-                                        {dialogState.options.title}
-                                    </Box>
-
-                                    {/* Text */}
-                                    <Box
-                                        fontSize="1rem"
-                                        color="#6b7280"
-                                        marginBottom="2rem"
-                                        lineHeight="1.5"
-                                    >
-                                        {dialogState.options.text}
-                                    </Box>
-
-                                    {/* Buttons */}
-                                    <Box
-                                        display="flex"
-                                        gap="1rem"
-                                        justifyContent="center"
-                                        flexWrap="wrap"
-                                    >
-                                        {dialogState.options.buttons.map((button, index) => (
-                                            <Button
-                                                key={index}
-                                                label={button.label}
-                                                onClick={() => handleDialogButton(button.onClick)}
-                                                variant={button.variant === 'primary' ? 'promoted' : button.variant === 'danger' ? 'normal' : button.variant || 'normal'}
-                                                size="medium"
-                                            />
-                                        ))}
-                                    </Box>
-                                </Box>
-                            </Dialog>
-                        )}
-
-                        {/* Loading Overlay */}
-                        {isLoading && (
+                    {/* Loading Overlay */}
+                    {isLoading && (
+                        <Box
+                            position="fixed"
+                            top="0"
+                            left="0"
+                            width="100%"
+                            height="100%"
+                            backgroundColor="rgba(0, 0, 0, 0.5)"
+                            zIndex="9998"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                        >
                             <Box
-                                position="fixed"
-                                top="0"
-                                left="0"
-                                width="100%"
-                                height="100%"
-                                backgroundColor="rgba(0, 0, 0, 0.5)"
-                                zIndex="9998"
+                                backgroundColor="white"
+                                borderRadius="8px"
+                                padding="2rem"
                                 display="flex"
+                                flexDirection="column"
                                 alignItems="center"
-                                justifyContent="center"
+                                gap="1rem"
                             >
                                 <Box
-                                    backgroundColor="white"
-                                    borderRadius="8px"
-                                    padding="2rem"
-                                    display="flex"
-                                    flexDirection="column"
-                                    alignItems="center"
-                                    gap="1rem"
-                                >
-                                    <Box
-                                        width="40px"
-                                        height="40px"
-                                        border="4px solid #f3f4f6"
-                                        borderTop={`4px solid ${theme.primaryColor}`}
-                                        borderRadius="50%"
-                                        animation="spin 1s linear infinite"
-                                        style={{
-                                            animation: 'spin 1s linear infinite'
-                                        }}
-                                    />
-                                    <Box fontSize="1rem" color="#6b7280">
-                                        Loading...
-                                    </Box>
+                                    width="40px"
+                                    height="40px"
+                                    border="4px solid #f3f4f6"
+                                    borderTop={`4px solid ${theme.primaryColor}`}
+                                    borderRadius="50%"
+                                    animation="spin 1s linear infinite"
+                                    style={{
+                                        animation: 'spin 1s linear infinite'
+                                    }}
+                                />
+                                <Box fontSize="1rem" color="#6b7280">
+                                    Loading...
                                 </Box>
                             </Box>
-                        )}
-                    </>
+                        </Box>
+                    )}
+                </>
 
                 {/* CSS Animations */}
                 <style>{`

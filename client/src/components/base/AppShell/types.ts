@@ -63,10 +63,26 @@ export interface AlertDialogOptions {
     buttons: DialogButton[]
 }
 
+// Visibility control interface
+export interface AppShellVisibility {
+    header: boolean
+    sideNav: boolean
+    footer: boolean
+}
+
+// Visibility control options for programmatic control
+export interface AppShellVisibilityOptions {
+    header?: boolean
+    sideNav?: boolean
+    footer?: boolean
+}
+
 // AppShell context interface
 export interface AppShellContextType<T extends Record<string, BaseRoute> = Record<string, BaseRoute>> {
     // Navigation
     navigateTo: NavigateToFunction<T>
+    navigateBack: () => void
+    canNavigateBack: boolean
     currentRoute: string
     currentParams: Record<string, any>
 
@@ -89,6 +105,11 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
 
     // Routes
     routes: T
+
+    // Visibility control
+    visibility: AppShellVisibility
+    setVisibility: (options: AppShellVisibilityOptions) => void
+    resetVisibility: () => void
 }
 
 // Splash screen functionality removed

@@ -27,7 +27,7 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
     }
 
     return (
-        <Box>
+        <Box paddingX={'1.5rem'}>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
                 <FaGavel style={{color: '#374151', fontSize: '1.25rem'}} />
                 <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
