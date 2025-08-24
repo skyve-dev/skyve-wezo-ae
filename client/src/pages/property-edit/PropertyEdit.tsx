@@ -66,7 +66,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
 
     // Scroll to top when tab changes via URL parameters
     useEffect(() => {
-        window.scrollTo({top: 0, behavior: 'smooth'})
+        window.scrollTo({top: 0, behavior: 'instant'})
     }, [activeTab])
 
     // Fetch property data on mount
@@ -311,7 +311,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                             tab: tabId
                         })
                         // Scroll to top when changing tabs
-                        window.scrollTo({top: 0, behavior: 'smooth'})
+                        window.scrollTo({top: 0, behavior: 'instant'})
                     }}
                     orientation={'horizontal'}
                     variant="underline"

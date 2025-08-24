@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import {Box} from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
 import Input from '@/components/base/Input.tsx'
@@ -17,6 +17,19 @@ interface LayoutTabProps {
 const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validationErrors: _validationErrors}) => {
     const [showAddRoom, setShowAddRoom] = useState(false)
     const [newRoomName, setNewRoomName] = useState('')
+    const scrollPositionRef = useRef<number>(0)
+    const shouldPreserveScrollRef = useRef<boolean>(false)
+
+    // Preserve scroll position after state updates
+    useEffect(() => {
+        if (shouldPreserveScrollRef.current) {
+            // Restore scroll position after re-render
+            requestAnimationFrame(() => {
+                window.scrollTo({top:scrollPositionRef.current,behavior:'instant'})
+                shouldPreserveScrollRef.current = false
+            })
+        }
+    })
     const addRoom = () => {
         if (newRoomName.trim()) {
             const newRoom: Room = {
@@ -33,6 +46,10 @@ const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validati
     }
 
     const removeRoom = (roomIndex: number) => {
+        // Save scroll position before state update
+        scrollPositionRef.current = window.scrollY
+        shouldPreserveScrollRef.current = true
+        
         // Create a deep copy to avoid mutating Redux state
         const currentRooms = formData.rooms ? JSON.parse(JSON.stringify(formData.rooms)) : []
         const updatedRooms = currentRooms.filter((_: Room, index: number) => index !== roomIndex)
@@ -41,6 +58,11 @@ const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validati
 
     const addBedToRoom = (roomIndex: number) => {
         if (!formData.rooms) return
+        
+        // Save scroll position before state update
+        scrollPositionRef.current = window.scrollY
+        shouldPreserveScrollRef.current = true
+        
         // Create a deep copy to avoid mutating Redux state
         const updatedRooms = JSON.parse(JSON.stringify(formData.rooms))
         if (!updatedRooms[roomIndex].beds) {
@@ -69,6 +91,11 @@ const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validati
 
     const removeBedFromRoom = (roomIndex: number, bedIndex: number) => {
         if (!formData.rooms) return
+        
+        // Save scroll position before state update
+        scrollPositionRef.current = window.scrollY
+        shouldPreserveScrollRef.current = true
+        
         // Create a deep copy to avoid mutating Redux state
         const updatedRooms = JSON.parse(JSON.stringify(formData.rooms))
         if (updatedRooms[roomIndex].beds) {
