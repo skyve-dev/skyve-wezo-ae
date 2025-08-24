@@ -1,6 +1,6 @@
-import React, { forwardRef } from 'react'
-import { Box } from './Box'
-import { BoxProps } from '@/types/box.ts'
+import React, {forwardRef} from 'react'
+import {Box} from './Box'
+import {BoxProps} from '@/types/box.ts'
 
 export interface ButtonProps extends Omit<BoxProps, 'onClick' | 'as' | 'size'> {
   // Core functionality
@@ -79,7 +79,6 @@ export const Button = forwardRef<
   className,
   ...props
 }, ref) => {
-  
   // Size configurations that match Input component heights
   const sizeConfig = {
     small: {
@@ -132,7 +131,7 @@ export const Button = forwardRef<
     if (variant === 'promoted') {
       return {
         ...baseStyles,
-        backgroundColor: '#3b82f6',
+        backgroundColor:  '#3b82f6',
         color: '#ffffff',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
       }

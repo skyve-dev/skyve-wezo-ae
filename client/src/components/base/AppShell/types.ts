@@ -110,6 +110,9 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     visibility: AppShellVisibility
     setVisibility: (options: AppShellVisibilityOptions) => void
     resetVisibility: () => void
+
+    // Theme
+    theme: AppShellTheme
 }
 
 // Splash screen functionality removed
@@ -135,14 +138,17 @@ export interface FooterConfig {
     maxItems?: number
 }
 
+// Theme configuration
+export interface AppShellTheme {
+    primaryColor: string
+    backgroundColor: string
+    navBackgroundColor: string
+}
+
 // AppShell configuration
 export interface AppShellConfig {
     header?: HeaderConfig
     footer?: FooterConfig
     breakpoints?: BreakpointConfig
-    theme?: {
-        primaryColor?: string
-        backgroundColor?: string
-        navBackgroundColor?: string
-    }
+    theme?: Partial<AppShellTheme>
 }

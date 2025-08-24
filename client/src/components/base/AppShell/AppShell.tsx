@@ -18,7 +18,7 @@ import {
     RouteDefinition,
     RouteInfo
 } from './types'
-import {FaBars, FaTimes} from 'react-icons/fa'
+import {FaBars} from 'react-icons/fa'
 import {
     getCurrentPath,
     isSamePath,
@@ -386,7 +386,13 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         // Visibility control
         visibility,
         setVisibility,
-        resetVisibility
+        resetVisibility,
+        // Theme
+        theme: {
+            primaryColor: theme.primaryColor,
+            backgroundColor: theme.backgroundColor,
+            navBackgroundColor: theme.navBackgroundColor
+        }
     }
 
     // Content is always shown (splash screen removed)
@@ -551,9 +557,11 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                         left="0"
                         right="0"
                         zIndex="100"
-                        backgroundColor={theme.navBackgroundColor}
-                        borderBottom="1px solid #e5e7eb"
-                        boxShadow="0 1px 3px rgba(0, 0, 0, 0.1)"
+                        backgroundColor={theme.primaryColor}
+                        color={theme.backgroundColor}
+                        //background="linear-gradient(135deg, #ffffff 0%, #FAFAFA 100%)"
+                        borderBottom="1px solid rgba(213, 33, 34, 0.08)"
+                        boxShadow="0 2px 20px rgba(213, 33, 34, 0.08)"
                         style={{
                             transform: (isHeaderVisible && visibility.header) ? 'translateY(0)' : 'translateY(-100%)',
                             transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -602,6 +610,8 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                         size="small"
                                         fullWidth
                                         centered
+                                        activeColor={theme.backgroundColor}
+                                        inactiveColor={'rgba(255,255,255,0.8)'}
                                     />
                                 )}
                             </Box>
@@ -614,14 +624,25 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                             )}
                             <Button
                                 label=""
-                                icon={<FaBars/>}
+                                icon={<FaBars fontSize={'1.2rem'}/>}
                                 onClick={() => setSideNavOpen(true)}
                                 variant="normal"
                                 size="small"
-                                backgroundColor="transparent"
-                                border="none"
-                                color={theme.primaryColor}
+                                border="1px solid #CCC"
+
+                                borderRadius="8px"
+                                background={'transparent'}
                                 aria-label="Open navigation menu"
+
+                                style={{
+                                    color:'white',
+                                    border:'none',
+                                    padding : 0
+                                }}
+                                whileHover={{
+                                    backgroundColor: 'rgba(213, 33, 34, 0.1)',
+                                    borderColor: theme.primaryColor
+                                }}
                             />
                         </Box>
                     </Box>
@@ -644,8 +665,8 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                             bottom="0"
                             left="0"
                             right="0"
-                            backgroundColor={theme.navBackgroundColor}
-                            borderTop="1px solid #e5e7eb"
+                            background="linear-gradient(180deg, #ffffff 0%, #FAFAFA 100%)"
+                            borderTop="1px solid rgba(213, 33, 34, 0.08)"
                             zIndex="90"
                             boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
                             style={{
@@ -657,15 +678,15 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 items={footerNavItems}
                                 activeTab={currentRoute}
                                 onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
-                                variant="minimal"
+                                variant="underline"
                                 size="small"
                                 fullWidth
                                 centered
                                 tabBarOnly
-                                iconSize={'2rem'}
+                                iconSize={'1.5rem'}
                                 iconLayout={'column'}
                                 activeColor={theme.primaryColor}
-                                inactiveColor="#6b7280"
+                                inactiveColor="#9ca3af"
                             />
                         </Box>
                     )}
@@ -676,17 +697,18 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                         onClose={() => setSideNavOpen(false)}
                         side="left"
                         width="280px"
-                        backgroundColor={theme.navBackgroundColor}
+                        background={'linear-gradient(135deg, #ffffff 0%, #FAFAFA 100%)'}
                     >
-                        <Box padding="1.5rem">
+                        <Box>
                             {/* Drawer Header */}
                             <Box
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="space-between"
                                 marginBottom="2rem"
-                                paddingBottom="1rem"
-                                borderBottom="1px solid #e5e7eb"
+                                padding="1rem"
+                                borderBottom="1px solid rgba(0,0,0,0.1)"
+                                background={theme.primaryColor}
                             >
                                 <Box display="flex" alignItems="center" gap="0.75rem">
                                     {header.logo && (
@@ -694,22 +716,9 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                             {header.logo}
                                         </Box>
                                     )}
-                                    <Box fontSize="1.25rem" fontWeight="bold" color="#1a202c">
-                                        {header.title || 'Navigation'}
-                                    </Box>
+
                                 </Box>
 
-                                <Button
-                                    label=""
-                                    icon={<FaTimes/>}
-                                    onClick={() => setSideNavOpen(false)}
-                                    variant="normal"
-                                    size="small"
-                                    backgroundColor="transparent"
-                                    border="none"
-                                    color="#6b7280"
-                                    aria-label="Close navigation menu"
-                                />
                             </Box>
 
                             {/* Navigation Items - Vertical Tab */}
@@ -726,15 +735,18 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                 fullWidth
                                 tabBarOnly
                                 activeColor={theme.primaryColor}
-                                inactiveColor="#4b5563"
+                                inactiveColor={'rgba(0,0,0,0.8)'}
                                 backgroundColor="transparent"
                                 iconSize="1.25rem"
                                 iconLayout="row"
+
                                 style={{
                                     width: '100%'
                                 }}
                                 tabBarStyle={{
-                                    gap: '0.5rem'
+                                    gap: '0.5rem',
+                                    paddingLeft : '1.5rem',
+                                    paddingRight : '1.5rem'
                                 }}
                             />
                         </Box>
@@ -820,23 +832,26 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                             justifyContent="center"
                         >
                             <Box
-                                backgroundColor="white"
-                                borderRadius="8px"
+                                background="linear-gradient(135deg, #ffffff 0%, #FAFAFA 100%)"
+                                borderRadius="16px"
                                 padding="2rem"
                                 display="flex"
                                 flexDirection="column"
                                 alignItems="center"
                                 gap="1rem"
+                                boxShadow="0 20px 60px rgba(213, 33, 34, 0.15)"
+                                border="1px solid rgba(213, 33, 34, 0.08)"
                             >
                                 <Box
                                     width="40px"
                                     height="40px"
-                                    border="4px solid #f3f4f6"
+                                    border="4px solid rgba(213, 33, 34, 0.1)"
                                     borderTop={`4px solid ${theme.primaryColor}`}
                                     borderRadius="50%"
                                     animation="spin 1s linear infinite"
                                     style={{
-                                        animation: 'spin 1s linear infinite'
+                                        animation: 'spin 1s linear infinite',
+                                        boxShadow: '0 0 20px rgba(213, 33, 34, 0.2)'
                                     }}
                                 />
                                 <Box fontSize="1rem" color="#6b7280">
@@ -847,11 +862,60 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                     )}
                 </>
 
-                {/* CSS Animations */}
+                {/* CSS Animations and Luxury Theme Styles */}
                 <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        /* Luxury gradient effects */
+        .luxury-gradient {
+          background: linear-gradient(135deg, #D52122 0%, #B51D1E 100%);
+        }
+        
+        .luxury-gradient-hover {
+          background: linear-gradient(135deg, #E53132 0%, #C52D2E 100%);
+        }
+        
+        .subtle-gradient {
+          background: linear-gradient(135deg, rgba(213, 33, 34, 0.05) 0%, rgba(213, 33, 34, 0.02) 100%);
+        }
+        
+        /* Custom scrollbar styling for luxury feel */
+        ::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #FAFAFA;
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(135deg, #D52122 0%, #B51D1E 100%);
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(135deg, #E53132 0%, #C52D2E 100%);
+        }
+        
+        /* Tab active state with gradient */
+        .tab-active {
+          background: linear-gradient(135deg, #D52122 0%, #B51D1E 100%) !important;
+          color: #ffffff !important;
+          box-shadow: 0 4px 15px rgba(213, 33, 34, 0.25);
+        }
+        
+        /* Premium box shadow effects */
+        .luxury-shadow {
+          box-shadow: 0 10px 40px rgba(213, 33, 34, 0.1);
+        }
+        
+        .luxury-shadow-hover {
+          box-shadow: 0 15px 60px rgba(213, 33, 34, 0.15);
         }
       `}</style>
             </>

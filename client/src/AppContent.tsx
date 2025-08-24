@@ -33,8 +33,8 @@ const AppContent: React.FC = () => {
             onAfterNavigate={handleAfterNavigate}
             config={{
                 header: {
-                    title: 'Wezo.ae',
-                    logo: <img src={wezoAe} alt="Wezo.ae" style={{height: '2rem'}} />,
+                    title: '',  // Remove title since we have logo
+                    logo: <img src={wezoAe} alt="Wezo.ae" style={{height: '2.5rem'}} />,
                     showQuickNav: true
                 },
                 footer: {
@@ -42,8 +42,8 @@ const AppContent: React.FC = () => {
                     maxItems: 3
                 },
                 theme: {
-                    primaryColor: '#6366f1',
-                    backgroundColor: '#f8fafc',
+                    primaryColor: '#D52122',
+                    backgroundColor: '#FAFAFA',
                     navBackgroundColor: '#ffffff'
                 }
             }}

@@ -6,6 +6,7 @@ export {
 } from './AppShellContext'
 export { useAppShellVisibility } from './useAppShellVisibility'
 export { useNavigation } from './useNavigation'
+export { useTheme } from './useTheme'
 export {
   getBasePath,
   getCurrentPath,
@@ -21,6 +22,7 @@ export type {
   BaseRoute,
   RouteDefinition,
   AppShellConfig,
+  AppShellTheme,
   AppShellContextType,
   AppShellVisibility,
   AppShellVisibilityOptions,

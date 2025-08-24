@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {CSSProperties, useEffect, useRef, useState} from 'react'
 import ReactDOM from 'react-dom'
 import {Button} from './Button'
 import {Box} from './Box'
@@ -203,6 +203,11 @@ interface SlidingDrawerProps {
      * Optional portal container ID (default: 'drawer-root')
      */
     portalId?: string
+
+    /**
+     * Optional drawer background color (default: 'white')
+     */
+    background?:CSSProperties['background']
 }
 
 /**
@@ -218,6 +223,7 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
                                                          zIndex = 9999,
                                                          backdropColor = 'rgba(0, 0, 0, 0.5)',
                                                          backgroundColor = 'white',
+                                                         background,
                                                          animationDuration = 300,
                                                          disableBackdropClick = false,
                                                          disableEscapeKey = false,
@@ -281,6 +287,7 @@ const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
             flexDirection: 'column' as const,
             maxHeight: '100vh',
             backgroundColor,
+            background,
             zIndex: zIndex + 1,
             transition: `transform ${animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             boxShadow: '0 0 20px rgba(0, 0, 0, 0.15)',
