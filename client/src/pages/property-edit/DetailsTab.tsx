@@ -1,11 +1,11 @@
 import React from 'react'
 import {Box} from '@/components'
-import {FaFileAlt, FaHome, FaMapMarkerAlt} from 'react-icons/fa'
+import {FaFileAlt, FaHome, FaMapMarkerAlt, FaBolt, FaClock, FaCreditCard, FaHandshake} from 'react-icons/fa'
 import Input from '@/components/base/Input.tsx'
 import DatePicker from '@/components/base/DatePicker.tsx'
+import SelectionPicker from '@/components/base/SelectionPicker.tsx'
 import {ValidationErrors, WizardFormData} from '@/types/property'
 import {BookingType, BookingTypeLabels, PaymentType, PaymentTypeLabels} from '@/constants/propertyEnums'
-import MobileSelect from './MobileSelect'
 
 interface DetailsTabProps {
     formData: Partial<WizardFormData>
@@ -14,6 +14,30 @@ interface DetailsTabProps {
 }
 
 const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, validationErrors }) => {
+    // Icon mapping for booking types
+    const getBookingTypeIcon = (bookingType: BookingType) => {
+        switch (bookingType) {
+            case BookingType.BookInstantly:
+                return <FaBolt style={{ color: '#f59e0b', fontSize: '1rem' }} />
+            case BookingType.NeedToRequestBook:
+                return <FaClock style={{ color: '#6b7280', fontSize: '1rem' }} />
+            default:
+                return <FaClock style={{ color: '#6b7280', fontSize: '1rem' }} />
+        }
+    }
+
+    // Icon mapping for payment types
+    const getPaymentTypeIcon = (paymentType: PaymentType) => {
+        switch (paymentType) {
+            case PaymentType.Online:
+                return <FaCreditCard style={{ color: '#10b981', fontSize: '1rem' }} />
+            case PaymentType.ByCreditCardAtProperty:
+                return <FaHandshake style={{ color: '#8b5cf6', fontSize: '1rem' }} />
+            default:
+                return <FaCreditCard style={{ color: '#10b981', fontSize: '1rem' }} />
+        }
+    }
+
     return (
         <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
@@ -80,28 +104,71 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     />
                 </Box>
 
-                <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumns="1fr" gap="1rem">
-                    <MobileSelect<BookingType>
-                        label="Booking Type"
-                        value={formData.bookingType || BookingType.BookInstantly}
-                        options={Object.values(BookingType).map(type => ({
-                            value: type,
-                            label: BookingTypeLabels[type]
-                        }))}
-                        onChange={(value) => updateFormData({bookingType: value})}
-                        placeholder="Select booking type"
-                    />
+                <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumns="1fr" gap="1.5rem">
+                    {/* Booking Type Selection */}
+                    <Box>
+                        <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.75rem">
+                            <FaBolt style={{color: '#374151', fontSize: '0.875rem'}} />
+                            <label style={{fontWeight: '500', fontSize: '0.875rem'}}>
+                                Booking Type
+                            </label>
+                        </Box>
+                        <SelectionPicker
+                            data={Object.values(BookingType).map(type => ({
+                                value: type,
+                                label: BookingTypeLabels[type],
+                                type
+                            }))}
+                            containerStyles={{display:'flex',flexDirection:'row'}}
+                            idAccessor={(item) => item.value}
+                            labelAccessor={(item) => item.label}
+                            value={formData.bookingType || BookingType.BookInstantly}
+                            onChange={(value) => updateFormData({bookingType: value as BookingType})}
+                            renderItem={(item) => (
+                                <>
+                                    <Box as="span" >
+                                        {getBookingTypeIcon(item.type)}
+                                    </Box>
+                                    <Box as="span" flex="1">
+                                        {item.label}
+                                    </Box>
+                                </>
+                            )}
+                        />
+                    </Box>
 
-                    <MobileSelect<PaymentType>
-                        label="Payment Type"
-                        value={formData.paymentType || PaymentType.Online}
-                        options={Object.values(PaymentType).map(type => ({
-                            value: type,
-                            label: PaymentTypeLabels[type]
-                        }))}
-                        onChange={(value) => updateFormData({paymentType: value})}
-                        placeholder="Select payment type"
-                    />
+                    {/* Payment Type Selection */}
+                    <Box>
+                        <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.75rem">
+                            <FaCreditCard style={{color: '#374151', fontSize: '0.875rem'}} />
+                            <label style={{fontWeight: '500', fontSize: '0.875rem'}}>
+                                Payment Type
+                            </label>
+                        </Box>
+                        <SelectionPicker
+                            data={Object.values(PaymentType).map(type => ({
+                                value: type,
+                                label: PaymentTypeLabels[type],
+                                type
+                            }))}
+                            containerStyles={{display:'flex',flexDirection:'row'}}
+                            itemStyles={{width:"50%"}}
+                            idAccessor={(item) => item.value}
+                            labelAccessor={(item) => item.label}
+                            value={formData.paymentType || PaymentType.Online}
+                            onChange={(value) => updateFormData({paymentType: value as PaymentType})}
+                            renderItem={(item) => (
+                                <>
+                                    <Box as="span" >
+                                        {getPaymentTypeIcon(item.type)}
+                                    </Box>
+                                    <Box as="span" flex="1">
+                                        {item.label}
+                                    </Box>
+                                </>
+                            )}
+                        />
+                    </Box>
                 </Box>
 
                 <DatePicker

@@ -244,7 +244,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
         <SecuredPage>
             <Box padding="1rem" maxWidth="1200px" margin="0 auto">
                 {/* Header - Mobile Optimized */}
-                <Box marginBottom="1.5rem">
+                <Box marginBottom="1.5rem" >
                     <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
                         <Box flex="1">
                             <h1 style={{
