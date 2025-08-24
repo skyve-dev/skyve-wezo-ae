@@ -35,7 +35,7 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData, validatio
                 </h3>
             </Box>
             
-            <Box display="grid" gap="1.5rem">
+            <Box display="grid" gap="2.5rem">
                 {/* Basic Rules */}
                 <Box>
                     <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>

@@ -85,7 +85,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({formData, updateFormData, validati
                     Layout & Capacity
                 </h3>
             </Box>
-            <Box display="grid" gap="1.5rem">
+            <Box display="grid" gap="2.5rem">
                 <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
                     <NumberStepperInput
                         label="Maximum Guests"

@@ -161,7 +161,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
                     Property Location
                 </h3>
             </Box>
-            <Box display="grid" gap="1.5rem">
+            <Box display="grid" gap="2.5rem">
                 {/* Address Search */}
                 <Box>
                     <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>

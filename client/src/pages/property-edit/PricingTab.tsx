@@ -40,7 +40,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, valid
                 Pricing & Policies
             </h3>
             
-            <Box display="grid" gap="1.5rem">
+            <Box display="grid" gap="2.5rem">
                 {/* Currency Selection */}
                 <MobileSelect<Currency>
                     label="Currency"

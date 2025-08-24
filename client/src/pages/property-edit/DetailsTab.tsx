@@ -46,7 +46,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     Basic Property Information
                 </h3>
             </Box>
-            <Box display="grid" gap="1.5rem">
+            <Box display="grid" gap="2.5rem">
                 <Input
                     label="Property Name"
                     icon={FaHome}
@@ -104,7 +104,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     />
                 </Box>
 
-                <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumns="1fr" gap="1.5rem">
+                <Box display="grid" gridTemplateColumnsSm="1fr 1fr" gridTemplateColumns="1fr" gap="2rem">
                     {/* Booking Type Selection */}
                     <Box>
                         <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.75rem">

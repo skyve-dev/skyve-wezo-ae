@@ -42,7 +42,7 @@ const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData, val
                 </h3>
             </Box>
             
-            <Box display="grid" gap="1.5rem">
+            <Box display="grid" gap="2.5rem">
                 {/* Breakfast Service */}
                 <Box>
                     <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
