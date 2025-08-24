@@ -50,6 +50,16 @@ interface DatePickerProps {
    * Maximum selectable date in ISO format
    */
   maxDate?: string
+
+  /**
+   * Whether the input has an error
+   */
+  error?: boolean
+  
+  /**
+   * Helper text to display below the input
+   */
+  helperText?: string
 }
 
 const MONTHS = [
@@ -74,7 +84,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
   required = false,
   label,
   minDate,
-  maxDate
+  maxDate,
+  error = false,
+  helperText
 }) => {
   const drawerManager = useDrawerManager()
   const drawerId = useRef(`date-picker-${Math.random().toString(36).substr(2, 9)}`).current
@@ -206,7 +218,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const yearOptions = generateYearOptions()
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" gap="8px">
       {label && (
         <Box
           as="label"
@@ -217,7 +229,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           marginBottom="0.5rem"
         >
           {label}
-          {required && <Box as="span" color="#dc2626"> *</Box>}
+          {required && <Box as="span" color="#ef4444" marginLeft="4px"> *</Box>}
         </Box>
       )}
       
@@ -227,7 +239,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         position="relative"
         width="100%"
         padding="0.75rem"
-        border="1px solid #d1d5db"
+        border={error ? '1px solid #ef4444' : '1px solid #d1d5db'}
         borderRadius="0.375rem"
         backgroundColor={disabled ? '#f9fafb' : 'white'}
         cursor={disabled ? 'not-allowed' : 'pointer'}
@@ -235,8 +247,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
         display="flex"
         alignItems="center"
         justifyContent="space-between"
-        whileHover={!disabled ? { borderColor: '#3182ce' } : {}}
-        whileFocus={{ borderColor: '#3182ce', outline: 'none', boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)' }}
+        whileHover={!disabled ? { borderColor: error ? '#ef4444' : '#3182ce' } : {}}
+        whileFocus={{ borderColor: error ? '#ef4444' : '#3182ce', outline: 'none', boxShadow: `0 0 0 3px rgba(${error ? '239, 68, 68' : '49, 130, 206'}, 0.1)` }}
         tabIndex={disabled ? -1 : 0}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -253,6 +265,16 @@ const DatePicker: React.FC<DatePickerProps> = ({
         </Box>
       </Box>
 
+      {/* Helper Text */}
+      {helperText && (
+        <Box
+          fontSize="0.875rem"
+          color={error ? '#ef4444' : '#6b7280'}
+          marginTop="4px"
+        >
+          {helperText}
+        </Box>
+      )}
       <SlidingDrawer
         isOpen={drawerManager.isDrawerOpen(drawerId)}
         onClose={() => drawerManager.closeDrawer(drawerId)}
@@ -525,7 +547,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           </Box>
         </Box>
       </SlidingDrawer>
-    </>
+    </Box>
   )
 }
 

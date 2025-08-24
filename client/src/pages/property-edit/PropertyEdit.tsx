@@ -12,8 +12,9 @@ import {
     createProperty,
     updateProperty,
     updateWizardData,
+    clearValidationErrors,
 } from '@/store/slices/propertySlice'
-import {WizardFormData} from '@/types/property'
+import {WizardFormData, ValidationErrors} from '@/types/property'
 
 // Import tab components
 import DetailsTab from './DetailsTab'
@@ -41,7 +42,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     const dispatch = useAppDispatch()
 
     // Redux state
-    const {currentProperty, wizardData, loading, error} = useAppSelector((state) => state.property)
+    const {currentProperty, wizardData, loading, error, validationErrors} = useAppSelector((state) => state.property)
 
     // Local state - initialize from URL params or default to 'details'
     const [activeTab, setActiveTab] = useState<TabId>(params.tab || 'details')
@@ -78,6 +79,11 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
         setFormData(newData)
         dispatch(updateWizardData(updates))
         setHasUnsavedChanges(true)
+        
+        // Clear validation errors when user starts editing
+        if (validationErrors) {
+            dispatch(clearValidationErrors())
+        }
     }
 
     // Handle save property
@@ -106,49 +112,49 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
             id: 'details', 
             label: 'Details', 
             icon: <FaBuilding/>,
-            content: <DetailsTab formData={formData} updateFormData={updateFormData} />
+            content: <DetailsTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'location', 
             label: 'Location', 
             icon: <FaMapMarkerAlt/>,
-            content: <LocationTab formData={formData} updateFormData={updateFormData} />
+            content: <LocationTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'layout', 
             label: 'Layout', 
             icon: <FaBed/>,
-            content: <LayoutTab formData={formData} updateFormData={updateFormData} />
+            content: <LayoutTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'amenities', 
             label: 'Amenities', 
             icon: <FaWifi/>,
-            content: <AmenitiesTab formData={formData} updateFormData={updateFormData} />
+            content: <AmenitiesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'photos', 
             label: 'Photos', 
             icon: <FaCamera/>,
-            content: <PhotosTab formData={formData} currentProperty={currentProperty} updateFormData={updateFormData} />
+            content: <PhotosTab formData={formData} currentProperty={currentProperty} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'services', 
             label: 'Services', 
             icon: <FaCog/>,
-            content: <ServicesTab formData={formData} updateFormData={updateFormData} />
+            content: <ServicesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'rules', 
             label: 'Rules', 
             icon: <FaGavel/>,
-            content: <RulesTab formData={formData} updateFormData={updateFormData} />
+            content: <RulesTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         },
         {
             id: 'pricing', 
             label: 'Pricing', 
             icon: <FaDollarSign/>,
-            content: <PricingTab formData={formData} updateFormData={updateFormData} />
+            content: <PricingTab formData={formData} updateFormData={updateFormData} validationErrors={validationErrors} />
         }
     ]
 
@@ -243,7 +249,29 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                         borderRadius="8px"
                         fontSize="0.875rem"
                     >
-                        {error}
+                        <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: '600' }}>
+                            {validationErrors ? '⚠️ Validation Errors' : '❌ Error'}
+                        </h4>
+                        <p style={{ margin: '0 0 1rem 0' }}>{error}</p>
+                        {validationErrors && (
+                            <Box
+                                backgroundColor="rgba(255,255,255,0.7)"
+                                padding="0.75rem"
+                                borderRadius="6px"
+                                fontSize="0.8125rem"
+                            >
+                                <strong style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                    Please fix these issues:
+                                </strong>
+                                <ul style={{ margin: '0', paddingLeft: '1.25rem', lineHeight: '1.4' }}>
+                                    {Object.entries(validationErrors).map(([field, message]) => (
+                                        <li key={field}>
+                                            <strong>{field}:</strong> {message}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </Box>
+                        )}
                     </Box>
                 )}
 

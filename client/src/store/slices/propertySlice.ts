@@ -15,7 +15,8 @@ const initialState: PropertyState = {
   currentProperty: null,
   wizardData: null,
   loading: false,
-  error: null
+  error: null,
+  validationErrors: null
 }
 
 // Load wizard data from localStorage
@@ -207,7 +208,19 @@ export const createProperty = createAsyncThunk(
       const response = await api.post<{ property: any }>('/api/properties', transformedData)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to create property')
+      // Handle field-specific validation errors
+      if (error.response?.data?.errors) {
+        return rejectWithValue({
+          type: 'validation',
+          errors: error.response.data.errors,
+          message: 'Please fix the following validation errors:'
+        })
+      }
+      // Handle general errors
+      return rejectWithValue({
+        type: 'general',
+        message: error.response?.data?.error || 'Failed to create property'
+      })
     }
   }
 )
@@ -224,7 +237,19 @@ export const updateProperty = createAsyncThunk(
       const response = await api.put<{ property: any }>(`/api/properties/${propertyId}`, dataToSend)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update property')
+      // Handle field-specific validation errors
+      if (error.response?.data?.errors) {
+        return rejectWithValue({
+          type: 'validation',
+          errors: error.response.data.errors,
+          message: 'Please fix the following validation errors:'
+        })
+      }
+      // Handle general errors
+      return rejectWithValue({
+        type: 'general',
+        message: error.response?.data?.error || 'Failed to update property'
+      })
     }
   }
 )
@@ -279,6 +304,10 @@ const propertySlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null
+      state.validationErrors = null
+    },
+    clearValidationErrors: (state) => {
+      state.validationErrors = null
     },
     setCurrentProperty: (state, action: PayloadAction<Property | null>) => {
       state.currentProperty = action.payload
@@ -427,6 +456,7 @@ const propertySlice = createSlice({
       .addCase(createProperty.pending, (state) => {
         state.loading = true
         state.error = null
+        state.validationErrors = null
       })
       .addCase(createProperty.fulfilled, (state, action) => {
         state.loading = false
@@ -434,17 +464,26 @@ const propertySlice = createSlice({
         state.currentProperty = action.payload
         // Clear wizard data on successful creation
         state.wizardData = null
+        state.validationErrors = null
         saveWizardDataToStorage(null)
       })
       .addCase(createProperty.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        const payload = action.payload as any
+        if (payload?.type === 'validation') {
+          state.validationErrors = payload.errors
+          state.error = payload.message
+        } else {
+          state.error = payload?.message || payload || 'Failed to create property'
+          state.validationErrors = null
+        }
       })
       
       // Update property
       .addCase(updateProperty.pending, (state) => {
         state.loading = true
         state.error = null
+        state.validationErrors = null
       })
       .addCase(updateProperty.fulfilled, (state, action) => {
         state.loading = false
@@ -455,10 +494,18 @@ const propertySlice = createSlice({
         if (state.currentProperty?.propertyId === action.payload.propertyId) {
           state.currentProperty = action.payload
         }
+        state.validationErrors = null
       })
       .addCase(updateProperty.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        const payload = action.payload as any
+        if (payload?.type === 'validation') {
+          state.validationErrors = payload.errors
+          state.error = payload.message
+        } else {
+          state.error = payload?.message || payload || 'Failed to update property'
+          state.validationErrors = null
+        }
       })
       
       // Delete property
@@ -517,6 +564,7 @@ const propertySlice = createSlice({
 
 export const {
   clearError,
+  clearValidationErrors,
   setCurrentProperty,
   initializeWizard,
   initializeWizardForEdit,

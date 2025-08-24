@@ -2,16 +2,17 @@ import React from 'react'
 import { Box } from '@/components'
 import Input from '@/components/base/Input.tsx'
 import DatePicker from '@/components/base/DatePicker.tsx'
-import { WizardFormData } from '@/types/property'
+import { WizardFormData, ValidationErrors } from '@/types/property'
 import { BookingType, PaymentType, BookingTypeLabels, PaymentTypeLabels } from '@/constants/propertyEnums'
 import MobileSelect from './MobileSelect'
 
 interface DetailsTabProps {
     formData: Partial<WizardFormData>
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
-const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData }) => {
+const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, validationErrors }) => {
     return (
         <Box>
             <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
@@ -98,6 +99,8 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData }) => 
                     onChange={(value) => updateFormData({firstDateGuestCanCheckIn: value})}
                     placeholder="Select earliest check-in date"
                     minDate={new Date().toISOString()}
+                    error={!!validationErrors?.firstDateGuestCanCheckIn}
+                    helperText={validationErrors?.firstDateGuestCanCheckIn}
                 />
                 <Box
                     padding="1rem"

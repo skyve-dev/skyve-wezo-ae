@@ -148,10 +148,15 @@ export enum WizardStep {
   REVIEW = 9
 }
 
+export interface ValidationErrors {
+  [fieldName: string]: string
+}
+
 export interface PropertyState {
   properties: Property[]
   currentProperty: Property | null
   wizardData: WizardFormData | null
   loading: boolean
   error: string | null
+  validationErrors: ValidationErrors | null
 }

@@ -2,14 +2,15 @@ import React from 'react'
 import { Box } from '@/components'
 import Input from '@/components/base/Input.tsx'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
-import { WizardFormData } from '@/types/property'
+import { WizardFormData, ValidationErrors } from '@/types/property'
 
 interface LocationTabProps {
     formData: Partial<WizardFormData>
     updateFormData: (updates: Partial<WizardFormData>) => void
+    validationErrors?: ValidationErrors | null
 }
 
-const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData }) => {
+const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, validationErrors }) => {
     return (
         <Box>
             <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
@@ -46,6 +47,8 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData }) =
                     })}
                     placeholder="Enter city name"
                     width="100%"
+                    error={!!validationErrors?.city}
+                    helperText={validationErrors?.city}
                 />
 
                 <Input
@@ -81,6 +84,8 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData }) =
                     max={999999}
                     format="integer"
                     width="100%"
+                    error={!!validationErrors?.zipCode}
+                    helperText={validationErrors?.zipCode}
                 />
 
                 <Box>
