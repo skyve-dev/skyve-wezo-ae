@@ -5,8 +5,9 @@ import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box} from '@/components'
 import Button from '@/components/base/Button.tsx'
 import {useAppDispatch, useAppSelector} from '@/store'
-import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty} from '@/store/slices/propertySlice'
+import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty, initializeWizard} from '@/store/slices/propertySlice'
 import {Property} from '@/types/property'
+import {resolvePhotoUrl} from '@/utils/api'
 
 const PropertiesList: React.FC = () => {
     const {navigateTo} = useAppShell()
@@ -88,7 +89,7 @@ const PropertiesList: React.FC = () => {
                     marginBottom="1rem"
                     borderRadius="8px"
                     overflow="hidden"
-                    backgroundImage={`url(${property.photos[0].url})`}
+                    backgroundImage={`url(${resolvePhotoUrl(property.photos[0].url)})`}
                     backgroundSize="cover"
                     backgroundPosition="center"
                     position="relative"
@@ -226,7 +227,10 @@ const PropertiesList: React.FC = () => {
                     <Button
                         label="Add New Property"
                         icon={<FaPlus/>}
-                        onClick={() => navigateTo('register-property', {})}
+                        onClick={() => {
+                            dispatch(initializeWizard({}))
+                            navigateTo('property-edit', { propertyId: 'new' })
+                        }}
                         variant="promoted"
                     />
                 </Box>
@@ -318,7 +322,10 @@ const PropertiesList: React.FC = () => {
                             <Button
                                 label="Add Your First Property"
                                 icon={<FaPlus/>}
-                                onClick={() => navigateTo('register-property', {})}
+                                onClick={() => {
+                                    dispatch(initializeWizard({}))
+                                    navigateTo('property-edit', { propertyId: 'new' })
+                                }}
                                 variant="promoted"
                             />
                         )}

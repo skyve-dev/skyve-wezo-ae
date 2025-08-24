@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import { TanStackRouterVite } from '@tanstack/router-vite-plugin'
 import { resolve } from 'path'
 
 // https://vitejs.dev/config/
@@ -13,7 +12,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     base: base.endsWith('/') ? base : `${base}/`,
-    plugins: [react(), TanStackRouterVite()],
+    plugins: [react()],
     resolve: {
       alias: {
         '@': resolve(__dirname, './src')

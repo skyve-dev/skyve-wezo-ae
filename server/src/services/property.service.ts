@@ -194,6 +194,14 @@ export class PropertyService {
         propertyId,
         ownerId,
       },
+      include: {
+        address: true,
+        rooms: true,
+        amenities: true,
+        checkInCheckout: true,
+        pricing: true,
+        cancellation: true,
+      },
     });
 
     if (!existingProperty) {
@@ -202,23 +210,217 @@ export class PropertyService {
 
     const {
       name,
+      address,
+      layout,
+      amenities,
+      services,
+      rules,
       bookingType,
       paymentType,
+      pricing,
+      cancellation,
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
     } = data;
 
+    // Build update data object
+    const updateData: any = {
+      name,
+      bookingType,
+      paymentType,
+      aboutTheProperty,
+      aboutTheNeighborhood,
+      firstDateGuestCanCheckIn,
+    };
+
+    // Update address if provided
+    if (address) {
+      const addressUpdate: any = {
+        apartmentOrFloorNumber: address.apartmentOrFloorNumber,
+        countryOrRegion: address.countryOrRegion,
+        city: address.city,
+        zipCode: parseInt(address.zipCode, 10),
+      };
+
+      // Handle latLong update
+      if (address.latLong) {
+        // Delete existing latLong if exists
+        await prisma.latLong.deleteMany({
+          where: { addressId: existingProperty.address?.id },
+        });
+        
+        addressUpdate.latLong = {
+          create: {
+            latitude: address.latLong.latitude,
+            longitude: address.latLong.longitude,
+          },
+        };
+      }
+
+      updateData.address = {
+        update: addressUpdate,
+      };
+    }
+
+    // Update layout fields if provided
+    if (layout) {
+      updateData.maximumGuest = layout.maximumGuest;
+      updateData.bathrooms = layout.bathrooms;
+      updateData.allowChildren = layout.allowChildren;
+      updateData.offerCribs = layout.offerCribs;
+      updateData.propertySizeSqMtr = layout.propertySizeSqMtr;
+
+      // Handle rooms update
+      if (layout.rooms !== undefined) {
+        // Delete existing beds and rooms
+        const existingRooms = await prisma.room.findMany({
+          where: { propertyId },
+          select: { id: true },
+        });
+        
+        for (const room of existingRooms) {
+          await prisma.bed.deleteMany({
+            where: { roomId: room.id },
+          });
+        }
+        
+        await prisma.room.deleteMany({
+          where: { propertyId },
+        });
+
+        // Create new rooms
+        if (layout.rooms && layout.rooms.length > 0) {
+          updateData.rooms = {
+            create: layout.rooms.map((room: any) => ({
+              spaceName: room.spaceName,
+              beds: {
+                create: room.beds?.map((bed: any) => ({
+                  typeOfBed: bed.typeOfBed,
+                  numberOfBed: bed.numberOfBed,
+                })),
+              },
+            })),
+          };
+        }
+      }
+    }
+
+    // Update services fields if provided
+    if (services) {
+      updateData.serveBreakfast = services.serveBreakfast;
+      updateData.parking = services.parking;
+      updateData.languages = services.languages;
+    }
+
+    // Update rules fields if provided
+    if (rules) {
+      updateData.smokingAllowed = rules.smokingAllowed;
+      updateData.partiesOrEventsAllowed = rules.partiesOrEventsAllowed;
+      updateData.petsAllowed = rules.petsAllowed;
+
+      // Handle checkInCheckout update
+      if (rules.checkInCheckout) {
+        // Delete existing checkInCheckout if exists
+        await prisma.checkInOutTimes.deleteMany({
+          where: { propertyId },
+        });
+
+        updateData.checkInCheckout = {
+          create: {
+            checkInFrom: rules.checkInCheckout.checkInFrom,
+            checkInUntil: rules.checkInCheckout.checkInUntil,
+            checkOutFrom: rules.checkInCheckout.checkOutFrom,
+            checkOutUntil: rules.checkInCheckout.checkOutUntil,
+          },
+        };
+      }
+    }
+
+    // Update amenities if provided
+    if (amenities !== undefined) {
+      // Delete existing amenities
+      await prisma.amenity.deleteMany({
+        where: { propertyId },
+      });
+
+      // Create new amenities
+      if (amenities && amenities.length > 0) {
+        updateData.amenities = {
+          create: amenities.map((amenity: any) => ({
+            name: amenity.name,
+            category: amenity.category,
+          })),
+        };
+      }
+    }
+
+    // Update pricing if provided
+    if (pricing) {
+      // Delete existing pricing and related records
+      if (existingProperty.pricing) {
+        await prisma.pricePerGroupSize.deleteMany({
+          where: { pricingId: existingProperty.pricing.id },
+        });
+        await prisma.promotion.deleteMany({
+          where: { pricingId: existingProperty.pricing.id },
+        });
+        await prisma.pricing.delete({
+          where: { id: existingProperty.pricing.id },
+        });
+      }
+
+      updateData.pricing = {
+        create: {
+          currency: pricing.currency,
+          ratePerNight: pricing.ratePerNight,
+          ratePerNightWeekend: pricing.ratePerNightWeekend,
+          discountPercentageForNonRefundableRatePlan:
+            pricing.discountPercentageForNonRefundableRatePlan,
+          discountPercentageForWeeklyRatePlan:
+            pricing.discountPercentageForWeeklyRatePlan,
+          promotion: pricing.promotion
+            ? {
+                create: {
+                  type: pricing.promotion.type,
+                  percentage: pricing.promotion.percentage,
+                  description: pricing.promotion.description,
+                },
+              }
+            : undefined,
+          pricePerGroupSize: pricing.pricePerGroupSize
+            ? {
+                create: pricing.pricePerGroupSize.map((pgs: any) => ({
+                  groupSize: pgs.groupSize,
+                  ratePerNight: pgs.ratePerNight,
+                })),
+              }
+            : undefined,
+        },
+      };
+    }
+
+    // Update cancellation if provided
+    if (cancellation) {
+      // Delete existing cancellation if exists
+      if (existingProperty.cancellation) {
+        await prisma.cancellation.delete({
+          where: { id: existingProperty.cancellation.id },
+        });
+      }
+
+      updateData.cancellation = {
+        create: {
+          daysBeforeArrivalFreeToCancel: cancellation.daysBeforeArrivalFreeToCancel,
+          waiveCancellationFeeAccidentalBookings:
+            cancellation.waiveCancellationFeeAccidentalBookings,
+        },
+      };
+    }
+
     const property = await prisma.property.update({
       where: { propertyId },
-      data: {
-        name,
-        bookingType,
-        paymentType,
-        aboutTheProperty,
-        aboutTheNeighborhood,
-        firstDateGuestCanCheckIn,
-      },
+      data: updateData,
       include: {
         address: {
           include: {

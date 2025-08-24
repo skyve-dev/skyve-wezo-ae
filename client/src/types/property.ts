@@ -134,50 +134,6 @@ export interface WizardFormData extends Property {
   isComplete: boolean
   lastSaved?: string
   mode?: 'create' | 'edit'
-  
-  // Additional location fields for mobile
-  country?: string
-  state?: string
-  city?: string
-  postalCode?: string
-  streetAddress?: string
-  latitude?: number
-  longitude?: number
-  
-  // Additional pricing fields for mobile
-  pricePerNight?: number
-  currency?: string
-  cleaningFeeType?: string
-  cleaningFee?: number
-  securityDepositType?: string
-  securityDepositAmount?: number
-  chargeExtraGuests?: boolean
-  extraGuestFee?: number
-  offerWeeklyDiscount?: boolean
-  weeklyDiscountPercent?: number
-  offerMonthlyDiscount?: boolean
-  monthlyDiscountPercent?: number
-  
-  // Additional services fields for mobile
-  services?: Array<{ name: string; category: string }>
-  allowSmoking?: boolean
-  allowPets?: boolean
-  allowEvents?: boolean
-  wheelchairAccessible?: boolean
-  
-  // Additional rules fields for mobile
-  checkInTime?: string
-  checkOutTime?: string
-  minimumNights?: number
-  maximumNights?: number
-  quietHours?: string
-  quietHoursFrom?: string
-  quietHoursTo?: string
-  noParties?: boolean
-  noSmoking?: boolean
-  requireIdVerification?: boolean
-  noVisitors?: boolean
-  additionalRules?: string
 }
 
 export enum WizardStep {

@@ -13,7 +13,6 @@ const AppContent: React.FC = () => {
 
     // Authentication middleware for navigation control
     const handleBeforeNavigate: OnBeforeNavigateFunction<typeof routes> = async (next, target, source) => {
-        console.log('Navigation:', {from: source.path, to: target.path, authenticated: isAuthenticated})
         // Allow all other navigation
         next()
     }

@@ -216,7 +216,6 @@ export function AppShellProvider<T extends Record<string, BaseRoute>>({
     // Store props for the route if needed (you can expand this)
     if (finalProps) {
       // You could store route props in a separate state or pass them through URL params
-      console.log('Route props:', finalProps)
     }
 
     // Create final target route info (in case of redirect)

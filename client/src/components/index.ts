@@ -12,5 +12,3 @@ export { default as TimePicker } from './base/TimePicker';
 export { LoginForm } from './forms/LoginForm';
 export { RegisterForm } from './forms/RegisterForm';
 
-// Pages/Views
-export { Dashboard } from './Dashboard';

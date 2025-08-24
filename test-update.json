@@ -1,0 +1,29 @@
+{
+  "name": "Test Property Updated",
+  "layout": {
+    "maximumGuest": 3,
+    "bathrooms": 2,
+    "allowChildren": true,
+    "offerCribs": true,
+    "rooms": [
+      {
+        "spaceName": "Master Bedroom",
+        "beds": [
+          {
+            "typeOfBed": "KingBed",
+            "numberOfBed": 1
+          }
+        ]
+      },
+      {
+        "spaceName": "Guest Room",
+        "beds": [
+          {
+            "typeOfBed": "TwinBed",
+            "numberOfBed": 2
+          }
+        ]
+      }
+    ]
+  }
+}

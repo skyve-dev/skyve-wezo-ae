@@ -9,6 +9,7 @@ import {useAppDispatch, useAppSelector} from '@/store'
 import {
     fetchPropertyById,
     initializeWizardForEdit,
+    createProperty,
     updateProperty,
     updateWizardData,
 } from '@/store/slices/propertySlice'
@@ -46,7 +47,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     const [activeTab, setActiveTab] = useState<TabId>(params.tab || 'details')
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [formData, setFormData] = useState<Partial<WizardFormData>>({})
-    console.log('WE HAVE FORM DATA',formData);
+    
     // Fetch property data on mount
     useEffect(() => {
         if (params.propertyId && params.propertyId !== 'new') {
@@ -56,10 +57,13 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
 
     // Initialize wizard data when property is loaded or changes
     useEffect(() => {
-        if (currentProperty) {
+        if (params.propertyId === 'new') {
+            // For new property, wizard should already be initialized from PropertiesList
+            // Do nothing here to preserve the initialized wizard data
+        } else if (currentProperty) {
             dispatch(initializeWizardForEdit({property: currentProperty, mode: 'edit'}))
         }
-    }, [currentProperty, dispatch])
+    }, [currentProperty, params.propertyId, dispatch])
 
     // Sync wizard data with form data
     useEffect(() => {
@@ -78,7 +82,16 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
 
     // Handle save property
     const handleSaveProperty = async () => {
-        if (currentProperty?.propertyId && wizardData) {
+        if (params.propertyId === 'new' && wizardData) {
+            // Create new property
+            const result = await dispatch(createProperty(wizardData))
+            if (createProperty.fulfilled.match(result)) {
+                setHasUnsavedChanges(false)
+                // Navigate to edit mode with the new property ID
+                navigateTo('property-edit', { propertyId: result.payload.propertyId })
+            }
+        } else if (currentProperty?.propertyId && wizardData) {
+            // Update existing property
             await dispatch(updateProperty({
                 propertyId: currentProperty.propertyId,
                 data: wizardData
@@ -139,7 +152,7 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
         }
     ]
 
-    if (loading) {
+    if (loading && params.propertyId !== 'new') {
         return (
             <SecuredPage>
                 <Box padding="2rem" maxWidth="1200px" margin="0 auto">
@@ -169,6 +182,22 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                             onClick={() => navigateTo('properties', {})}
                             variant="promoted"
                         />
+                    </Box>
+                </Box>
+            </SecuredPage>
+        )
+    }
+
+    // For new property, ensure wizard data is initialized
+    if (params.propertyId === 'new' && !wizardData) {
+        return (
+            <SecuredPage>
+                <Box padding="2rem" maxWidth="1200px" margin="0 auto">
+                    <Box textAlign="center" padding="4rem">
+                        <h2 style={{color: '#dc2626', marginBottom: '1rem'}}>Initializing...</h2>
+                        <p style={{color: '#666', marginBottom: '2rem'}}>
+                            Setting up property creation wizard...
+                        </p>
                     </Box>
                 </Box>
             </SecuredPage>

@@ -6,18 +6,8 @@ import { BookingType, PaymentType, ParkingType, PetPolicy, Currency } from '../.
 const WIZARD_STORAGE_KEY = 'property-wizard-data'
 
 // Debug utility to help identify data structure mismatches
-const debugServerDataStructure = (serverData: any, context: string = '') => {
-  if (process.env.NODE_ENV === 'development') {
-    console.group(`🔍 Server Data Structure Debug ${context}`)
-    console.log('Has layout object:', !!serverData.layout)
-    console.log('Has services object:', !!serverData.services)
-    console.log('Has rules object:', !!serverData.rules)
-    console.log('Has flat maximumGuest:', !!serverData.maximumGuest)
-    console.log('Has flat serveBreakfast:', !!serverData.serveBreakfast)
-    console.log('Has flat smokingAllowed:', !!serverData.smokingAllowed)
-    console.log('Full structure keys:', Object.keys(serverData))
-    console.groupEnd()
-  }
+const debugServerDataStructure = (_serverData: any, _context: string = '') => {
+  // Debug logging removed for cleaner devtools
 }
 
 const initialState: PropertyState = {
@@ -306,6 +296,7 @@ const propertySlice = createSlice({
         bathrooms: 1,
         allowChildren: false,
         offerCribs: false,
+        rooms: [],
         // Services fields (flattened)
         serveBreakfast: false,
         parking: ParkingType.No,
@@ -314,6 +305,8 @@ const propertySlice = createSlice({
         smokingAllowed: false,
         partiesOrEventsAllowed: false,
         petsAllowed: PetPolicy.No,
+        amenities: [],
+        photos: [],
         bookingType: BookingType.NeedToRequestBook,
         paymentType: PaymentType.Online,
         pricing: {
@@ -346,7 +339,7 @@ const propertySlice = createSlice({
         allowChildren: property.allowChildren || false,
         offerCribs: property.offerCribs || false,
         propertySizeSqMtr: property.propertySizeSqMtr,
-        rooms: property.rooms,
+        rooms: property.rooms || [],
         // Services fields (flattened)
         serveBreakfast: property.serveBreakfast || false,
         parking: property.parking || ParkingType.No,

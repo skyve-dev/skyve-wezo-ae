@@ -2,6 +2,7 @@ import React from 'react'
 import { FaCamera } from 'react-icons/fa'
 import { Box } from '@/components'
 import { WizardFormData } from '@/types/property'
+import { resolvePhotoUrl } from '@/utils/api'
 
 interface PhotosTabProps {
     formData: Partial<WizardFormData>
@@ -46,7 +47,7 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
                                 borderRadius="8px"
                                 overflow="hidden"
                                 height="150px"
-                                backgroundImage={`url(${photo.url})`}
+                                backgroundImage={`url(${resolvePhotoUrl(photo.url)})`}
                                 backgroundSize="cover"
                                 backgroundPosition="center"
                                 position="relative"

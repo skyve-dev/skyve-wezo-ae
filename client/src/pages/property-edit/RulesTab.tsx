@@ -180,54 +180,6 @@ const RulesTab: React.FC<RulesTabProps> = ({ formData, updateFormData }) => {
                     </Box>
                 </Box>
 
-                {/* Booking Restrictions */}
-                <Box>
-                    <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Booking Restrictions
-                    </h4>
-                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
-                        <NumberStepperInput
-                            label="Minimum Nights"
-                            value={formData.minimumNights || 1}
-                            onChange={(value) => updateFormData({minimumNights: value})}
-                            min={1}
-                            max={365}
-                            format="integer"
-                            width="100%"
-                        />
-                        <NumberStepperInput
-                            label="Maximum Nights"
-                            value={formData.maximumNights || 365}
-                            onChange={(value) => updateFormData({maximumNights: value})}
-                            min={1}
-                            max={365}
-                            format="integer"
-                            width="100%"
-                        />
-                    </Box>
-                </Box>
-
-                {/* Additional Policies */}
-                <Box>
-                    <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                        House Rules & Additional Policies
-                    </label>
-                    <textarea
-                        value={formData.additionalRules || ''}
-                        onChange={(e) => updateFormData({additionalRules: e.target.value})}
-                        placeholder="Enter any additional house rules, policies, or important information for guests..."
-                        rows={6}
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '4px',
-                            fontSize: '0.875rem',
-                            resize: 'vertical',
-                            fontFamily: 'inherit'
-                        }}
-                    />
-                </Box>
 
                 <Box
                     padding="1rem"

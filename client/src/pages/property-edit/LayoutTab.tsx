@@ -16,7 +16,6 @@ interface LayoutTabProps {
 const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData }) => {
     const [showAddRoom, setShowAddRoom] = useState(false)
     const [newRoomName, setNewRoomName] = useState('')
-
     const addRoom = () => {
         if (newRoomName.trim()) {
             const newRoom: Room = {
