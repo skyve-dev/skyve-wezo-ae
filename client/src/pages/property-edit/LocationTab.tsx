@@ -1,5 +1,6 @@
 import React from 'react'
 import { Box } from '@/components'
+import { FaMapMarkerAlt, FaGlobe, FaBuilding, FaMapPin } from 'react-icons/fa'
 import Input from '@/components/base/Input.tsx'
 import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
 import { WizardFormData, ValidationErrors } from '@/types/property'
@@ -13,12 +14,16 @@ interface LocationTabProps {
 const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, validationErrors }) => {
     return (
         <Box>
-            <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                Property Location
-            </h3>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+                <FaMapMarkerAlt style={{color: '#374151', fontSize: '1.25rem'}} />
+                <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                    Property Location
+                </h3>
+            </Box>
             <Box display="grid" gap="1.5rem">
                 <Input
                     label="Country/Region"
+                    icon={FaGlobe}
                     value={formData.address?.countryOrRegion || 'UAE'}
                     onChange={(e) => updateFormData({
                         address: {
@@ -35,6 +40,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
 
                 <Input
                     label="City"
+                    icon={FaBuilding}
                     value={formData.address?.city || ''}
                     onChange={(e) => updateFormData({
                         address: {
@@ -53,6 +59,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
 
                 <Input
                     label="Apartment/Floor Number (Optional)"
+                    icon={FaBuilding}
                     value={formData.address?.apartmentOrFloorNumber || ''}
                     onChange={(e) => updateFormData({
                         address: {
@@ -69,6 +76,7 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
 
                 <NumberStepperInput
                     label="Zip Code"
+                    icon={FaMapPin}
                     value={formData.address?.zipCode || 0}
                     onChange={(value) => updateFormData({
                         address: {
@@ -145,9 +153,12 @@ const LocationTab: React.FC<LocationTabProps> = ({ formData, updateFormData, val
                     borderRadius="0.5rem"
                     border="1px solid #bae6fd"
                 >
-                    <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                        📍 Location Tips
-                    </h4>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaMapMarkerAlt style={{color: '#0369a1', fontSize: '0.875rem'}} />
+                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
+                            Location Tips
+                        </h4>
+                    </Box>
                     <ul style={{
                         margin: 0,
                         paddingLeft: '1rem',

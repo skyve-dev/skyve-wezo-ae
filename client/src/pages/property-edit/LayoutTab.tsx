@@ -5,7 +5,7 @@ import Input from '@/components/base/Input.tsx'
 import Button from '@/components/base/Button.tsx'
 import { WizardFormData, Room, Bed } from '@/types/property'
 import { BedType, BedTypeLabels } from '@/constants/propertyEnums'
-import { FaPlus, FaTrash, FaBed } from 'react-icons/fa'
+import { FaPlus, FaTrash, FaBed, FaUsers, FaBath, FaChild, FaRulerCombined } from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface LayoutTabProps {
@@ -78,13 +78,17 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData }) => {
 
     return (
         <Box>
-            <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                Layout & Capacity
-            </h3>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+                <FaBed style={{color: '#374151', fontSize: '1.25rem'}} />
+                <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                    Layout & Capacity
+                </h3>
+            </Box>
             <Box display="grid" gap="1.5rem">
                 <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
                     <NumberStepperInput
                         label="Maximum Guests"
+                        icon={FaUsers}
                         value={formData.maximumGuest || 1}
                         onChange={(value) => updateFormData({maximumGuest: value})}
                         min={1}
@@ -97,6 +101,7 @@ const LayoutTab: React.FC<LayoutTabProps> = ({ formData, updateFormData }) => {
 
                     <NumberStepperInput
                         label="Bathrooms"
+                        icon={FaBath}
                         value={formData.bathrooms || 1}
                         onChange={(value) => updateFormData({bathrooms: value})}
                         min={1}

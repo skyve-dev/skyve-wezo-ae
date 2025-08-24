@@ -6,7 +6,7 @@ import SlidingDrawer from '@/components/base/SlidingDrawer'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import useDrawerManager from '@/hooks/useDrawerManager'
 import {AVAILABLE_AMENITIES, getAmenitiesByCategory} from '@/constants/amenities'
-import {FaCheck, FaPlus} from 'react-icons/fa'
+import {FaCheck, FaPlus, FaTimes, FaStar, FaCheckCircle} from 'react-icons/fa'
 
 interface AmenitiesTabProps {
     formData: Partial<WizardFormData>
@@ -63,9 +63,12 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
     }
     return (
         <Box>
-            <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                Property Amenities
-            </h3>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+                <FaStar style={{color: '#374151', fontSize: '1.25rem'}} />
+                <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                    Property Amenities
+                </h3>
+            </Box>
             <p style={{color: '#666', marginBottom: '1.5rem'}}>
                 Select amenities that your property offers. These help guests find your property in search results.
             </p>
@@ -123,7 +126,7 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                                         minHeight: '1.2rem'
                                     }}
                                 >
-                                    ×
+                                    <FaTimes />
                                 </Box>
                             </Box>
                         ))}
@@ -152,9 +155,12 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                     borderRadius="0.5rem"
                     border="1px solid #bae6fd"
                 >
-                    <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                        ✨ Amenity Tips
-                    </h4>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaStar style={{color: '#0369a1', fontSize: '0.875rem'}} />
+                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
+                            Amenity Tips
+                        </h4>
+                    </Box>
                     <ul style={{
                         margin: 0,
                         paddingLeft: '1rem',
@@ -238,9 +244,7 @@ const AmenitiesTab: React.FC<AmenitiesTabProps> = ({ formData, updateFormData, v
                                             transition="all 0.2s"
                                         >
                                             {isSelected && (
-                                                <Box color="white" fontSize="0.875rem" fontWeight="bold">
-                                                    ✓
-                                                </Box>
+                                                <FaCheckCircle style={{color: 'white', fontSize: '0.75rem'}} />
                                             )}
                                         </Box>
                                         <Box fontSize="1.5rem">{amenity.icon}</Box>

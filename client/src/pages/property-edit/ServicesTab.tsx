@@ -4,7 +4,7 @@ import Input from '@/components/base/Input.tsx'
 import Button from '@/components/base/Button.tsx'
 import { WizardFormData } from '@/types/property'
 import { ParkingType, ParkingTypeLabels } from '@/constants/propertyEnums'
-import { FaPlus, FaTrash } from 'react-icons/fa'
+import { FaPlus, FaTrash, FaCoffee, FaCar, FaGlobe, FaConciergeBell } from 'react-icons/fa'
 import MobileSelect from './MobileSelect'
 
 interface ServicesTabProps {
@@ -34,16 +34,22 @@ const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData }) =
 
     return (
         <Box>
-            <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                Services & Amenities
-            </h3>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+                <FaConciergeBell style={{color: '#374151', fontSize: '1.25rem'}} />
+                <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                    Services & Amenities
+                </h3>
+            </Box>
             
             <Box display="grid" gap="1.5rem">
                 {/* Breakfast Service */}
                 <Box>
-                    <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                        Breakfast Service
-                    </label>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaCoffee style={{color: '#374151', fontSize: '0.875rem'}} />
+                        <label style={{fontWeight: '500'}}>
+                            Breakfast Service
+                        </label>
+                    </Box>
                     <Box display="flex" gap="1rem">
                         <Box
                             as="button"
@@ -75,23 +81,34 @@ const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData }) =
                 </Box>
 
                 {/* Parking */}
-                <MobileSelect<ParkingType>
-                    label="Parking Availability"
-                    value={formData.parking || ParkingType.No}
-                    options={Object.values(ParkingType).map(type => ({
-                        value: type,
-                        label: ParkingTypeLabels[type]
-                    }))}
-                    onChange={(value) => updateFormData({parking: value})}
-                    placeholder="Select parking option"
-                    helperText="Choose the parking option that best describes your property"
-                />
+                <Box>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaCar style={{color: '#374151', fontSize: '0.875rem'}} />
+                        <label style={{fontWeight: '500'}}>
+                            Parking Availability
+                        </label>
+                    </Box>
+                    <MobileSelect<ParkingType>
+                        label=""
+                        value={formData.parking || ParkingType.No}
+                        options={Object.values(ParkingType).map(type => ({
+                            value: type,
+                            label: ParkingTypeLabels[type]
+                        }))}
+                        onChange={(value) => updateFormData({parking: value})}
+                        placeholder="Select parking option"
+                        helperText="Choose the parking option that best describes your property"
+                    />
+                </Box>
 
                 {/* Languages */}
                 <Box>
-                    <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                        Languages Spoken ({formData.languages?.length || 0})
-                    </label>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaGlobe style={{color: '#374151', fontSize: '0.875rem'}} />
+                        <label style={{fontWeight: '500'}}>
+                            Languages Spoken ({formData.languages?.length || 0})
+                        </label>
+                    </Box>
                     
                     {/* Current Languages */}
                     {formData.languages && formData.languages.length > 0 && (
@@ -136,6 +153,7 @@ const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData }) =
                     <Box display="flex" gap="0.5rem" alignItems="flex-end">
                         <Input
                             label="Add Language"
+                            icon={FaGlobe}
                             value={newLanguage}
                             onChange={(e) => setNewLanguage(e.target.value)}
                             placeholder="e.g., English, Arabic, Hindi"
@@ -164,9 +182,12 @@ const ServicesTab: React.FC<ServicesTabProps> = ({ formData, updateFormData }) =
                     borderRadius="0.5rem"
                     border="1px solid #bae6fd"
                 >
-                    <h4 style={{margin: '0 0 0.5rem 0', color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
-                        🛎️ Services Tips
-                    </h4>
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                        <FaConciergeBell style={{color: '#0369a1', fontSize: '0.875rem'}} />
+                        <h4 style={{margin: 0, color: '#0369a1', fontSize: '0.875rem', fontWeight: '600'}}>
+                            Services Tips
+                        </h4>
+                    </Box>
                     <ul style={{
                         margin: 0,
                         paddingLeft: '1rem',

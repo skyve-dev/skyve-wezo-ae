@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {FaArrowLeft, FaBed, FaBuilding, FaCamera, FaCog, FaDollarSign, FaGavel, FaMapMarkerAlt, FaSave, FaSpinner, FaWifi} from 'react-icons/fa'
+import {FaArrowLeft, FaBed, FaBuilding, FaCamera, FaCog, FaDollarSign, FaGavel, FaMapMarkerAlt, FaSave, FaSpinner, FaWifi, FaExclamationTriangle, FaTimes} from 'react-icons/fa'
 import {useAppShell} from '@/components/base/AppShell'
 import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box, Tab} from '@/components'
@@ -249,9 +249,12 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
                         borderRadius="8px"
                         fontSize="0.875rem"
                     >
-                        <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: '600' }}>
-                            {validationErrors ? '⚠️ Validation Errors' : '❌ Error'}
-                        </h4>
+                        <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                            {validationErrors ? <FaExclamationTriangle style={{color: '#dc2626'}} /> : <FaTimes style={{color: '#dc2626'}} />}
+                            <h4 style={{ margin: 0, fontWeight: '600' }}>
+                                {validationErrors ? 'Validation Errors' : 'Error'}
+                            </h4>
+                        </Box>
                         <p style={{ margin: '0 0 1rem 0' }}>{error}</p>
                         {validationErrors && (
                             <Box
