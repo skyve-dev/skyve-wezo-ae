@@ -1,9 +1,8 @@
 import React from 'react'
 import {AppShell} from '@/components/base/AppShell'
-import {FaHome} from 'react-icons/fa'
 import type {OnAfterNavigateFunction, OnBeforeNavigateFunction} from '@/components/base/AppShell/types'
 import {routes} from "@/Routes.tsx";
-
+import wezoAe from "./assets/wezo.svg";
 
 // Main AppContent Component
 const AppContent: React.FC = () => {
@@ -35,7 +34,7 @@ const AppContent: React.FC = () => {
             config={{
                 header: {
                     title: 'Wezo.ae',
-                    logo: <FaHome/>,
+                    logo: <img src={wezoAe} alt="Wezo.ae" style={{height: '2rem'}} />,
                     showQuickNav: true
                 },
                 footer: {
