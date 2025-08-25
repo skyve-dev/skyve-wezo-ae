@@ -12,7 +12,9 @@ import {
     AppShellConfig,
     AppShellContextType,
     BaseRoute,
+    GuardRegistrationFunction,
     NavigateToFunction,
+    NavigationGuardFunction,
     OnAfterNavigateFunction,
     OnBeforeNavigateFunction,
     RouteDefinition,
@@ -83,11 +85,50 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     // UI state
     const [isSideNavOpen, setSideNavOpen] = useState(false)
     const [isLoading, setLoading] = useState(false)
+    
+    // Navigation guards state
+    const navigationGuards = useRef<Set<NavigationGuardFunction>>(new Set())
 
+    // Guard registration function
+    const registerNavigationGuard: GuardRegistrationFunction = useCallback((guard: NavigationGuardFunction) => {
+        navigationGuards.current.add(guard)
+        
+        return () => {
+            navigationGuards.current.delete(guard)
+        }
+    }, [])
+
+    // Check all navigation guards
+    const checkNavigationGuards = useCallback(async (): Promise<boolean> => {
+        const guards = Array.from(navigationGuards.current)
+        
+        for (const guard of guards) {
+            try {
+                const canNavigate = await guard()
+                if (!canNavigate) {
+                    return false
+                }
+            } catch (error) {
+                console.error('Navigation guard error:', error)
+                return false
+            }
+        }
+        
+        return true
+    }, [])
 
     // Handle URL changes and popstate events (back/forward navigation)
     useEffect(() => {
-        const handlePopState = () => {
+        const handlePopState = async () => {
+            // Check navigation guards first
+            const canNavigate = await checkNavigationGuards()
+            if (!canNavigate) {
+                // Guards blocked navigation - restore previous URL
+                const currentPath = routeKeyToPath(currentRoute)
+                navigateToUrl(currentPath, currentParams, true)
+                return
+            }
+            
             const fullPath = getCurrentPath() + window.location.search
             const {routeKey, params} = pathToRouteKeyWithParams(fullPath)
 
@@ -107,8 +148,19 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
             }
         }
 
+        // Handle beforeunload for page unload attempts
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (navigationGuards.current.size > 0) {
+                event.preventDefault()
+                event.returnValue = '' // Show browser confirmation dialog
+                return ''
+            }
+        }
+
         // Listen for browser back/forward navigation
         window.addEventListener('popstate', handlePopState)
+        // Listen for page unload attempts (closing tab, refresh, etc.)
+        window.addEventListener('beforeunload', handleBeforeUnload)
 
         // Initial URL sync - ensure URL matches current route and params
         const currentPath = getCurrentPath()
@@ -126,8 +178,9 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
 
         return () => {
             window.removeEventListener('popstate', handlePopState)
+            window.removeEventListener('beforeunload', handleBeforeUnload)
         }
-    }, [routes, currentRoute, currentParams])
+    }, [routes, currentRoute, currentParams, checkNavigationGuards])
 
     // Sync URL when current route or params change programmatically
     useEffect(() => {
@@ -145,6 +198,12 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
 
     // Type-safe navigation function with URL synchronization and event hooks
     const navigateTo: NavigateToFunction<T> = useCallback(async (routeKey: any, props?: any) => {
+        // Check navigation guards first
+        const canNavigate = await checkNavigationGuards()
+        if (!canNavigate) {
+            return // Guards blocked navigation
+        }
+        
         const route = routes[routeKey]
         if (!route) {
             console.warn(`Route not found: ${routeKey}`)
@@ -244,7 +303,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
             }
             return prev
         })
-    }, [routes, currentRoute, currentParams, onBeforeNavigate, onAfterNavigate])
+    }, [routes, currentRoute, currentParams, onBeforeNavigate, onAfterNavigate, checkNavigationGuards])
 
 
 
@@ -301,6 +360,8 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
         canNavigateBack,
         currentRoute,
         currentParams,
+        // Navigation guards
+        registerNavigationGuard,
         isLoading,
         setLoading,
         routes,

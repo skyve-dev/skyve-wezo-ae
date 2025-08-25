@@ -66,6 +66,10 @@ export interface DialogState<T = any> {
 // Mount function type for dynamic content
 export type MountFunction = (content: React.ReactNode) => () => void
 
+// Navigation guard types
+export type NavigationGuardFunction = () => Promise<boolean>
+export type GuardRegistrationFunction = (guard: NavigationGuardFunction) => () => void
+
 // AppShell context interface
 export interface AppShellContextType<T extends Record<string, BaseRoute> = Record<string, BaseRoute>> {
     // Navigation
@@ -74,6 +78,9 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     canNavigateBack: boolean
     currentRoute: string
     currentParams: Record<string, any>
+
+    // Navigation guards
+    registerNavigationGuard: GuardRegistrationFunction
 
     // Promise-based dialog system
     openDialog: PromiseDialogFunction

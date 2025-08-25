@@ -31,5 +31,8 @@ export type {
   PromiseDialogFunction,
   DialogState,
   // Dynamic content mounting
-  MountFunction
+  MountFunction,
+  // Navigation guard types
+  NavigationGuardFunction,
+  GuardRegistrationFunction
 } from './types'

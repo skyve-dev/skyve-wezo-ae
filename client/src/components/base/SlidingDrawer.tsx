@@ -2,7 +2,8 @@ import React, {CSSProperties, useEffect, useRef, useState} from 'react'
 import ReactDOM from 'react-dom'
 import {Button} from './Button'
 import {Box} from './Box'
-import {IoClose} from "react-icons/io5";
+import {IoClose} from "react-icons/io5"
+import { disableScroller, enableScroller } from '../../utils/scrollUtils'
 
 // Global portal manager to track multiple drawers using the same portal
 class PortalManager {
@@ -101,22 +102,6 @@ class PortalManager {
     }
 }
 
-const disableStyleId = 'disable-scroll-style'
-
-function disableScroller() {
-    const style = document.createElement('style');
-    style.id = disableStyleId;
-    style.innerText = `html,body,#root{height:100%;overflow:hidden}`;
-    document.head.append(style);
-}
-
-
-function enableScroller() {
-    const style = document.getElementById(disableStyleId);
-    if(style){
-        style.remove();
-    }
-}
 
 interface SlidingDrawerProps {
     /**

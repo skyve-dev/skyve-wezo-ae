@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
 import { DialogState, DialogContentFunction, PromiseDialogFunction, DialogCloseFunction } from './types';
 import { Box } from '../Box';
+import { disableScroller, enableScroller } from '../../../utils/scrollUtils';
 
 interface PromiseDialogContextType {
     openDialog: PromiseDialogFunction;
@@ -15,6 +16,7 @@ interface PromiseDialogProviderProps {
 export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ children }) => {
     const [dialogStack, setDialogStack] = useState<DialogState[]>([]);
     const dialogCounter = useRef(0);
+    const scrollPositionRef = useRef<number>(0);
 
     const openDialog: PromiseDialogFunction = <T = any>(content: DialogContentFunction<T>): Promise<T> => {
         return new Promise<T>((resolve, reject) => {
@@ -39,6 +41,24 @@ export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ ch
             setDialogStack(prev => [...prev, newDialog]);
         });
     };
+
+    // Manage scroll behavior when dialogs open/close
+    useEffect(() => {
+        if (dialogStack.length > 0) {
+            // First dialog opened - disable scrolling and save position
+            if (dialogStack.length === 1) {
+                scrollPositionRef.current = window.scrollY;
+                disableScroller();
+            }
+        } else {
+            // All dialogs closed - enable scrolling and restore position
+            enableScroller();
+            window.scrollTo({
+                top: scrollPositionRef.current,
+                behavior: 'instant'
+            });
+        }
+    }, [dialogStack.length]);
 
     const contextValue: PromiseDialogContextType = {
         openDialog
