@@ -156,6 +156,7 @@ export interface PropertyState {
   properties: Property[]
   currentProperty: Property | null
   wizardData: WizardFormData | null
+  originalWizardData: WizardFormData | null // Baseline data for change detection
   loading: boolean
   error: string | null
   validationErrors: ValidationErrors | null

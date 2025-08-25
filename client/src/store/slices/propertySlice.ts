@@ -14,6 +14,7 @@ const initialState: PropertyState = {
   properties: [],
   currentProperty: null,
   wizardData: null,
+  originalWizardData: null, // Baseline data for change detection
   loading: false,
   error: null,
   validationErrors: null
@@ -397,12 +398,18 @@ const propertySlice = createSlice({
       }
       
       state.wizardData = wizardData
+      state.originalWizardData = { ...wizardData } // Set baseline for change detection
       saveWizardDataToStorage(wizardData)
     },
     updateWizardData: (state, action: PayloadAction<Partial<WizardFormData>>) => {
+      console.log('🔄 Redux updateWizardData called with:', action.payload)
+      console.log('🔄 Current wizardData:', state.wizardData)
       if (state.wizardData) {
         state.wizardData = { ...state.wizardData, ...action.payload }
+        console.log('🔄 Updated wizardData:', state.wizardData)
         saveWizardDataToStorage(state.wizardData)
+      } else {
+        console.log('❌ No wizardData in state!')
       }
     },
     setWizardStep: (state, action: PayloadAction<number>) => {
@@ -418,6 +425,17 @@ const propertySlice = createSlice({
     completeWizard: (state) => {
       if (state.wizardData) {
         state.wizardData.isComplete = true
+        saveWizardDataToStorage(state.wizardData)
+      }
+    },
+    // Actions for managing original data baseline (for change detection)
+    setOriginalWizardData: (state, action: PayloadAction<WizardFormData | null>) => {
+      state.originalWizardData = action.payload
+    },
+    resetToOriginalWizardData: (state) => {
+      // Discard changes - reset wizardData to original state
+      if (state.originalWizardData) {
+        state.wizardData = { ...state.originalWizardData }
         saveWizardDataToStorage(state.wizardData)
       }
     }
@@ -492,7 +510,11 @@ const propertySlice = createSlice({
           state.properties[index] = action.payload
         }
         if (state.currentProperty?.propertyId === action.payload.propertyId) {
-          state.currentProperty = action.payload
+          state.currentProperty = action.payload;
+        }
+        // Reset originalWizardData to match current wizardData after successful save
+        if (state.wizardData) {
+          state.originalWizardData = { ...state.wizardData }
         }
         state.validationErrors = null
       })
@@ -571,7 +593,9 @@ export const {
   updateWizardData,
   setWizardStep,
   clearWizardData,
-  completeWizard
+  completeWizard,
+  setOriginalWizardData,
+  resetToOriginalWizardData
 } = propertySlice.actions
 
 export default propertySlice.reducer

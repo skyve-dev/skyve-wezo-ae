@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, ReactNode, useCallback } from 'react'
+import React, { createContext, useContext, useState, useRef, ReactNode, useCallback, useMemo } from 'react'
 
 interface DynamicContentState {
     header: ReactNode | null
@@ -112,12 +112,12 @@ export const DynamicContentProvider: React.FC<DynamicContentProviderProps> = ({ 
         }
     }, [])
 
-    const contextValue: DynamicContentContextType = {
+    const contextValue: DynamicContentContextType = useMemo(() => ({
         content,
         mountHeader,
         mountSideNav,
         mountFooter
-    }
+    }), [content, mountHeader, mountSideNav, mountFooter])
 
     return (
         <DynamicContentContext.Provider value={contextValue}>

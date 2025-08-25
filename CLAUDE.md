@@ -38,7 +38,9 @@ wezo-monorepo/
 
 ### Workspace Commands (from root)
 
+- `npm run dev` - Start both client and server in development mode
 - `npm run dev:server` - Start server in development mode
+- `npm run dev:client` - Start client in development mode
 - `npm run build:server` - Build server
 - `npm run test:server` - Run server tests
 - `npm install` - Install all workspace dependencies
