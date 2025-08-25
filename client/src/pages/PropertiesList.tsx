@@ -81,7 +81,7 @@ const PropertiesList: React.FC = () => {
             borderRadius="0px"
             borderRadiusSm="8px"
             boxShadow="0 0px 0px rgba(0,0,0,0)"
-            boxShadowSm="0 2px 4px rgba(0,0,0,0.1)"
+            boxShadowSm="0 0.1rem 0.5rem rgba(0,0,0,0.1)"
             position="relative"
         >
             {/* Property Photo */}
