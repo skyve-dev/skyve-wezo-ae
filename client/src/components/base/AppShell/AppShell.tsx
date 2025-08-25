@@ -4,6 +4,7 @@ import {Button} from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
 import Tab, {TabItem} from '../Tab'
 import Dialog from '../Dialog'
+import ScrollbarOverlay from '../ScrollbarOverlay'
 import AppShellContext from './AppShellContext'
 import {
     AlertDialogOptions,
@@ -549,6 +550,14 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         <AppShellContext.Provider value={contextValue as AppShellContextType}>
             <>
                 <>
+                    {/* Custom Scrollbar Overlay */}
+                    <ScrollbarOverlay 
+                        thumbColor="rgba(0, 0, 0, 0.2)"
+                        thumbHoverColor="rgba(0, 0, 0, 0.4)"
+                        trackColor="transparent"
+                        hideDelay={1500}
+                        minHeight={40}
+                    />
                     {/* Header */}
                     <Box
                         ref={headerRef}
@@ -880,25 +889,12 @@ const AppShell = <T extends Record<string, BaseRoute>>({
           background: linear-gradient(135deg, rgba(213, 33, 34, 0.05) 0%, rgba(213, 33, 34, 0.02) 100%);
         }
         
-        /* Custom scrollbar styling for luxury feel */
+        /* Custom scrollbar styling */
         ::-webkit-scrollbar {
-          width: 10px;
-          height: 10px;
+          width: 0px;
+          height: 0px;
         }
         
-        ::-webkit-scrollbar-track {
-          background: #FAFAFA;
-          border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-          background: linear-gradient(135deg, #D52122 0%, #B51D1E 100%);
-          border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(135deg, #E53132 0%, #C52D2E 100%);
-        }
         
         /* Tab active state with gradient */
         .tab-active {
