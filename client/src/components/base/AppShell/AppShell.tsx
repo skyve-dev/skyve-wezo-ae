@@ -397,8 +397,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         canNavigateBack,
         currentRoute,
         currentParams,
-        isSideNavOpen,
-        setSideNavOpen,
         alertDialog,
         isLoading,
         setLoading,

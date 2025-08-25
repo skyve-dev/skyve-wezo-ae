@@ -86,10 +86,6 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     currentRoute: string
     currentParams: Record<string, any>
 
-    // UI State
-    isSideNavOpen: boolean
-    setSideNavOpen: (open: boolean) => void
-
     // Dialog system
     alertDialog: (options: AlertDialogOptions) => Promise<void>
     dialogState?: {
