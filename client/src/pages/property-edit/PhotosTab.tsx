@@ -6,6 +6,7 @@ import {Property, ValidationErrors, WizardFormData} from '@/types/property'
 import {api, resolvePhotoUrl} from '@/utils/api'
 import {useAppDispatch} from '@/store'
 import {fetchPropertyById} from '@/store/slices/propertySlice'
+import {useAppShell} from '@/components/base/AppShell'
 
 interface PhotosTabProps {
     formData: Partial<WizardFormData>
@@ -16,6 +17,7 @@ interface PhotosTabProps {
 
 const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
     const dispatch = useAppDispatch()
+    const { openDialog } = useAppShell()
     const [isUploading, setIsUploading] = useState(false)
     const [isDeletingPhoto, setIsDeletingPhoto] = useState<string | null>(null)
     const [uploadError, setUploadError] = useState<string>('')
@@ -149,7 +151,30 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ currentProperty }) => {
     const handleDeletePhoto = async (photoId: string) => {
         if (!currentProperty?.propertyId) return
         
-        if (!window.confirm('Are you sure you want to delete this photo?')) return
+        const confirmed = await openDialog<boolean>((close) => (
+            <Box padding="2rem" textAlign="center" >
+                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+                    Delete Photo
+                </Box>
+                <Box marginBottom="2rem" color="#374151">
+                    Are you sure you want to delete this photo? This action cannot be undone.
+                </Box>
+                <Box display="flex" gap="1rem" justifyContent="center">
+                    <Button 
+                        label="Cancel"
+                        onClick={() => close(false)}
+                        variant="normal"
+                    />
+                    <Button 
+                        label="Delete"
+                        onClick={() => close(true)}
+                        variant="promoted"
+                    />
+                </Box>
+            </Box>
+        ))
+
+        if (!confirmed) return
 
         setIsDeletingPhoto(photoId)
         setUploadError('')

@@ -3,11 +3,10 @@ import {Box} from '../Box'
 import {Button} from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
 import Tab, {TabItem} from '../Tab'
-import Dialog from '../Dialog'
 import ScrollbarOverlay from '../ScrollbarOverlay'
 import AppShellContext from './AppShellContext'
+import { PromiseDialogProvider, usePromiseDialog } from './PromiseDialogProvider'
 import {
-    AlertDialogOptions,
     AppShellConfig,
     AppShellContextType,
     AppShellVisibility,
@@ -40,19 +39,9 @@ interface AppShellProps<T extends Record<string, BaseRoute>> {
     children?: ReactNode
 }
 
-// Global dialog state for the AppShell
-let globalDialogState: {
-    isOpen: boolean
-    options: AlertDialogOptions | null
-    resolver: ((value: void) => void) | null
-    setDialog?: (state: any) => void
-} = {
-    isOpen: false,
-    options: null,
-    resolver: null
-}
 
-const AppShell = <T extends Record<string, BaseRoute>>({
+// Internal AppShell component that uses the promise dialog context
+const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                                            routes,
                                                            config,
                                                            initialRoute,
@@ -60,6 +49,7 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                                                            onAfterNavigate,
                                                            children
                                                        }: AppShellProps<T>) => {
+    const { openDialog } = usePromiseDialog();
     // Helper function to get initial route and params from URL
     const getInitialRouteAndParams = useCallback((): { route: string; params: Record<string, any> } => {
         if (typeof window === 'undefined') {
@@ -101,21 +91,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         footer: true
     })
 
-    // Dialog state
-    const [dialogState, setDialogState] = useState<{
-        isOpen: boolean
-        options: AlertDialogOptions | null
-        resolver: ((value: void) => void) | null
-    }>({
-        isOpen: false,
-        options: null,
-        resolver: null
-    })
-
-    // Set up global dialog state
-    React.useEffect(() => {
-        globalDialogState.setDialog = setDialogState
-    }, [])
 
     // Handle URL changes and popstate events (back/forward navigation)
     useEffect(() => {
@@ -278,54 +253,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         })
     }, [routes, currentRoute, currentParams, onBeforeNavigate, onAfterNavigate])
 
-    // Alert dialog function
-    const alertDialog = useCallback((options: AlertDialogOptions): Promise<void> => {
-        return new Promise((resolve) => {
-            const dialogState = {
-                isOpen: true,
-                options: {
-                    ...options,
-                    buttons: options.buttons.map(button => ({
-                        ...button,
-                        onClick: async () => {
-                            try {
-                                await button.onClick()
-                                setDialogState({isOpen: false, options: null, resolver: null})
-                                // Update global state
-                                globalDialogState.isOpen = false
-                                globalDialogState.options = null
-                                globalDialogState.resolver = null
-                                resolve()
-                            } catch (error) {
-                                console.error('Dialog button error:', error)
-                                // Still resolve to close dialog
-                                setDialogState({isOpen: false, options: null, resolver: null})
-                                globalDialogState.isOpen = false
-                                globalDialogState.options = null
-                                globalDialogState.resolver = null
-                                resolve()
-                            }
-                        }
-                    }))
-                },
-                resolver: resolve
-            }
-
-            setDialogState(dialogState)
-            // Update global state for AppShell to access
-            globalDialogState.isOpen = true
-            globalDialogState.options = dialogState.options
-            globalDialogState.resolver = resolve
-        })
-    }, [])
-
-    // Close dialog helper
-    const closeDialog = useCallback(() => {
-        if (dialogState.resolver) {
-            dialogState.resolver()
-        }
-        setDialogState({isOpen: false, options: null, resolver: null})
-    }, [dialogState.resolver])
 
     // Visibility control functions
     const setVisibility = useCallback((options: AppShellVisibilityOptions) => {
@@ -397,13 +324,11 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         canNavigateBack,
         currentRoute,
         currentParams,
-        alertDialog,
         isLoading,
         setLoading,
         routes,
-        // Expose dialog state for AppShell
-        dialogState,
-        closeDialog,
+        // Promise-based dialog system
+        openDialog,
         // Visibility control
         visibility,
         setVisibility,
@@ -528,21 +453,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
             // content is optional since we're using tabBarOnly
         }))
 
-    // Handle dialog button clicks
-    const handleDialogButton = async (onClick: () => Promise<void>) => {
-        try {
-            await onClick()
-            if (closeDialog) {
-                closeDialog()
-            }
-        } catch (error) {
-            console.error('Dialog button error:', error)
-            // Still close dialog on error
-            if (closeDialog) {
-                closeDialog()
-            }
-        }
-    }
 
     return (
         <AppShellContext.Provider value={contextValue as AppShellContextType}>
@@ -757,70 +667,6 @@ const AppShell = <T extends Record<string, BaseRoute>>({
                         </Box>
                     </SlidingDrawer>
 
-                    {/* Alert Dialog */}
-                    {dialogState?.isOpen && dialogState.options && (
-                        <Dialog
-                            isOpen={true}
-                            onClose={() => {
-                                if (closeDialog) {
-                                    closeDialog()
-                                }
-                            }}
-                            width="400px"
-                            disableBackdropClick
-                        >
-                            <Box padding="2rem" textAlign="center">
-                                {/* Icon */}
-                                {dialogState.options.icon && (
-                                    <Box
-                                        fontSize="3rem"
-                                        marginBottom="1rem"
-                                        color={theme.primaryColor}
-                                    >
-                                        {dialogState.options.icon}
-                                    </Box>
-                                )}
-
-                                {/* Title */}
-                                <Box
-                                    fontSize="1.5rem"
-                                    fontWeight="600"
-                                    marginBottom="1rem"
-                                    color="#1a202c"
-                                >
-                                    {dialogState.options.title}
-                                </Box>
-
-                                {/* Text */}
-                                <Box
-                                    fontSize="1rem"
-                                    color="#6b7280"
-                                    marginBottom="2rem"
-                                    lineHeight="1.5"
-                                >
-                                    {dialogState.options.text}
-                                </Box>
-
-                                {/* Buttons */}
-                                <Box
-                                    display="flex"
-                                    gap="1rem"
-                                    justifyContent="center"
-                                    flexWrap="wrap"
-                                >
-                                    {dialogState.options.buttons.map((button, index) => (
-                                        <Button
-                                            key={index}
-                                            label={button.label}
-                                            onClick={() => handleDialogButton(button.onClick)}
-                                            variant={button.variant === 'primary' ? 'promoted' : button.variant === 'danger' ? 'normal' : button.variant || 'normal'}
-                                            size="medium"
-                                        />
-                                    ))}
-                                </Box>
-                            </Box>
-                        </Dialog>
-                    )}
 
                     {/* Loading Overlay */}
                     {isLoading && (
@@ -914,5 +760,14 @@ const AppShell = <T extends Record<string, BaseRoute>>({
         </AppShellContext.Provider>
     )
 }
+
+// Main AppShell component that provides the promise dialog context
+const AppShell = <T extends Record<string, BaseRoute>>(props: AppShellProps<T>) => {
+    return (
+        <PromiseDialogProvider>
+            <AppShellInternal {...props} />
+        </PromiseDialogProvider>
+    );
+};
 
 export default AppShell

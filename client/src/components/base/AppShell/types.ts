@@ -48,19 +48,18 @@ export type OnAfterNavigateFunction = (
     source: RouteInfo
 ) => void | Promise<void>
 
-// Dialog button interface
-export interface DialogButton {
-    label: string
-    variant?: 'primary' | 'normal' | 'danger'
-    onClick: () => Promise<void>
-}
 
-// Alert dialog options
-export interface AlertDialogOptions {
-    icon?: React.ReactNode
-    title: string
-    text: string
-    buttons: DialogButton[]
+// New promise-based dialog system types
+export type DialogCloseFunction<T = any> = (result: T) => void
+export type DialogContentFunction<T = any> = (close: DialogCloseFunction<T>) => React.ReactNode
+export type PromiseDialogFunction = <T = any>(content: DialogContentFunction<T>) => Promise<T>
+
+// Dialog state for stacking support
+export interface DialogState<T = any> {
+    id: string
+    content: React.ReactNode
+    resolve: (value: T) => void
+    reject: (reason?: any) => void
 }
 
 // Visibility control interface
@@ -70,12 +69,8 @@ export interface AppShellVisibility {
     footer: boolean
 }
 
-// Visibility control options for programmatic control
-export interface AppShellVisibilityOptions {
-    header?: boolean
-    sideNav?: boolean
-    footer?: boolean
-}
+// Visibility control options for programmatic control (partial updates)
+export type AppShellVisibilityOptions = Partial<AppShellVisibility>
 
 // AppShell context interface
 export interface AppShellContextType<T extends Record<string, BaseRoute> = Record<string, BaseRoute>> {
@@ -86,14 +81,8 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     currentRoute: string
     currentParams: Record<string, any>
 
-    // Dialog system
-    alertDialog: (options: AlertDialogOptions) => Promise<void>
-    dialogState?: {
-        isOpen: boolean
-        options: AlertDialogOptions | null
-        resolver: ((value: void) => void) | null
-    }
-    closeDialog?: () => void
+    // Promise-based dialog system
+    openDialog: PromiseDialogFunction
 
     // Loading state
     isLoading: boolean

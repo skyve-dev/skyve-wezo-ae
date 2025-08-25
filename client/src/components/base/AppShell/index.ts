@@ -26,8 +26,11 @@ export type {
   AppShellContextType,
   AppShellVisibility,
   AppShellVisibilityOptions,
-  AlertDialogOptions,
-  DialogButton,
   NavigateToFunction,
-  ComponentProps
+  ComponentProps,
+  // Promise-based dialog types
+  DialogCloseFunction,
+  DialogContentFunction,
+  PromiseDialogFunction,
+  DialogState
 } from './types'

@@ -3,6 +3,8 @@ import { Photo } from '@/types/property';
 import { api, resolvePhotoUrl } from '@/utils/api';
 import { Box } from './base/Box';
 import { Input } from './base/Input';
+import { Button } from './base/Button';
+import { useAppShell } from './base/AppShell';
 
 interface ExtendedPhoto extends Photo {
   id: string;
@@ -16,6 +18,7 @@ interface Property {
 }
 
 const PhotoManagement: React.FC = () => {
+  const { openDialog } = useAppShell();
   const [photos, setPhotos] = useState<ExtendedPhoto[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
@@ -184,7 +187,30 @@ const PhotoManagement: React.FC = () => {
   };
 
   const handleDeletePhoto = async (photoId: string) => {
-    if (!window.confirm('Are you sure you want to delete this photo?')) return;
+    const confirmed = await openDialog<boolean>((close) => (
+      <Box padding="2rem" textAlign="center" maxWidth="400px">
+        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+          Delete Photo
+        </Box>
+        <Box marginBottom="2rem" color="#374151">
+          Are you sure you want to delete this photo? This action cannot be undone.
+        </Box>
+        <Box display="flex" gap="1rem" justifyContent="center">
+          <Button 
+            label="Cancel"
+            onClick={() => close(false)}
+            variant="normal"
+          />
+          <Button 
+            label="Delete"
+            onClick={() => close(true)}
+            variant="promoted"
+          />
+        </Box>
+      </Box>
+    ));
+
+    if (!confirmed) return;
 
     try {
       await api.delete(`/api/photos/${photoId}`);
@@ -229,7 +255,31 @@ const PhotoManagement: React.FC = () => {
   };
 
   const handleDetachFromProperty = async (photoId: string, propertyId: string) => {
-    if (!window.confirm('Are you sure you want to detach this photo from the property?')) return;
+    const confirmed = await openDialog<boolean>((close) => (
+      <Box padding="2rem" textAlign="center" maxWidth="400px">
+        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
+          Detach Photo
+        </Box>
+        <Box marginBottom="2rem" color="#374151">
+          Are you sure you want to detach this photo from the property? The photo will remain in your gallery.
+        </Box>
+        <Box display="flex" gap="1rem" justifyContent="center">
+          <Button 
+            label="Cancel"
+            onClick={() => close(false)}
+            variant="normal"
+          />
+          <Button 
+            label="Detach"
+            onClick={() => close(true)}
+            variant="promoted"
+            backgroundColor="#f59e0b"
+          />
+        </Box>
+      </Box>
+    ));
+
+    if (!confirmed) return;
 
     try {
       await api.delete(`/api/properties/${propertyId}/photos/${photoId}`);
