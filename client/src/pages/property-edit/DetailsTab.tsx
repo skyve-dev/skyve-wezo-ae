@@ -51,7 +51,10 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     label="Property Name"
                     icon={FaHome}
                     value={formData.name || ''}
-                    onChange={(e) => updateFormData({name: e.target.value})}
+                    onChange={(e) => {
+                        console.log('🏠 DetailsTab: Property name changed to:', e.target.value)
+                        updateFormData({name: e.target.value})
+                    }}
                     placeholder="Enter a descriptive name for your property"
                     width="100%"
                 />

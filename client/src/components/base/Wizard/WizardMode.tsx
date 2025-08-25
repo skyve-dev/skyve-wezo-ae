@@ -69,13 +69,18 @@ const WizardContent: React.FC<{
     }, [onCancel, openDialog, beginProgrammaticCancel])
 
     const handleNext = useCallback(async () => {
-        console.log('🔄 handleNext called', { isLastStep, currentStep, totalSteps })
         if (isLastStep) {
-            console.log('🏁 Last step - calling submitFinal')
-            await submitFinal()
+            try {
+                await submitFinal()
+            } catch (error) {
+                console.error('❌ WizardContent: submitFinal failed:', error)
+            }
         } else {
-            console.log('➡️ Not last step - calling nextStep')
-            await nextStep()
+            try {
+                await nextStep()
+            } catch (error) {
+                console.error('❌ WizardContent: nextStep failed:', error)
+            }
         }
     }, [isLastStep, submitFinal, nextStep])
 

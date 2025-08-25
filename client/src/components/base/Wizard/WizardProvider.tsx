@@ -130,10 +130,23 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
     }, [])
 
     const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
-        console.log('📝 updateFormData called with:', updates)
+        // Log property name specific changes
+        if ('name' in updates) {
+            console.log('🏠 WizardProvider: Property name being updated to:', updates.name)
+        }
+        
         setFormData(prev => {
             const newFormData = { ...prev, ...updates }
-            console.log('📝 formData updated from:', prev, 'to:', newFormData)
+            
+            // Log current property name in formData after update
+            if ('name' in updates) {
+                console.log('🏠 WizardProvider: FormData after property name update:', {
+                    previousName: prev.name,
+                    newName: newFormData.name,
+                    fullFormData: newFormData
+                })
+            }
+            
             return newFormData
         })
         dispatch(updateWizardData(updates))
@@ -256,22 +269,31 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
     // }, [openDialog, uploadedPhotos, clearDraft, onCancel])
 
     const submitFinal = useCallback(async () => {
-        console.log('🚀 submitFinal called', { propertyId, formData })
+        console.log('🏠 WizardProvider: submitFinal - Property name check:', {
+            propertyName: formData?.name,
+            formDataExists: !!formData,
+            propertyId
+        })
+        
         if (propertyId === 'new' && formData) {
-            console.log('📤 Dispatching createProperty with:', formData)
-            const result = await dispatch(createProperty(formData as WizardFormData))
-            console.log('📥 createProperty result:', result)
+            console.log('🏠 WizardProvider: About to submit property with name:', formData.name)
+            console.log('🏠 WizardProvider: Full form data being submitted:', formData)
             
-            if (createProperty.fulfilled.match(result)) {
-                console.log('✅ Property created successfully:', result.payload)
-                // Clear draft after successful creation
-                clearDraft()
-                onComplete?.(result.payload.propertyId || '')
-            } else {
-                console.log('❌ Property creation failed:', result)
+            try {
+                const result = await dispatch(createProperty(formData as WizardFormData))
+                
+                if (createProperty.fulfilled.match(result)) {
+                    console.log('✅ WizardProvider: Property created successfully')
+                    clearDraft()
+                    onComplete?.(result.payload.propertyId || '')
+                } else {
+                    console.log('❌ WizardProvider: Property creation failed:', result)
+                }
+            } catch (error) {
+                console.error('❌ WizardProvider: Exception during createProperty dispatch:', error)
             }
         } else {
-            console.log('❌ submitFinal conditions not met:', { propertyId, formDataExists: !!formData })
+            console.log('❌ WizardProvider: submitFinal conditions not met')
         }
     }, [propertyId, dispatch, clearDraft, onComplete])
 

@@ -106,8 +106,11 @@ const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
     ], [])
 
     const handleWizardComplete = useCallback((propertyId: string) => {
+        console.log('🎉 PropertyEdit: handleWizardComplete called with propertyId:', propertyId)
+        console.log('🔄 PropertyEdit: Navigating to edit mode...')
         // Navigate to edit mode with the new property ID
         navigateTo('property-edit', { propertyId })
+        console.log('✅ PropertyEdit: Navigation completed')
     }, [navigateTo])
 
     const handleWizardCancel = useCallback(() => {

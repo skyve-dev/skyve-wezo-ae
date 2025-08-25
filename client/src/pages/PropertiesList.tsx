@@ -4,13 +4,14 @@ import {useAppShell} from '@/components/base/AppShell'
 import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box, Input} from '@/components'
 import Button from '@/components/base/Button.tsx'
+import ConfirmationDialog from '@/components/base/ConfirmationDialog'
 import {useAppDispatch, useAppSelector} from '@/store'
 import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty, initializeWizard} from '@/store/slices/propertySlice'
 import {Property} from '@/types/property'
 import {resolvePhotoUrl} from '@/utils/api'
 
 const PropertiesList: React.FC = () => {
-    const {navigateTo} = useAppShell()
+    const {navigateTo, openDialog} = useAppShell()
     const dispatch = useAppDispatch()
 
     // Redux state
@@ -18,10 +19,6 @@ const PropertiesList: React.FC = () => {
 
     // Local state
     const [searchTerm, setSearchTerm] = useState('')
-    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; property: Property | null }>({
-        isOpen: false,
-        property: null
-    })
 
     // Fetch properties on component mount
     useEffect(() => {
@@ -46,10 +43,21 @@ const PropertiesList: React.FC = () => {
     }, [properties, searchTerm])
 
     // Handle property deletion
-    const handleDeleteProperty = async () => {
-        if (deleteDialog.property?.propertyId) {
-            await dispatch(deleteProperty(deleteDialog.property.propertyId))
-            setDeleteDialog({isOpen: false, property: null})
+    const handleDeleteProperty = async (property: Property) => {
+        const shouldDelete = await openDialog<boolean>((close) => (
+            <ConfirmationDialog
+                title="Delete Property"
+                message={`Are you sure you want to delete "${property.name}"? This action cannot be undone and will remove all associated data.`}
+                confirmLabel="Delete Property"
+                cancelLabel="Cancel"
+                onConfirm={() => close(true)}
+                onCancel={() => close(false)}
+                variant="destructive"
+            />
+        ))
+
+        if (shouldDelete && property.propertyId) {
+            await dispatch(deleteProperty(property.propertyId))
         }
     }
 
@@ -194,7 +202,7 @@ const PropertiesList: React.FC = () => {
                 <Button
                     label=""
                     icon={<FaTrash/>}
-                    onClick={() => setDeleteDialog({isOpen: true, property})}
+                    onClick={() => handleDeleteProperty(property)}
                     variant="normal"
                     size="small"
                     style={{color: '#dc2626'}}
@@ -323,50 +331,6 @@ const PropertiesList: React.FC = () => {
                 )}
             </Box>
 
-            {/* Delete Confirmation Dialog */}
-            {deleteDialog.isOpen && (
-                <Box
-                    position="fixed"
-                    top="0"
-                    left="0"
-                    right="0"
-                    bottom="0"
-                    backgroundColor="rgba(0,0,0,0.5)"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    style={{zIndex: 1000}}
-                >
-                    <Box
-                        backgroundColor="white"
-                        borderRadius="8px"
-                        padding="2rem"
-                        maxWidth="400px"
-                        width="90%"
-                    >
-                        <h3 style={{marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '600'}}>
-                            Delete Property
-                        </h3>
-                        <p style={{marginBottom: '1.5rem', color: '#666'}}>
-                            Are you sure you want to delete "{deleteDialog.property?.name}"?
-                            This action cannot be undone and will remove all associated data.
-                        </p>
-                        <Box display="flex" gap="1rem" justifyContent="flex-end">
-                            <Button
-                                label="Cancel"
-                                onClick={() => setDeleteDialog({isOpen: false, property: null})}
-                                variant="normal"
-                            />
-                            <Button
-                                label="Delete Property"
-                                onClick={handleDeleteProperty}
-                                variant="promoted"
-                                style={{backgroundColor: '#dc2626'}}
-                            />
-                        </Box>
-                    </Box>
-                </Box>
-            )}
         </SecuredPage>
     )
 }
