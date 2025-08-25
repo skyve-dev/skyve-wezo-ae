@@ -4,7 +4,6 @@ export {
   createRoutes, 
   createAppShell 
 } from './AppShellContext'
-export { useAppShellVisibility } from './useAppShellVisibility'
 export { useNavigation } from './useNavigation'
 export { useTheme } from './useTheme'
 export {
@@ -24,13 +23,13 @@ export type {
   AppShellConfig,
   AppShellTheme,
   AppShellContextType,
-  AppShellVisibility,
-  AppShellVisibilityOptions,
   NavigateToFunction,
   ComponentProps,
   // Promise-based dialog types
   DialogCloseFunction,
   DialogContentFunction,
   PromiseDialogFunction,
-  DialogState
+  DialogState,
+  // Dynamic content mounting
+  MountFunction
 } from './types'

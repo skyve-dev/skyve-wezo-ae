@@ -50,17 +50,11 @@ interface PropertyEditProps {
 }
 
 const PropertyEdit: React.FC<PropertyEditProps> = (props) => {
-    const {navigateTo, currentParams,setVisibility,resetVisibility} = useAppShellRoutes()
+    const {navigateTo, currentParams} = useAppShellRoutes()
 
     // Combine props from navigation and URL query parameters
     const params = {...props, ...currentParams}
     const dispatch = useAppDispatch()
-    useEffect(() => {
-        setVisibility({footer:false,header:false,sideNav:false});
-        return () => {
-            resetVisibility();
-        }
-    },[])
     // Redux state
     const {currentProperty, wizardData, loading, error, validationErrors} = useAppSelector((state) => state.property)
 

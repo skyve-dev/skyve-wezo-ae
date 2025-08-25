@@ -62,15 +62,9 @@ export interface DialogState<T = any> {
     reject: (reason?: any) => void
 }
 
-// Visibility control interface
-export interface AppShellVisibility {
-    header: boolean
-    sideNav: boolean
-    footer: boolean
-}
 
-// Visibility control options for programmatic control (partial updates)
-export type AppShellVisibilityOptions = Partial<AppShellVisibility>
+// Mount function type for dynamic content
+export type MountFunction = (content: React.ReactNode) => () => void
 
 // AppShell context interface
 export interface AppShellContextType<T extends Record<string, BaseRoute> = Record<string, BaseRoute>> {
@@ -84,17 +78,17 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
     // Promise-based dialog system
     openDialog: PromiseDialogFunction
 
+    // Dynamic content mounting
+    mountHeader: MountFunction
+    mountSideNav: MountFunction
+    mountFooter: MountFunction
+
     // Loading state
     isLoading: boolean
     setLoading: (loading: boolean) => void
 
     // Routes
     routes: T
-
-    // Visibility control
-    visibility: AppShellVisibility
-    setVisibility: (options: AppShellVisibilityOptions) => void
-    resetVisibility: () => void
 
     // Theme
     theme: AppShellTheme

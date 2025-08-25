@@ -1,16 +1,16 @@
 import React, {ReactNode, useCallback, useEffect, useRef, useState} from 'react'
 import {Box} from '../Box'
-import {Button} from '../Button'
 import SlidingDrawer from '../SlidingDrawer'
-import Tab, {TabItem} from '../Tab'
 import ScrollbarOverlay from '../ScrollbarOverlay'
 import AppShellContext from './AppShellContext'
 import { PromiseDialogProvider, usePromiseDialog } from './PromiseDialogProvider'
+import { DynamicContentProvider, useDynamicContent } from './DynamicContentProvider'
+import HeaderDefault from './HeaderDefault'
+import SideNavDefault from './SideNavDefault'
+import FooterDefault from './FooterDefault'
 import {
     AppShellConfig,
     AppShellContextType,
-    AppShellVisibility,
-    AppShellVisibilityOptions,
     BaseRoute,
     NavigateToFunction,
     OnAfterNavigateFunction,
@@ -18,7 +18,6 @@ import {
     RouteDefinition,
     RouteInfo
 } from './types'
-import {FaBars} from 'react-icons/fa'
 import {
     getCurrentPath,
     isSamePath,
@@ -50,6 +49,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                                            children
                                                        }: AppShellProps<T>) => {
     const { openDialog } = usePromiseDialog();
+    const { content, mountHeader, mountSideNav, mountFooter } = useDynamicContent();
     // Helper function to get initial route and params from URL
     const getInitialRouteAndParams = useCallback((): { route: string; params: Record<string, any> } => {
         if (typeof window === 'undefined') {
@@ -83,13 +83,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     // UI state
     const [isSideNavOpen, setSideNavOpen] = useState(false)
     const [isLoading, setLoading] = useState(false)
-
-    // Visibility control state
-    const [visibility, setVisibilityState] = useState<AppShellVisibility>({
-        header: true,
-        sideNav: true,
-        footer: true
-    })
 
 
     // Handle URL changes and popstate events (back/forward navigation)
@@ -254,22 +247,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     }, [routes, currentRoute, currentParams, onBeforeNavigate, onAfterNavigate])
 
 
-    // Visibility control functions
-    const setVisibility = useCallback((options: AppShellVisibilityOptions) => {
-        setVisibilityState(prev => ({
-            header: options.header !== undefined ? options.header : prev.header,
-            sideNav: options.sideNav !== undefined ? options.sideNav : prev.sideNav,
-            footer: options.footer !== undefined ? options.footer : prev.footer
-        }))
-    }, [])
-
-    const resetVisibility = useCallback(() => {
-        setVisibilityState({
-            header: true,
-            sideNav: true,
-            footer: true
-        })
-    }, [])
 
     // Navigate back function
     const navigateBack = useCallback(() => {
@@ -329,10 +306,10 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
         routes,
         // Promise-based dialog system
         openDialog,
-        // Visibility control
-        visibility,
-        setVisibility,
-        resetVisibility,
+        // Dynamic content mounting
+        mountHeader,
+        mountSideNav,
+        mountFooter,
         // Theme
         theme: {
             primaryColor: theme.primaryColor || '#D52122',
@@ -421,37 +398,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     const currentRouteData = routes[currentRoute as keyof T]
     const CurrentComponent = currentRouteData?.component
 
-    // Get navigation items for side drawer (Tab format)
-    const navTabItems: TabItem[] = Object.entries(routes)
-        .filter(([_, route]) => route.showInNav !== false)
-        .map(([path, route]) => ({
-            id: path,
-            label: route.label,
-            icon: route.icon,
-            content: <></> // Not needed for navigation tabs
-        }))
-
-    // Get header quick nav items
-    const headerNavItems: TabItem[] = Object.entries(routes)
-        .filter(([_, route]) => route.showInHeader !== false && (!isMobile || route.showInFooter !== false))
-        .slice(0, isMobile ? footer.maxItems : undefined)
-        .map(([path, route]) => ({
-            id: path,
-            label: route.label,
-            icon: route.icon,
-            content: <></>
-        }))
-
-    // Get footer nav items (mobile only) - formatted as TabItem[]
-    const footerNavItems: TabItem[] = Object.entries(routes)
-        .filter(([_, route]) => route.showInFooter !== false)
-        .slice(0, footer.maxItems)
-        .map(([path, route]) => ({
-            id: path,
-            label: route.label,
-            icon: route.icon
-            // content is optional since we're using tabBarOnly
-        }))
 
 
     return (
@@ -476,102 +422,42 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                         zIndex="100"
                         backgroundColor={theme.primaryColor}
                         color={theme.backgroundColor}
-                        //background="linear-gradient(135deg, #ffffff 0%, #FAFAFA 100%)"
                         borderBottom="1px solid rgba(213, 33, 34, 0.08)"
                         boxShadow="0 2px 20px rgba(213, 33, 34, 0.08)"
                         style={{
-                            transform: (isHeaderVisible && visibility.header) ? 'translateY(0)' : 'translateY(-100%)',
+                            transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
                             transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
-                        <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent={'center'}
-                            padding="1rem 1.5rem"
-                            maxWidth="1200px"
-                            margin="0 auto"
-                        >
-                            {/* Left: Menu Button + Logo/Title */}
-                            <Box display="flex" alignItems="center" gap="1rem">
-
-                                {header.logo && (
-                                    <Box fontSize="1.5rem" color={theme.primaryColor}>
-                                        {header.logo}
-                                    </Box>
-                                )}
-
-                                {header.title && (
-                                    <Box
-                                        fontSize="1.25rem"
-                                        fontWeight="bold"
-                                        color="#1a202c"
-                                    >
-                                        {header.title}
-                                    </Box>
-                                )}
-
-
-                            </Box>
-
-                            {/* Center: Quick Navigation (Desktop/Tablet) */}
-                            <Box display={'flex'} justifyContent={'flex-end'} paddingX={'1rem'} flexGrow={1}>
-                                {header.showQuickNav && !isMobile && headerNavItems.length > 0 && (
-
-                                    <Tab
-                                        items={headerNavItems}
-                                        activeTab={currentRoute}
-                                        onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
-                                        variant="minimal"
-                                        tabBarOnly={true}
-                                        size="small"
-                                        fullWidth
-                                        centered
-                                        activeColor={theme.backgroundColor}
-                                        inactiveColor={'rgba(255,255,255,0.8)'}
-                                    />
-                                )}
-                            </Box>
-
-                            {/* Right: Actions */}
-                            {header.actions && (
-                                <Box display="flex" alignItems="center" gap="0.5rem">
-                                    {header.actions}
-                                </Box>
-                            )}
-                            <Button
-                                label=""
-                                icon={<FaBars fontSize={'1.2rem'}/>}
-                                onClick={() => setSideNavOpen(true)}
-                                variant="plain"
-                                size="small"
-                                border="1px solid #CCC"
-                                borderRadius="8px"
-                                aria-label="Open navigation menu"
-                                style={{
-                                    color:'white',
-                                    padding : 0
-                                }}
-                                whileHover={{
-                                    backgroundColor: 'rgba(213, 33, 34, 0.1)',
-                                    borderColor: theme.primaryColor
+                        {content.header || (
+                            <HeaderDefault
+                                routes={routes}
+                                currentRoute={currentRoute}
+                                navigateTo={navigateTo}
+                                setSideNavOpen={setSideNavOpen}
+                                isMobile={isMobile}
+                                headerConfig={header}
+                                theme={{
+                                    primaryColor: theme.primaryColor || '#D52122',
+                                    backgroundColor: theme.backgroundColor || '#FAFAFA',
+                                    navBackgroundColor: theme.navBackgroundColor || '#ffffff'
                                 }}
                             />
-                        </Box>
+                        )}
                     </Box>
 
                     {/* Main Content Area */}
                     <Box
                         flex="1"
-                        paddingTop={visibility.header ? "4rem" : '0px'} // Account for fixed header
-                        paddingBottom={isMobile && footer.showOnMobile && visibility.footer ? "4rem" : "0"}
+                        paddingTop="4rem" // Always account for fixed header
+                        paddingBottom={isMobile && footer.showOnMobile ? "4rem" : "0"}
                         minHeight="100%"
                     >
                         {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
                     </Box>
 
                     {/* Footer (Mobile Only) */}
-                    {isMobile && footer.showOnMobile && footerNavItems.length > 0 && (
+                    {isMobile && footer.showOnMobile && (
                         <Box
                             ref={footerRef}
                             position="fixed"
@@ -583,88 +469,48 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                             zIndex="90"
                             boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
                             style={{
-                                transform: (isFooterVisible && visibility.footer) ? 'translateY(0)' : 'translateY(100%)',
+                                transform: isFooterVisible ? 'translateY(0)' : 'translateY(100%)',
                                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
                         >
-                            <Tab
-                                items={footerNavItems}
-                                activeTab={currentRoute}
-                                onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
-                                variant="underline"
-                                size="small"
-                                fullWidth
-                                centered
-                                tabBarOnly
-                                iconSize={'1.5rem'}
-                                iconLayout={'column'}
-                                activeColor={'rgba(255,255,255,1)'}
-
-                                inactiveColor="rgba(255,255,255,0.5)"
-                                tabBarStyle={{background:theme.primaryColor,borderRadius:0}}
-                            />
+                            {content.footer || (
+                                <FooterDefault
+                                    routes={routes}
+                                    currentRoute={currentRoute}
+                                    navigateTo={navigateTo}
+                                    footerConfig={footer}
+                                    theme={{
+                                        primaryColor: theme.primaryColor || '#D52122',
+                                        backgroundColor: theme.backgroundColor || '#FAFAFA',
+                                        navBackgroundColor: theme.navBackgroundColor || '#ffffff'
+                                    }}
+                                />
+                            )}
                         </Box>
                     )}
 
                     {/* Side Navigation Drawer */}
                     <SlidingDrawer
-                        isOpen={isSideNavOpen && visibility.sideNav}
+                        isOpen={isSideNavOpen}
                         onClose={() => setSideNavOpen(false)}
                         side="left"
                         width="280px"
                         background={'linear-gradient(135deg, #ffffff 0%, #FAFAFA 100%)'}
                     >
-                        <Box>
-                            {/* Drawer Header */}
-                            <Box
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="space-between"
-                                marginBottom="2rem"
-                                padding="1rem"
-                                borderBottom="1px solid rgba(0,0,0,0.1)"
-                                background={theme.primaryColor}
-                            >
-                                <Box display="flex" alignItems="center" gap="0.75rem">
-                                    {header.logo && (
-                                        <Box fontSize="1.5rem" color={theme.primaryColor}>
-                                            {header.logo}
-                                        </Box>
-                                    )}
-
-                                </Box>
-
-                            </Box>
-
-                            {/* Navigation Items - Vertical Tab */}
-                            <Tab
-                                items={navTabItems}
-                                activeTab={currentRoute}
-                                onTabChange={(tabId) => {
-                                    navigateTo(tabId as keyof T, {} as any)
-                                    setSideNavOpen(false) // Close drawer after navigation
-                                }}
-                                orientation="vertical"
-                                variant="pills"
-                                size="medium"
-                                fullWidth
-                                tabBarOnly
-                                activeColor={theme.primaryColor}
-                                inactiveColor={'rgba(0,0,0,0.8)'}
-                                backgroundColor="transparent"
-                                iconSize="1.25rem"
-                                iconLayout="row"
-
-                                style={{
-                                    width: '100%'
-                                }}
-                                tabBarStyle={{
-                                    gap: '0.5rem',
-                                    paddingLeft : '1.5rem',
-                                    paddingRight : '1.5rem'
+                        {content.sideNav || (
+                            <SideNavDefault
+                                routes={routes}
+                                currentRoute={currentRoute}
+                                navigateTo={navigateTo}
+                                setSideNavOpen={setSideNavOpen}
+                                headerConfig={header}
+                                theme={{
+                                    primaryColor: theme.primaryColor || '#D52122',
+                                    backgroundColor: theme.backgroundColor || '#FAFAFA',
+                                    navBackgroundColor: theme.navBackgroundColor || '#ffffff'
                                 }}
                             />
-                        </Box>
+                        )}
                     </SlidingDrawer>
 
 
@@ -761,12 +607,14 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     )
 }
 
-// Main AppShell component that provides the promise dialog context
+// Main AppShell component that provides both promise dialog and dynamic content contexts
 const AppShell = <T extends Record<string, BaseRoute>>(props: AppShellProps<T>) => {
     return (
-        <PromiseDialogProvider>
-            <AppShellInternal {...props} />
-        </PromiseDialogProvider>
+        <DynamicContentProvider>
+            <PromiseDialogProvider>
+                <AppShellInternal {...props} />
+            </PromiseDialogProvider>
+        </DynamicContentProvider>
     );
 };
 
