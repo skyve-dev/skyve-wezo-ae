@@ -196,7 +196,414 @@ interface SlidingDrawerProps {
 }
 
 /**
- * A robust sliding drawer component that uses React Portal for proper layering
+ * # SlidingDrawer Component
+ * 
+ * A sophisticated, portal-based sliding drawer component that provides smooth animations,
+ * accessibility features, and proper layering for modal-like interfaces. Perfect for mobile
+ * menus, filters, forms, and detailed content panels.
+ * 
+ * ## Key Features
+ * - **Portal-Based Rendering**: Uses ReactDOM.createPortal for proper z-index layering
+ * - **Multi-Directional**: Slides from left, right, top, or bottom sides
+ * - **Smooth Animations**: Coordinated backdrop and drawer animations with cubic-bezier easing
+ * - **Portal Management**: Sophisticated system handles multiple concurrent drawers
+ * - **Accessibility**: Focus management, keyboard navigation, ARIA attributes
+ * - **Scroll Management**: Automatically handles body scroll prevention
+ * - **Backdrop Interaction**: Configurable backdrop click-to-close behavior
+ * - **Performance Optimized**: Efficient mounting/unmounting with animation coordination
+ * 
+ * ## Basic Usage
+ * ```tsx
+ * import SlidingDrawer from '@/components/base/SlidingDrawer'
+ * 
+ * function MyComponent() {
+ *   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+ * 
+ *   return (
+ *     <>
+ *       <button onClick={() => setIsDrawerOpen(true)}>
+ *         Open Drawer
+ *       </button>
+ * 
+ *       <SlidingDrawer
+ *         isOpen={isDrawerOpen}
+ *         onClose={() => setIsDrawerOpen(false)}
+ *         side="right"
+ *         width="400px"
+ *         showCloseButton={true}
+ *       >
+ *         <h2>Drawer Content</h2>
+ *         <p>This content slides in from the right side.</p>
+ *       </SlidingDrawer>
+ *     </>
+ *   )
+ * }
+ * ```
+ * 
+ * ## Direction Examples
+ * ### Right Side Panel (Common for filters/settings)
+ * ```tsx
+ * <SlidingDrawer
+ *   isOpen={showFilters}
+ *   onClose={() => setShowFilters(false)}
+ *   side="right"
+ *   width="350px"
+ *   showCloseButton={true}
+ * >
+ *   <Box padding="1.5rem">
+ *     <h3>Filter Properties</h3>
+ *   </Box>
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ### Left Side Navigation
+ * ```tsx
+ * <SlidingDrawer
+ *   isOpen={showNavigation}
+ *   onClose={() => setShowNavigation(false)}
+ *   side="left"
+ *   width="280px"
+ *   backgroundColor="#1f2937"
+ * >
+ *   <Box padding="1rem" color="white">
+ *     <nav>Navigation items</nav>
+ *   </Box>
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ### Bottom Sheet (Mobile-friendly)
+ * ```tsx
+ * <SlidingDrawer
+ *   isOpen={showBottomSheet}
+ *   onClose={() => setShowBottomSheet(false)}
+ *   side="bottom"
+ *   height="60vh"
+ *   borderRadius="1rem 1rem 0 0"
+ * >
+ *   <Box padding="1.5rem">
+ *     <h3>Property Details</h3>
+ *   </Box>
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ### Top Notification Panel
+ * ```tsx
+ * <SlidingDrawer
+ *   isOpen={showNotifications}
+ *   onClose={() => setShowNotifications(false)}
+ *   side="top"
+ *   height="300px"
+ *   backgroundColor="#f8fafc"
+ * >
+ *   <Box padding="1rem">
+ *     <h3>Recent Notifications</h3>
+ *   </Box>
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ## Advanced Configuration
+ * ### Custom Styling and Animation
+ * ```tsx
+ * <SlidingDrawer
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   side="right"
+ *   width="500px"
+ *   
+ *   // Animation customization
+ *   animationDuration={400}
+ *   
+ *   // Styling
+ *   backgroundColor="white"
+ *   backdropColor="rgba(0, 0, 0, 0.7)"
+ *   
+ *   // Custom styles
+ *   contentStyles={{
+ *     borderLeft: '3px solid #3b82f6',
+ *     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+ *   }}
+ *   
+ *   // Behavior
+ *   disableBackdropClick={false}
+ *   disableEscapeKey={false}
+ *   
+ *   // Accessibility
+ *   className="property-details-drawer"
+ * >
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ### Multiple Portals (Advanced)
+ * ```tsx
+ * // Different portal containers for layering
+ * <SlidingDrawer
+ *   portalId="main-drawer-portal"
+ *   isOpen={mainDrawerOpen}
+ *   onClose={() => setMainDrawerOpen(false)}
+ *   side="right"
+ *   zIndex={1000}
+ * >
+ *   Main drawer content
+ *   
+ *   <SlidingDrawer
+ *     portalId="nested-drawer-portal"
+ *     isOpen={nestedDrawerOpen}
+ *     onClose={() => setNestedDrawerOpen(false)}
+ *     side="right"
+ *     zIndex={1100}
+ *   >
+ *     Nested drawer content
+ *   </SlidingDrawer>
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ## Portal Management System
+ * The component uses a sophisticated PortalManager class that:
+ * - **Creates portals dynamically** when needed
+ * - **Manages multiple concurrent drawers** with proper layering
+ * - **Handles scroll prevention** automatically
+ * - **Coordinates animations** with portal activation/deactivation
+ * - **Cleanup on unmount** prevents memory leaks
+ * 
+ * ```tsx
+ * // Portal lifecycle:
+ * // 1. Open: Portal activated → Animation starts
+ * // 2. Close: Animation completes → Portal deactivated
+ * // 3. Cleanup: Portal removed when no active drawers
+ * ```
+ * 
+ * ## Accessibility Features
+ * ### Focus Management
+ * ```tsx
+ * // Automatic focus management:
+ * // 1. Stores current focus when opening
+ * // 2. Focuses drawer for screen readers
+ * // 3. Restores previous focus when closing
+ * 
+ * <SlidingDrawer
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   side="right"
+ * >
+ *   <input placeholder="This will be focusable" />
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ### Keyboard Navigation
+ * - **Escape Key**: Closes drawer (unless disabled)
+ * - **Tab Navigation**: Proper focus trapping within drawer
+ * - **ARIA Attributes**: `role="dialog"`, `aria-modal="true"`
+ * 
+ * ### Screen Reader Support
+ * ```tsx
+ * <SlidingDrawer
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   side="right"
+ *   className="filters-drawer"
+ *   contentStyles={{ 'aria-label': 'Property filters' }}
+ * >
+ *   <h2 id="drawer-title">Filter Properties</h2>
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ## Animation & Performance
+ * ### Smooth Transitions
+ * - **Transform-based animations** for optimal performance
+ * - **Cubic-bezier easing** for natural motion
+ * - **Coordinated backdrop fade** with drawer slide
+ * - **Double RAF** for smooth initialization
+ * 
+ * ### Performance Optimizations
+ * ```tsx
+ * // Efficient rendering lifecycle:
+ * // 1. Portal created only when needed
+ * // 2. Component mounted before animation
+ * // 3. Animation triggered via state changes
+ * // 4. Unmounting delayed until animation completes
+ * // 5. Portal cleanup prevents memory leaks
+ * ```
+ * 
+ * ## Common Use Cases
+ * 
+ * ### Property Filters Panel
+ * ```tsx
+ * function PropertyFilters() {
+ *   const [filtersOpen, setFiltersOpen] = useState(false)
+ * 
+ *   return (
+ *     <SlidingDrawer
+ *       isOpen={filtersOpen}
+ *       onClose={() => setFiltersOpen(false)}
+ *       side="right"
+ *       width="400px"
+ *       showCloseButton={true}
+ *     >
+ *       <Box padding="1.5rem">
+ *         <h2>Filter Properties</h2>
+ *         <SelectionPicker
+ *           data={amenities}
+ *           isMultiSelect={true}
+ *           // ... filter options
+ *         />
+ *       </Box>
+ *     </SlidingDrawer>
+ *   )
+ * }
+ * ```
+ * 
+ * ### Mobile Property Details
+ * ```tsx
+ * function MobilePropertyDetails() {
+ *   return (
+ *     <SlidingDrawer
+ *       isOpen={showDetails}
+ *       onClose={() => setShowDetails(false)}
+ *       side="bottom"
+ *       height="80vh"
+ *       backgroundColor="white"
+ *       contentStyles={{
+ *         borderRadius: '1rem 1rem 0 0',
+ *         overflow: 'auto'
+ *       }}
+ *     >
+ *       <Box padding="1.5rem">
+ *         <h2>Luxury Villa Marina</h2>
+ *         <p>Property details, photos, amenities...</p>
+ *       </Box>
+ *     </SlidingDrawer>
+ *   )
+ * }
+ * ```
+ * 
+ * ### Navigation Menu
+ * ```tsx
+ * function NavigationDrawer() {
+ *   return (
+ *     <SlidingDrawer
+ *       isOpen={menuOpen}
+ *       onClose={() => setMenuOpen(false)}
+ *       side="left"
+ *       width="280px"
+ *       backgroundColor="#1f2937"
+ *     >
+ *       <Box padding="1rem" color="white">
+ *         <nav>
+ *           <Box as="a" href="/properties" padding="0.75rem">
+ *             Properties
+ *           </Box>
+ *           <Box as="a" href="/reservations" padding="0.75rem">
+ *             Reservations
+ *           </Box>
+ *         </nav>
+ *       </Box>
+ *     </SlidingDrawer>
+ *   )
+ * }
+ * ```
+ * 
+ * ## Error Handling & Best Practices
+ * 
+ * ### Cleanup on Unmount
+ * ```tsx
+ * // Component handles cleanup automatically:
+ * // - Portal deactivation
+ * // - Event listener removal
+ * // - Focus restoration
+ * // - Body scroll restoration
+ * ```
+ * 
+ * ### Multiple Drawer Management
+ * ```tsx
+ * // Safe to have multiple drawers:
+ * function MultiDrawerApp() {
+ *   return (
+ *     <>
+ *       <SlidingDrawer portalId="drawer-1" >
+ *         First drawer
+ *       </SlidingDrawer>
+ *       
+ *       <SlidingDrawer portalId="drawer-2" >
+ *         Second drawer (different portal)
+ *       </SlidingDrawer>
+ *     </>
+ *   )
+ * }
+ * ```
+ * 
+ * ### Responsive Considerations
+ * ```tsx
+ * // Adapt to screen size:
+ * const isMobile = window.innerWidth < 768
+ * 
+ * <SlidingDrawer
+ *   side={isMobile ? "bottom" : "right"}
+ *   width={isMobile ? "100%" : "400px"}
+ *   height={isMobile ? "70vh" : "100%"}
+ * >
+ *   Responsive drawer content
+ * </SlidingDrawer>
+ * ```
+ * 
+ * ## Integration with Other Components
+ * - **Works seamlessly with Box** for layout and styling
+ * - **Compatible with SelectionPicker** for forms and filters
+ * - **Portal system works with Dialog** components
+ * - **Theme integration** via backgroundColor and styling props
+ * 
+ * @example
+ * // Complete property filter drawer
+ * function PropertyFilterDrawer() {
+ *   const [isOpen, setIsOpen] = useState(false)
+ *   const [selectedAmenities, setSelectedAmenities] = useState([])
+ * 
+ *   return (
+ *     <>
+ *       <button onClick={() => setIsOpen(true)}>
+ *         Show Filters
+ *       </button>
+ * 
+ *       <SlidingDrawer
+ *         isOpen={isOpen}
+ *         onClose={() => setIsOpen(false)}
+ *         side="right"
+ *         width="400px"
+ *         showCloseButton={true}
+ *         backgroundColor="white"
+ *         contentStyles={{ overflow: 'auto' }}
+ *       >
+ *         <Box padding="1.5rem">
+ *           <h2>Filter Properties</h2>
+ *           
+ *           <Box marginBottom="2rem">
+ *             <h3>Amenities</h3>
+ *             <SelectionPicker
+ *               data={amenities}
+ *               idAccessor={item => item.id}
+ *               labelAccessor={item => item.name}
+ *               value={selectedAmenities}
+ *               onChange={setSelectedAmenities}
+ *               isMultiSelect={true}
+ *             />
+ *           </Box>
+ * 
+ *           <Box display="flex" gap="1rem">
+ *             <Button
+ *               label="Clear All"
+ *               variant="normal"
+ *               onClick={() => setSelectedAmenities([])}
+ *             />
+ *             <Button
+ *               label="Apply Filters"
+ *               variant="promoted"
+ *               onClick={() => setIsOpen(false)}
+ *             />
+ *           </Box>
+ *         </Box>
+ *       </SlidingDrawer>
+ *     </>
+ *   )
+ * }
  */
 const SlidingDrawer: React.FC<SlidingDrawerProps> = ({
                                                          isOpen,

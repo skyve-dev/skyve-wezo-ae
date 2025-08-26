@@ -56,10 +56,239 @@ const LoadingSpinner: React.FC<{ size: 'small' | 'medium' | 'large' }> = ({ size
 }
 
 /**
- * Button Component
+ * # Button Component
  * 
- * A comprehensive, accessible button component that can render as either a button or link
- * while maintaining consistent styling and behavior across the property rental platform.
+ * A comprehensive, accessible button component that can render as either a button or link element
+ * while maintaining consistent styling and behavior. Built on top of the Box component with theme
+ * integration and responsive design capabilities.
+ * 
+ * ## Key Features
+ * - **Polymorphic**: Renders as button or anchor based on href prop
+ * - **Theme Integration**: Uses app theme colors and utilities automatically  
+ * - **Loading States**: Built-in spinner with size-aware animations
+ * - **Accessibility**: Full keyboard navigation and ARIA support
+ * - **Variants**: Multiple visual styles (promoted, normal, plain)
+ * - **Interactive**: Hover, tap, and focus animations via Box motion props
+ * - **Icon Support**: Flexible icon positioning with proper sizing
+ * 
+ * ## Basic Usage
+ * ```tsx
+ * // Simple button
+ * <Button label="Click me" onClick={handleClick} />
+ * 
+ * // With icon
+ * <Button 
+ *   label="Save" 
+ *   icon={<FaSave />} 
+ *   onClick={handleSave}
+ * />
+ * 
+ * // Link button
+ * <Button 
+ *   label="Visit page" 
+ *   href="/dashboard"
+ * />
+ * ```
+ * 
+ * ## Variants and Styling
+ * ### Visual Variants
+ * ```tsx
+ * // Promoted (primary action)
+ * <Button 
+ *   label="Book Now" 
+ *   variant="promoted" 
+ *   onClick={handleBooking}
+ * />
+ * 
+ * // Normal (secondary action)  
+ * <Button 
+ *   label="Cancel" 
+ *   variant="normal"
+ *   onClick={handleCancel}
+ * />
+ * 
+ * // Plain (minimal styling)
+ * <Button 
+ *   label="Skip" 
+ *   variant="plain"
+ *   onClick={handleSkip}
+ * />
+ * ```
+ * 
+ * ### Size Options
+ * ```tsx
+ * // Small button (36px height)
+ * <Button label="Small" size="small" />
+ * 
+ * // Medium button (44px height) - default
+ * <Button label="Medium" size="medium" />
+ * 
+ * // Large button (52px height)
+ * <Button label="Large" size="large" />
+ * ```
+ * 
+ * ## States and Interactions
+ * ### Loading State
+ * ```tsx
+ * <Button 
+ *   label="Saving..." 
+ *   loading={isLoading}
+ *   disabled={isLoading}
+ *   onClick={handleSave}
+ * />
+ * ```
+ * 
+ * ### Disabled State
+ * ```tsx
+ * <Button 
+ *   label="Submit" 
+ *   disabled={!isValid}
+ *   onClick={handleSubmit}
+ * />
+ * ```
+ * 
+ * ### Full Width
+ * ```tsx
+ * <Button 
+ *   label="Continue" 
+ *   fullWidth
+ *   variant="promoted"
+ *   onClick={handleContinue}
+ * />
+ * ```
+ * 
+ * ## Link Behavior
+ * ### Internal Links
+ * ```tsx
+ * <Button 
+ *   label="Go to Dashboard" 
+ *   href="/dashboard"
+ * />
+ * ```
+ * 
+ * ### External Links
+ * ```tsx
+ * <Button 
+ *   label="Visit Website" 
+ *   href="https://example.com"
+ *   target="_blank"
+ *   rel="noopener noreferrer"
+ * />
+ * ```
+ * 
+ * ## Form Integration
+ * ### Submit Button
+ * ```tsx
+ * <Button 
+ *   label="Submit Form" 
+ *   type="submit"
+ *   variant="promoted"
+ * />
+ * ```
+ * 
+ * ### Reset Button
+ * ```tsx
+ * <Button 
+ *   label="Reset" 
+ *   type="reset"
+ *   variant="normal"
+ * />
+ * ```
+ * 
+ * ## Advanced Examples
+ * ### Property Booking Button
+ * ```tsx
+ * <Button
+ *   label="Book Villa"
+ *   icon={<FaCalendarAlt />}
+ *   variant="promoted"
+ *   size="large"
+ *   fullWidth
+ *   loading={isBooking}
+ *   disabled={!isAvailable}
+ *   onClick={handleBooking}
+ * />
+ * ```
+ * 
+ * ### Navigation with Icon
+ * ```tsx
+ * <Button
+ *   label="Back to Listings"
+ *   icon={<FaArrowLeft />}
+ *   variant="normal"
+ *   href="/listings"
+ * />
+ * ```
+ * 
+ * ### Action Button Group
+ * ```tsx
+ * <Box display="flex" gap="1rem">
+ *   <Button 
+ *     label="Save Draft" 
+ *     variant="normal"
+ *     onClick={handleSaveDraft}
+ *   />
+ *   <Button 
+ *     label="Publish" 
+ *     variant="promoted"
+ *     onClick={handlePublish}
+ *   />
+ * </Box>
+ * ```
+ * 
+ * ## Accessibility Features
+ * - **Keyboard Navigation**: Full tab navigation support
+ * - **Screen Readers**: Proper ARIA labels and roles
+ * - **Loading Announcements**: aria-busy for loading states  
+ * - **Disabled States**: aria-disabled for proper state communication
+ * - **Focus Management**: Visible focus rings and proper tabindex handling
+ * 
+ * ## Theme Integration
+ * The component automatically uses theme colors:
+ * - **Primary Color**: For promoted variant background and hover states
+ * - **Primary Contrast**: For text color in promoted buttons
+ * - **Color Utilities**: Automatic color manipulation (lighten, darken, opacity)
+ * 
+ * ## Performance Notes
+ * - **Efficient Rendering**: Uses Box component's optimized CSS generation
+ * - **Animation Optimization**: Hardware-accelerated transforms and opacity
+ * - **Loading Spinner**: CSS-based animation with minimal JavaScript overhead
+ * - **Conditional Event Handlers**: Only attached when needed to prevent unnecessary renders
+ * 
+ * ## Implementation Details
+ * - Built on Box component for consistent styling API
+ * - Polymorphic implementation supports both button and anchor elements
+ * - Size configurations match Input component heights for form consistency
+ * - Loading spinner automatically scales based on button size
+ * - Theme colors are resolved at render time for dynamic theme switching
+ * 
+ * @example
+ * // Complete property booking interface
+ * <Box display="flex" flexDirection="column" gap="1rem">
+ *   <Button
+ *     label="Check Availability"
+ *     icon={<FaCalendarCheck />}
+ *     variant="normal"
+ *     size="large"
+ *     fullWidth
+ *     onClick={handleCheckAvailability}
+ *   />
+ *   <Button
+ *     label={isBooking ? "Processing..." : "Book Now"}
+ *     icon={!isBooking && <FaCreditCard />}
+ *     variant="promoted"
+ *     size="large"
+ *     fullWidth
+ *     loading={isBooking}
+ *     disabled={!isAvailable || isBooking}
+ *     onClick={handleBookNow}
+ *   />
+ *   <Button
+ *     label="View Similar Properties"
+ *     variant="plain"
+ *     href="/listings?similar=true"
+ *   />
+ * </Box>
  */
 export const Button = forwardRef<
   HTMLButtonElement | HTMLAnchorElement,

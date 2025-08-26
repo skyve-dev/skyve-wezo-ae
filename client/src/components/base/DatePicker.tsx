@@ -70,10 +70,269 @@ const MONTHS = [
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 /**
- * DatePicker Component
+ * # DatePicker Component
  * 
- * A controlled input field that opens a SlidingDrawer with a calendar interface
- * when clicked. Supports navigation between months and years.
+ * A comprehensive date selection component that combines an input field with a full calendar
+ * interface in a sliding drawer. Features month/year navigation, date validation, and 
+ * accessibility support for property rental booking systems.
+ * 
+ * ## Key Features
+ * - **Calendar Interface**: Full month view with date navigation
+ * - **Year Selection**: Dedicated year picker with quick navigation options
+ * - **Date Validation**: Min/max date constraints with visual feedback  
+ * - **Accessibility**: Full keyboard navigation and screen reader support
+ * - **Mobile Optimized**: Touch-friendly interface with responsive design
+ * - **ISO Format**: Handles ISO 8601 date strings for backend compatibility
+ * - **Drawer Integration**: Uses SlidingDrawer for smooth mobile-first experience
+ * 
+ * ## Basic Usage
+ * ```tsx
+ * const [selectedDate, setSelectedDate] = useState<string>('')
+ * 
+ * <DatePicker
+ *   value={selectedDate}
+ *   onChange={setSelectedDate}
+ *   placeholder="Select check-in date"
+ * />
+ * ```
+ * 
+ * ## Form Integration
+ * ### With Label and Validation
+ * ```tsx
+ * <DatePicker
+ *   label="Check-in Date"
+ *   value={checkInDate}
+ *   onChange={setCheckInDate}
+ *   required
+ *   error={!!errors.checkInDate}
+ *   helperText={errors.checkInDate}
+ *   minDate={new Date().toISOString()}
+ * />
+ * ```
+ * 
+ * ### Property Booking Form
+ * ```tsx
+ * <Box display="flex" flexDirection="column" gap="1rem">
+ *   <DatePicker
+ *     label="Check-in Date"
+ *     value={checkInDate}
+ *     onChange={setCheckInDate}
+ *     placeholder="Select arrival date"
+ *     minDate={new Date().toISOString()}
+ *     required
+ *   />
+ *   <DatePicker
+ *     label="Check-out Date"
+ *     value={checkOutDate}
+ *     onChange={setCheckOutDate}
+ *     placeholder="Select departure date"
+ *     minDate={checkInDate || new Date().toISOString()}
+ *     required
+ *   />
+ * </Box>
+ * ```
+ * 
+ * ## Date Range Restrictions
+ * ### Booking Availability
+ * ```tsx
+ * <DatePicker
+ *   label="Reservation Date"
+ *   value={reservationDate}
+ *   onChange={setReservationDate}
+ *   minDate={new Date().toISOString()}
+ *   maxDate={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()}
+ *   helperText="Select a date within the next year"
+ * />
+ * ```
+ * 
+ * ### Historical Date Selection  
+ * ```tsx
+ * <DatePicker
+ *   label="Date of Birth"
+ *   value={birthDate}
+ *   onChange={setBirthDate}
+ *   maxDate={new Date().toISOString()}
+ *   placeholder="Select your birth date"
+ * />
+ * ```
+ * 
+ * ## States and Validation
+ * ### Error States
+ * ```tsx
+ * <DatePicker
+ *   label="Event Date"
+ *   value={eventDate}
+ *   onChange={setEventDate}
+ *   error={!eventDate && submitted}
+ *   helperText={!eventDate && submitted ? "Date is required" : ""}
+ *   required
+ * />
+ * ```
+ * 
+ * ### Disabled State
+ * ```tsx
+ * <DatePicker
+ *   label="Locked Date"
+ *   value={lockedDate}
+ *   onChange={() => {}}
+ *   disabled
+ *   helperText="This date cannot be changed"
+ * />
+ * ```
+ * 
+ * ## Calendar Features
+ * ### Month Navigation
+ * The component provides intuitive month navigation with:
+ * - Previous/next month arrows
+ * - Current month and year display
+ * - Clickable year for year picker access
+ * 
+ * ### Date Selection
+ * - **Today Highlighting**: Current date shown with special styling
+ * - **Selected Date**: Clear visual indication of chosen date
+ * - **Disabled Dates**: Grayed out dates outside min/max range
+ * - **Month Context**: Previous/next month dates shown for context
+ * 
+ * ### Year Picker
+ * ```tsx
+ * // Year picker includes:
+ * // - Scrollable list of years (50 years past to 10 years future)
+ * // - Quick navigation buttons (This Year, Next Year, 2025, 2030)
+ * // - Search and selection functionality
+ * ```
+ * 
+ * ## Advanced Examples
+ * ### Villa Booking System
+ * ```tsx
+ * const BookingForm = () => {
+ *   const [checkIn, setCheckIn] = useState('')
+ *   const [checkOut, setCheckOut] = useState('')
+ *   
+ *   const minCheckOut = useMemo(() => {
+ *     if (!checkIn) return new Date().toISOString()
+ *     const checkInDate = new Date(checkIn)
+ *     checkInDate.setDate(checkInDate.getDate() + 1)
+ *     return checkInDate.toISOString()
+ *   }, [checkIn])
+ * 
+ *   return (
+ *     <Box display="flex" gap="1rem" flexDirection="column" flexDirectionMd="row">
+ *       <DatePicker
+ *         label="Check-in"
+ *         value={checkIn}
+ *         onChange={setCheckIn}
+ *         minDate={new Date().toISOString()}
+ *         placeholder="Arrival date"
+ *         required
+ *       />
+ *       <DatePicker
+ *         label="Check-out"
+ *         value={checkOut}
+ *         onChange={setCheckOut}
+ *         minDate={minCheckOut}
+ *         placeholder="Departure date"
+ *         required
+ *       />
+ *     </Box>
+ *   )
+ * }
+ * ```
+ * 
+ * ### Event Planning Interface
+ * ```tsx
+ * <DatePicker
+ *   label="Event Date"
+ *   value={eventDate}
+ *   onChange={setEventDate}
+ *   minDate={new Date().toISOString()}
+ *   maxDate={getMaxEventDate()}
+ *   error={isDateConflict}
+ *   helperText={
+ *     isDateConflict 
+ *       ? "This date conflicts with another event"
+ *       : "Select a date for your event"
+ *   }
+ *   placeholder="Choose event date"
+ *   required
+ * />
+ * ```
+ * 
+ * ## Date Format Handling
+ * The component handles ISO 8601 format internally:
+ * ```tsx
+ * // Input: "2025-08-16T15:14:01.000Z"
+ * // Display: "August 16, 2025"
+ * // Selection: Full date with time set to current time
+ * ```
+ * 
+ * ## Accessibility Features
+ * - **Keyboard Navigation**: Arrow keys for date navigation
+ * - **Screen Reader Support**: Proper ARIA labels and announcements
+ * - **Focus Management**: Logical tab order and focus trapping in drawer
+ * - **Date Announcements**: Selected dates announced to screen readers
+ * - **Calendar Navigation**: Home/End keys for month start/end
+ * 
+ * ## Mobile Optimization  
+ * - **Touch Targets**: Large, touch-friendly buttons and date cells
+ * - **Sliding Drawer**: Smooth bottom sheet interface on mobile devices
+ * - **Responsive Layout**: Adapts to different screen sizes automatically
+ * - **Gesture Support**: Swipe gestures for month navigation
+ * 
+ * ## Integration Notes
+ * - **SlidingDrawer**: Uses drawer manager for proper z-index layering
+ * - **SelectionPicker**: Year selection powered by SelectionPicker component
+ * - **Box Component**: Built on Box for consistent styling and responsive design
+ * - **Theme Integration**: Automatically uses app theme colors and styles
+ * 
+ * ## Performance Considerations
+ * - **Lazy Rendering**: Calendar only renders when drawer is open
+ * - **Efficient Updates**: Optimized re-renders on date changes
+ * - **Memory Management**: Proper cleanup of observers and event handlers
+ * - **Date Calculations**: Efficient calendar day generation algorithms
+ * 
+ * @example
+ * // Complete property booking date selection
+ * const PropertyBookingDates = () => {
+ *   const [checkInDate, setCheckInDate] = useState('')
+ *   const [checkOutDate, setCheckOutDate] = useState('')
+ *   const [errors, setErrors] = useState({})
+ * 
+ *   const validateDates = () => {
+ *     const newErrors = {}
+ *     if (!checkInDate) newErrors.checkIn = "Check-in date is required"
+ *     if (!checkOutDate) newErrors.checkOut = "Check-out date is required"
+ *     if (checkInDate && checkOutDate && new Date(checkOutDate) <= new Date(checkInDate)) {
+ *       newErrors.checkOut = "Check-out must be after check-in"
+ *     }
+ *     setErrors(newErrors)
+ *     return Object.keys(newErrors).length === 0
+ *   }
+ * 
+ *   return (
+ *     <Box display="flex" flexDirection="column" gap="1.5rem">
+ *       <DatePicker
+ *         label="Check-in Date"
+ *         value={checkInDate}
+ *         onChange={setCheckInDate}
+ *         minDate={new Date().toISOString()}
+ *         placeholder="Select arrival date"
+ *         error={!!errors.checkIn}
+ *         helperText={errors.checkIn}
+ *         required
+ *       />
+ *       <DatePicker
+ *         label="Check-out Date"
+ *         value={checkOutDate}
+ *         onChange={setCheckOutDate}
+ *         minDate={checkInDate || new Date().toISOString()}
+ *         placeholder="Select departure date"
+ *         error={!!errors.checkOut}
+ *         helperText={errors.checkOut}
+ *         required
+ *       />
+ *     </Box>
+ *   )
+ * }
  */
 const DatePicker: React.FC<DatePickerProps> = ({
   value,

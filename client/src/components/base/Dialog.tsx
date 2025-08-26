@@ -116,7 +116,409 @@ interface DialogProps {
 }
 
 /**
- * A Dialog component that appears in the center of the screen with scale animations
+ * # Dialog Component
+ * 
+ * A flexible modal dialog component that displays content in a centered overlay with backdrop.
+ * Features smooth animations, portal rendering, accessibility support, and scroll management
+ * for creating professional modal experiences in property rental applications.
+ * 
+ * ## Key Features
+ * - **Portal Rendering**: Renders outside DOM hierarchy for proper layering
+ * - **Smooth Animations**: Scale and opacity transitions with configurable timing
+ * - **Scroll Management**: Automatically prevents body scroll when open
+ * - **Focus Management**: Traps focus within dialog and restores after closing
+ * - **Accessibility**: Full ARIA support with proper roles and keyboard navigation
+ * - **Flexible Sizing**: Responsive width/height with max constraints
+ * - **Backdrop Control**: Customizable backdrop click and escape key behavior
+ * - **Auto Cleanup**: Handles cleanup on unmount and component destruction
+ * 
+ * ## Basic Usage
+ * ```tsx
+ * const [isOpen, setIsOpen] = useState(false)
+ * 
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={() => setIsOpen(false)}
+ * >
+ *   <Box padding="2rem">
+ *     <h2>Dialog Content</h2>
+ *     <p>This is a simple dialog example.</p>
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ## Sizing and Layout
+ * ### Custom Dimensions
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   width="600px"
+ *   height="400px"
+ *   maxWidth="90vw"
+ *   maxHeight="90vh"
+ * >
+ *   <Box padding="2rem">
+ *     Content with specific dimensions
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ### Responsive Dialog
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   width="90vw"
+ *   maxWidth="800px"
+ *   height="auto"
+ *   maxHeight="80vh"
+ * >
+ *   <Box padding="1.5rem" paddingMd="2rem">
+ *     Responsive content
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ## Visual Customization
+ * ### Backdrop and Colors
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   backdropColor="rgba(0, 0, 0, 0.8)"
+ *   backgroundColor="#f8fafc"
+ * >
+ *   <Box padding="2rem">
+ *     Custom styled dialog
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ### Animation Timing
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   animationDuration={500}
+ * >
+ *   <Box padding="2rem">
+ *     Slow animation dialog
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ## Behavior Control
+ * ### Prevent Accidental Closing
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   disableBackdropClick
+ *   disableEscapeKey
+ * >
+ *   <Box padding="2rem">
+ *     <h3>Confirmation Required</h3>
+ *     <p>This dialog can only be closed with buttons.</p>
+ *     <Button label="Cancel" onClick={onClose} />
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ### Close Button
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   showCloseButton
+ * >
+ *   <Box padding="2rem" paddingTop="3rem">
+ *     Content with built-in close button
+ *   </Box>
+ * </Dialog>
+ * ```
+ * 
+ * ### Custom Close Button
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   showCloseButton
+ *   closeButton={
+ *     <Button
+ *       label="Close"
+ *       icon={<FaTimes />}
+ *       onClick={onClose}
+ *       variant="plain"
+ *       position="absolute"
+ *       top="1rem"
+ *       right="1rem"
+ *     />
+ *   }
+ * >
+ *   Dialog content
+ * </Dialog>
+ * ```
+ * 
+ * ## Advanced Examples
+ * ### Property Details Modal
+ * ```tsx
+ * const PropertyModal = ({ property, isOpen, onClose }) => (
+ *   <Dialog
+ *     isOpen={isOpen}
+ *     onClose={onClose}
+ *     width="90vw"
+ *     maxWidth="1000px"
+ *     height="90vh"
+ *     showCloseButton
+ *   >
+ *     <Box padding="0" overflow="auto">
+ *       <Box
+ *         backgroundImage={`url(${property.image})`}
+ *         height="300px"
+ *         backgroundSize="cover"
+ *         backgroundPosition="center"
+ *       />
+ *       <Box padding="2rem">
+ *         <h2>{property.title}</h2>
+ *         <p>{property.description}</p>
+ *         <Box display="flex" gap="1rem" marginTop="2rem">
+ *           <Button 
+ *             label="Book Now" 
+ *             variant="promoted"
+ *             onClick={handleBooking}
+ *           />
+ *           <Button 
+ *             label="Save to Favorites" 
+ *             variant="normal"
+ *             onClick={handleSave}
+ *           />
+ *         </Box>
+ *       </Box>
+ *     </Box>
+ *   </Dialog>
+ * )
+ * ```
+ * 
+ * ### Confirmation Dialog
+ * ```tsx
+ * const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message }) => (
+ *   <Dialog
+ *     isOpen={isOpen}
+ *     onClose={onClose}
+ *     width="400px"
+ *     disableBackdropClick
+ *   >
+ *     <Box padding="2rem" textAlign="center">
+ *       <Box fontSize="1.5rem" fontWeight="600" marginBottom="1rem">
+ *         {title}
+ *       </Box>
+ *       <Box color="#6b7280" marginBottom="2rem">
+ *         {message}
+ *       </Box>
+ *       <Box display="flex" gap="1rem" justifyContent="center">
+ *         <Button 
+ *           label="Cancel" 
+ *           variant="normal"
+ *           onClick={onClose}
+ *         />
+ *         <Button 
+ *           label="Confirm" 
+ *           variant="promoted"
+ *           onClick={() => {
+ *             onConfirm()
+ *             onClose()
+ *           }}
+ *         />
+ *       </Box>
+ *     </Box>
+ *   </Dialog>
+ * )
+ * ```
+ * 
+ * ### Form Dialog with Validation
+ * ```tsx
+ * const ContactDialog = ({ isOpen, onClose }) => {
+ *   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+ *   const [isSubmitting, setIsSubmitting] = useState(false)
+ * 
+ *   const handleSubmit = async () => {
+ *     setIsSubmitting(true)
+ *     try {
+ *       await submitContact(formData)
+ *       onClose()
+ *     } finally {
+ *       setIsSubmitting(false)
+ *     }
+ *   }
+ * 
+ *   return (
+ *     <Dialog
+ *       isOpen={isOpen}
+ *       onClose={onClose}
+ *       width="500px"
+ *       maxHeight="80vh"
+ *       showCloseButton
+ *     >
+ *       <Box padding="2rem" paddingTop="3rem">
+ *         <h2>Contact Us</h2>
+ *         <Box display="flex" flexDirection="column" gap="1rem" marginTop="1.5rem">
+ *           <Input
+ *             label="Name"
+ *             value={formData.name}
+ *             onChange={(e) => setFormData({...formData, name: e.target.value})}
+ *             required
+ *           />
+ *           <Input
+ *             label="Email"
+ *             type="email"
+ *             value={formData.email}
+ *             onChange={(e) => setFormData({...formData, email: e.target.value})}
+ *             required
+ *           />
+ *           <Box display="flex" gap="1rem" marginTop="1rem">
+ *             <Button 
+ *               label="Cancel" 
+ *               variant="normal"
+ *               onClick={onClose}
+ *               disabled={isSubmitting}
+ *               flex={1}
+ *             />
+ *             <Button 
+ *               label={isSubmitting ? "Sending..." : "Send"}
+ *               variant="promoted"
+ *               onClick={handleSubmit}
+ *               loading={isSubmitting}
+ *               disabled={!formData.name || !formData.email}
+ *               flex={1}
+ *             />
+ *           </Box>
+ *         </Box>
+ *       </Box>
+ *     </Dialog>
+ *   )
+ * }
+ * ```
+ * 
+ * ## Portal Management
+ * ### Custom Portal Container
+ * ```tsx
+ * <Dialog
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   portalId="custom-dialog-root"
+ * >
+ *   Content rendered in custom portal
+ * </Dialog>
+ * ```
+ * 
+ * ## Accessibility Features
+ * - **Focus Trapping**: Focus stays within dialog when open
+ * - **Focus Restoration**: Returns focus to trigger element when closed
+ * - **Keyboard Navigation**: Escape key closes dialog (unless disabled)
+ * - **Screen Reader Support**: Proper ARIA roles and modal attributes
+ * - **Tab Order**: Logical tab navigation within dialog content
+ * 
+ * ## Scroll Management
+ * The component automatically:
+ * - Prevents body scrolling when dialog is open
+ * - Preserves scroll position when dialog closes
+ * - Handles scroll restoration on component unmount
+ * - Maintains proper z-index layering
+ * 
+ * ## Performance Optimization
+ * - **Conditional Rendering**: Only renders DOM elements when open
+ * - **Animation Queuing**: Proper animation timing prevents layout thrashing
+ * - **Memory Cleanup**: Automatically removes event handlers and portals
+ * - **Z-Index Management**: Dynamic z-index calculation for layering
+ * 
+ * ## Integration Notes
+ * - **Box Component**: Uses Box for consistent styling and responsive design
+ * - **Button Component**: Works seamlessly with Button component for actions
+ * - **Portal System**: Creates isolated render trees for proper layering
+ * - **Theme Integration**: Automatically inherits app theme colors and styles
+ * 
+ * @example
+ * // Complete property inquiry dialog system
+ * const PropertyInquiryDialog = ({ property, isOpen, onClose }) => {
+ *   const [inquiry, setInquiry] = useState({
+ *     checkIn: '',
+ *     checkOut: '',
+ *     guests: 1,
+ *     message: ''
+ *   })
+ *   const [isSubmitting, setIsSubmitting] = useState(false)
+ * 
+ *   const handleSubmit = async () => {
+ *     setIsSubmitting(true)
+ *     try {
+ *       await submitInquiry(property.id, inquiry)
+ *       onClose()
+ *     } finally {
+ *       setIsSubmitting(false)
+ *     }
+ *   }
+ * 
+ *   return (
+ *     <Dialog
+ *       isOpen={isOpen}
+ *       onClose={onClose}
+ *       width="600px"
+ *       maxWidth="90vw"
+ *       maxHeight="90vh"
+ *       showCloseButton
+ *     >
+ *       <Box padding="2rem" paddingTop="3rem" overflow="auto">
+ *         <h2>Inquire About {property.title}</h2>
+ *         
+ *         <Box display="flex" flexDirection="column" gap="1.5rem" marginTop="1.5rem">
+ *           <Box display="flex" gap="1rem" flexDirection="column" flexDirectionMd="row">
+ *             <DatePicker
+ *               label="Check-in"
+ *               value={inquiry.checkIn}
+ *               onChange={(value) => setInquiry({...inquiry, checkIn: value})}
+ *               minDate={new Date().toISOString()}
+ *               required
+ *             />
+ *             <DatePicker
+ *               label="Check-out"
+ *               value={inquiry.checkOut}
+ *               onChange={(value) => setInquiry({...inquiry, checkOut: value})}
+ *               minDate={inquiry.checkIn}
+ *               required
+ *             />
+ *           </Box>
+ *           
+ *           <NumberStepperInput
+ *             label="Number of Guests"
+ *             value={inquiry.guests}
+ *             onChange={(value) => setInquiry({...inquiry, guests: value})}
+ *             min={1}
+ *             max={property.maxGuests}
+ *           />
+ *           
+ *           <Box display="flex" gap="1rem" marginTop="1rem">
+ *             <Button 
+ *               label="Cancel" 
+ *               variant="normal"
+ *               onClick={onClose}
+ *               disabled={isSubmitting}
+ *               flex={1}
+ *             />
+ *             <Button 
+ *               label={isSubmitting ? "Sending..." : "Send Inquiry"}
+ *               variant="promoted"
+ *               onClick={handleSubmit}
+ *               loading={isSubmitting}
+ *               disabled={!inquiry.checkIn || !inquiry.checkOut}
+ *               flex={1}
+ *             />
+ *           </Box>
+ *         </Box>
+ *       </Box>
+ *     </Dialog>
+ *   )
+ * }
  */
 const Dialog: React.FC<DialogProps> = ({
     isOpen,

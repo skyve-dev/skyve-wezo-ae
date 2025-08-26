@@ -126,6 +126,586 @@ export interface TabProps {
     tabBarStyle?: React.CSSProperties
 }
 
+/**
+ * # Tab Component
+ * 
+ * A flexible, accessible tab navigation component with animated focus indicators and multiple
+ * styling variants. Features keyboard navigation, responsive design, and theme integration
+ * optimized for property management and booking interfaces.
+ * 
+ * ## Key Features
+ * - **Multiple Variants**: Pills, underline, minimal, and default styling options
+ * - **Animated Focus Ring**: Smooth transitions between active tabs
+ * - **Keyboard Navigation**: Full arrow key, Home/End navigation support
+ * - **Icon Support**: Optional icons with flexible layout options
+ * - **Badge System**: Notification badges and counters for tabs
+ * - **Responsive Design**: Orientation switching and flexible layouts
+ * - **Theme Integration**: Automatic color theming with override options
+ * - **Accessibility**: Full ARIA support and screen reader compatibility
+ * 
+ * ## Basic Usage
+ * ```tsx
+ * const [activeTab, setActiveTab] = useState('tab1')
+ * 
+ * const tabs = [
+ *   { id: 'tab1', label: 'Overview', content: <div>Overview content</div> },
+ *   { id: 'tab2', label: 'Details', content: <div>Details content</div> },
+ *   { id: 'tab3', label: 'Reviews', content: <div>Reviews content</div> }
+ * ]
+ * 
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ * />
+ * ```
+ * 
+ * ## Tab Content Structure
+ * ### With Content Panels
+ * ```tsx
+ * const propertyTabs = [
+ *   {
+ *     id: 'overview',
+ *     label: 'Overview',
+ *     icon: <FaHome />,
+ *     content: (
+ *       <Box padding="2rem">
+ *         <h3>Property Overview</h3>
+ *         <p>Detailed property information...</p>
+ *       </Box>
+ *     )
+ *   },
+ *   {
+ *     id: 'amenities',
+ *     label: 'Amenities',
+ *     icon: <FaStar />,
+ *     content: (
+ *       <Box padding="2rem">
+ *         <h3>Amenities & Features</h3>
+ *         <ul>Available amenities...</ul>
+ *       </Box>
+ *     )
+ *   }
+ * ]
+ * ```
+ * 
+ * ### Tab Bar Only (No Content)
+ * ```tsx
+ * <Tab
+ *   items={navigationTabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   tabBarOnly
+ * />
+ * ```
+ * 
+ * ## Visual Variants
+ * ### Pills Variant
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   variant="pills"
+ *   size="medium"
+ * />
+ * ```
+ * 
+ * ### Underline Variant
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   variant="underline"
+ *   orientation="horizontal"
+ * />
+ * ```
+ * 
+ * ### Minimal Variant
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   variant="minimal"
+ *   centered
+ * />
+ * ```
+ * 
+ * ### Default Variant
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   variant="default"
+ *   fullWidth
+ * />
+ * ```
+ * 
+ * ## Size and Layout Options
+ * ### Size Variants
+ * ```tsx
+ * // Small tabs (32px min height)
+ * <Tab size="small" items={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+ * 
+ * // Medium tabs (40px min height) - default
+ * <Tab size="medium" items={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+ * 
+ * // Large tabs (48px min height)
+ * <Tab size="large" items={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+ * ```
+ * 
+ * ### Orientation Options
+ * ```tsx
+ * // Horizontal layout (default)
+ * <Tab
+ *   orientation="horizontal"
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ * />
+ * 
+ * // Vertical layout
+ * <Tab
+ *   orientation="vertical"
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ * />
+ * ```
+ * 
+ * ## Icons and Badges
+ * ### With Icons
+ * ```tsx
+ * const iconTabs = [
+ *   {
+ *     id: 'properties',
+ *     label: 'Properties',
+ *     icon: <FaHome />,
+ *     content: <PropertyList />
+ *   },
+ *   {
+ *     id: 'bookings',
+ *     label: 'Bookings',
+ *     icon: <FaCalendar />,
+ *     badge: newBookings.length,
+ *     content: <BookingList />
+ *   },
+ *   {
+ *     id: 'messages',
+ *     label: 'Messages',
+ *     icon: <FaEnvelope />,
+ *     badge: unreadCount > 0 ? unreadCount : undefined,
+ *     content: <MessagesList />
+ *   }
+ * ]
+ * 
+ * <Tab
+ *   items={iconTabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   variant="pills"
+ *   iconLayout="row"
+ * />
+ * ```
+ * 
+ * ### Icon Layout Options
+ * ```tsx
+ * // Icons beside text (default)
+ * <Tab iconLayout="row" items={iconTabs} activeTab={activeTab} onTabChange={setActiveTab} />
+ * 
+ * // Icons above text
+ * <Tab iconLayout="column" items={iconTabs} activeTab={activeTab} onTabChange={setActiveTab} />
+ * ```
+ * 
+ * ## Property Management Examples
+ * ### Property Dashboard Navigation
+ * ```tsx
+ * const PropertyDashboard = ({ propertyId }) => {
+ *   const [activeTab, setActiveTab] = useState('overview')
+ *   
+ *   const dashboardTabs = [
+ *     {
+ *       id: 'overview',
+ *       label: 'Overview',
+ *       icon: <FaDashboard />,
+ *       content: <PropertyOverview propertyId={propertyId} />
+ *     },
+ *     {
+ *       id: 'bookings',
+ *       label: 'Bookings',
+ *       icon: <FaCalendar />,
+ *       badge: pendingBookings.length,
+ *       content: <BookingCalendar propertyId={propertyId} />
+ *     },
+ *     {
+ *       id: 'pricing',
+ *       label: 'Pricing',
+ *       icon: <FaDollarSign />,
+ *       content: <PricingManagement propertyId={propertyId} />
+ *     },
+ *     {
+ *       id: 'analytics',
+ *       label: 'Analytics',
+ *       icon: <FaChartBar />,
+ *       content: <PropertyAnalytics propertyId={propertyId} />
+ *     }
+ *   ]
+ * 
+ *   return (
+ *     <Tab
+ *       items={dashboardTabs}
+ *       activeTab={activeTab}
+ *       onTabChange={setActiveTab}
+ *       variant="underline"
+ *       size="large"
+ *       fullWidth
+ *     />
+ *   )
+ * }
+ * ```
+ * 
+ * ### Booking Status Navigation
+ * ```tsx
+ * const BookingManagement = () => {
+ *   const [activeStatus, setActiveStatus] = useState('pending')
+ *   
+ *   const statusTabs = [
+ *     {
+ *       id: 'pending',
+ *       label: 'Pending',
+ *       badge: pendingCount,
+ *       content: <BookingList status="pending" />
+ *     },
+ *     {
+ *       id: 'confirmed',
+ *       label: 'Confirmed',
+ *       badge: confirmedCount,
+ *       content: <BookingList status="confirmed" />
+ *     },
+ *     {
+ *       id: 'cancelled',
+ *       label: 'Cancelled',
+ *       content: <BookingList status="cancelled" />
+ *     }
+ *   ]
+ * 
+ *   return (
+ *     <Tab
+ *       items={statusTabs}
+ *       activeTab={activeStatus}
+ *       onTabChange={setActiveStatus}
+ *       variant="pills"
+ *       centered
+ *       backgroundColor="#f8fafc"
+ *     />
+ *   )
+ * }
+ * ```
+ * 
+ * ### Property Filter Tabs
+ * ```tsx
+ * const PropertyFilters = ({ onFilterChange }) => {
+ *   const [activeFilter, setActiveFilter] = useState('all')
+ *   
+ *   const filterTabs = [
+ *     { id: 'all', label: 'All Properties', badge: allCount },
+ *     { id: 'available', label: 'Available', badge: availableCount },
+ *     { id: 'booked', label: 'Booked', badge: bookedCount },
+ *     { id: 'maintenance', label: 'Maintenance', badge: maintenanceCount }
+ *   ]
+ * 
+ *   const handleTabChange = (tabId) => {
+ *     setActiveFilter(tabId)
+ *     onFilterChange(tabId)
+ *   }
+ * 
+ *   return (
+ *     <Tab
+ *       items={filterTabs}
+ *       activeTab={activeFilter}
+ *       onTabChange={handleTabChange}
+ *       variant="default"
+ *       size="small"
+ *       tabBarOnly
+ *     />
+ *   )
+ * }
+ * ```
+ * 
+ * ## Customization Options
+ * ### Theme Colors
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   activeColor="#e53e3e"          // Custom active color
+ *   inactiveColor="#718096"        // Custom inactive color
+ *   backgroundColor="transparent"   // Custom background
+ * />
+ * ```
+ * 
+ * ### Animation Timing
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   animationDuration={300}        // Slower animation
+ * />
+ * ```
+ * 
+ * ### Custom Icon Size
+ * ```tsx
+ * <Tab
+ *   items={iconTabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   iconSize="1.5rem"             // Larger icons
+ * />
+ * ```
+ * 
+ * ## Disabled States
+ * ```tsx
+ * const tabsWithDisabled = [
+ *   { id: 'tab1', label: 'Available', content: <Content1 /> },
+ *   { id: 'tab2', label: 'Coming Soon', disabled: true },
+ *   { id: 'tab3', label: 'Active', content: <Content3 /> }
+ * ]
+ * 
+ * <Tab
+ *   items={tabsWithDisabled}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ * />
+ * ```
+ * 
+ * ## Responsive Behavior
+ * ### Mobile-First Design
+ * ```tsx
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   orientation="horizontal"       // Mobile: horizontal
+ *   size="small"                   // Mobile: small size
+ *   fullWidth                      // Mobile: full width tabs
+ * />
+ * ```
+ * 
+ * ### Adaptive Layout
+ * ```tsx
+ * const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+ * 
+ * <Tab
+ *   items={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={setActiveTab}
+ *   orientation={isMobile ? 'horizontal' : 'vertical'}
+ *   variant={isMobile ? 'pills' : 'default'}
+ *   size={isMobile ? 'small' : 'medium'}
+ *   iconLayout={isMobile ? 'column' : 'row'}
+ * />
+ * ```
+ * 
+ * ## Advanced Examples
+ * ### Multi-Level Tab Navigation
+ * ```tsx
+ * const PropertySettingsPanel = ({ propertyId }) => {
+ *   const [primaryTab, setPrimaryTab] = useState('general')
+ *   const [secondaryTab, setSecondaryTab] = useState('basic')
+ *   
+ *   const primaryTabs = [
+ *     {
+ *       id: 'general',
+ *       label: 'General',
+ *       icon: <FaCog />,
+ *       content: (
+ *         <Tab
+ *           items={generalSubTabs}
+ *           activeTab={secondaryTab}
+ *           onTabChange={setSecondaryTab}
+ *           variant="underline"
+ *           size="small"
+ *         />
+ *       )
+ *     },
+ *     {
+ *       id: 'pricing',
+ *       label: 'Pricing',
+ *       icon: <FaDollarSign />,
+ *       content: <PricingSettings propertyId={propertyId} />
+ *     }
+ *   ]
+ * 
+ *   return (
+ *     <Tab
+ *       items={primaryTabs}
+ *       activeTab={primaryTab}
+ *       onTabChange={setPrimaryTab}
+ *       variant="pills"
+ *       size="large"
+ *       orientation="vertical"
+ *     />
+ *   )
+ * }
+ * ```
+ * 
+ * ### Tab with Async Content
+ * ```tsx
+ * const AsyncTabContent = ({ propertyId, tabId }) => {
+ *   const [data, setData] = useState(null)
+ *   const [loading, setLoading] = useState(true)
+ * 
+ *   useEffect(() => {
+ *     const loadData = async () => {
+ *       setLoading(true)
+ *       try {
+ *         const result = await fetchTabData(propertyId, tabId)
+ *         setData(result)
+ *       } finally {
+ *         setLoading(false)
+ *       }
+ *     }
+ *     loadData()
+ *   }, [propertyId, tabId])
+ * 
+ *   if (loading) return <LoadingSpinner />
+ *   return <TabContent data={data} />
+ * }
+ * 
+ * const dynamicTabs = [
+ *   {
+ *     id: 'reviews',
+ *     label: 'Reviews',
+ *     badge: reviewCount,
+ *     content: <AsyncTabContent propertyId={propertyId} tabId="reviews" />
+ *   }
+ * ]
+ * ```
+ * 
+ * ## Keyboard Navigation
+ * The component supports comprehensive keyboard navigation:
+ * - **Arrow Keys**: Navigate between tabs (Left/Right or Up/Down)
+ * - **Home**: Jump to first tab
+ * - **End**: Jump to last tab  
+ * - **Enter/Space**: Activate focused tab
+ * - **Tab**: Move focus in/out of tab list
+ * 
+ * ## Accessibility Features
+ * - **ARIA Roles**: Proper tablist, tab, and tabpanel roles
+ * - **Keyboard Support**: Full keyboard navigation as per WAI-ARIA
+ * - **Screen Readers**: Tab labels and states announced properly
+ * - **Focus Management**: Visual focus indicators and logical tab order
+ * - **Disabled States**: Proper aria-disabled handling
+ * - **Selection States**: aria-selected for current tab
+ * 
+ * ## Performance Optimization
+ * - **Animated Focus Ring**: Hardware-accelerated CSS animations
+ * - **Efficient Updates**: Optimized re-renders on tab changes
+ * - **Memory Management**: Proper cleanup of resize observers and event handlers  
+ * - **Conditional Rendering**: Content panels only render when active
+ * 
+ * ## Integration Notes
+ * - **Theme System**: Automatically inherits app theme colors
+ * - **Box Component**: Uses Box for consistent styling and layout
+ * - **Responsive Design**: Inherits responsive design patterns
+ * - **Icon Integration**: Works with any React icon library
+ * 
+ * @example
+ * // Complete property management dashboard
+ * const PropertyManagementDashboard = ({ propertyId }) => {
+ *   const [activeTab, setActiveTab] = useState('dashboard')
+ *   const [notifications, setNotifications] = useState({
+ *     bookings: 3,
+ *     messages: 7,
+ *     maintenance: 1
+ *   })
+ * 
+ *   const managementTabs = [
+ *     {
+ *       id: 'dashboard',
+ *       label: 'Dashboard',
+ *       icon: <FaTachometerAlt />,
+ *       content: (
+ *         <Box padding="2rem">
+ *           <PropertyDashboard propertyId={propertyId} />
+ *         </Box>
+ *       )
+ *     },
+ *     {
+ *       id: 'bookings',
+ *       label: 'Bookings',
+ *       icon: <FaCalendarCheck />,
+ *       badge: notifications.bookings,
+ *       content: (
+ *         <Box padding="2rem">
+ *           <BookingManagement propertyId={propertyId} />
+ *         </Box>
+ *       )
+ *     },
+ *     {
+ *       id: 'messages',
+ *       label: 'Messages',
+ *       icon: <FaComments />,
+ *       badge: notifications.messages,
+ *       content: (
+ *         <Box padding="2rem">
+ *           <MessageCenter propertyId={propertyId} />
+ *         </Box>
+ *       )
+ *     },
+ *     {
+ *       id: 'maintenance',
+ *       label: 'Maintenance',
+ *       icon: <FaTools />,
+ *       badge: notifications.maintenance,
+ *       content: (
+ *         <Box padding="2rem">
+ *           <MaintenanceTracker propertyId={propertyId} />
+ *         </Box>
+ *       )
+ *     },
+ *     {
+ *       id: 'analytics',
+ *       label: 'Analytics',
+ *       icon: <FaChartLine />,
+ *       content: (
+ *         <Box padding="2rem">
+ *           <PropertyAnalytics propertyId={propertyId} />
+ *         </Box>
+ *       )
+ *     }
+ *   ]
+ * 
+ *   return (
+ *     <Box height="100vh" display="flex" flexDirection="column">
+ *       <Box borderBottom="1px solid #e2e8f0" backgroundColor="white">
+ *         <Tab
+ *           items={managementTabs}
+ *           activeTab={activeTab}
+ *           onTabChange={setActiveTab}
+ *           variant="underline"
+ *           size="large"
+ *           fullWidth
+ *           tabBarStyle={{
+ *             padding: '0 2rem',
+ *             maxWidth: '1200px',
+ *             margin: '0 auto'
+ *           }}
+ *         />
+ *       </Box>
+ *       <Box flex={1} overflow="auto" backgroundColor="#f7fafc">
+ *         {managementTabs.find(tab => tab.id === activeTab)?.content}
+ *       </Box>
+ *     </Box>
+ *   )
+ * }
+ */
+
 const Tab: React.FC<TabProps> = ({
     items,
     activeTab,

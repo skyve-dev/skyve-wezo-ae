@@ -49,6 +49,579 @@ export interface NumberStepperInputProps extends Pick<BoxProps, 'width' | 'width
     onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
+/**
+ * # NumberStepperInput Component
+ * 
+ * A specialized numeric input component with integrated increment/decrement buttons for 
+ * precise value selection. Features number formatting, validation, keyboard shortcuts, 
+ * and responsive design optimized for property rental pricing and booking systems.
+ * 
+ * ## Key Features
+ * - **Stepper Controls**: Built-in +/- buttons for value adjustment
+ * - **Number Formatting**: Currency, decimal, and integer display formats
+ * - **Keyboard Navigation**: Arrow keys for value adjustment
+ * - **Input Validation**: Min/max range enforcement with visual feedback
+ * - **Controlled/Uncontrolled**: Supports both controlled and uncontrolled usage
+ * - **Responsive Design**: Mobile-first width controls via Box props
+ * - **Theme Integration**: Consistent styling with Input component
+ * - **Accessibility**: Full keyboard and screen reader support
+ * 
+ * ## Basic Usage
+ * ```tsx
+ * const [value, setValue] = useState(0)
+ * 
+ * <NumberStepperInput
+ *   value={value}
+ *   onChange={setValue}
+ *   label="Quantity"
+ * />
+ * ```
+ * 
+ * ## Number Formats
+ * ### Currency Format
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Nightly Rate"
+ *   value={price}
+ *   onChange={setPrice}
+ *   format="currency"
+ *   currency="AED"
+ *   currencyPosition="suffix"
+ *   step={50}
+ *   min={100}
+ *   max={10000}
+ * />
+ * ```
+ * 
+ * ### Decimal Format
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Rating"
+ *   value={rating}
+ *   onChange={setRating}
+ *   format="decimal"
+ *   decimalPlaces={1}
+ *   step={0.1}
+ *   min={0}
+ *   max={5}
+ * />
+ * ```
+ * 
+ * ### Integer Format
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Guest Count"
+ *   value={guests}
+ *   onChange={setGuests}
+ *   format="integer"
+ *   step={1}
+ *   min={1}
+ *   max={12}
+ * />
+ * ```
+ * 
+ * ## Size and Variants
+ * ### Size Options
+ * ```tsx
+ * // Small (36px height)
+ * <NumberStepperInput
+ *   size="small"
+ *   label="Small Input"
+ *   value={smallValue}
+ *   onChange={setSmallValue}
+ * />
+ * 
+ * // Medium (44px height) - default
+ * <NumberStepperInput
+ *   size="medium"
+ *   label="Medium Input"
+ *   value={mediumValue}
+ *   onChange={setMediumValue}
+ * />
+ * 
+ * // Large (52px height)
+ * <NumberStepperInput
+ *   size="large"
+ *   label="Large Input"
+ *   value={largeValue}
+ *   onChange={setLargeValue}
+ * />
+ * ```
+ * 
+ * ### Visual Variants
+ * ```tsx
+ * // Default variant
+ * <NumberStepperInput
+ *   variant="default"
+ *   label="Default Style"
+ *   value={value1}
+ *   onChange={setValue1}
+ * />
+ * 
+ * // Outlined variant
+ * <NumberStepperInput
+ *   variant="outlined"
+ *   label="Outlined Style"
+ *   value={value2}
+ *   onChange={setValue2}
+ * />
+ * 
+ * // Filled variant
+ * <NumberStepperInput
+ *   variant="filled"
+ *   label="Filled Style"
+ *   value={value3}
+ *   onChange={setValue3}
+ * />
+ * ```
+ * 
+ * ## Property Booking Examples
+ * ### Guest Selection
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Number of Guests"
+ *   icon={FaUsers}
+ *   value={guestCount}
+ *   onChange={setGuestCount}
+ *   format="integer"
+ *   min={1}
+ *   max={property.maxGuests}
+ *   step={1}
+ *   helperText={`Maximum ${property.maxGuests} guests allowed`}
+ * />
+ * ```
+ * 
+ * ### Bedroom Count Filter
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Bedrooms"
+ *   icon={FaBed}
+ *   value={bedroomCount}
+ *   onChange={setBedroomCount}
+ *   format="integer"
+ *   min={0}
+ *   max={10}
+ *   step={1}
+ *   placeholder="Any"
+ * />
+ * ```
+ * 
+ * ### Price Range Filter
+ * ```tsx
+ * <Box display="flex" gap="1rem" flexDirection="column" flexDirectionMd="row">
+ *   <NumberStepperInput
+ *     label="Min Price"
+ *     icon={FaDollarSign}
+ *     value={minPrice}
+ *     onChange={setMinPrice}
+ *     format="currency"
+ *     currency="AED"
+ *     currencyPosition="suffix"
+ *     step={100}
+ *     min={0}
+ *     width="100%"
+ *     widthMd="50%"
+ *   />
+ *   <NumberStepperInput
+ *     label="Max Price"
+ *     icon={FaDollarSign}
+ *     value={maxPrice}
+ *     onChange={setMaxPrice}
+ *     format="currency"
+ *     currency="AED"
+ *     currencyPosition="suffix"
+ *     step={100}
+ *     min={minPrice || 0}
+ *     width="100%"
+ *     widthMd="50%"
+ *   />
+ * </Box>
+ * ```
+ * 
+ * ## Advanced Formatting
+ * ### Custom Currency
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Property Value"
+ *   value={propertyValue}
+ *   onChange={setPropertyValue}
+ *   format="currency"
+ *   currency="AED"
+ *   currencyPosition="suffix"
+ *   decimalPlaces={0}
+ *   thousandsSeparator=","
+ *   step={10000}
+ *   min={100000}
+ * />
+ * ```
+ * 
+ * ### Percentage Input
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Commission Rate"
+ *   value={commission}
+ *   onChange={setCommission}
+ *   format="decimal"
+ *   currency="%"
+ *   currencyPosition="suffix"
+ *   decimalPlaces={1}
+ *   step={0.5}
+ *   min={0}
+ *   max={15}
+ * />
+ * ```
+ * 
+ * ## Validation and Error States
+ * ### Required Field
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Required Amount"
+ *   value={amount}
+ *   onChange={setAmount}
+ *   required
+ *   error={amount === 0}
+ *   helperText={amount === 0 ? "Amount is required" : ""}
+ *   min={1}
+ * />
+ * ```
+ * 
+ * ### Range Validation
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Booking Duration (days)"
+ *   value={duration}
+ *   onChange={setDuration}
+ *   format="integer"
+ *   min={1}
+ *   max={30}
+ *   error={duration > 30}
+ *   helperText={
+ *     duration > 30 
+ *       ? "Maximum booking duration is 30 days"
+ *       : "Select number of nights"
+ *   }
+ * />
+ * ```
+ * 
+ * ## State Management
+ * ### Controlled Usage
+ * ```tsx
+ * const [controlledValue, setControlledValue] = useState(5)
+ * 
+ * <NumberStepperInput
+ *   label="Controlled Input"
+ *   value={controlledValue}
+ *   onChange={setControlledValue}
+ * />
+ * ```
+ * 
+ * ### Uncontrolled Usage
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Uncontrolled Input"
+ *   defaultValue={10}
+ *   onChange={(value) => console.log('Value changed:', value)}
+ * />
+ * ```
+ * 
+ * ### Disabled State
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Locked Value"
+ *   value={lockedValue}
+ *   onChange={() => {}}
+ *   disabled
+ *   helperText="This value cannot be changed"
+ * />
+ * ```
+ * 
+ * ### Read-Only State
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Display Only"
+ *   value={displayValue}
+ *   onChange={() => {}}
+ *   readOnly
+ *   helperText="Read-only display"
+ * />
+ * ```
+ * 
+ * ## Keyboard Interactions
+ * The component supports these keyboard shortcuts:
+ * - **Arrow Up**: Increment by step value
+ * - **Arrow Down**: Decrement by step value
+ * - **Focus/Blur**: Format display value
+ * - **Direct Input**: Type values directly while focused
+ * 
+ * ## Responsive Design
+ * ### Width Controls
+ * ```tsx
+ * <NumberStepperInput
+ *   label="Responsive Input"
+ *   value={value}
+ *   onChange={setValue}
+ *   width="100%"           // Mobile: full width
+ *   widthMd="50%"          // Tablet: half width
+ *   widthLg="200px"        // Desktop: fixed width
+ *   maxWidth="300px"       // Maximum constraint
+ * />
+ * ```
+ * 
+ * ### Form Grid Layout
+ * ```tsx
+ * <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="repeat(2, 1fr)" gap="1rem">
+ *   <NumberStepperInput
+ *     label="Adults"
+ *     value={adults}
+ *     onChange={setAdults}
+ *     min={1}
+ *     max={10}
+ *   />
+ *   <NumberStepperInput
+ *     label="Children"
+ *     value={children}
+ *     onChange={setChildren}
+ *     min={0}
+ *     max={8}
+ *   />
+ * </Box>
+ * ```
+ * 
+ * ## Complete Examples
+ * ### Property Pricing Form
+ * ```tsx
+ * const PropertyPricingForm = () => {
+ *   const [pricing, setPricing] = useState({
+ *     basePrice: 500,
+ *     cleaningFee: 50,
+ *     securityDeposit: 200,
+ *     maxGuests: 4,
+ *     minStay: 2
+ *   })
+ * 
+ *   const updatePricing = (field, value) => {
+ *     setPricing(prev => ({ ...prev, [field]: value }))
+ *   }
+ * 
+ *   return (
+ *     <Box display="flex" flexDirection="column" gap="1.5rem">
+ *       <NumberStepperInput
+ *         label="Base Nightly Rate"
+ *         icon={FaDollarSign}
+ *         value={pricing.basePrice}
+ *         onChange={(value) => updatePricing('basePrice', value)}
+ *         format="currency"
+ *         currency="AED"
+ *         currencyPosition="suffix"
+ *         step={25}
+ *         min={100}
+ *         max={5000}
+ *         required
+ *       />
+ *       
+ *       <Box display="flex" gap="1rem" flexDirection="column" flexDirectionMd="row">
+ *         <NumberStepperInput
+ *           label="Cleaning Fee"
+ *           value={pricing.cleaningFee}
+ *           onChange={(value) => updatePricing('cleaningFee', value)}
+ *           format="currency"
+ *           currency="AED"
+ *           currencyPosition="suffix"
+ *           step={25}
+ *           min={0}
+ *           max={500}
+ *           width="100%"
+ *           widthMd="50%"
+ *         />
+ *         <NumberStepperInput
+ *           label="Security Deposit"
+ *           value={pricing.securityDeposit}
+ *           onChange={(value) => updatePricing('securityDeposit', value)}
+ *           format="currency"
+ *           currency="AED"
+ *           currencyPosition="suffix"
+ *           step={50}
+ *           min={0}
+ *           max={2000}
+ *           width="100%"
+ *           widthMd="50%"
+ *         />
+ *       </Box>
+ * 
+ *       <Box display="flex" gap="1rem" flexDirection="column" flexDirectionMd="row">
+ *         <NumberStepperInput
+ *           label="Maximum Guests"
+ *           icon={FaUsers}
+ *           value={pricing.maxGuests}
+ *           onChange={(value) => updatePricing('maxGuests', value)}
+ *           format="integer"
+ *           min={1}
+ *           max={16}
+ *           width="100%"
+ *           widthMd="50%"
+ *           required
+ *         />
+ *         <NumberStepperInput
+ *           label="Minimum Stay (nights)"
+ *           icon={FaCalendarAlt}
+ *           value={pricing.minStay}
+ *           onChange={(value) => updatePricing('minStay', value)}
+ *           format="integer"
+ *           min={1}
+ *           max={30}
+ *           width="100%"
+ *           widthMd="50%"
+ *           required
+ *         />
+ *       </Box>
+ *     </Box>
+ *   )
+ * }
+ * ```
+ * 
+ * ### Booking Calculator
+ * ```tsx
+ * const BookingCalculator = ({ basePrice }) => {
+ *   const [nights, setNights] = useState(3)
+ *   const [guests, setGuests] = useState(2)
+ *   const [cleaningFee] = useState(75)
+ *   
+ *   const subtotal = basePrice * nights
+ *   const total = subtotal + cleaningFee
+ * 
+ *   return (
+ *     <Box display="flex" flexDirection="column" gap="1rem">
+ *       <NumberStepperInput
+ *         label="Number of Nights"
+ *         value={nights}
+ *         onChange={setNights}
+ *         format="integer"
+ *         min={1}
+ *         max={30}
+ *         size="large"
+ *       />
+ *       
+ *       <NumberStepperInput
+ *         label="Number of Guests"
+ *         value={guests}
+ *         onChange={setGuests}
+ *         format="integer"
+ *         min={1}
+ *         max={8}
+ *         size="large"
+ *       />
+ * 
+ *       <Box padding="1rem" backgroundColor="#f8fafc" borderRadius="8px">
+ *         <Box display="flex" justifyContent="space-between" marginBottom="0.5rem">
+ *           <span>Subtotal ({nights} nights)</span>
+ *           <span>AED {subtotal.toLocaleString()}</span>
+ *         </Box>
+ *         <Box display="flex" justifyContent="space-between" marginBottom="0.5rem">
+ *           <span>Cleaning Fee</span>
+ *           <span>AED {cleaningFee}</span>
+ *         </Box>
+ *         <Box display="flex" justifyContent="space-between" fontWeight="600" fontSize="1.125rem">
+ *           <span>Total</span>
+ *           <span>AED {total.toLocaleString()}</span>
+ *         </Box>
+ *       </Box>
+ *     </Box>
+ *   )
+ * }
+ * ```
+ * 
+ * ## Accessibility Features
+ * - **Keyboard Navigation**: Full arrow key support for value adjustment
+ * - **Screen Readers**: Proper ARIA labels and value announcements
+ * - **Focus Management**: Clear focus indicators on all interactive elements
+ * - **Input Validation**: Accessible error messaging and constraints
+ * - **Button Labels**: Clear aria-labels for increment/decrement buttons
+ * 
+ * ## Integration Notes
+ * - **Input Component**: Shares size configurations for consistent form layouts
+ * - **Button Component**: Uses Button for increment/decrement controls
+ * - **Box Component**: Inherits responsive width controls and styling
+ * - **Theme Integration**: Automatic theme color integration via useTheme
+ * 
+ * ## Performance Optimization
+ * - **Efficient Formatting**: Memoized number formatting functions
+ * - **Smart Updates**: Prevents unnecessary re-renders on format changes
+ * - **Input Debouncing**: Smooth typing experience with proper value parsing
+ * - **Memory Management**: Proper cleanup of event handlers and timers
+ * 
+ * @example
+ * // Complete property amenity pricing interface
+ * const AmenityPricingManager = ({ propertyId }) => {
+ *   const [amenities, setAmenities] = useState({
+ *     extraGuest: { enabled: false, price: 25 },
+ *     latePet: { enabled: false, price: 15 },
+ *     earlyCheckin: { enabled: false, price: 50 },
+ *     lateCheckout: { enabled: false, price: 50 }
+ *   })
+ * 
+ *   const updateAmenity = (amenityKey, field, value) => {
+ *     setAmenities(prev => ({
+ *       ...prev,
+ *       [amenityKey]: { ...prev[amenityKey], [field]: value }
+ *     }))
+ *   }
+ * 
+ *   return (
+ *     <Box display="flex" flexDirection="column" gap="2rem">
+ *       <h3>Additional Service Pricing</h3>
+ *       
+ *       <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="repeat(2, 1fr)" gap="1.5rem">
+ *         <Box>
+ *           <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
+ *             <input 
+ *               type="checkbox" 
+ *               checked={amenities.extraGuest.enabled}
+ *               onChange={(e) => updateAmenity('extraGuest', 'enabled', e.target.checked)}
+ *             />
+ *             <label>Extra Guest Fee</label>
+ *           </Box>
+ *           <NumberStepperInput
+ *             label="Price per extra guest per night"
+ *             value={amenities.extraGuest.price}
+ *             onChange={(value) => updateAmenity('extraGuest', 'price', value)}
+ *             format="currency"
+ *             currency="AED"
+ *             currencyPosition="suffix"
+ *             step={5}
+ *             min={0}
+ *             max={100}
+ *             disabled={!amenities.extraGuest.enabled}
+ *           />
+ *         </Box>
+ * 
+ *         <Box>
+ *           <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
+ *             <input 
+ *               type="checkbox" 
+ *               checked={amenities.petFee.enabled}
+ *               onChange={(e) => updateAmenity('petFee', 'enabled', e.target.checked)}
+ *             />
+ *             <label>Pet Fee</label>
+ *           </Box>
+ *           <NumberStepperInput
+ *             label="Price per pet per night"
+ *             value={amenities.petFee.price}
+ *             onChange={(value) => updateAmenity('petFee', 'price', value)}
+ *             format="currency"
+ *             currency="AED"
+ *             currencyPosition="suffix"
+ *             step={5}
+ *             min={0}
+ *             max={50}
+ *             disabled={!amenities.petFee.enabled}
+ *           />
+ *         </Box>
+ *       </Box>
+ *     </Box>
+ *   )
+ * }
+ */
+
 export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                                                                           value: controlledValue,
                                                                           defaultValue = 0,
