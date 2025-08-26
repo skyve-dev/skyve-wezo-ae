@@ -108,7 +108,8 @@ const WizardContent: React.FC<{
                 onPrevious={previousStep}
                 onNext={handleNext}
                 onSave={saveDraft}
-            />
+            />,
+            { visibility: 'persistent' }
         )
 
         // Cleanup on unmount or when dependencies change

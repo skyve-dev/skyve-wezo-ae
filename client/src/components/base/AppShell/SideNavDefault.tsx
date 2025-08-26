@@ -1,16 +1,13 @@
-import React from 'react'
-import { Box } from '../Box'
-import Tab, { TabItem } from '../Tab'
-import { BaseRoute } from './types'
+import {Box} from '../Box'
+import Tab, {TabItem} from '../Tab'
+import {BaseRoute} from './types'
+import wezoAe from "@/assets/wezo-optimized.svg";
 
 interface SideNavDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
     currentRoute: string
     navigateTo: (route: keyof T, params?: any) => void
     setSideNavOpen: (open: boolean) => void
-    headerConfig?: {
-        logo?: React.ReactNode
-    }
     theme: {
         primaryColor: string
         backgroundColor: string
@@ -23,7 +20,6 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
     currentRoute,
     navigateTo,
     setSideNavOpen,
-    headerConfig,
     theme
 }: SideNavDefaultProps<T>) => {
     // Get navigation items for side drawer (Tab format)
@@ -48,12 +44,17 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
                 borderBottom="1px solid rgba(0,0,0,0.1)"
                 background={theme.primaryColor}
             >
-                <Box display="flex" alignItems="center" gap="0.75rem">
-                    {headerConfig?.logo && (
-                        <Box fontSize="1.5rem" color={theme.primaryColor}>
-                            {headerConfig.logo}
-                        </Box>
-                    )}
+                <Box display="flex" alignItems={'flex-end'}>
+                    <img src={wezoAe} alt="Wezo AE" style={{ width:'2.25rem'}}/>
+                    <Box
+                        fontSize="1.2rem"
+                        fontWeight="bold"
+                        marginLeft={'0rem'}
+                        color="white"
+                        marginBottom={'0.25rem'}
+                    >
+                        ezo.ae
+                    </Box>
                 </Box>
             </Box>
 

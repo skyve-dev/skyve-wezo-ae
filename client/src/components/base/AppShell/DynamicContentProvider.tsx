@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useRef, ReactNode, useCallback, useMemo } from 'react'
+import type { ContentOptions, MountedContent, VisibilityMode } from './types'
 
 interface DynamicContentState {
     header: ReactNode | null
@@ -6,20 +7,22 @@ interface DynamicContentState {
     footer: ReactNode | null
 }
 
+interface VisibilityState {
+    header: VisibilityMode
+    sideNav: VisibilityMode
+    footer: VisibilityMode
+}
+
 interface MountFunction {
-    (content: ReactNode): () => void
+    (content: ReactNode, options?: ContentOptions): () => void
 }
 
 interface DynamicContentContextType {
     content: DynamicContentState
+    visibility: VisibilityState
     mountHeader: MountFunction
     mountSideNav: MountFunction
     mountFooter: MountFunction
-}
-
-interface StackItem {
-    id: string
-    content: ReactNode
 }
 
 const DynamicContentContext = createContext<DynamicContentContextType | undefined>(undefined)
@@ -35,89 +38,143 @@ export const DynamicContentProvider: React.FC<DynamicContentProviderProps> = ({ 
         footer: null
     })
 
-    // Stack-based storage for each area
-    const headerStack = useRef<StackItem[]>([])
-    const sideNavStack = useRef<StackItem[]>([])
-    const footerStack = useRef<StackItem[]>([])
+    const [visibility, setVisibility] = useState<VisibilityState>({
+        header: 'auto',
+        sideNav: 'auto', 
+        footer: 'auto'
+    })
+
+    // Stack-based storage for each area with options
+    const headerStack = useRef<MountedContent[]>([])
+    const sideNavStack = useRef<MountedContent[]>([])
+    const footerStack = useRef<MountedContent[]>([])
 
     const idCounter = useRef(0)
 
+    // Default options
+    const defaultOptions: ContentOptions = { visibility: 'auto' }
+
     // Helper function to get the topmost content from a stack
-    const getTopContent = (stack: StackItem[]): ReactNode | null => {
+    const getTopContent = (stack: MountedContent[]): ReactNode | null => {
         return stack.length > 0 ? stack[stack.length - 1].content : null
     }
 
+    // Helper function to get the topmost options from a stack
+    const getTopOptions = (stack: MountedContent[]): ContentOptions => {
+        return stack.length > 0 ? stack[stack.length - 1].options : defaultOptions
+    }
+
     // Helper function to remove an item from stack by ID
-    const removeFromStack = (stack: StackItem[], id: string): StackItem[] => {
+    const removeFromStack = (stack: MountedContent[], id: string): MountedContent[] => {
         return stack.filter(item => item.id !== id)
     }
 
-    const mountHeader: MountFunction = useCallback((headerContent: ReactNode) => {
+    const mountHeader: MountFunction = useCallback((headerContent: ReactNode, options?: ContentOptions) => {
         const mountId = `header-${++idCounter.current}`
+        const mergedOptions = { ...defaultOptions, ...options }
         
-        // Add to header stack
-        const newItem: StackItem = { id: mountId, content: headerContent }
+        // Add to header stack with options
+        const newItem: MountedContent = { 
+            id: mountId, 
+            content: headerContent,
+            options: mergedOptions
+        }
         headerStack.current = [...headerStack.current, newItem]
         
-        // Update displayed content to topmost item
+        // Update displayed content and visibility to topmost item
         setContent(prev => ({ ...prev, header: getTopContent(headerStack.current) }))
+        setVisibility(prev => ({ 
+            ...prev, 
+            header: getTopOptions(headerStack.current).visibility || 'auto'
+        }))
 
         // Return cleanup function
         return () => {
             // Remove this specific item from the stack
             headerStack.current = removeFromStack(headerStack.current, mountId)
             
-            // Update displayed content to new topmost item (or null if stack empty)
+            // Update displayed content and visibility to new topmost item
             setContent(prev => ({ ...prev, header: getTopContent(headerStack.current) }))
+            setVisibility(prev => ({ 
+                ...prev, 
+                header: getTopOptions(headerStack.current).visibility || 'auto'
+            }))
         }
     }, [])
 
-    const mountSideNav: MountFunction = useCallback((sideNavContent: ReactNode) => {
+    const mountSideNav: MountFunction = useCallback((sideNavContent: ReactNode, options?: ContentOptions) => {
         const mountId = `sidenav-${++idCounter.current}`
+        const mergedOptions = { ...defaultOptions, ...options }
         
-        // Add to sideNav stack
-        const newItem: StackItem = { id: mountId, content: sideNavContent }
+        // Add to sideNav stack with options
+        const newItem: MountedContent = { 
+            id: mountId, 
+            content: sideNavContent,
+            options: mergedOptions
+        }
         sideNavStack.current = [...sideNavStack.current, newItem]
         
-        // Update displayed content to topmost item
+        // Update displayed content and visibility to topmost item
         setContent(prev => ({ ...prev, sideNav: getTopContent(sideNavStack.current) }))
+        setVisibility(prev => ({ 
+            ...prev, 
+            sideNav: getTopOptions(sideNavStack.current).visibility || 'auto'
+        }))
 
         // Return cleanup function
         return () => {
             // Remove this specific item from the stack
             sideNavStack.current = removeFromStack(sideNavStack.current, mountId)
             
-            // Update displayed content to new topmost item (or null if stack empty)
+            // Update displayed content and visibility to new topmost item
             setContent(prev => ({ ...prev, sideNav: getTopContent(sideNavStack.current) }))
+            setVisibility(prev => ({ 
+                ...prev, 
+                sideNav: getTopOptions(sideNavStack.current).visibility || 'auto'
+            }))
         }
     }, [])
 
-    const mountFooter: MountFunction = useCallback((footerContent: ReactNode) => {
+    const mountFooter: MountFunction = useCallback((footerContent: ReactNode, options?: ContentOptions) => {
         const mountId = `footer-${++idCounter.current}`
+        const mergedOptions = { ...defaultOptions, ...options }
         
-        // Add to footer stack
-        const newItem: StackItem = { id: mountId, content: footerContent }
+        // Add to footer stack with options
+        const newItem: MountedContent = { 
+            id: mountId, 
+            content: footerContent,
+            options: mergedOptions
+        }
         footerStack.current = [...footerStack.current, newItem]
         
-        // Update displayed content to topmost item
+        // Update displayed content and visibility to topmost item
         setContent(prev => ({ ...prev, footer: getTopContent(footerStack.current) }))
+        setVisibility(prev => ({ 
+            ...prev, 
+            footer: getTopOptions(footerStack.current).visibility || 'auto'
+        }))
 
         // Return cleanup function
         return () => {
             // Remove this specific item from the stack
             footerStack.current = removeFromStack(footerStack.current, mountId)
             
-            // Update displayed content to new topmost item (or null if stack empty)
+            // Update displayed content and visibility to new topmost item
             setContent(prev => ({ ...prev, footer: getTopContent(footerStack.current) }))
+            setVisibility(prev => ({ 
+                ...prev, 
+                footer: getTopOptions(footerStack.current).visibility || 'auto'
+            }))
         }
     }, [])
 
     const contextValue: DynamicContentContextType = useMemo(() => ({
         content,
+        visibility,
         mountHeader,
         mountSideNav,
         mountFooter
-    }), [content, mountHeader, mountSideNav, mountFooter])
+    }), [content, visibility, mountHeader, mountSideNav, mountFooter])
 
     return (
         <DynamicContentContext.Provider value={contextValue}>

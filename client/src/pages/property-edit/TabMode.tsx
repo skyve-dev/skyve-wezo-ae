@@ -148,7 +148,8 @@ const TabMode: React.FC<TabModeProps> = ({ propertyId, initialTab = 'details', o
                     onDiscard={handleDiscardChanges}
                     isSaving={isSaving}
                     hasErrors={!!validationErrors && Object.keys(validationErrors).length > 0}
-                />
+                />,
+                { visibility: 'persistent' }
             )
         }
 

@@ -1,9 +1,10 @@
 import React from 'react'
-import { Box } from '../Box'
-import { Button } from '../Button'
-import Tab, { TabItem } from '../Tab'
-import { FaBars } from 'react-icons/fa'
-import { BaseRoute } from './types'
+import {Box} from '../Box'
+import {Button} from '../Button'
+import Tab, {TabItem} from '../Tab'
+import {FaBars} from 'react-icons/fa'
+import {BaseRoute} from './types'
+import wezoAe from "../../../assets/wezo-optimized.svg"
 
 interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
@@ -25,20 +26,14 @@ interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
 }
 
 export const HeaderDefault = <T extends Record<string, BaseRoute>>({
-    routes,
-    currentRoute,
-    navigateTo,
-    setSideNavOpen,
-    isMobile,
-    headerConfig,
-    theme
-}: HeaderDefaultProps<T>) => {
-    const {
-        title = 'App',
-        logo,
-        showQuickNav = true,
-        actions
-    } = headerConfig || {}
+                                                                       routes,
+                                                                       currentRoute,
+                                                                       navigateTo,
+                                                                       setSideNavOpen,
+                                                                       isMobile,
+                                                                       theme
+                                                                   }: HeaderDefaultProps<T>) => {
+
 
     // Get header quick nav items
     const headerNavItems: TabItem[] = Object.entries(routes)
@@ -61,27 +56,22 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
             margin="0 auto"
         >
             {/* Left: Menu Button + Logo/Title */}
-            <Box display="flex" alignItems="center" gap="1rem">
-                {logo && (
-                    <Box fontSize="1.5rem" color={theme.primaryColor}>
-                        {logo}
-                    </Box>
-                )}
-
-                {title && (
-                    <Box
-                        fontSize="1.25rem"
-                        fontWeight="bold"
-                        color="#1a202c"
-                    >
-                        {title}
-                    </Box>
-                )}
+            <Box display="flex" alignItems={'flex-end'}>
+                <img src={wezoAe} alt="Wezo AE" style={{ width:'2rem'}}/>
+                <Box
+                    fontSize="1.2rem"
+                    fontWeight="bold"
+                    marginLeft={'0rem'}
+                    color="white"
+                    marginBottom={'0.25rem'}
+                >
+                    ezo.ae
+                </Box>
             </Box>
 
             {/* Center: Quick Navigation (Desktop/Tablet) */}
             <Box display={'flex'} justifyContent={'flex-end'} paddingX={'1rem'} flexGrow={1}>
-                {showQuickNav && !isMobile && headerNavItems.length > 0 && (
+                {!isMobile && headerNavItems.length > 0 && (
                     <Tab
                         items={headerNavItems}
                         activeTab={currentRoute}
@@ -97,12 +87,7 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                 )}
             </Box>
 
-            {/* Right: Actions */}
-            {actions && (
-                <Box display="flex" alignItems="center" gap="0.5rem">
-                    {actions}
-                </Box>
-            )}
+
             <Button
                 label=""
                 icon={<FaBars fontSize={'1.2rem'}/>}
@@ -113,8 +98,8 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                 borderRadius="8px"
                 aria-label="Open navigation menu"
                 style={{
-                    color:'white',
-                    padding : 0
+                    color: 'white',
+                    padding: 0
                 }}
                 whileHover={{
                     backgroundColor: 'rgba(213, 33, 34, 0.1)',

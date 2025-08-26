@@ -3,8 +3,8 @@ import {Box} from '../Box'
 import SlidingDrawer from '../SlidingDrawer'
 import ScrollbarOverlay from '../ScrollbarOverlay'
 import AppShellContext from './AppShellContext'
-import { PromiseDialogProvider, usePromiseDialog } from './PromiseDialogProvider'
-import { DynamicContentProvider, useDynamicContent } from './DynamicContentProvider'
+import {PromiseDialogProvider, usePromiseDialog} from './PromiseDialogProvider'
+import {DynamicContentProvider, useDynamicContent} from './DynamicContentProvider'
 import HeaderDefault from './HeaderDefault'
 import SideNavDefault from './SideNavDefault'
 import FooterDefault from './FooterDefault'
@@ -43,15 +43,15 @@ interface AppShellProps<T extends Record<string, BaseRoute>> {
 
 // Internal AppShell component that uses the promise dialog context
 const AppShellInternal = <T extends Record<string, BaseRoute>>({
-                                                           routes,
-                                                           config,
-                                                           initialRoute,
-                                                           onBeforeNavigate,
-                                                           onAfterNavigate,
-                                                           children
-                                                       }: AppShellProps<T>) => {
-    const { openDialog } = usePromiseDialog();
-    const { content, mountHeader, mountSideNav, mountFooter } = useDynamicContent();
+                                                                   routes,
+                                                                   config,
+                                                                   initialRoute,
+                                                                   onBeforeNavigate,
+                                                                   onAfterNavigate,
+                                                                   children
+                                                               }: AppShellProps<T>) => {
+    const {openDialog} = usePromiseDialog();
+    const {content, visibility, mountHeader, mountSideNav, mountFooter} = useDynamicContent();
     // Helper function to get initial route and params from URL
     const getInitialRouteAndParams = useCallback((): { route: string; params: Record<string, any> } => {
         if (typeof window === 'undefined') {
@@ -80,19 +80,22 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     const initialRouteData = getInitialRouteAndParams()
     const [currentRoute, setCurrentRoute] = useState<string>(initialRouteData.route)
     const [currentParams, setCurrentParams] = useState<Record<string, any>>(initialRouteData.params)
-    const [navigationHistory, setNavigationHistory] = useState<Array<{route: string, params: Record<string, any>}>>([])    
+    const [navigationHistory, setNavigationHistory] = useState<Array<{
+        route: string,
+        params: Record<string, any>
+    }>>([])
 
     // UI state
     const [isSideNavOpen, setSideNavOpen] = useState(false)
     const [isLoading, setLoading] = useState(false)
-    
+
     // Navigation guards state
     const navigationGuards = useRef<Set<NavigationGuardFunction>>(new Set())
 
     // Guard registration function
     const registerNavigationGuard: GuardRegistrationFunction = useCallback((guard: NavigationGuardFunction) => {
         navigationGuards.current.add(guard)
-        
+
         return () => {
             navigationGuards.current.delete(guard)
         }
@@ -101,7 +104,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     // Check all navigation guards
     const checkNavigationGuards = useCallback(async (): Promise<boolean> => {
         const guards = Array.from(navigationGuards.current)
-        
+
         for (const guard of guards) {
             try {
                 const canNavigate = await guard()
@@ -113,7 +116,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                 return false
             }
         }
-        
+
         return true
     }, [])
 
@@ -128,7 +131,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                 navigateToUrl(currentPath, currentParams, true)
                 return
             }
-            
+
             const fullPath = getCurrentPath() + window.location.search
             const {routeKey, params} = pathToRouteKeyWithParams(fullPath)
 
@@ -203,7 +206,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
         if (!canNavigate) {
             return // Guards blocked navigation
         }
-        
+
         const route = routes[routeKey]
         if (!route) {
             console.warn(`Route not found: ${routeKey}`)
@@ -299,12 +302,11 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
         setNavigationHistory(prev => {
             const lastEntry = prev[prev.length - 1]
             if (!lastEntry || lastEntry.route !== routeKeyStr) {
-                return [...prev, { route: routeKeyStr, params: routeParams }]
+                return [...prev, {route: routeKeyStr, params: routeParams}]
             }
             return prev
         })
     }, [routes, currentRoute, currentParams, onBeforeNavigate, onAfterNavigate, checkNavigationGuards])
-
 
 
     // Navigate back function
@@ -334,14 +336,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
 
     // Configuration with defaults (moved up for theme access)
     const {
-        header = {
-            title: 'App',
-            showQuickNav: true
-        },
-        footer = {
-            showOnMobile: true,
-            maxItems: 4
-        },
         breakpoints = {
             mobile: 768,
             tablet: 1024,
@@ -420,25 +414,27 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
 
             // Only act if accumulated scroll exceeds threshold or single scroll is large
             if (Math.abs(scrollAccumulator.current) > ACCUMULATOR_THRESHOLD || Math.abs(scrollDelta) > SCROLL_THRESHOLD) {
-                // Scrolling down - hide header and footer
+                // Scrolling down - hide header and footer (but respect visibility settings)
                 if (scrollAccumulator.current > 0 && currentScrollY > SCROLL_THRESHOLD) {
-                    setHeaderVisible(false)
-                    setFooterVisible(false)
+                    // Only auto-hide if visibility is 'auto'
+                    if (visibility.header === 'auto') setHeaderVisible(false)
+                    if (visibility.footer === 'auto') setFooterVisible(false)
                 }
-                // Scrolling up - show header and footer
+                // Scrolling up - show header and footer (but respect visibility settings)
                 else if (scrollAccumulator.current < 0) {
-                    setHeaderVisible(true)
-                    setFooterVisible(true)
+                    // Only auto-show if visibility is 'auto'
+                    if (visibility.header === 'auto') setHeaderVisible(true)
+                    if (visibility.footer === 'auto') setFooterVisible(true)
                 }
 
                 // Reset accumulator after action
                 scrollAccumulator.current = 0
             }
 
-            // Always show header/footer when at the top
+            // Always show header/footer when at the top (but respect visibility settings)
             if (currentScrollY <= 10) {
-                setHeaderVisible(true)
-                setFooterVisible(true)
+                if (visibility.header === 'auto') setHeaderVisible(true)
+                if (visibility.footer === 'auto') setFooterVisible(true)
                 scrollAccumulator.current = 0
             }
 
@@ -451,7 +447,24 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
         return () => {
             window.removeEventListener('scroll', handleScroll)
         }
-    }, [])
+    }, [visibility])
+
+    // Apply visibility settings for persistent and disabled modes
+    useEffect(() => {
+        // Handle header visibility
+        if (visibility.header === 'persistent') {
+            setHeaderVisible(true)
+        } else if (visibility.header === 'disabled') {
+            setHeaderVisible(false)
+        }
+        
+        // Handle footer visibility
+        if (visibility.footer === 'persistent') {
+            setFooterVisible(true)
+        } else if (visibility.footer === 'disabled') {
+            setFooterVisible(false)
+        }
+    }, [visibility])
 
     // Splash screen removed - no effect needed
 
@@ -460,13 +473,12 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     const CurrentComponent = currentRouteData?.component
 
 
-
     return (
         <AppShellContext.Provider value={contextValue as AppShellContextType}>
             <>
                 <>
                     {/* Custom Scrollbar Overlay */}
-                    <ScrollbarOverlay 
+                    <ScrollbarOverlay
                         thumbColor="rgba(0, 0, 0, 0.2)"
                         thumbHoverColor="rgba(0, 0, 0, 0.4)"
                         trackColor="transparent"
@@ -497,7 +509,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 navigateTo={navigateTo}
                                 setSideNavOpen={setSideNavOpen}
                                 isMobile={isMobile}
-                                headerConfig={header}
+
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',
@@ -517,42 +529,39 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                         {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
                     </Box>
 
-                    {/* Footer (Mobile Only) */}
-                    {footer.showOnMobile && (
-                        <Box
-                            ref={footerRef}
-                            position="fixed"
-                            bottom="0"
-                            bottomSm={'1rem'}
-                            borderRadius={'0px'}
-                            borderRadiusSm={'2rem'}
-                            overflow={'hidden'}
-                            left="0"
-                            right="0"
-                            maxWidth={'450px'}
-                            margin={'auto'}
-                            zIndex="1000"
-                            boxShadow="0 5px 10px rgba(0, 0, 0, 0.1)"
-                            style={{
-                                transform: isFooterVisible ? 'translateY(0)' : 'translateY(200%)',
-                                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }}
-                        >
-                            {content.footer || (
-                                <FooterDefault
-                                    routes={routes}
-                                    currentRoute={currentRoute}
-                                    navigateTo={navigateTo}
-                                    footerConfig={footer}
-                                    theme={{
-                                        primaryColor: theme.primaryColor || '#D52122',
-                                        backgroundColor: theme.backgroundColor || '#FAFAFA',
-                                        navBackgroundColor: theme.navBackgroundColor || '#ffffff'
-                                    }}
-                                />
-                            )}
-                        </Box>
-                    )}
+                    {/* Footer */}
+                    <Box
+                        ref={footerRef}
+                        position="fixed"
+                        bottom="0"
+                        bottomSm={'1rem'}
+                        borderRadius={'0px'}
+                        borderRadiusSm={'2rem'}
+                        overflow={'hidden'}
+                        left="0"
+                        right="0"
+                        maxWidth={'450px'}
+                        margin={'auto'}
+                        zIndex="1000"
+                        boxShadow="0 5px 10px rgba(0, 0, 0, 0.1)"
+                        style={{
+                            transform: isFooterVisible ? 'translateY(0)' : 'translateY(200%)',
+                            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                    >
+                        {content.footer || (
+                            <FooterDefault
+                                routes={routes}
+                                currentRoute={currentRoute}
+                                navigateTo={navigateTo}
+                                theme={{
+                                    primaryColor: theme.primaryColor || '#D52122',
+                                    backgroundColor: theme.backgroundColor || '#FAFAFA',
+                                    navBackgroundColor: theme.navBackgroundColor || '#ffffff'
+                                }}
+                            />
+                        )}
+                    </Box>
 
                     {/* Side Navigation Drawer */}
                     <SlidingDrawer
@@ -568,7 +577,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 currentRoute={currentRoute}
                                 navigateTo={navigateTo}
                                 setSideNavOpen={setSideNavOpen}
-                                headerConfig={header}
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',

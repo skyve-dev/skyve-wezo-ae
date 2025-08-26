@@ -22,7 +22,7 @@ export const FooterDefault = <T extends Record<string, BaseRoute>>({
     footerConfig,
     theme
 }: FooterDefaultProps<T>) => {
-    const { maxItems = 4 } = footerConfig || {}
+    const { maxItems = 3 } = footerConfig || {}
 
     // Get footer nav items (mobile only) - formatted as TabItem[]
     const footerNavItems: TabItem[] = Object.entries(routes)

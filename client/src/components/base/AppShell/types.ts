@@ -63,8 +63,23 @@ export interface DialogState<T = any> {
 }
 
 
+// Visibility mode for mounted content
+export type VisibilityMode = 'auto' | 'persistent' | 'disabled'
+
+// Content options for mounting
+export interface ContentOptions {
+    visibility?: VisibilityMode
+}
+
+// Mounted content with options
+export interface MountedContent {
+    content: React.ReactNode
+    options: ContentOptions
+    id: string
+}
+
 // Mount function type for dynamic content
-export type MountFunction = (content: React.ReactNode) => () => void
+export type MountFunction = (content: React.ReactNode, options?: ContentOptions) => () => void
 
 // Navigation guard types
 export type NavigationGuardFunction = () => Promise<boolean>
@@ -110,20 +125,6 @@ export interface BreakpointConfig {
     desktop: number
 }
 
-// Header configuration
-export interface HeaderConfig {
-    title?: string
-    logo?: React.ReactNode
-    showQuickNav?: boolean
-    actions?: React.ReactNode[]
-}
-
-// Footer configuration
-export interface FooterConfig {
-    showOnMobile?: boolean
-    maxItems?: number
-}
-
 // Theme configuration
 export interface AppShellTheme {
     primaryColor: string
@@ -133,8 +134,6 @@ export interface AppShellTheme {
 
 // AppShell configuration
 export interface AppShellConfig {
-    header?: HeaderConfig
-    footer?: FooterConfig
     breakpoints?: BreakpointConfig
     theme?: Partial<AppShellTheme>
 }

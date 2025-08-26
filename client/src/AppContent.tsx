@@ -2,7 +2,6 @@ import React from 'react'
 import {AppShell} from '@/components/base/AppShell'
 import type {OnAfterNavigateFunction, OnBeforeNavigateFunction} from '@/components/base/AppShell/types'
 import {routes} from "@/Routes.tsx";
-import wezoAe from "./assets/wezo.svg";
 
 // Main AppContent Component
 const AppContent: React.FC = () => {
@@ -32,15 +31,6 @@ const AppContent: React.FC = () => {
             onBeforeNavigate={handleBeforeNavigate}
             onAfterNavigate={handleAfterNavigate}
             config={{
-                header: {
-                    title: '',  // Remove title since we have logo
-                    logo: <img src={wezoAe} alt="Wezo.ae" style={{height: '2.5rem'}} />,
-                    showQuickNav: true
-                },
-                footer: {
-                    showOnMobile: true,
-                    maxItems: 3
-                },
                 theme: {
                     primaryColor: '#D52122',
                     backgroundColor: '#FAFAFA',
