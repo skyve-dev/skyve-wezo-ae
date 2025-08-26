@@ -103,6 +103,40 @@ When implementing features:
 3. Write comprehensive tests for new functionality
 4. Document APIs and complex business logic
 
+## Code Modification Guidelines
+
+When making code changes, Claude must:
+1. **Analyze** - First analyze the issue or request thoroughly
+2. **Explain** - Clearly explain findings and the proposed solution
+3. **Present Plan** - Detail what changes will be made and why
+4. **Wait for Confirmation** - Only proceed after explicit approval (e.g., "please do it", "confirm", "yes", "go ahead")
+5. **Never execute without permission** - Do not make changes until the user confirms the plan
+
+This ensures clear communication and prevents unwanted modifications.
+
+## Component and UI Guidelines
+
+When building UI features:
+1. **Reuse existing components** - Always use components from `src/components/base` instead of creating new ones
+2. **Understand before using** - Fully understand how existing components work before implementation
+3. **Avoid creativity** - Stick to established patterns and component APIs, don't introduce new patterns
+4. **Use react-icons** - Always use icons from `react-icons` library that are relevant to the functionality
+5. **Maintain consistency** - Follow the existing UI patterns and styling approaches in the codebase
+
+This ensures UI consistency and maintainability across the application.
+
+## State Management Guidelines
+
+When managing application state:
+1. **Redux as primary state manager** - Always use Redux for application state management
+2. **Use slices** - Organize all state logic in Redux slices using Redux Toolkit
+3. **Business logic in slices** - Put all functionality and business logic inside slice reducers and actions
+4. **Use async thunks** - Handle all async operations with createAsyncThunk
+5. **Minimize local state** - Only use useState or Context for micro state management (e.g., UI toggles, form inputs)
+6. **No prop drilling** - Use Redux selectors instead of passing props through multiple components
+
+This ensures predictable state management and centralized business logic.
+
 ### Testing Guidelines
 - Jest is configured for **sequential execution** (`maxWorkers: 1`, `maxConcurrency: 1`)
 - This prevents race conditions between tests that share database state

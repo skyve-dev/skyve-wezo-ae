@@ -39,7 +39,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
     }
 
     return (
-        <Box paddingX={'1.5rem'}>
+        <Box paddingX={'1.5rem'} paddingY={'1.5rem'}>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
                 <FaHome style={{color: '#374151', fontSize: '1.25rem'}} />
                 <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
@@ -51,10 +51,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ formData, updateFormData, valid
                     label="Property Name"
                     icon={FaHome}
                     value={formData.name || ''}
-                    onChange={(e) => {
-                        console.log('🏠 DetailsTab: Property name changed to:', e.target.value)
-                        updateFormData({name: e.target.value})
-                    }}
+                    onChange={(e) => updateFormData({name: e.target.value})}
                     placeholder="Enter a descriptive name for your property"
                     width="100%"
                 />

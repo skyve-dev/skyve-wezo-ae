@@ -48,6 +48,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
     const initializingRef = useRef(true)
     // Track if we're in the process of programmatic cancellation to skip navigation guard
     const isCancellingRef = useRef(false)
+    // Track if we're in the process of successful completion to skip navigation guard
+    const isCompletingRef = useRef(false)
     const hasChanges = changeDetection.detectChanges(originalFormData, formData).hasChanges
 
     // Initialize wizard from localStorage or empty state
@@ -77,8 +79,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
         if (!hasChanges) return
 
         const cleanup = registerNavigationGuard(async () => {
-            // Skip navigation guard if user is explicitly cancelling
-            if (isCancellingRef.current) {
+            // Skip navigation guard if user is explicitly cancelling or completing
+            if (isCancellingRef.current || isCompletingRef.current) {
                 return true // Allow navigation without confirmation
             }
 
@@ -130,23 +132,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
     }, [])
 
     const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
-        // Log property name specific changes
-        if ('name' in updates) {
-            console.log('🏠 WizardProvider: Property name being updated to:', updates.name)
-        }
-        
         setFormData(prev => {
             const newFormData = { ...prev, ...updates }
-            
-            // Log current property name in formData after update
-            if ('name' in updates) {
-                console.log('🏠 WizardProvider: FormData after property name update:', {
-                    previousName: prev.name,
-                    newName: newFormData.name,
-                    fullFormData: newFormData
-                })
-            }
-            
             return newFormData
         })
         dispatch(updateWizardData(updates))
@@ -269,23 +256,37 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
     // }, [openDialog, uploadedPhotos, clearDraft, onCancel])
 
     const submitFinal = useCallback(async () => {
-        console.log('🏠 WizardProvider: submitFinal - Property name check:', {
-            propertyName: formData?.name,
-            formDataExists: !!formData,
+        // Get fresh data from Redux store instead of using stale closure
+        const freshState = (dispatch as any)((_: any, getState: any) => getState())
+        const freshFormData = freshState.property.wizardData
+        
+        console.log('🏠 WizardProvider: submitFinal - Using fresh Redux data:', {
+            propertyName: freshFormData?.name,
+            formDataExists: !!freshFormData,
             propertyId
         })
         
-        if (propertyId === 'new' && formData) {
-            console.log('🏠 WizardProvider: About to submit property with name:', formData.name)
-            console.log('🏠 WizardProvider: Full form data being submitted:', formData)
+        if (propertyId === 'new' && freshFormData) {
+            console.log('🏠 WizardProvider: About to submit property with name:', freshFormData.name)
+            console.log('🏠 WizardProvider: Full form data being submitted:', freshFormData)
             
             try {
-                const result = await dispatch(createProperty(formData as WizardFormData))
+                // Use fresh data from Redux instead of stale closure data
+                const result = await dispatch(createProperty(freshFormData as WizardFormData))
                 
                 if (createProperty.fulfilled.match(result)) {
                     console.log('✅ WizardProvider: Property created successfully')
+                    
+                    // Set completion flag to bypass navigation guard
+                    isCompletingRef.current = true
+                    
                     clearDraft()
                     onComplete?.(result.payload.propertyId || '')
+                    
+                    // Reset the flag after a short delay to prevent it from affecting future navigations
+                    setTimeout(() => {
+                        isCompletingRef.current = false
+                    }, 100)
                 } else {
                     console.log('❌ WizardProvider: Property creation failed:', result)
                 }
@@ -293,7 +294,10 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({
                 console.error('❌ WizardProvider: Exception during createProperty dispatch:', error)
             }
         } else {
-            console.log('❌ WizardProvider: submitFinal conditions not met')
+            console.log('❌ WizardProvider: submitFinal conditions not met:', {
+                propertyId,
+                hasFreshFormData: !!freshFormData
+            })
         }
     }, [propertyId, dispatch, clearDraft, onComplete])
 

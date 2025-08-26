@@ -421,13 +421,14 @@ const TabMode: React.FC<TabModeProps> = ({ propertyId, initialTab = 'details', o
                         window.scrollTo({top: 0, behavior: 'instant'})
                     }}
                     orientation={'horizontal'}
-                    variant="underline"
+                    variant="pills"
                     size="medium"
                     fullWidth={false}
                     tabBarStyle={{
                         backgroundColor: 'white',
                         borderBottom: '1px solid #e5e5e5',
-                        justifyContent : 'space-between',
+                        paddingBottom: '1rem',
+                        paddingTop:'1rem',
                         marginBottom:'2rem',
                         borderRadius : 0,
                     }}

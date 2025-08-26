@@ -49,9 +49,6 @@ const saveWizardDataToStorage = (data: WizardFormData | null) => {
 
 // Transform flattened wizard data to nested server format
 const transformPropertyDataForServer = (data: WizardFormData) => {
-  console.log('🏠 transformPropertyDataForServer: Property name check:', data.name)
-  console.log('🔄 transformPropertyDataForServer: Input data:', data)
-  console.log('🔄 transformPropertyDataForServer: Address data:', data.address)
   
   // Prepare the transformed data with required structure
   const transformedData: any = {
@@ -208,29 +205,15 @@ export const fetchPropertyById = createAsyncThunk(
 export const createProperty = createAsyncThunk(
   'property/createProperty',
   async (propertyData: WizardFormData, { rejectWithValue }) => {
-    console.log('🔥 Redux createProperty: Action started with data:', propertyData)
-    
     try {
-      console.log('🔄 Redux createProperty: Transforming data for server...')
       const transformedData = transformPropertyDataForServer(propertyData)
-      console.log('📤 Redux createProperty: Transformed data:', transformedData)
-      console.log('🏠 Redux createProperty: Property name in final payload:', transformedData.name)
-      
-      console.log('🌐 Redux createProperty: Making API call to /api/properties')
       const response = await api.post<{ property: any }>('/api/properties', transformedData)
-      console.log('📥 Redux createProperty: API response:', response)
-      
       const serverProperty = transformServerPropertyData(response.property)
-      console.log('✅ Redux createProperty: Final transformed property:', serverProperty)
-      
       return serverProperty
     } catch (error: any) {
-      console.error('❌ Redux createProperty: Error occurred:', error)
-      console.error('❌ Redux createProperty: Error response:', error.response)
       
       // Handle field-specific validation errors
       if (error.response?.data?.errors) {
-        console.log('❌ Redux createProperty: Validation errors detected:', error.response.data.errors)
         return rejectWithValue({
           type: 'validation',
           errors: error.response.data.errors,
@@ -423,20 +406,8 @@ const propertySlice = createSlice({
       saveWizardDataToStorage(wizardData)
     },
     updateWizardData: (state, action: PayloadAction<Partial<WizardFormData>>) => {
-        if ('name' in action.payload) {
-          console.log('🏠 Redux updateWizardData: Property name update:', {
-            previousName: state.wizardData?.name,
-            newName: action.payload.name
-          })
-        }
-        
         if (state.wizardData) {
           state.wizardData = { ...state.wizardData, ...action.payload }
-          
-          if ('name' in action.payload) {
-            console.log('🏠 Redux updateWizardData: After update, wizardData.name is:', state.wizardData.name)
-          }
-          
           saveWizardDataToStorage(state.wizardData)
         }
     },

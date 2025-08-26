@@ -34,6 +34,7 @@ const SaveFooter: React.FC<SaveFooterProps> = ({
                 display="flex" 
                 alignItems="center" 
                 gap="0.75rem"
+                flexGrow={'1'}
             >
                 {onDiscard && (
                     <Button
@@ -46,11 +47,11 @@ const SaveFooter: React.FC<SaveFooterProps> = ({
                         style={{
                             backgroundColor: 'transparent',
                             color: 'white',
-                            border: '1px solid white',
                             minWidth: '110px'
                         }}
                     />
                 )}
+                <Box flexGrow={'1'} />
                 <Button
                     label={isSaving ? "Saving..." : "Save Changes"}
                     icon={isSaving ? <FaSpinner className="spin" /> : <FaSave />}

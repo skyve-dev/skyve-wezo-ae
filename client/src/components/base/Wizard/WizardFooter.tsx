@@ -1,13 +1,7 @@
 import React from 'react'
-import { Box } from '../Box'
+import {Box} from '../Box'
 import Button from '../Button'
-import { 
-    FaArrowLeft, 
-    FaArrowRight, 
-    FaCheck, 
-    FaSave,
-    FaSpinner 
-} from 'react-icons/fa'
+import {FaArrowLeft, FaArrowRight, FaCheck, FaSpinner} from 'react-icons/fa'
 
 interface WizardFooterProps {
     currentStep: number
@@ -22,114 +16,80 @@ interface WizardFooterProps {
 }
 
 const WizardFooter: React.FC<WizardFooterProps> = ({
-    currentStep,
-    totalSteps,
-    canGoPrevious,
-    canGoNext,
-    isLastStep,
-    isLoading = false,
-    onPrevious,
-    onNext,
-    onSave
-}) => {
+                                                       currentStep,
+                                                       totalSteps,
+                                                       canGoPrevious,
+                                                       canGoNext,
+                                                       isLastStep,
+                                                       isLoading = false,
+                                                       onPrevious,
+                                                       onNext,
+                                                   }) => {
     return (
         <Box
             display="flex"
             alignItems="center"
             justifyContent="space-between"
-            padding="1rem 1.5rem"
+            padding="1rem"
             backgroundColor="#D52122"
             height="4.5rem"
         >
             {/* Left: Previous Button */}
-            <Box flex="1" display="flex" justifyContent="flex-start">
-                {canGoPrevious && (
-                    <Button
-                        label="Previous"
-                        icon={<FaArrowLeft />}
-                        onClick={onPrevious}
-                        variant="normal"
-                        size="medium"
-                        disabled={isLoading}
-                        style={{
-                            backgroundColor: 'transparent',
-                            color: 'white',
-                            minWidth: '110px'
-                        }}
-                    />
-                )}
-            </Box>
-
-            {/* Center: Progress and Save Draft */}
-            <Box 
-                flex="1" 
-                display="flex" 
-                alignItems="center" 
-                justifyContent="center"
-                gap="1rem"
-            >
-                {/* Save Draft Button */}
+            {canGoPrevious && (
                 <Button
-                    label=""
-                    icon={<FaSave />}
-                    onClick={onSave}
+                    label="Previous"
+                    icon={<FaArrowLeft/>}
+                    onClick={onPrevious}
                     variant="normal"
-                    size="small"
+                    size="medium"
                     disabled={isLoading}
                     style={{
                         backgroundColor: 'transparent',
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        borderRadius: '50%',
-                        padding: '0.5rem',
-                        minWidth: 'unset',
-                        width: '2.25rem',
-                        height: '2.25rem'
+                        color: 'white',
+                        minWidth: '110px'
                     }}
-                    title="Save Draft"
                 />
-                
-                {/* Step Progress */}
-                <Box
+            )}
 
-                    padding="0.375rem 0.875rem"
-                    fontSize="0.875rem"
-                    fontWeight="500"
-                    color="white"
-                >
-                    Step {currentStep + 1} of {totalSteps}
-                </Box>
+            {/* Center: Progress and Save Draft */}
+            <Box
+                padding="0.375rem 0.875rem"
+                fontSize="0.875rem"
+                fontWeight="500"
+                color="white"
+            >
+                Step {currentStep + 1} of {totalSteps}
             </Box>
 
             {/* Right: Next/Submit Button */}
-            <Box flex="1" display="flex" justifyContent="flex-end">
-                <Button
-                    label={
-                        isLoading 
-                            ? "Processing..." 
-                            : isLastStep 
-                                ? "Create Property" 
-                                : "Next"
-                    }
-                    icon={
-                        isLoading 
-                            ? <FaSpinner className="spin" />
-                            : isLastStep 
-                                ? <FaCheck /> 
-                                : <FaArrowRight />
-                    }
-                    onClick={onNext}
-                    variant={isLastStep ? "promoted" : "promoted"}
-                    size="medium"
-                    disabled={isLoading || (!canGoNext && !isLastStep)}
-                    style={{
-                        minWidth: isLastStep ? '150px' : '110px',
-                        color: 'white',
-                        padding : 0,
-                        border: 'none',
-                        fontWeight: '600'
-                    }}
-                />
-            </Box>
+            <Button
+                label={
+                    isLoading
+                        ? "Processing..."
+                        : isLastStep
+                            ? "Create Property"
+                            : "Next"
+                }
+                icon={
+                    isLoading
+                        ? <FaSpinner className="spin"/>
+                        : isLastStep
+                            ? <FaCheck/>
+                            : <FaArrowRight/>
+                }
+                onClick={onNext}
+                variant={isLastStep ? "promoted" : "promoted"}
+                size="medium"
+                disabled={isLoading || (!canGoNext && !isLastStep)}
+                style={{
+                    backgroundColor: 'transparent',
+                    minWidth: isLastStep ? '150px' : '110px',
+                    color: 'white',
+                    padding: 0,
+                    border: 'none',
+                    fontWeight: '600'
+                }}
+            />
 
             {/* Loading spinner animation */}
             <style>{`

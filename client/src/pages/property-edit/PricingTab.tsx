@@ -35,7 +35,7 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, valid
     }
 
     return (
-        <Box paddingX={'1.5rem'}>
+        <Box paddingX={'1.5rem'} paddingY={'1.5rem'}>
             <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
                 Pricing & Policies
             </h3>

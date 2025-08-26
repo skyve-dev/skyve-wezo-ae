@@ -480,7 +480,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                         top="0"
                         left="0"
                         right="0"
-                        zIndex="100"
+                        zIndex="1000"
                         backgroundColor={theme.primaryColor}
                         color={theme.backgroundColor}
                         borderBottom="1px solid rgba(213, 33, 34, 0.08)"
@@ -511,26 +511,30 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                     <Box
                         flex="1"
                         paddingTop="4rem" // Always account for fixed header
-                        paddingBottom={isMobile && footer.showOnMobile ? "4rem" : "0"}
+                        paddingBottom="4rem"
                         minHeight="100%"
                     >
                         {children || (CurrentComponent && <CurrentComponent {...currentParams}/>)}
                     </Box>
 
                     {/* Footer (Mobile Only) */}
-                    {isMobile && footer.showOnMobile && (
+                    {footer.showOnMobile && (
                         <Box
                             ref={footerRef}
                             position="fixed"
                             bottom="0"
+                            bottomSm={'1rem'}
+                            borderRadius={'0px'}
+                            borderRadiusSm={'2rem'}
+                            overflow={'hidden'}
                             left="0"
                             right="0"
-                            background="linear-gradient(180deg, #ffffff 0%, #FAFAFA 100%)"
-                            borderTop="1px solid rgba(213, 33, 34, 0.08)"
-                            zIndex="90"
-                            boxShadow="0 -2px 10px rgba(0, 0, 0, 0.1)"
+                            maxWidth={'450px'}
+                            margin={'auto'}
+                            zIndex="1000"
+                            boxShadow="0 5px 10px rgba(0, 0, 0, 0.1)"
                             style={{
-                                transform: isFooterVisible ? 'translateY(0)' : 'translateY(100%)',
+                                transform: isFooterVisible ? 'translateY(0)' : 'translateY(200%)',
                                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
                         >

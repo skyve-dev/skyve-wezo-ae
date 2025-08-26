@@ -323,7 +323,7 @@ const PropertiesList: React.FC = () => {
                 ) : (
                     <Box
                         display="grid"
-                        gridTemplateColumns="repeat(auto-fill, minmax(350px, 1fr))"
+                        gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
                         gap="1.5rem"
                     >
                         {filteredProperties.map(property => renderPropertyCard(property))}
