@@ -11,7 +11,7 @@ const Availability: React.FC = () => {
     return (
         <SecuredPage>
             <Box padding="2rem" maxWidth="1200px" margin="0 auto">
-                <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="2rem">
+                <Box display="flex" flexDirection={'column'} flexDirectionSm={'row'} justifyContent="space-between" gap={'1rem'} marginBottom="2rem">
                     <Box>
                         <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0'}}>Availability & Rates</h1>
                         <p style={{color: '#666'}}>Manage your property availability and pricing</p>
@@ -33,9 +33,9 @@ const Availability: React.FC = () => {
                 </Box>
 
                 {viewMode === 'calendar' ? (
-                    <Box padding="2rem" backgroundColor="white" borderRadius="8px" boxShadow="0 2px 4px rgba(0,0,0,0.1)">
+                    <Box padding="2rem"  backgroundColor="white" borderRadius="8px" boxShadow="0 2px 4px rgba(0,0,0,0.1)">
                         <h3 style={{marginBottom: '1.5rem'}}>Calendar View</h3>
-                        <Box textAlign="center" padding="4rem" backgroundColor="#f9fafb" borderRadius="4px">
+                        <Box display={'flex'} flexDirection={'column'} alignItems={'center'} padding="4rem" backgroundColor="#f9fafb" borderRadius="4px">
                             <FaCalendarAlt style={{fontSize: '3rem', color: '#9ca3af', marginBottom: '1rem'}} />
                             <p style={{color: '#666'}}>Calendar view showing availability up to 16 months in advance</p>
                         </Box>
@@ -61,7 +61,7 @@ const Availability: React.FC = () => {
                 )}
 
                 {/* Quick Actions */}
-                <Box marginTop="2rem" display="flex" gap="1rem">
+                <Box marginTop="2rem" display="flex" flexWrap={'wrap'} gap="1rem">
                     <Button label="Block Dates" icon={<FaBan />} variant="normal" />
                     <Button label="Set Rates" icon={<FaDollarSign />} variant="normal" />
                     <Button label="Set Restrictions" icon={<FaClock />} variant="normal" />
