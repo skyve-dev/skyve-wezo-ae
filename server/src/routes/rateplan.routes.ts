@@ -1,59 +1,61 @@
 import { Router } from 'express';
 import * as ratePlanController from '../controllers/rateplan.controller';
 import { authenticate } from '../middleware/auth';
-import {
-  validateRatePlanCreation,
-  validateRatePlanUpdate,
-  validatePriceUpdate,
-  validateRestrictionUpdate,
-} from '../middleware/rateplan.validation';
 
 const router = Router();
 
+// Create a new rate plan for a property
 router.post(
   '/properties/:propertyId/rate-plans',
   authenticate,
-  validateRatePlanCreation,
   ratePlanController.createRatePlan
 );
 
+// Get all rate plans for a property
 router.get(
   '/properties/:propertyId/rate-plans',
   authenticate,
-  ratePlanController.getRatePlans
+  ratePlanController.getRatePlansForProperty
 );
 
+// Get a specific rate plan
 router.get(
   '/properties/:propertyId/rate-plans/:ratePlanId',
   authenticate,
-  ratePlanController.getRatePlan
+  ratePlanController.getRatePlanById
 );
 
+// Update a rate plan
 router.put(
   '/properties/:propertyId/rate-plans/:ratePlanId',
   authenticate,
-  validateRatePlanUpdate,
   ratePlanController.updateRatePlan
 );
 
+// Delete a rate plan
 router.delete(
   '/properties/:propertyId/rate-plans/:ratePlanId',
   authenticate,
   ratePlanController.deleteRatePlan
 );
 
-router.put(
-  '/properties/:propertyId/rate-plans/:ratePlanId/prices',
-  authenticate,
-  validatePriceUpdate,
-  ratePlanController.updateRatePlanPrices
+// Search for available rates (public endpoint for booking engine)
+router.post(
+  '/properties/:propertyId/rate-plans/search',
+  ratePlanController.searchAvailableRates
 );
 
-router.put(
-  '/properties/:propertyId/rate-plans/:ratePlanId/restrictions',
+// Calculate cancellation refund
+router.post(
+  '/properties/:propertyId/rate-plans/:ratePlanId/cancellation-refund',
   authenticate,
-  validateRestrictionUpdate,
-  ratePlanController.updateRatePlanRestrictions
+  ratePlanController.calculateCancellationRefund
+);
+
+// Get rate plan metadata
+router.get(
+  '/rate-plans/metadata/adjustment-types',
+  ratePlanController.getAdjustmentTypesMetadata
 );
 
 export default router;

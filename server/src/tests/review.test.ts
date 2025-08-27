@@ -91,7 +91,24 @@ describe('Review Management API Tests', () => {
         name: 'Standard Rate',
         type: 'FullyFlexible',
         description: 'Standard flexible rate',
-        cancellationPolicy: 'Free cancellation',
+        adjustmentType: 'FixedPrice',
+        adjustmentValue: 800,
+        cancellationPolicy: {
+          create: {
+            tiers: {
+              create: [
+                {
+                  daysBeforeCheckIn: 1,
+                  refundPercentage: 100,
+                },
+                {
+                  daysBeforeCheckIn: 0,
+                  refundPercentage: 0,
+                },
+              ],
+            },
+          },
+        },
         includesBreakfast: false,
       },
     });
@@ -100,7 +117,6 @@ describe('Review Management API Tests', () => {
     // Create reservation
     const reservation = await prisma.reservation.create({
       data: {
-        propertyId,
         ratePlanId,
         guestId,
         checkInDate: new Date('2024-01-01'),
@@ -269,7 +285,6 @@ describe('Review Management API Tests', () => {
       // Create another review to test with
       const newReservation = await prisma.reservation.create({
         data: {
-          propertyId,
           ratePlanId,
           guestId,
           checkInDate: new Date('2024-02-01'),

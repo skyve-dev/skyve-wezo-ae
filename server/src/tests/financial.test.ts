@@ -85,7 +85,24 @@ describe('Financial API Tests', () => {
         name: 'Financial Test Rate',
         type: 'FullyFlexible',
         description: 'Test rate plan',
-        cancellationPolicy: 'Free cancellation',
+        adjustmentType: 'FixedPrice',
+        adjustmentValue: 1000,
+        cancellationPolicy: {
+          create: {
+            tiers: {
+              create: [
+                {
+                  daysBeforeCheckIn: 1,
+                  refundPercentage: 100,
+                },
+                {
+                  daysBeforeCheckIn: 0,
+                  refundPercentage: 0,
+                },
+              ],
+            },
+          },
+        },
         includesBreakfast: true,
       },
     });
@@ -93,7 +110,6 @@ describe('Financial API Tests', () => {
     // Create reservations with payments for earnings test
     await prisma.reservation.create({
       data: {
-        propertyId,
         ratePlanId: ratePlan.id,
         guestId: guest.id,
         checkInDate: new Date('2024-03-01'),
@@ -110,7 +126,6 @@ describe('Financial API Tests', () => {
     // Create another completed reservation
     await prisma.reservation.create({
       data: {
-        propertyId,
         ratePlanId: ratePlan.id,
         guestId: guest.id,
         checkInDate: new Date('2024-03-10'),

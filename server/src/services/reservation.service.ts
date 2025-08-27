@@ -13,18 +13,22 @@ export class ReservationService {
     page: number,
     limit: number
   ): Promise<any> {
-    const whereClause: Prisma.ReservationWhereInput = {
+    const ratePlanWhere: any = {
       property: {
         ownerId: userId,
       },
     };
 
-    if (filters.status) {
-      whereClause.status = filters.status as any;
+    if (filters.propertyId) {
+      ratePlanWhere.propertyId = filters.propertyId;
     }
 
-    if (filters.propertyId) {
-      whereClause.propertyId = filters.propertyId;
+    const whereClause: Prisma.ReservationWhereInput = {
+      ratePlan: ratePlanWhere,
+    };
+
+    if (filters.status) {
+      whereClause.status = filters.status as any;
     }
 
     if (filters.startDate || filters.endDate) {
@@ -45,23 +49,23 @@ export class ReservationService {
         skip,
         take: limit,
         include: {
-          property: {
-            select: {
-              propertyId: true,
-              name: true,
-              address: {
-                select: {
-                  city: true,
-                  countryOrRegion: true,
-                },
-              },
-            },
-          },
           ratePlan: {
             select: {
               id: true,
               name: true,
               type: true,
+              property: {
+                select: {
+                  propertyId: true,
+                  name: true,
+                  address: {
+                    select: {
+                      city: true,
+                      countryOrRegion: true,
+                    },
+                  },
+                },
+              },
             },
           },
           guest: {
@@ -101,15 +105,22 @@ export class ReservationService {
     const reservation = await prisma.reservation.findFirst({
       where: {
         id: reservationId,
-        property: {
-          ownerId: userId,
+        ratePlan: {
+          property: {
+            ownerId: userId,
+          },
         },
       },
       include: {
-        property: true,
         ratePlan: {
           include: {
-            restrictions: true,
+            ratePlanRestrictions: true,
+            property: {
+              select: {
+                propertyId: true,
+                name: true,
+              },
+            },
           },
         },
         guest: {
@@ -133,7 +144,7 @@ export class ReservationService {
       throw new Error('Reservation not found or you do not have permission to view it');
     }
 
-    // Create payment object for backward compatibility
+    // Create payment and property objects for backward compatibility
     const result = {
       ...reservation,
       payment: {
@@ -141,6 +152,7 @@ export class ReservationService {
         commissionAmount: reservation.commissionAmount,
         paymentStatus: reservation.paymentStatus,
       },
+      property: reservation.ratePlan?.property,
     };
 
     return result;
@@ -154,8 +166,10 @@ export class ReservationService {
     const reservation = await prisma.reservation.findFirst({
       where: {
         id: reservationId,
-        property: {
-          ownerId: userId,
+        ratePlan: {
+          property: {
+            ownerId: userId,
+          },
         },
       },
     });
@@ -178,10 +192,16 @@ export class ReservationService {
         status: updateData.status,
       },
       include: {
-        property: {
+        ratePlan: {
           select: {
-            propertyId: true,
+            id: true,
             name: true,
+            property: {
+              select: {
+                propertyId: true,
+                name: true,
+              },
+            },
           },
         },
         guest: {
@@ -206,8 +226,10 @@ export class ReservationService {
     const reservation = await prisma.reservation.findFirst({
       where: {
         id: reservationId,
-        property: {
-          ownerId: userId,
+        ratePlan: {
+          property: {
+            ownerId: userId,
+          },
         },
       },
       include: {},
@@ -252,8 +274,10 @@ export class ReservationService {
     const reservation = await prisma.reservation.findFirst({
       where: {
         id: reservationId,
-        property: {
-          ownerId: userId,
+        ratePlan: {
+          property: {
+            ownerId: userId,
+          },
         },
       },
     });
@@ -280,8 +304,10 @@ export class ReservationService {
     const reservation = await prisma.reservation.findFirst({
       where: {
         id: reservationId,
-        property: {
-          ownerId: userId,
+        ratePlan: {
+          property: {
+            ownerId: userId,
+          },
         },
       },
     });

@@ -13,7 +13,7 @@ export class PropertyService {
       photos,
       bookingType,
       paymentType,
-      pricing,
+      // pricing removed - now managed through rate plans
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
@@ -89,36 +89,7 @@ export class PropertyService {
             },
           }
         : undefined,
-      pricing: pricing
-        ? {
-            create: {
-              currency: pricing.currency,
-              ratePerNight: pricing.ratePerNight,
-              ratePerNightWeekend: pricing.ratePerNightWeekend,
-              discountPercentageForNonRefundableRatePlan:
-                pricing.discountPercentageForNonRefundableRatePlan,
-              discountPercentageForWeeklyRatePlan:
-                pricing.discountPercentageForWeeklyRatePlan,
-              promotion: pricing.promotion
-                ? {
-                    create: {
-                      type: pricing.promotion.type,
-                      percentage: pricing.promotion.percentage,
-                      description: pricing.promotion.description,
-                    },
-                  }
-                : undefined,
-              pricePerGroupSize: pricing.pricePerGroupSize
-                ? {
-                    create: pricing.pricePerGroupSize.map((pgs: any) => ({
-                      groupSize: pgs.groupSize,
-                      ratePerNight: pgs.ratePerNight,
-                    })),
-                  }
-                : undefined,
-            },
-          }
-        : undefined,
+      // pricing removed - now managed through rate plans
       // Cancellation policies now managed through rate plans
     };
 
@@ -138,12 +109,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        pricing: {
-          include: {
-            promotion: true,
-            pricePerGroupSize: true,
-          },
-        },
+        // pricing include removed - now managed through rate plans
         // cancellation: removed - now handled by rate plans
         owner: {
           select: {
@@ -208,7 +174,7 @@ export class PropertyService {
       rules,
       bookingType,
       paymentType,
-      pricing,
+      // pricing removed - now managed through rate plans
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
@@ -345,50 +311,7 @@ export class PropertyService {
       }
     }
 
-    // Update pricing if provided
-    if (pricing) {
-      // Delete existing pricing and related records
-      if (existingProperty.pricing) {
-        await prisma.pricePerGroupSize.deleteMany({
-          where: { pricingId: existingProperty.pricing.id },
-        });
-        await prisma.promotion.deleteMany({
-          where: { pricingId: existingProperty.pricing.id },
-        });
-        await prisma.pricing.delete({
-          where: { id: existingProperty.pricing.id },
-        });
-      }
-
-      updateData.pricing = {
-        create: {
-          currency: pricing.currency,
-          ratePerNight: pricing.ratePerNight,
-          ratePerNightWeekend: pricing.ratePerNightWeekend,
-          discountPercentageForNonRefundableRatePlan:
-            pricing.discountPercentageForNonRefundableRatePlan,
-          discountPercentageForWeeklyRatePlan:
-            pricing.discountPercentageForWeeklyRatePlan,
-          promotion: pricing.promotion
-            ? {
-                create: {
-                  type: pricing.promotion.type,
-                  percentage: pricing.promotion.percentage,
-                  description: pricing.promotion.description,
-                },
-              }
-            : undefined,
-          pricePerGroupSize: pricing.pricePerGroupSize
-            ? {
-                create: pricing.pricePerGroupSize.map((pgs: any) => ({
-                  groupSize: pgs.groupSize,
-                  ratePerNight: pgs.ratePerNight,
-                })),
-              }
-            : undefined,
-        },
-      };
-    }
+    // Pricing updates removed - now managed through rate plans
 
     // Cancellation policies now managed through rate plans
 
@@ -409,12 +332,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        pricing: {
-          include: {
-            promotion: true,
-            pricePerGroupSize: true,
-          },
-        },
+        // pricing include removed - now managed through rate plans
         // cancellation: removed - now handled by rate plans
         owner: {
           select: {
@@ -594,85 +512,7 @@ export class PropertyService {
     return property;
   }
 
-  async updatePropertyPricing(propertyId: string, pricing: any, ownerId: string) {
-    const existingProperty = await prisma.property.findFirst({
-      where: {
-        propertyId,
-        ownerId,
-      },
-      include: {
-        pricing: true,
-      },
-    });
-
-    if (!existingProperty) {
-      throw new Error('Property not found or you do not have permission to update it');
-    }
-
-    // Delete existing pricing and related records in correct order
-    if (existingProperty.pricing) {
-      try {
-        await prisma.pricePerGroupSize.deleteMany({
-          where: { pricingId: existingProperty.pricing.id },
-        });
-        await prisma.promotion.deleteMany({
-          where: { pricingId: existingProperty.pricing.id },
-        });
-        await prisma.pricing.delete({
-          where: { id: existingProperty.pricing.id },
-        });
-      } catch (error: any) {
-        // If pricing record doesn't exist, continue (it might have been deleted already)
-        if (error.code !== 'P2025') {
-          throw error;
-        }
-      }
-    }
-
-    const property = await prisma.property.update({
-      where: { propertyId },
-      data: {
-        pricing: {
-          create: {
-            currency: pricing.currency,
-            ratePerNight: pricing.ratePerNight,
-            ratePerNightWeekend: pricing.ratePerNightWeekend,
-            discountPercentageForNonRefundableRatePlan:
-              pricing.discountPercentageForNonRefundableRatePlan,
-            discountPercentageForWeeklyRatePlan:
-              pricing.discountPercentageForWeeklyRatePlan,
-            promotion: pricing.promotion
-              ? {
-                  create: {
-                    type: pricing.promotion.type,
-                    percentage: pricing.promotion.percentage,
-                    description: pricing.promotion.description,
-                  },
-                }
-              : undefined,
-            pricePerGroupSize: pricing.pricePerGroupSize
-              ? {
-                  create: pricing.pricePerGroupSize.map((pgs: any) => ({
-                    groupSize: pgs.groupSize,
-                    ratePerNight: pgs.ratePerNight,
-                  })),
-                }
-              : undefined,
-          },
-        },
-      },
-      include: {
-        pricing: {
-          include: {
-            promotion: true,
-            pricePerGroupSize: true,
-          },
-        },
-      },
-    });
-
-    return property;
-  }
+  // updatePropertyPricing removed - pricing now managed through rate plans
 
   // updatePropertyCancellation removed - cancellation policies now managed through rate plans
 
@@ -693,12 +533,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        pricing: {
-          include: {
-            promotion: true,
-            pricePerGroupSize: true,
-          },
-        },
+        // pricing include removed - now managed through rate plans
         // cancellation: removed - now handled by rate plans
         owner: {
           select: {
@@ -731,12 +566,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        pricing: {
-          include: {
-            promotion: true,
-            pricePerGroupSize: true,
-          },
-        },
+        // pricing include removed - now managed through rate plans
         // cancellation: removed - now handled by rate plans
       },
     });
@@ -765,18 +595,7 @@ export class PropertyService {
 
     // Delete in correct order due to foreign key constraints
     
-    // Delete pricing and related records
-    if (existingProperty.pricing) {
-      await prisma.pricePerGroupSize.deleteMany({
-        where: { pricingId: existingProperty.pricing.id },
-      });
-      await prisma.promotion.deleteMany({
-        where: { pricingId: existingProperty.pricing.id },
-      });
-      await prisma.pricing.delete({
-        where: { id: existingProperty.pricing.id },
-      });
-    }
+    // Pricing deletion removed - now managed through rate plans
 
     // Cancellation policies now handled by rate plans (deleted above)
 
@@ -807,19 +626,26 @@ export class PropertyService {
       where: { propertyId },
     });
 
-    // Delete rate plans (with their restrictions and prices)
+    // Delete rate plans (with their restrictions and cancellation policies)
     const ratePlans = await prisma.ratePlan.findMany({
       where: { propertyId },
+      include: { cancellationPolicy: true },
     });
 
     for (const ratePlan of ratePlans) {
-      // Delete rate plan restrictions
-      await prisma.restriction.deleteMany({
-        where: { ratePlanId: ratePlan.id },
-      });
+      // Delete cancellation tiers first
+      if (ratePlan.cancellationPolicy) {
+        await prisma.cancellationTier.deleteMany({
+          where: { cancellationPolicyId: ratePlan.cancellationPolicy.id },
+        });
+        // Delete cancellation policy
+        await prisma.cancellationPolicy.delete({
+          where: { id: ratePlan.cancellationPolicy.id },
+        });
+      }
 
-      // Delete rate plan prices
-      await prisma.price.deleteMany({
+      // Delete rate plan restrictions
+      await prisma.ratePlanRestriction.deleteMany({
         where: { ratePlanId: ratePlan.id },
       });
     }
@@ -828,6 +654,8 @@ export class PropertyService {
     await prisma.ratePlan.deleteMany({
       where: { propertyId },
     });
+
+    // Property restrictions removed - now managed through rate plans
 
     // Delete property
     await prisma.property.delete({

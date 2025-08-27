@@ -9,10 +9,13 @@ export async function cleanupDatabase() {
     // Use raw SQL to truncate tables and reset sequences
     // This bypasses foreign key checks during the operation
     const tableNames = [
-      'PricePerGroupSize',
-      'Promotion', 
-      'Pricing',
-      'Cancellation',
+      'CancellationTier',
+      'CancellationPolicy', 
+      'RatePlanRestriction',
+      'Price',
+      'RatePlan',
+      'Review',
+      'Reservation',
       'CheckInOutTimes',
       'Bed',
       'Room',
@@ -21,8 +24,7 @@ export async function cleanupDatabase() {
       'Property',
       'LatLong', 
       'Address',
-      'User',
-      'PropertyGroup'
+      'User'
     ];
     
     // Disable foreign key checks temporarily and truncate tables
@@ -37,10 +39,14 @@ export async function cleanupDatabase() {
     console.error('Database cleanup error:', error);
     // If the above fails, try the manual approach with error handling
     try {
-      await prisma.pricePerGroupSize.deleteMany();
-      await prisma.promotion.deleteMany();
-      await prisma.pricing.deleteMany();
-      await prisma.cancellation.deleteMany();
+      // Delete in proper order due to foreign key constraints
+      await prisma.cancellationTier.deleteMany();
+      await prisma.cancellationPolicy.deleteMany();
+      await prisma.ratePlanRestriction.deleteMany();
+      await prisma.price.deleteMany();
+      await prisma.ratePlan.deleteMany();
+      await prisma.review.deleteMany();
+      await prisma.reservation.deleteMany();
       await prisma.checkInOutTimes.deleteMany();
       await prisma.bed.deleteMany();
       await prisma.room.deleteMany();
@@ -50,7 +56,6 @@ export async function cleanupDatabase() {
       await prisma.latLong.deleteMany();
       await prisma.address.deleteMany();
       await prisma.user.deleteMany();
-      await prisma.propertyGroup.deleteMany();
     } catch (secondError) {
       console.error('Fallback cleanup also failed:', secondError);
     }

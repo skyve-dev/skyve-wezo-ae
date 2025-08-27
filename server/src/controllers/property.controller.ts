@@ -182,34 +182,7 @@ export const updatePropertyRules = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updatePropertyPricing = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    const { propertyId } = req.params;
-    const property = await propertyService.updatePropertyPricing(
-      propertyId,
-      req.body,
-      req.user.id
-    );
-
-    res.json({
-      message: 'Property pricing updated successfully',
-      property,
-    });
-  } catch (error: any) {
-    console.error('Update property pricing error:', error);
-    if (error.message === 'Property not found or you do not have permission to update it') {
-      res.status(404).json({ error: error.message });
-      return;
-    }
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
+// updatePropertyPricing removed - pricing now managed through rate plans
 // updatePropertyCancellation removed - cancellation policies now managed through rate plans
 
 export const getProperty = async (req: Request, res: Response): Promise<void> => {

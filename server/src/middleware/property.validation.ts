@@ -208,47 +208,5 @@ export const validateRulesUpdate = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-export const validatePricingUpdate = (req: Request, res: Response, next: NextFunction): void => {
-  const { currency, ratePerNight, ratePerNightWeekend } = req.body;
-
-  const validations = [
-    () => !currency ? 'currency: Currency is required' : null,
-    () => currency && currency !== 'AED' ? 'currency: Must be AED' : null,
-    () => typeof ratePerNight !== 'number' ? 'ratePerNight: Must be a number' : null,
-    () => ratePerNight <= 0 ? 'ratePerNight: Must be greater than 0' : null,
-    () => typeof ratePerNightWeekend !== 'number' ? 'ratePerNightWeekend: Must be a number' : null,
-    () => ratePerNightWeekend <= 0 ? 'ratePerNightWeekend: Must be greater than 0' : null,
-  ];
-
-  const errors = validateAndCollectErrors(validations);
-  
-  if (Object.keys(errors).length > 0) {
-    returnValidationResponse(res, errors);
-    return;
-  }
-
-  next();
-};
-
-export const validateCancellationUpdate = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  const { daysBeforeArrivalFreeToCancel, waiveCancellationFeeAccidentalBookings } = req.body;
-
-  const validations = [
-    () => typeof daysBeforeArrivalFreeToCancel !== 'number' ? 'daysBeforeArrivalFreeToCancel: Must be a number' : null,
-    () => daysBeforeArrivalFreeToCancel < 0 ? 'daysBeforeArrivalFreeToCancel: Must be 0 or greater' : null,
-    () => typeof waiveCancellationFeeAccidentalBookings !== 'boolean' ? 'waiveCancellationFeeAccidentalBookings: Must be true or false' : null,
-  ];
-
-  const errors = validateAndCollectErrors(validations);
-  
-  if (Object.keys(errors).length > 0) {
-    returnValidationResponse(res, errors);
-    return;
-  }
-
-  next();
-};
+// validatePricingUpdate removed - pricing now managed through rate plans
+// validateCancellationUpdate removed - cancellation policies now managed through rate plans

@@ -11,8 +11,10 @@ export class FinancialService {
     }
   ): Promise<any> {
     const whereClause: any = {
-      property: {
-        ownerId: userId,
+      ratePlan: {
+        property: {
+          ownerId: userId,
+        },
       },
       status: {
         in: ['Confirmed', 'Completed'],
@@ -20,7 +22,7 @@ export class FinancialService {
     };
 
     if (filters.propertyId) {
-      whereClause.propertyId = filters.propertyId;
+      whereClause.ratePlan.property.propertyId = filters.propertyId;
     }
 
     if (filters.startDate || filters.endDate) {
@@ -36,10 +38,16 @@ export class FinancialService {
     const reservations = await prisma.reservation.findMany({
       where: whereClause,
       include: {
-        property: {
+        ratePlan: {
           select: {
-            propertyId: true,
+            id: true,
             name: true,
+            property: {
+              select: {
+                propertyId: true,
+                name: true,
+              },
+            },
           },
         },
       },
@@ -61,11 +69,11 @@ export class FinancialService {
     }, 0);
 
     const earningsByProperty = reservations.reduce((acc: any, reservation) => {
-      const propertyId = reservation.propertyId;
+      const propertyId = reservation.ratePlan.property.propertyId;
       if (!acc[propertyId]) {
         acc[propertyId] = {
           propertyId,
-          propertyName: reservation.property.name,
+          propertyName: reservation.ratePlan.property.name,
           totalEarnings: 0,
           totalCommission: 0,
           reservationCount: 0,
@@ -111,8 +119,10 @@ export class FinancialService {
 
     const reservations = await prisma.reservation.findMany({
       where: {
-        property: {
-          ownerId: userId,
+        ratePlan: {
+          property: {
+            ownerId: userId,
+          },
         },
         checkInDate: {
           gte: startDate,
@@ -123,10 +133,16 @@ export class FinancialService {
         },
       },
       include: {
-        property: {
+        ratePlan: {
           select: {
-            propertyId: true,
+            id: true,
             name: true,
+            property: {
+              select: {
+                propertyId: true,
+                name: true,
+              },
+            },
           },
         },
       },
@@ -159,7 +175,7 @@ export class FinancialService {
       statement.transactions.push({
         date: reservation.checkInDate,
         reservationId: reservation.id,
-        propertyName: reservation.property.name,
+        propertyName: reservation.ratePlan.property.name,
         amount: gross,
         commission,
         netAmount: net,

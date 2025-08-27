@@ -92,7 +92,24 @@ describe('Reservation API Tests', () => {
         name: 'Test Rate Plan',
         type: 'FullyFlexible',
         description: 'Test rate plan',
-        cancellationPolicy: 'Free cancellation',
+        adjustmentType: 'FixedPrice',
+        adjustmentValue: 1200,
+        cancellationPolicy: {
+          create: {
+            tiers: {
+              create: [
+                {
+                  daysBeforeCheckIn: 1,
+                  refundPercentage: 100,
+                },
+                {
+                  daysBeforeCheckIn: 0,
+                  refundPercentage: 0,
+                },
+              ],
+            },
+          },
+        },
         includesBreakfast: true,
       },
     });
@@ -102,7 +119,6 @@ describe('Reservation API Tests', () => {
     // Create a test reservation
     const reservation = await prisma.reservation.create({
       data: {
-        propertyId,
         ratePlanId,
         guestId,
         checkInDate: new Date('2024-06-01'),
@@ -139,7 +155,7 @@ describe('Reservation API Tests', () => {
         .expect(200);
 
       expect(response.body.reservations).toHaveLength(1);
-      expect(response.body.reservations[0].property.name).toBe('Reservation Test Villa');
+      expect(response.body.reservations[0].ratePlan.property.name).toBe('Reservation Test Villa');
       expect(response.body.reservations[0].guest.id).toBe(guestId);
       expect(response.body.pagination).toBeDefined();
       expect(response.body.pagination.totalCount).toBe(1);
@@ -210,8 +226,7 @@ describe('Reservation API Tests', () => {
       // Create a pending reservation for update test
       const pendingReservation = await prisma.reservation.create({
         data: {
-          propertyId,
-          ratePlanId,
+            ratePlanId,
           guestId,
           checkInDate: new Date('2024-07-01'),
           checkOutDate: new Date('2024-07-05'),
@@ -254,8 +269,7 @@ describe('Reservation API Tests', () => {
     it('should reject invalid date range', async () => {
       const pendingReservation = await prisma.reservation.create({
         data: {
-          propertyId,
-          ratePlanId,
+            ratePlanId,
           guestId,
           checkInDate: new Date('2024-08-01'),
           checkOutDate: new Date('2024-08-05'),
@@ -396,8 +410,7 @@ describe('Reservation API Tests', () => {
       // Create another reservation and review to test with
       const newReservation = await prisma.reservation.create({
         data: {
-          propertyId,
-          ratePlanId,
+            ratePlanId,
           guestId,
           checkInDate: new Date('2024-02-01'),
           checkOutDate: new Date('2024-02-05'),

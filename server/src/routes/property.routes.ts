@@ -8,7 +8,6 @@ import {
   validateAmenitiesUpdate,
   validateServicesUpdate,
   validateRulesUpdate,
-  validatePricingUpdate,
 } from '../middleware/property.validation';
 import multer from 'multer';
 import path from 'path';
@@ -73,13 +72,7 @@ router.put(
   propertyController.updatePropertyRules
 );
 
-router.put(
-  '/:propertyId/pricing',
-  authenticate,
-  validatePricingUpdate,
-  propertyController.updatePropertyPricing
-);
-
+// Pricing route removed - pricing now managed through rate plans
 // Cancellation route removed - cancellation policies now managed through rate plans
 
 router.get('/my-properties', authenticate, propertyController.getMyProperties);
