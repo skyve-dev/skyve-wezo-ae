@@ -31,8 +31,7 @@ import LandingPage from "@/pages/LandingPage";
 // Revenue management pages
 import RatePlans from "@/pages/revenue/RatePlans";
 import PricingCalendar from "@/pages/revenue/PricingCalendar";
-import RatePlanCreate from "@/pages/revenue/RatePlanCreate";
-import RatePlanEdit from "@/pages/revenue/RatePlanEdit";
+import RatePlanManager from "@/pages/revenue/RatePlanManager";
 
 export const routes = createRoutes({
     home: {
@@ -140,7 +139,7 @@ export const routes = createRoutes({
         showInFooter: false
     },
     'rate-plan-create': {
-        component: RatePlanCreate,
+        component: () => <RatePlanManager ratePlanId="new" />,
         icon: <FaPlus />,
         label: 'Create Rate Plan',
         showInNav: false,
@@ -148,7 +147,7 @@ export const routes = createRoutes({
         showInFooter: false
     },
     'rate-plan-edit': {
-        component: RatePlanEdit,
+        component: ({ id }: { id: string }) => <RatePlanManager ratePlanId={id} />,
         icon: <FaEdit />,
         label: 'Edit Rate Plan',
         showInNav: false,

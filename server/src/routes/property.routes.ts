@@ -9,7 +9,6 @@ import {
   validateServicesUpdate,
   validateRulesUpdate,
   validatePricingUpdate,
-  validateCancellationUpdate,
 } from '../middleware/property.validation';
 import multer from 'multer';
 import path from 'path';
@@ -81,12 +80,7 @@ router.put(
   propertyController.updatePropertyPricing
 );
 
-router.put(
-  '/:propertyId/cancellation',
-  authenticate,
-  validateCancellationUpdate,
-  propertyController.updatePropertyCancellation
-);
+// Cancellation route removed - cancellation policies now managed through rate plans
 
 router.get('/my-properties', authenticate, propertyController.getMyProperties);
 

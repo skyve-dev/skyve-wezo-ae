@@ -1,22 +1,25 @@
 import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaToggleOn, FaToggleOff, FaInfoCircle } from 'react-icons/fa'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Button from '@/components/base/Button'
 import { useAppShell } from '@/components/base/AppShell'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { fetchRatePlans, createRatePlan, updateRatePlanAsync, deleteRatePlanAsync } from '@/store/slices/ratePlanSlice'
 
 const RatePlans: React.FC = () => {
-  const dispatch = useDispatch()
-  const { ratePlans, loading, error } = useSelector((state: any) => state.ratePlan)
-  const { currentProperty } = useSelector((state: any) => state.property || { currentProperty: { propertyId: 'demo' } })
+  const dispatch = useAppDispatch()
+  const { ratePlans, loading, error } = useAppSelector((state) => state.ratePlan)
+  const { currentProperty } = useAppSelector((state) => state.property)
   const { openDialog, navigateTo } = useAppShell()
   
+  const propertyId = currentProperty?.propertyId
+  
   useEffect(() => {
-    const propertyId = currentProperty?.propertyId || 'demo'
-    dispatch(fetchRatePlans(propertyId) as any)
-  }, [currentProperty, dispatch])
+    if (propertyId) {
+      dispatch(fetchRatePlans(propertyId))
+    }
+  }, [propertyId, dispatch])
 
   const handleCreateRatePlan = () => {
     navigateTo('rate-plan-create', {})
@@ -33,7 +36,8 @@ const RatePlans: React.FC = () => {
         name: `${ratePlan.name} (Copy)`,
         id: undefined // Remove ID to create new one
       }
-      await dispatch(createRatePlan(currentProperty?.propertyId || 'demo', duplicatedPlan) as any)
+      if (!propertyId) return
+      await dispatch(createRatePlan(propertyId, duplicatedPlan))
       
       // Show success dialog
       await openDialog<void>((close) => (
@@ -98,7 +102,8 @@ const RatePlans: React.FC = () => {
 
     if (confirmed) {
       try {
-        await dispatch(deleteRatePlanAsync(ratePlanId) as any)
+        if (!propertyId) return
+        await dispatch(deleteRatePlanAsync({ propertyId, ratePlanId }))
       } catch (error) {
         console.error('Failed to delete rate plan:', error)
         
@@ -123,7 +128,8 @@ const RatePlans: React.FC = () => {
   
   const handleToggleActive = async (ratePlan: any) => {
     try {
-      await dispatch(updateRatePlanAsync(ratePlan.id, { isActive: !ratePlan.isActive }) as any)
+      if (!propertyId) return
+      await dispatch(updateRatePlanAsync({ propertyId, ratePlanId: ratePlan.id, data: { isActive: !ratePlan.isActive } }))
     } catch (error) {
       console.error('Failed to toggle rate plan status:', error)
     }
@@ -285,6 +291,7 @@ const RatePlans: React.FC = () => {
               variant="promoted"
               onClick={handleCreateRatePlan}
               size={window.innerWidth < 480 ? "small" : "medium"}
+              disabled={!propertyId}
             />
           </Box>
         </Box>
@@ -321,8 +328,37 @@ const RatePlans: React.FC = () => {
           </Box>
         )}
         
+        {/* No Property State */}
+        {!propertyId && (
+          <Box
+            padding="1.5rem"
+            backgroundColor="#fef3c7"
+            borderRadius="8px"
+            marginBottom="2rem"
+          >
+            <Box display="flex" gap="0.75rem" alignItems="start">
+              <FaInfoCircle color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <Box>
+                <h3 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#92400e' }}>
+                  No Property Selected
+                </h3>
+                <p style={{ color: '#92400e', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                  Rate plans must be linked to a property. Please select a property first to manage rate plans.
+                </p>
+                <Button
+                  label="Select Property"
+                  onClick={() => navigateTo('properties', {})}
+                  variant="promoted"
+                  size="small"
+                  style={{ backgroundColor: '#f59e0b', borderColor: '#f59e0b' }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        )}
+
         {/* Loading State */}
-        {loading && (
+        {propertyId && loading && (
           <Box display="flex" justifyContent="center" padding="4rem">
             <span>Loading rate plans...</span>
           </Box>
@@ -342,11 +378,15 @@ const RatePlans: React.FC = () => {
         )}
         
         {/* Rate Plans Grid */}
-        <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="repeat(2, 1fr)" gap="1.5rem">
-          {ratePlans.map((plan: any) => (
-            <RatePlanCard key={plan.id} ratePlan={plan} />
-          ))}
-        </Box>
+        {propertyId && (
+          <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="repeat(2, 1fr)" gap="1.5rem">
+            {ratePlans
+              .filter((plan: any) => plan && plan.id) // Filter out undefined/invalid plans
+              .map((plan: any) => (
+                <RatePlanCard key={plan.id} ratePlan={plan} />
+              ))}
+          </Box>
+        )}
       </Box>
     </SecuredPage>
   )

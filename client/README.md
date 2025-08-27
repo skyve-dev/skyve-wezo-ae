@@ -304,6 +304,77 @@ const MyComponent = () => {
 - **Browser History** - Full back/forward button support
 - **Dynamic Content Mounting** - Mount header/sidebar/footer content dynamically
 
+#### Editing Page UI Pattern
+
+For editing pages (Property Edit, Rate Plan Edit, etc.), the application follows a consistent pattern:
+
+**Custom Header + Conditional Footer:**
+```typescript
+// Always mount custom minimal header
+const unmountHeader = mountHeader(
+  <CustomEditHeader title="Edit Rate Plan" onBack={handleBack} />
+)
+
+// Mount footer ONLY when there are unsaved changes
+if (hasUnsavedChanges) {
+  unmountFooter = mountFooter(
+    <CustomEditFooter 
+      onSave={handleSave} 
+      onDiscard={handleDiscard}
+      isSaving={isSaving}
+    />
+  )
+}
+```
+
+**Features:**
+- **Minimal Header** - Custom red header with back button and title
+- **Conditional Footer** - Save/Discard buttons only when changes exist
+- **Navigation Guards** - Automatic protection against data loss
+- **Smart Back Button** - Offers to save changes before leaving
+- **Loading States** - Visual feedback during save operations
+- **Consistent Styling** - Brand red color (`#D52122`) for all editing UI
+
+### Unified Manager Pattern
+
+**CRITICAL**: For features requiring both Create and Edit functionality, always use the Unified Manager Pattern to eliminate code duplication and ensure consistency.
+
+#### Pattern Structure
+```typescript
+// Single component handles both create and edit modes
+const ComponentManager: React.FC<{ itemId?: string }> = ({ itemId }) => {
+  // Mode detection: 'new' = create, actual ID = edit
+  const isCreateMode = itemId === 'new'
+  const isEditMode = !isCreateMode && itemId
+  
+  // All state managed in Redux (NO local formData)
+  const { currentForm, hasUnsavedChanges, isSaving } = useSelector(state => state.slice)
+  
+  // Unified save logic
+  const handleSave = async () => {
+    if (isCreateMode) {
+      await dispatch(createItemAsync(currentForm))
+    } else {
+      await dispatch(updateItemAsync({ id: itemId, data: currentForm }))
+    }
+  }
+}
+```
+
+#### Key Benefits
+- **✅ Single Source of Truth** - One component, no duplication
+- **✅ Redux Integration** - Centralized state management  
+- **✅ Consistent UX** - Identical behavior for create/edit
+- **✅ Easy Maintenance** - Fix bugs once, works everywhere
+- **✅ Type Safety** - Unified interface and validation
+
+#### Implementation Rules
+1. **Never create separate Create/Edit components**
+2. **Use parameter-based mode detection (`itemId === 'new'`)**
+3. **All form state in Redux, never local formData**
+4. **Single unified save handler with mode branching**
+5. **Shared header/footer components for both modes**
+
 ## 📱 Responsive Design
 
 ### Breakpoint System

@@ -27,15 +27,27 @@ enum RatePlanType {
   Custom /// Allows unique rate plans for specific guest segments or special discounts
 }
 
-/// RestrictionType defines booking restrictions partners can apply to control received bookings
-/// Purpose: Gives property owners granular control over booking patterns and guest behavior
-enum RestrictionType {
+/// PriceAdjustmentType defines how rate plan pricing is calculated relative to base rates
+/// Purpose: Enables flexible pricing strategies using percentage discounts, fixed amounts, or absolute pricing
+enum PriceAdjustmentType {
+  Percentage    /// Apply percentage adjustment (e.g., 20 = 20% discount, -10 = 10% markup)
+  FixedDiscount /// Apply fixed amount discount per night (e.g., 50 = AED 50 off per night)
+  FixedPrice    /// Set absolute price per night (e.g., 200 = AED 200 per night regardless of base rate)
+}
+
+
+/// RatePlanRestrictionType defines business rules for specific rate plans
+/// Purpose: Controls booking patterns, requirements, and operational constraints for different pricing strategies
+enum RatePlanRestrictionType {
   MinLengthOfStay /// Minimum number of nights required for a booking
   MaxLengthOfStay /// Maximum number of nights accepted for a booking
-  NoArrivals /// Prevents guests from checking in on specific dates
-  NoDepartures /// Prevents guests from checking out on specific dates
   MinAdvancedReservation /// Specifies minimum lead time required before arrival
   MaxAdvancedReservation /// Specifies maximum lead time allowed for advance bookings
+  MinGuests /// Minimum number of guests required for this rate plan
+  MaxGuests /// Maximum number of guests allowed for this rate plan
+  NoArrivals /// Prevents guests from checking in on specific dates for this rate plan
+  NoDepartures /// Prevents guests from checking out on specific dates for this rate plan
+  SeasonalDateRange /// Rate plan only active within specific date range (for seasonal pricing)
 }
 
 /// ReservationStatus indicates the current state of a reservation in the booking lifecycle
@@ -236,8 +248,8 @@ model Property {
   paymentType PaymentType /// Online or at-property payment
 
   // Pricing & Policies
-  pricing      Pricing? /// Base pricing information
-  cancellation Cancellation? /// Cancellation policy details
+  pricing Pricing? /// Base pricing information
+  // Cancellation policies now managed through RatePlan.cancellationPolicy
 
   // Availability
   firstDateGuestCanCheckIn String? /// Earliest possible check-in date
@@ -255,16 +267,13 @@ model Property {
   minPhotosRequired Int            @default(5) /// Minimum photos required (platform recommendation)
 
   // Additional Policies
-  reservationPolicy      String? /// Custom reservation policy text
-  paymentPolicy          String? /// Custom payment policy text
-  cancellationPolicyType RatePlanType? /// Default cancellation type for property
-  houseRules             String? /// Additional house rules text
+  reservationPolicy String? /// Custom reservation policy text
+  paymentPolicy     String? /// Custom payment policy text
+  houseRules        String? /// Additional house rules text
 
   // Relations for Property Management
   availability Availability[] /// Calendar availability (supports date blocking)
   ratePlans    RatePlan[] /// Multiple rate plans for different traveler segments
-  restrictions Restriction[] /// Booking restrictions (min stay, etc.)
-  reservations Reservation[] /// All bookings for this property
   reviews      Review[] /// Guest reviews and ratings
 }
 
@@ -347,50 +356,15 @@ model Amenity {
 }
 
 /// Pricing stores general pricing information for a property
-/// Purpose: Defines base rates and discounts for different booking scenarios
+/// Purpose: Defines currency configuration for property pricing
 model Pricing {
-  id                                         String              @id @default(uuid()) /// Unique identifier
-  currency                                   Currency /// Currency for all prices
-  ratePerNight                               Float /// Standard nightly rate
-  ratePerNightWeekend                        Float? /// Optional weekend rate
-  promotion                                  Promotion? /// Active promotion if any
-  pricePerGroupSize                          PricePerGroupSize[] /// Variable pricing by group size
-  discountPercentageForNonRefundableRatePlan Float? /// Discount for non-refundable bookings
-  discountPercentageForWeeklyRatePlan        Float? /// Discount for weekly stays
-  propertyId                                 String              @unique /// Foreign key to property (one-to-one)
-  property                                   Property            @relation(fields: [propertyId], references: [propertyId]) /// Associated property
+  id         String   @id @default(uuid()) /// Unique identifier
+  currency   Currency /// Currency for all prices
+  propertyId String   @unique /// Foreign key to property (one-to-one)
+  property   Property @relation(fields: [propertyId], references: [propertyId]) /// Associated property
 }
 
-/// Promotion defines special offers for a property
-/// Purpose: Boosts visibility and bookings through targeted discounts
-model Promotion {
-  id          String  @id @default(uuid()) /// Unique identifier
-  type        String /// Promotion type (e.g., "Early Booker", "Last Minute")
-  percentage  Float /// Discount percentage
-  description String /// Promotion description for guests
-  pricingId   String  @unique /// Foreign key to pricing (one-to-one)
-  pricing     Pricing @relation(fields: [pricingId], references: [id]) /// Associated pricing
-}
-
-/// PricePerGroupSize allows different rates based on number of guests
-/// Purpose: Enables flexible pricing strategies for different group sizes
-model PricePerGroupSize {
-  id           String  @id @default(uuid()) /// Unique identifier
-  groupSize    Int /// Number of guests
-  ratePerNight Float /// Rate for this group size
-  pricingId    String /// Foreign key to pricing
-  pricing      Pricing @relation(fields: [pricingId], references: [id]) /// Associated pricing
-}
-
-/// Cancellation defines cancellation policies for a property
-/// Purpose: Sets clear cancellation terms to manage guest expectations and owner revenue
-model Cancellation {
-  id                                     String   @id @default(uuid()) /// Unique identifier
-  daysBeforeArrivalFreeToCancel          Int /// Days before arrival for free cancellation
-  waiveCancellationFeeAccidentalBookings Boolean /// Whether to waive fees for accidental bookings
-  propertyId                             String   @unique /// Foreign key to property (one-to-one)
-  property                               Property @relation(fields: [propertyId], references: [propertyId]) /// Associated property
-}
+// PricePerGroupSize model removed - group size pricing now managed through RatePlan restrictions (MinGuests/MaxGuests)
 
 /// ADDITIONAL SCHEMA
 
@@ -411,19 +385,27 @@ model Availability {
 /// RatePlan defines a rate plan with specific conditions and pricing options
 /// Purpose: Enables partners to create multiple pricing strategies to appeal to different traveler segments
 model RatePlan {
-  id                 String        @id @default(uuid()) /// Unique identifier
-  propertyId         String /// Foreign key to property
-  property           Property      @relation(fields: [propertyId], references: [propertyId]) /// Associated property
-  name               String /// Rate plan name (e.g., "Standard Rate", "Early Booker")
-  type               RatePlanType /// Plan type (FullyFlexible/NonRefundable/Custom)
-  description        String? /// Optional description for guests
-  cancellationPolicy String /// Detailed cancellation terms
-  includesBreakfast  Boolean       @default(false) /// Whether breakfast is included
-  percentage         Float /// Discount percentage
+  id                   String                @id @default(uuid()) /// Unique identifier
+  propertyId           String /// Foreign key to property
+  property             Property              @relation(fields: [propertyId], references: [propertyId]) /// Associated property
+  name                 String /// Rate plan name (e.g., "Standard Rate", "Early Booker")
+  type                 RatePlanType /// Plan type (FullyFlexible/NonRefundable/Custom)
+  description          String? /// Optional description for guests
+  includesBreakfast    Boolean               @default(false) /// Whether breakfast is included
+  adjustmentType       PriceAdjustmentType   @default(Percentage) /// How pricing is calculated (Percentage/FixedDiscount/FixedPrice)
+  adjustmentValue      Float /// Value for adjustment (meaning depends on adjustmentType)
+  baseRatePlanId       String? /// Required when adjustmentType is Percentage - references the FixedPrice rate plan to calculate from
+  priority             Int                   @default(100) /// Priority for conflict resolution (lower number = higher priority)
+  allowConcurrentRates Boolean               @default(true) /// Whether this rate can coexist with other rates (false = exclusive override)
+  isActive             Boolean               @default(true) /// Whether this rate plan is available for booking
+  activeDays           Int[]                 @default([0, 1, 2, 3, 4, 5, 6]) /// Days of week when rate plan applies (0=Sunday, 1=Monday, ..., 6=Saturday)
   // Relations
-  restrictions       Restriction[] /// Specific booking restrictions for this plan
-  prices             Price[] /// Daily prices for this rate plan
-  reservations       Reservation[] /// Bookings made under this rate plan
+  baseRatePlan         RatePlan? @relation("BaseRatePlan", fields: [baseRatePlanId], references: [id]) /// Base rate plan for percentage calculations
+  derivedRatePlans     RatePlan[] @relation("BaseRatePlan") /// Rate plans that use this as their base rate
+  cancellationPolicy   CancellationPolicy? /// Structured cancellation rules for this rate plan
+  ratePlanRestrictions RatePlanRestriction[] /// Business rules for this rate plan (MinStay, MaxStay, etc.)
+  prices               Price[] /// Daily prices for this rate plan
+  reservations         Reservation[] /// Bookings made under this rate plan
 
   createdAt DateTime @default(now()) /// Creation timestamp
   updatedAt DateTime @updatedAt /// Last update timestamp
@@ -443,30 +425,59 @@ model Price {
   @@unique([ratePlanId, date]) /// Ensures one price per rate plan per date
 }
 
-/// Restriction represents booking limitations applied to properties or rate plans
-/// Purpose: Gives partners granular control over booking patterns and guest behavior
-model Restriction {
-  id         String          @id @default(uuid()) /// Unique identifier
-  ratePlanId String? /// Optional: links to specific rate plan
-  ratePlan   RatePlan?       @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan if applicable
-  propertyId String /// Always linked to a property
-  property   Property        @relation(fields: [propertyId], references: [propertyId]) /// Associated property
-  type       RestrictionType /// Type of restriction (MinLengthOfStay, NoArrivals, etc.)
-  value      Int /// Numerical value (e.g., 3 for minimum 3 nights)
-  startDate  DateTime? /// Optional: when restriction starts
-  endDate    DateTime? /// Optional: when restriction ends
-  createdAt  DateTime        @default(now()) /// Creation timestamp
-  updatedAt  DateTime        @updatedAt /// Last update timestamp
+/// CancellationPolicy defines structured cancellation rules for rate plans
+/// Purpose: Enables programmatic processing of cancellation terms and refund calculations
+model CancellationPolicy {
+  id         String @id @default(uuid()) /// Unique identifier
+  ratePlanId String @unique /// Foreign key to rate plan (one-to-one)
+  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan
+  
+  // Cancellation tiers (ordered by days before check-in)
+  tiers      CancellationTier[] /// Structured refund tiers based on timing
+  
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+}
+
+/// CancellationTier defines a specific cancellation rule within a policy
+/// Purpose: Structured refund rules based on timing before check-in
+model CancellationTier {
+  id                   String @id @default(uuid()) /// Unique identifier
+  cancellationPolicyId String /// Foreign key to cancellation policy
+  cancellationPolicy   CancellationPolicy @relation(fields: [cancellationPolicyId], references: [id]) /// Associated policy
+  
+  daysBeforeCheckIn    Int     /// Minimum days before check-in for this tier
+  refundPercentage     Float   /// Percentage of total amount to refund (0-100)
+  description          String? /// Human-readable description of this tier
+  
+  createdAt DateTime @default(now()) /// Creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+  
+  @@index([cancellationPolicyId, daysBeforeCheckIn]) /// Index for efficient tier lookups
+}
+
+// PropertyRestriction model removed - all restrictions now managed through RatePlan restrictions for maximum flexibility
+
+/// RatePlanRestriction represents business rules for specific rate plans
+/// Purpose: Controls booking patterns and requirements for different pricing strategies
+model RatePlanRestriction {
+  id         String                  @id @default(uuid()) /// Unique identifier
+  ratePlanId String /// Foreign key to rate plan
+  ratePlan   RatePlan                @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan
+  type       RatePlanRestrictionType /// Type of rate plan restriction (MinStay, MaxStay, etc.)
+  value      Int /// Numerical value (e.g., 3 for minimum 3 nights, 30 for advance days)
+  startDate  DateTime? /// Optional: when restriction starts (for seasonal rules)
+  endDate    DateTime? /// Optional: when restriction ends (for seasonal rules)
+  createdAt  DateTime                @default(now()) /// Creation timestamp
+  updatedAt  DateTime                @updatedAt /// Last update timestamp
 }
 
 /// Reservation represents a booking made by a guest for a property
 /// Purpose: Core booking entity tracking all reservation details and lifecycle
 model Reservation {
   id         String   @id @default(uuid()) /// Unique identifier
-  propertyId String /// Foreign key to property
-  property   Property @relation(fields: [propertyId], references: [propertyId]) /// Booked property
   ratePlanId String /// Foreign key to rate plan
-  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Selected rate plan
+  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Selected rate plan (property accessible via ratePlan.property)
   guestId    String /// Foreign key to guest user
   guest      User     @relation(fields: [guestId], references: [id]) /// Guest making the booking
 

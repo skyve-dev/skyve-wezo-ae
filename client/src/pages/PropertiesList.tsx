@@ -57,7 +57,48 @@ const PropertiesList: React.FC = () => {
         ))
 
         if (shouldDelete && property.propertyId) {
-            await dispatch(deleteProperty(property.propertyId))
+            try {
+                const result = await dispatch(deleteProperty(property.propertyId))
+                
+                if (deleteProperty.fulfilled.match(result)) {
+                    // Success: Show success message
+                    await openDialog<void>((close) => (
+                        <ConfirmationDialog
+                            title="Property Deleted"
+                            message={`"${property.name}" has been successfully deleted.`}
+                            confirmLabel="OK"
+                            onConfirm={() => close()}
+                            onCancel={() => close()}
+                            variant="success"
+                        />
+                    ))
+                } else {
+                    // Error: Show detailed error message
+                    const errorMessage = result.payload as string || 'Unknown error occurred'
+                    await openDialog<void>((close) => (
+                        <ConfirmationDialog
+                            title="Delete Failed"
+                            message={`Failed to delete "${property.name}": ${errorMessage}`}
+                            confirmLabel="OK"
+                            onConfirm={() => close()}
+                            onCancel={() => close()}
+                            variant="destructive"
+                        />
+                    ))
+                }
+            } catch (error: any) {
+                // Catch any unexpected errors
+                await openDialog<void>((close) => (
+                    <ConfirmationDialog
+                        title="Delete Failed"
+                        message={`An unexpected error occurred while deleting "${property.name}": ${error.message || 'Unknown error'}`}
+                        confirmLabel="OK"
+                        onConfirm={() => close()}
+                        onCancel={() => close()}
+                        variant="destructive"
+                    />
+                ))
+            }
         }
     }
 

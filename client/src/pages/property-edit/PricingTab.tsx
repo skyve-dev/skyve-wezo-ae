@@ -57,21 +57,12 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, valid
         })
     }
 
-    const updateCancellation = (field: string, value: any) => {
-        updateFormData({
-            cancellation: {
-                daysBeforeArrivalFreeToCancel: formData.cancellation?.daysBeforeArrivalFreeToCancel || 7,
-                waiveCancellationFeeAccidentalBookings: formData.cancellation?.waiveCancellationFeeAccidentalBookings || false,
-                ...formData.cancellation,
-                [field]: value
-            }
-        })
-    }
+    // updateCancellation removed - cancellation policies now managed through rate plans
 
     return (
         <Box paddingX={'1.5rem'} paddingY={'1.5rem'}>
             <h3 style={{marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '600'}}>
-                Pricing & Policies
+                Pricing & Rate Plans
             </h3>
             
             <Box display="grid" gap="2.5rem">
@@ -199,72 +190,16 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, valid
                     </Box>
                 </Box>
 
-                {/* Cancellation Policy */}
-                <Box>
-                    <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Cancellation Policy
-                    </h4>
-                    <Box display="grid" gap="1rem">
-                        <NumberStepperInput
-                            label="Free Cancellation (days before arrival)"
-                            value={formData.cancellation?.daysBeforeArrivalFreeToCancel || 7}
-                            onChange={(value) => updateCancellation('daysBeforeArrivalFreeToCancel', value)}
-                            min={0}
-                            max={30}
-                            format="integer"
-                            step={1}
-                            width="100%"
-                            helperText="Number of days before arrival when guests can cancel for free"
-                        />
-                        
-                        <Box>
-                            <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                                Waive Cancellation Fee for Accidental Bookings
-                            </label>
-                            <Box display="flex" gap="1rem">
-                                <Box
-                                    as="button"
-                                    onClick={() => updateCancellation('waiveCancellationFeeAccidentalBookings', true)}
-                                    padding="0.75rem 1.5rem"
-                                    border={formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '2px solid #3b82f6' : '1px solid #d1d5db'}
-                                    backgroundColor={formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '#eff6ff' : 'white'}
-                                    borderRadius="0.5rem"
-                                    cursor="pointer"
-                                    fontWeight={formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '600' : '400'}
-                                    color={formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '#1d4ed8' : '#374151'}
-                                    width="50%"
-                                    fontSize="0.875rem"
-                                >
-                                    Yes, Waive Fee
-                                </Box>
-                                <Box
-                                    as="button"
-                                    onClick={() => updateCancellation('waiveCancellationFeeAccidentalBookings', false)}
-                                    padding="0.75rem 1.5rem"
-                                    border={!formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '2px solid #3b82f6' : '1px solid #d1d5db'}
-                                    backgroundColor={!formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '#eff6ff' : 'white'}
-                                    borderRadius="0.5rem"
-                                    cursor="pointer"
-                                    fontWeight={!formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '600' : '400'}
-                                    color={!formData.cancellation?.waiveCancellationFeeAccidentalBookings ? '#1d4ed8' : '#374151'}
-                                    width="50%"
-                                    fontSize="0.875rem"
-                                >
-                                    No, Charge Fee
-                                </Box>
-                            </Box>
-                            <p style={{fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem'}}>
-                                Allow free cancellation within 24 hours if booking was made by mistake
-                            </p>
-                        </Box>
-                    </Box>
-                </Box>
+                {/* Property-level cancellation policy removed - now managed through rate plans */}
 
-                {/* Enhanced Rate Plan Policies */}
+                {/* Rate Plan Cancellation & Policies */}
                 <Box>
                     <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Rate Plan Policies
+                        Rate Plan Cancellation & Policies
                     </h4>
+                    <p style={{fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem'}}>
+                        Configure cancellation policies for each rate plan. These settings determine how guests can cancel bookings.
+                    </p>
                     
                     {selectedRatePlans.map(planId => {
                         const plan = defaultRatePlans.find(p => p.id === planId)

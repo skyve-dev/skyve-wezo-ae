@@ -210,33 +210,7 @@ export const updatePropertyPricing = async (req: Request, res: Response): Promis
   }
 };
 
-export const updatePropertyCancellation = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    const { propertyId } = req.params;
-    const property = await propertyService.updatePropertyCancellation(
-      propertyId,
-      req.body,
-      req.user.id
-    );
-
-    res.json({
-      message: 'Property cancellation policy updated successfully',
-      property,
-    });
-  } catch (error: any) {
-    console.error('Update property cancellation error:', error);
-    if (error.message === 'Property not found or you do not have permission to update it') {
-      res.status(404).json({ error: error.message });
-      return;
-    }
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+// updatePropertyCancellation removed - cancellation policies now managed through rate plans
 
 export const getProperty = async (req: Request, res: Response): Promise<void> => {
   try {

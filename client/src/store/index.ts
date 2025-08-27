@@ -24,9 +24,9 @@ export const store = configureStore({
   },
 })
 
-// Internal types - not exported to force usage of custom hooks
-type RootState = ReturnType<typeof store.getState>
-type AppDispatch = typeof store.dispatch
+// Export types for components that need them
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch
 
 // Custom hooks - use these instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>()

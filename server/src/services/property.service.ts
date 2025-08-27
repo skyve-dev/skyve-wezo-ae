@@ -14,7 +14,6 @@ export class PropertyService {
       bookingType,
       paymentType,
       pricing,
-      cancellation,
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
@@ -120,15 +119,7 @@ export class PropertyService {
             },
           }
         : undefined,
-      cancellation: cancellation
-        ? {
-            create: {
-              daysBeforeArrivalFreeToCancel: cancellation.daysBeforeArrivalFreeToCancel,
-              waiveCancellationFeeAccidentalBookings:
-                cancellation.waiveCancellationFeeAccidentalBookings,
-            },
-          }
-        : undefined,
+      // Cancellation policies now managed through rate plans
     };
 
     const property = await prisma.property.create({
@@ -153,7 +144,7 @@ export class PropertyService {
             pricePerGroupSize: true,
           },
         },
-        cancellation: true,
+        // cancellation: removed - now handled by rate plans
         owner: {
           select: {
             id: true,
@@ -200,7 +191,7 @@ export class PropertyService {
         amenities: true,
         checkInCheckout: true,
         pricing: true,
-        cancellation: true,
+        // cancellation: removed - now handled by rate plans
       },
     });
 
@@ -218,7 +209,6 @@ export class PropertyService {
       bookingType,
       paymentType,
       pricing,
-      cancellation,
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
@@ -400,23 +390,7 @@ export class PropertyService {
       };
     }
 
-    // Update cancellation if provided
-    if (cancellation) {
-      // Delete existing cancellation if exists
-      if (existingProperty.cancellation) {
-        await prisma.cancellation.delete({
-          where: { id: existingProperty.cancellation.id },
-        });
-      }
-
-      updateData.cancellation = {
-        create: {
-          daysBeforeArrivalFreeToCancel: cancellation.daysBeforeArrivalFreeToCancel,
-          waiveCancellationFeeAccidentalBookings:
-            cancellation.waiveCancellationFeeAccidentalBookings,
-        },
-      };
-    }
+    // Cancellation policies now managed through rate plans
 
     const property = await prisma.property.update({
       where: { propertyId },
@@ -441,7 +415,7 @@ export class PropertyService {
             pricePerGroupSize: true,
           },
         },
-        cancellation: true,
+        // cancellation: removed - now handled by rate plans
         owner: {
           select: {
             id: true,
@@ -700,46 +674,7 @@ export class PropertyService {
     return property;
   }
 
-  async updatePropertyCancellation(propertyId: string, cancellation: any, ownerId: string) {
-    const existingProperty = await prisma.property.findFirst({
-      where: {
-        propertyId,
-        ownerId,
-      },
-      include: {
-        cancellation: true,
-      },
-    });
-
-    if (!existingProperty) {
-      throw new Error('Property not found or you do not have permission to update it');
-    }
-
-    // Delete existing cancellation if exists
-    if (existingProperty.cancellation) {
-      await prisma.cancellation.delete({
-        where: { id: existingProperty.cancellation.id },
-      });
-    }
-
-    const property = await prisma.property.update({
-      where: { propertyId },
-      data: {
-        cancellation: {
-          create: {
-            daysBeforeArrivalFreeToCancel: cancellation.daysBeforeArrivalFreeToCancel,
-            waiveCancellationFeeAccidentalBookings:
-              cancellation.waiveCancellationFeeAccidentalBookings,
-          },
-        },
-      },
-      include: {
-        cancellation: true,
-      },
-    });
-
-    return property;
-  }
+  // updatePropertyCancellation removed - cancellation policies now managed through rate plans
 
   async getPropertyById(propertyId: string) {
     const property = await prisma.property.findUnique({
@@ -764,7 +699,7 @@ export class PropertyService {
             pricePerGroupSize: true,
           },
         },
-        cancellation: true,
+        // cancellation: removed - now handled by rate plans
         owner: {
           select: {
             id: true,
@@ -802,7 +737,7 @@ export class PropertyService {
             pricePerGroupSize: true,
           },
         },
-        cancellation: true,
+        // cancellation: removed - now handled by rate plans
       },
     });
 
@@ -818,7 +753,7 @@ export class PropertyService {
       include: {
         address: true,
         pricing: true,
-        cancellation: true,
+        // cancellation: removed - now handled by rate plans
         checkInCheckout: true,
         rooms: true,
       },
@@ -843,12 +778,7 @@ export class PropertyService {
       });
     }
 
-    // Delete cancellation
-    if (existingProperty.cancellation) {
-      await prisma.cancellation.delete({
-        where: { id: existingProperty.cancellation.id },
-      });
-    }
+    // Cancellation policies now handled by rate plans (deleted above)
 
     // Delete check-in/out times
     if (existingProperty.checkInCheckout) {
@@ -874,6 +804,28 @@ export class PropertyService {
 
     // Delete photos
     await prisma.photo.deleteMany({
+      where: { propertyId },
+    });
+
+    // Delete rate plans (with their restrictions and prices)
+    const ratePlans = await prisma.ratePlan.findMany({
+      where: { propertyId },
+    });
+
+    for (const ratePlan of ratePlans) {
+      // Delete rate plan restrictions
+      await prisma.restriction.deleteMany({
+        where: { ratePlanId: ratePlan.id },
+      });
+
+      // Delete rate plan prices
+      await prisma.price.deleteMany({
+        where: { ratePlanId: ratePlan.id },
+      });
+    }
+
+    // Delete rate plans
+    await prisma.ratePlan.deleteMany({
       where: { propertyId },
     });
 
