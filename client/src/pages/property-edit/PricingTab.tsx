@@ -1,11 +1,8 @@
-import React, { useState } from 'react'
-import {Box} from '@/components'
-import NumberStepperInput from '@/components/base/NumberStepperInput.tsx'
-import SelectionPicker from '@/components/base/SelectionPicker'
-import {ValidationErrors, WizardFormData} from '@/types/property'
-import {Currency, CurrencyLabels} from '@/constants/propertyEnums'
-import MobileSelect from './MobileSelect'
-import { FaInfoCircle } from 'react-icons/fa'
+import React from 'react'
+import { Box } from '@/components'
+import { ValidationErrors, WizardFormData } from '@/types/property'
+import { FaInfoCircle, FaTags, FaArrowRight } from 'react-icons/fa'
+import { useAppShell } from '@/components/base/AppShell'
 
 interface PricingTabProps {
     formData: Partial<WizardFormData>
@@ -13,51 +10,22 @@ interface PricingTabProps {
     validationErrors?: ValidationErrors | null
 }
 
-const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, validationErrors: _validationErrors }) => {
-    // Rate Plan state
-    const [selectedRatePlans, setSelectedRatePlans] = useState<string[]>(['flexible'])
-    const [ratePlanSettings, setRatePlanSettings] = useState<Record<string, any>>({})
-
-    // Default rate plans
-    const defaultRatePlans = [
-        {
-            id: 'flexible',
-            name: 'Flexible Cancellation',
-            type: 'FullyFlexible',
-            discountPercentage: 0,
-            cancellationDays: 1,
-            description: 'Free cancellation up to 24 hours before check-in'
-        },
-        {
-            id: 'non-refundable',
-            name: 'Non-Refundable Rate',
-            type: 'NonRefundable',
-            discountPercentage: 15,
-            cancellationDays: 0,
-            description: 'Save 15% with our non-refundable rate'
-        },
-        {
-            id: 'weekly',
-            name: 'Weekly Stay Discount',
-            type: 'Custom',
-            discountPercentage: 20,
-            cancellationDays: 7,
-            description: 'Stay 7+ nights and save 20%'
+const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData: _updateFormData, validationErrors: _validationErrors }) => {
+    const { navigateTo } = useAppShell()
+    
+    const handleCreateRatePlan = () => {
+        if (formData.propertyId) {
+            // Navigate to rate plan creation for this property
+            navigateTo('rate-plan-create', { propertyId: formData.propertyId })
         }
-    ]
-
-    const updatePricing = (field: string, value: any) => {
-        updateFormData({
-            pricing: {
-                currency: formData.pricing?.currency || Currency.AED,
-                ratePerNight: formData.pricing?.ratePerNight || 0,
-                ...formData.pricing,
-                [field]: value
-            }
-        })
     }
-
-    // updateCancellation removed - cancellation policies now managed through rate plans
+    
+    const handleManageRatePlans = () => {
+        if (formData.propertyId) {
+            // Navigate to rate plans list for this property
+            navigateTo('rate-plans', { propertyId: formData.propertyId })
+        }
+    }
 
     return (
         <Box paddingX={'1.5rem'} paddingY={'1.5rem'}>
@@ -65,199 +33,118 @@ const PricingTab: React.FC<PricingTabProps> = ({ formData, updateFormData, valid
                 Pricing & Rate Plans
             </h3>
             
-            <Box display="grid" gap="2.5rem">
-                {/* Currency Selection */}
-                <MobileSelect<Currency>
-                    label="Currency"
-                    value={formData.pricing?.currency || Currency.AED}
-                    options={Object.values(Currency).map(currency => ({
-                        value: currency,
-                        label: CurrencyLabels[currency]
-                    }))}
-                    onChange={(value) => updatePricing('currency', value)}
-                    placeholder="Select currency"
-                    helperText="Choose the currency for pricing your property"
-                />
-
-                {/* Rate Plans Section */}
-                <Box>
-                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
-                        <h4 style={{ fontSize: '1.125rem', fontWeight: '500' }}>Rate Plans</h4>
-                        <FaInfoCircle size={16} color="#9ca3af" />
+            <Box display="flex" flexDirection="column" gap="2rem">
+                {/* Migration Notice */}
+                <Box 
+                    padding="1.5rem" 
+                    backgroundColor="#eff6ff" 
+                    borderRadius="12px" 
+                    border="1px solid #bfdbfe"
+                >
+                    <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1rem">
+                        <FaInfoCircle size={20} color="#2563eb" />
+                        <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1e40af' }}>
+                            New Pricing System
+                        </h4>
                     </Box>
                     
-                    <SelectionPicker
-                        data={defaultRatePlans}
-                        idAccessor={(plan) => plan.id}
-                        value={selectedRatePlans}
-                        onChange={(value) => setSelectedRatePlans(Array.isArray(value) ? value as string[] : [value as string])}
-                        isMultiSelect={true}
-                        renderItem={(plan, _isSelected) => (
-                            <Box>
-                                <Box fontWeight="500">{plan.name}</Box>
-                                <Box fontSize="0.875rem" color="#6b7280">{plan.description}</Box>
-                            </Box>
-                        )}
-                    />
-
-                    {selectedRatePlans.includes('non-refundable') && (
-                        <Box marginTop="1rem" padding="1rem" backgroundColor="#fef3c7" borderRadius="8px">
-                            <Box display="flex" alignItems="center" gap="0.5rem">
-                                <FaInfoCircle color="#f59e0b" />
-                                <span style={{ fontSize: '0.875rem', color: '#92400e' }}>
-                                    Non-refundable rate automatically applies 15% discount to base prices
-                                </span>
-                            </Box>
-                        </Box>
-                    )}
-
-                    {selectedRatePlans.includes('weekly') && (
-                        <Box marginTop="1rem">
-                            <NumberStepperInput
-                                label="Minimum Nights for Weekly Discount"
-                                value={ratePlanSettings.weeklyMinNights || 7}
-                                onChange={(value) => setRatePlanSettings(prev => ({
-                                    ...prev,
-                                    weeklyMinNights: value
-                                }))}
-                                min={5}
-                                max={14}
-                                helperText="Minimum consecutive nights to qualify for weekly discount"
-                                width="200px"
-                            />
-                        </Box>
-                    )}
-                </Box>
-
-                {/* Base Pricing */}
-                <Box>
-                    <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Base Pricing
-                    </h4>
-                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
-                        <NumberStepperInput
-                            label="Rate Per Night (Weekdays)"
-                            value={formData.pricing?.ratePerNight || 0}
-                            onChange={(value) => updatePricing('ratePerNight', value)}
-                            min={1}
-                            max={50000}
-                            format="decimal"
-                            step={10}
-                            width="100%"
-                        />
-                        <NumberStepperInput
-                            label="Rate Per Night (Weekends)"
-                            value={formData.pricing?.ratePerNightWeekend || formData.pricing?.ratePerNight || 0}
-                            onChange={(value) => updatePricing('ratePerNightWeekend', value)}
-                            min={1}
-                            max={50000}
-                            format="decimal"
-                            step={10}
-                            width="100%"
-                        />
+                    <Box fontSize="0.875rem" color="#374151" lineHeight="1.5" marginBottom="1.5rem">
+                        Pricing is now managed through <strong>Rate Plans</strong> for better flexibility and control. 
+                        Rate plans allow you to create multiple pricing strategies with different cancellation policies, 
+                        restrictions, and seasonal adjustments.
                     </Box>
-                </Box>
-
-                {/* Discount Policies */}
-                <Box>
-                    <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Discount Policies
-                    </h4>
-                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
-                        <NumberStepperInput
-                            label="Non-Refundable Rate Discount (%)"
-                            value={formData.pricing?.discountPercentageForNonRefundableRatePlan || 0}
-                            onChange={(value) => updatePricing('discountPercentageForNonRefundableRatePlan', value)}
-                            min={0}
-                            max={50}
-                            format="integer"
-                            step={1}
-                            width="100%"
-                            helperText="Discount for non-refundable bookings"
-                        />
-                        
-                        <NumberStepperInput
-                            label="Weekly Rate Discount (%)"
-                            value={formData.pricing?.discountPercentageForWeeklyRatePlan || 0}
-                            onChange={(value) => updatePricing('discountPercentageForWeeklyRatePlan', value)}
-                            min={0}
-                            max={50}
-                            format="integer"
-                            step={1}
-                            width="100%"
-                            helperText="Discount for 7+ night stays"
-                        />
-                    </Box>
-                </Box>
-
-                {/* Property-level cancellation policy removed - now managed through rate plans */}
-
-                {/* Rate Plan Cancellation & Policies */}
-                <Box>
-                    <h4 style={{marginBottom: '1rem', fontSize: '1.125rem', fontWeight: '500'}}>
-                        Rate Plan Cancellation & Policies
-                    </h4>
-                    <p style={{fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem'}}>
-                        Configure cancellation policies for each rate plan. These settings determine how guests can cancel bookings.
-                    </p>
                     
-                    {selectedRatePlans.map(planId => {
-                        const plan = defaultRatePlans.find(p => p.id === planId)
-                        if (!plan) return null
+                    <Box display="flex" gap="1rem" flexWrap="wrap">
+                        <Box 
+                            as="button"
+                            onClick={handleCreateRatePlan}
+                            display="flex"
+                            alignItems="center"
+                            gap="0.5rem"
+                            padding="0.75rem 1rem"
+                            backgroundColor="#2563eb"
+                            color="white"
+                            borderRadius="8px"
+                            border="none"
+                            fontSize="0.875rem"
+                            fontWeight="500"
+                            cursor="pointer"
+                            style={{ transition: 'background-color 0.2s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                        >
+                            <FaTags size={14} />
+                            Create Rate Plan
+                            <FaArrowRight size={12} />
+                        </Box>
                         
-                        return (
-                            <Box key={planId} marginBottom="1.5rem" padding="1rem" border="1px solid #e5e7eb" borderRadius="8px">
-                                <h5 style={{ fontWeight: '600', marginBottom: '0.5rem' }}>{plan.name}</h5>
-                                
-                                {plan.type === 'FullyFlexible' && (
-                                    <NumberStepperInput
-                                        label="Free Cancellation (hours before check-in)"
-                                        value={ratePlanSettings[`${planId}_cancellationHours`] || 24}
-                                        onChange={(value) => setRatePlanSettings(prev => ({
-                                            ...prev,
-                                            [`${planId}_cancellationHours`]: value
-                                        }))}
-                                        min={0}
-                                        max={72}
-                                        step={12}
-                                        format="integer"
-                                        helperText="Hours before check-in when cancellation is free"
-                                        width="250px"
-                                    />
-                                )}
-                                
-                                {plan.type === 'NonRefundable' && (
-                                    <Box color="#6b7280" fontSize="0.875rem">
-                                        No refunds allowed after booking confirmation
-                                    </Box>
-                                )}
-                                
-                                {plan.type === 'Custom' && (
-                                    <Box>
-                                        <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                                            Custom Cancellation Policy
-                                        </label>
-                                        <textarea
-                                            value={ratePlanSettings[`${planId}_customPolicy`] || ''}
-                                            onChange={(e) => setRatePlanSettings(prev => ({
-                                                ...prev,
-                                                [`${planId}_customPolicy`]: e.target.value
-                                            }))}
-                                            placeholder="Describe your cancellation policy"
-                                            rows={3}
-                                            style={{
-                                                width: '100%',
-                                                padding: '0.75rem',
-                                                border: '1px solid #d1d5db',
-                                                borderRadius: '0.5rem',
-                                                fontSize: '0.875rem'
-                                            }}
-                                        />
-                                    </Box>
-                                )}
+                        <Box 
+                            as="button"
+                            onClick={handleManageRatePlans}
+                            display="flex"
+                            alignItems="center"
+                            gap="0.5rem"
+                            padding="0.75rem 1rem"
+                            backgroundColor="white"
+                            color="#2563eb"
+                            borderRadius="8px"
+                            border="1px solid #2563eb"
+                            fontSize="0.875rem"
+                            fontWeight="500"
+                            cursor="pointer"
+                            style={{ transition: 'all 0.2s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                        >
+                            View Existing Plans
+                            <FaArrowRight size={12} />
+                        </Box>
+                    </Box>
+                </Box>
+                
+                {/* What You Can Do with Rate Plans */}
+                <Box>
+                    <h4 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
+                        What You Can Do with Rate Plans
+                    </h4>
+                    
+                    <Box display="grid" gridTemplateColumns="1fr 1fr" gridTemplateColumnsSm="1fr" gap="1rem">
+                        <Box padding="1rem" backgroundColor="#f9fafb" borderRadius="8px" border="1px solid #e5e7eb">
+                            <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
+                                💰 Flexible Pricing
+                            </h5>
+                            <Box fontSize="0.875rem" color="#6b7280">
+                                Set fixed prices, percentage adjustments, or seasonal rates
                             </Box>
-                        )
-                    })}
+                        </Box>
+                        
+                        <Box padding="1rem" backgroundColor="#f9fafb" borderRadius="8px" border="1px solid #e5e7eb">
+                            <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
+                                📋 Cancellation Policies
+                            </h5>
+                            <Box fontSize="0.875rem" color="#6b7280">
+                                Create structured cancellation policies with multiple tiers
+                            </Box>
+                        </Box>
+                        
+                        <Box padding="1rem" backgroundColor="#f9fafb" borderRadius="8px" border="1px solid #e5e7eb">
+                            <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
+                                🎯 Restrictions
+                            </h5>
+                            <Box fontSize="0.875rem" color="#6b7280">
+                                Set minimum stays, advance booking requirements, and seasonal restrictions
+                            </Box>
+                        </Box>
+                        
+                        <Box padding="1rem" backgroundColor="#f9fafb" borderRadius="8px" border="1px solid #e5e7eb">
+                            <h5 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
+                                📅 Multiple Plans
+                            </h5>
+                            <Box fontSize="0.875rem" color="#6b7280">
+                                Create multiple rate plans for different guest segments and seasons
+                            </Box>
+                        </Box>
+                    </Box>
                 </Box>
             </Box>
         </Box>

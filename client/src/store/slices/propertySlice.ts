@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Property, PropertyState, WizardFormData, Photo } from '../../types/property'
 import { api } from '../../utils/api'
-import { BookingType, PaymentType, ParkingType, PetPolicy, Currency } from '../../constants/propertyEnums'
+import { BookingType, PaymentType, ParkingType, PetPolicy } from '../../constants/propertyEnums'
 
 const WIZARD_STORAGE_KEY = 'property-wizard-data'
 
@@ -114,15 +114,8 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     checkOutUntil: '12:00'
   }
 
-  if (data.pricing) {
-    transformedData.pricing = data.pricing
-  }
-
-  // Always include cancellation with defaults if not provided
-  transformedData.cancellation = data.cancellation || {
-    daysBeforeArrivalFreeToCancel: 7,
-    waiveCancellationFeeAccidentalBookings: true
-  }
+  // NOTE: Pricing and cancellation are now managed through RatePlan model, not directly on Property
+  // These fields have been removed from the backend Property schema
 
   if (data.firstDateGuestCanCheckIn) {
     transformedData.firstDateGuestCanCheckIn = data.firstDateGuestCanCheckIn
@@ -166,8 +159,9 @@ const transformServerPropertyData = (serverData: any): Property => {
     photos: serverData.photos,
     bookingType: serverData.bookingType,
     paymentType: serverData.paymentType,
-    pricing: serverData.pricing,
-    cancellation: serverData.cancellation,
+    // NOTE: pricing and cancellation are now managed through RatePlan model
+    // pricing: serverData.pricing, // REMOVED - no longer exists on backend
+    // cancellation: serverData.cancellation, // REMOVED - no longer exists on backend
     aboutTheProperty: serverData.aboutTheProperty,
     aboutTheNeighborhood: serverData.aboutTheNeighborhood,
     firstDateGuestCanCheckIn: serverData.firstDateGuestCanCheckIn,
@@ -343,10 +337,8 @@ const propertySlice = createSlice({
         photos: [],
         bookingType: BookingType.NeedToRequestBook,
         paymentType: PaymentType.Online,
-        pricing: {
-          currency: Currency.AED,
-          ratePerNight: 0
-        },
+        // NOTE: pricing is now managed through RatePlan model, not directly on Property
+        // pricing: { currency: Currency.AED, ratePerNight: 0 }, // REMOVED
         currentStep: 1,
         isComplete: false,
         ...action.payload
@@ -388,11 +380,9 @@ const propertySlice = createSlice({
         photos: property.photos || [],
         bookingType: property.bookingType || BookingType.NeedToRequestBook,
         paymentType: property.paymentType || PaymentType.Online,
-        pricing: property.pricing || {
-          currency: Currency.AED,
-          ratePerNight: 0
-        },
-        cancellation: property.cancellation,
+        // NOTE: pricing and cancellation are now managed through RatePlan model
+        // pricing: property.pricing || { currency: Currency.AED, ratePerNight: 0 }, // REMOVED
+        // cancellation: property.cancellation, // REMOVED
         aboutTheProperty: property.aboutTheProperty,
         aboutTheNeighborhood: property.aboutTheNeighborhood,
         firstDateGuestCanCheckIn: property.firstDateGuestCanCheckIn,

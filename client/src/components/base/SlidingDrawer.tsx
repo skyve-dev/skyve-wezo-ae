@@ -95,7 +95,8 @@ class PortalManager {
             container.style.zIndex = '9999';
         } else {
             // When no drawers are active: minimal footprint to avoid blocking interactions
-            container.style.zIndex = '-1'
+            // This has cause some bugs, for time being we'll comment it out'
+            // container.style.zIndex = '-1'
             enableScroller();
             window.scrollTo({top:parseInt(container.getAttribute('data-scroll-y') ?? '0'),behavior:'instant'})
         }

@@ -75,6 +75,9 @@ export interface PricePerGroupSize {
   ratePerNight: number
 }
 
+// DEPRECATED: Pricing and Cancellation are now managed through RatePlan model
+// These interfaces are kept for backward compatibility but should not be used for new features
+// @deprecated Use RatePlan model for pricing and cancellation policies
 export interface Pricing {
   currency: Currency
   ratePerNight: number
@@ -85,6 +88,7 @@ export interface Pricing {
   pricePerGroupSize?: PricePerGroupSize[]
 }
 
+// @deprecated Use RatePlan.cancellationPolicy instead
 export interface Cancellation {
   daysBeforeArrivalFreeToCancel: number
   waiveCancellationFeeAccidentalBookings: boolean
@@ -119,6 +123,8 @@ export interface Property {
   photos?: Photo[]
   bookingType: BookingType
   paymentType: PaymentType
+  // NOTE: pricing and cancellation are now managed through RatePlan model
+  // @deprecated These fields are kept for backward compatibility but are not used by backend
   pricing?: Pricing
   cancellation?: Cancellation
   aboutTheProperty?: string
@@ -144,7 +150,8 @@ export enum WizardStep {
   PHOTOS = 5,
   SERVICES = 6,
   RULES = 7,
-  PRICING = 8,
+  // NOTE: PRICING step is deprecated - pricing is now managed through RatePlan creation
+  PRICING = 8, // Keep for backward compatibility but should redirect to rate plan creation
   REVIEW = 9
 }
 

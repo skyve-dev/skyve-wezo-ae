@@ -1,29 +1,57 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit'
 import { api } from '@/utils/api'
 
+// Updated interface to match backend schema changes
 interface RatePlan {
   id: string
   propertyId: string
   name: string
   type: 'FullyFlexible' | 'NonRefundable' | 'Custom'
   description?: string
-  cancellationPolicy: string
   includesBreakfast: boolean
-  percentage: number
-  restrictions?: Restriction[]
+  
+  // NEW BACKEND FIELDS - Critical for pricing functionality
+  adjustmentType: 'FixedPrice' | 'Percentage' | 'FixedDiscount'
+  adjustmentValue: number
+  baseRatePlanId?: string  // Required when adjustmentType is 'Percentage'
+  priority: number
+  allowConcurrentRates: boolean
+  activeDays: number[]  // Days of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+  
+  // Updated field structure
+  cancellationPolicy?: CancellationPolicy  // Now structured object, not string
+  ratePlanRestrictions?: RatePlanRestriction[]  // Renamed from 'restrictions'
   prices?: Price[]
   isActive: boolean
   createdAt: string
   updatedAt: string
 }
 
-interface Restriction {
+// New structured cancellation policy interface
+interface CancellationPolicy {
   id: string
+  ratePlanId: string
+  tiers: CancellationTier[]
+}
+
+interface CancellationTier {
+  id: string
+  daysBeforeCheckIn: number
+  refundPercentage: number
+  description?: string
+}
+
+// Updated to match backend RatePlanRestriction model
+interface RatePlanRestriction {
+  id: string
+  ratePlanId: string
   type: 'MinLengthOfStay' | 'MaxLengthOfStay' | 'NoArrivals' | 'NoDepartures' | 
-        'MinAdvancedReservation' | 'MaxAdvancedReservation'
+        'MinAdvancedReservation' | 'MaxAdvancedReservation' | 'SeasonalDateRange'
   value: number
   startDate?: string
   endDate?: string
+  createdAt: string
+  updatedAt: string
 }
 
 interface Price {
@@ -116,31 +144,31 @@ const ratePlanSlice = createSlice({
       state.filters = { ...state.filters, ...action.payload }
     },
     
-    // Restrictions
-    addRestriction: (state, action: PayloadAction<{ ratePlanId: string; restriction: Restriction }>) => {
+    // Rate Plan Restrictions (updated field name)
+    addRatePlanRestriction: (state, action: PayloadAction<{ ratePlanId: string; restriction: RatePlanRestriction }>) => {
       const ratePlan = state.ratePlans.find(rp => rp.id === action.payload.ratePlanId)
       if (ratePlan) {
-        if (!ratePlan.restrictions) {
-          ratePlan.restrictions = []
+        if (!ratePlan.ratePlanRestrictions) {
+          ratePlan.ratePlanRestrictions = []
         }
-        ratePlan.restrictions.push(action.payload.restriction)
+        ratePlan.ratePlanRestrictions.push(action.payload.restriction)
       }
     },
     
-    updateRestriction: (state, action: PayloadAction<{ ratePlanId: string; restriction: Restriction }>) => {
+    updateRatePlanRestriction: (state, action: PayloadAction<{ ratePlanId: string; restriction: RatePlanRestriction }>) => {
       const ratePlan = state.ratePlans.find(rp => rp.id === action.payload.ratePlanId)
-      if (ratePlan && ratePlan.restrictions) {
-        const index = ratePlan.restrictions.findIndex(r => r.id === action.payload.restriction.id)
+      if (ratePlan && ratePlan.ratePlanRestrictions) {
+        const index = ratePlan.ratePlanRestrictions.findIndex(r => r.id === action.payload.restriction.id)
         if (index !== -1) {
-          ratePlan.restrictions[index] = action.payload.restriction
+          ratePlan.ratePlanRestrictions[index] = action.payload.restriction
         }
       }
     },
     
-    deleteRestriction: (state, action: PayloadAction<{ ratePlanId: string; restrictionId: string }>) => {
+    deleteRatePlanRestriction: (state, action: PayloadAction<{ ratePlanId: string; restrictionId: string }>) => {
       const ratePlan = state.ratePlans.find(rp => rp.id === action.payload.ratePlanId)
-      if (ratePlan && ratePlan.restrictions) {
-        ratePlan.restrictions = ratePlan.restrictions.filter(r => r.id !== action.payload.restrictionId)
+      if (ratePlan && ratePlan.ratePlanRestrictions) {
+        ratePlan.ratePlanRestrictions = ratePlan.ratePlanRestrictions.filter(r => r.id !== action.payload.restrictionId)
       }
     },
     
@@ -171,7 +199,7 @@ const ratePlanSlice = createSlice({
       }
     },
     
-    // Form management actions
+    // Form management actions - Updated for new backend schema
     initializeFormForCreate: (state, action: PayloadAction<string>) => {
       const propertyId = action.payload
       state.currentForm = {
@@ -180,9 +208,20 @@ const ratePlanSlice = createSlice({
         name: '',
         type: 'FullyFlexible',
         description: '',
-        cancellationPolicy: '',
         includesBreakfast: false,
-        percentage: 0,
+        
+        // NEW REQUIRED BACKEND FIELDS
+        adjustmentType: 'FixedPrice', // Default to FixedPrice for new rate plans
+        adjustmentValue: 0,
+        baseRatePlanId: undefined, // Only required for Percentage type
+        priority: 100, // Default priority
+        allowConcurrentRates: true,
+        activeDays: [0, 1, 2, 3, 4, 5, 6], // All days by default
+        
+        // Updated field structure
+        cancellationPolicy: undefined, // Now structured object
+        ratePlanRestrictions: [],
+        prices: [],
         isActive: true,
         createdAt: '',
         updatedAt: ''
@@ -323,9 +362,10 @@ export const {
   setLoading,
   setError,
   setFilters,
-  addRestriction,
-  updateRestriction,
-  deleteRestriction,
+  // Updated restriction action names
+  addRatePlanRestriction,
+  updateRatePlanRestriction,
+  deleteRatePlanRestriction,
   setPrices,
   updatePrice,
   clearRatePlans,
@@ -402,5 +442,8 @@ export const deleteRatePlanAsync = createAsyncThunk(
 export const createRatePlan = (propertyId: string, ratePlan: Partial<RatePlan>) => async (dispatch: any) => {
   return dispatch(createRatePlanAsync({ propertyId, data: ratePlan }))
 }
+
+// Export types for use in components
+export type { RatePlan, CancellationPolicy, CancellationTier, RatePlanRestriction, Price }
 
 export default ratePlanSlice.reducer
