@@ -1,17 +1,108 @@
 import React, { useState } from 'react'
-import { FaEnvelope, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
+import { FaEnvelope, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from 'react-icons/fa'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
 import { Box } from '@/components'
 import Button from '@/components/base/Button.tsx'
+import { useAppShell } from '@/components/base/AppShell'
 
 // Reservations Component
 const Reservations: React.FC = () => {
     const [filter, setFilter] = useState('all')
-    const reservations = [
-        {id: 1, guest: "John Smith", property: "Luxury Villa Marina", checkIn: "Jan 15, 2025", checkOut: "Jan 20, 2025", status: "Confirmed", amount: "AED 4,500"},
-        {id: 2, guest: "Sarah Johnson", property: "Beach House JBR", checkIn: "Jan 18, 2025", checkOut: "Jan 25, 2025", status: "Pending", amount: "AED 7,200"},
-        {id: 3, guest: "Ahmed Ali", property: "Luxury Villa Marina", checkIn: "Jan 10, 2025", checkOut: "Jan 12, 2025", status: "Completed", amount: "AED 1,800"}
-    ]
+    const { openDialog } = useAppShell()
+    const [reservations, setReservations] = useState([
+        {id: 1, guest: "John Smith", property: "Luxury Villa Marina", checkIn: "Jan 15, 2025", checkOut: "Jan 20, 2025", status: "Confirmed", amount: "AED 4,500", isNoShowReported: false},
+        {id: 2, guest: "Sarah Johnson", property: "Beach House JBR", checkIn: "Jan 18, 2025", checkOut: "Jan 25, 2025", status: "Pending", amount: "AED 7,200", isNoShowReported: false},
+        {id: 3, guest: "Ahmed Ali", property: "Luxury Villa Marina", checkIn: "Jan 10, 2025", checkOut: "Jan 12, 2025", status: "Completed", amount: "AED 1,800", isNoShowReported: false}
+    ])
+
+    // Add utility function
+    const isWithin48Hours = (checkInDate: string): boolean => {
+        const checkIn = new Date(checkInDate)
+        const now = new Date()
+        const hoursDiff = (checkIn.getTime() - now.getTime()) / (1000 * 60 * 60)
+        return hoursDiff <= 48 && hoursDiff >= -48
+    }
+
+    // Add no-show handler with openDialog
+    const handleReportNoShow = async (reservationId: number) => {
+        const confirmed = await openDialog<boolean>((close) => (
+            <Box padding="2rem" textAlign="center">
+                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+                    Report No-Show
+                </Box>
+                <Box marginBottom="2rem" color="#374151">
+                    Are you sure the guest did not show up? This will allow you to 
+                    request commission waiver within the 48-hour window.
+                </Box>
+                <Box display="flex" gap="1rem" justifyContent="center">
+                    <Button 
+                        label="Cancel"
+                        onClick={() => close(false)}
+                        variant="normal"
+                        fullWidth
+                    />
+                    <Button 
+                        label="Confirm No-Show"
+                        onClick={() => close(true)}
+                        variant="promoted"
+                        fullWidth
+                    />
+                </Box>
+            </Box>
+        ))
+
+        if (confirmed) {
+            try {
+                // In real implementation, this would be:
+                // await api.post(`/api/reservations/${reservationId}/no-show`)
+                
+                // Update local state for demo
+                setReservations(prev => 
+                    prev.map(res => 
+                        res.id === reservationId 
+                            ? { ...res, status: 'NoShow', isNoShowReported: true }
+                            : res
+                    )
+                )
+                
+                // Show success message
+                await openDialog<void>((close) => (
+                    <Box padding="2rem" textAlign="center">
+                        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
+                            Success!
+                        </Box>
+                        <Box marginBottom="2rem" color="#374151">
+                            No-show has been reported successfully. You can now request commission waiver.
+                        </Box>
+                        <Button 
+                            label="Continue"
+                            onClick={() => close()}
+                            variant="promoted"
+                        />
+                    </Box>
+                ))
+            } catch (error) {
+                console.error('Failed to report no-show:', error)
+                
+                // Show error message
+                await openDialog<void>((close) => (
+                    <Box padding="2rem" textAlign="center">
+                        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+                            Error
+                        </Box>
+                        <Box marginBottom="2rem" color="#374151">
+                            Failed to report no-show. Please try again later.
+                        </Box>
+                        <Button 
+                            label="Close"
+                            onClick={() => close()}
+                            variant="normal"
+                        />
+                    </Box>
+                ))
+            }
+        }
+    }
 
     return (
         <SecuredPage>
@@ -167,6 +258,22 @@ const Reservations: React.FC = () => {
                                     variant="normal"
                                     style={{ flex: window.innerWidth < 640 ? '1' : 'unset' }}
                                 />
+                                {reservation.status === 'Confirmed' && 
+                                 isWithin48Hours(reservation.checkIn) && 
+                                 !reservation.isNoShowReported && (
+                                    <Button 
+                                        label="Report No-Show" 
+                                        icon={<FaExclamationTriangle />}
+                                        onClick={() => handleReportNoShow(reservation.id)}
+                                        variant="normal"
+                                        size="small"
+                                        style={{ 
+                                            backgroundColor: '#fef3c7',
+                                            color: '#92400e',
+                                            flex: window.innerWidth < 640 ? '1' : 'unset'
+                                        }}
+                                    />
+                                )}
                                 {reservation.status === 'Pending' && (
                                     <>
                                         <Button 

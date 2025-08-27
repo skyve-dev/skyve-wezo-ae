@@ -8,7 +8,7 @@ A modern, responsive React application for property owners to manage villa listi
 - **React 18** - Modern React with hooks and concurrent features
 - **TypeScript** - Full type safety and enhanced developer experience  
 - **Vite** - Lightning-fast development server and build tool
-- **TanStack Router** - Type-safe file-based routing
+- **AppShell Navigation** - Custom type-safe routing with dialog management
 - **Redux Toolkit** - Predictable state management with RTK
 - **Custom Box Component** - Advanced styling and responsive design system
 - **React Leaflet** - Interactive maps for property locations
@@ -48,20 +48,22 @@ client/
 │   │       ├── PricingStep.tsx
 │   │       └── ReviewStep.tsx
 │   │
-│   ├── routes/                 # TanStack Router pages
-│   │   ├── __root.tsx          # Root layout
-│   │   ├── index.tsx           # Landing page
-│   │   ├── login.tsx           # Login page
-│   │   ├── register.tsx        # Registration page
-│   │   ├── dashboard/          # Dashboard routes
-│   │   │   ├── index.tsx       # Dashboard home
-│   │   │   ├── my-properties.tsx # Property list
-│   │   │   └── photos.tsx      # Photo management
-│   │   ├── property/           # Property routes
-│   │   │   ├── $propertyId.tsx # Property details
-│   │   │   └── $propertyId/
-│   │   │       └── edit.tsx    # Property editor
-│   │   └── examples/           # Component demos
+│   ├── pages/                  # Page components for AppShell routing
+│   │   ├── Dashboard.tsx       # Main dashboard page
+│   │   ├── LandingPage.tsx     # Landing page
+│   │   ├── PropertiesList.tsx  # Property list
+│   │   ├── PropertyEdit.tsx    # Property editor
+│   │   ├── Availability.tsx    # Calendar management
+│   │   ├── Reservations.tsx    # Booking management
+│   │   ├── Inbox.tsx          # Messages
+│   │   ├── Reviews.tsx        # Reviews management
+│   │   ├── Finance.tsx        # Financial reports
+│   │   ├── Support.tsx        # Help and support
+│   │   └── revenue/           # Revenue management
+│   │       ├── RatePlans.tsx  # Rate plan management
+│   │       ├── RatePlanCreate.tsx # Create rate plan
+│   │       ├── RatePlanEdit.tsx   # Edit rate plan
+│   │       └── PricingCalendar.tsx # Pricing calendar
 │   │
 │   ├── store/                  # Redux state management
 │   │   ├── index.ts            # Store configuration
@@ -81,9 +83,18 @@ client/
 │   │   ├── deviceDetection.ts  # Responsive helpers
 │   │   └── assetHelpers.ts     # Asset path resolution
 │   │
+│   ├── components/             # Base UI components
+│   │   └── base/
+│   │       └── AppShell/       # AppShell routing system
+│   │           ├── AppShell.tsx # Main AppShell component
+│   │           ├── AppShellContext.tsx # Navigation context
+│   │           ├── types.ts    # Type definitions
+│   │           └── index.ts    # Exports
+│   │
+│   ├── Routes.tsx              # Route definitions for AppShell
 │   ├── App.tsx                 # Root application
-│   ├── main.tsx                # Entry point
-│   └── router.tsx              # Router configuration
+│   ├── AppContent.tsx          # Main app content wrapper
+│   └── main.tsx                # Entry point
 │
 ├── public/                     # Static assets
 ├── .env.example                # Environment template
@@ -230,12 +241,68 @@ VITE_ENABLE_PHOTO_RESIZE=true
 VITE_DEBUG_MODE=false
 ```
 
-### Routing Configuration
+### AppShell Navigation System
 
-Routes are automatically generated from the file structure:
-- `/dashboard` → `src/routes/dashboard/index.tsx`
-- `/property/:id` → `src/routes/property/$propertyId.tsx`
-- `/examples/box` → `src/routes/examples/box.tsx`
+The client uses a custom routing system with type-safe navigation and dialog management:
+
+```typescript
+// Routes.tsx - Define all application routes
+export const routes = createRoutes({
+  'dashboard': {
+    component: Dashboard,
+    icon: <FaTachometerAlt />,
+    label: 'Dashboard',
+    showInNav: true,
+    showInHeader: true,
+    showInFooter: true
+  },
+  'rate-plan-edit': {
+    component: RatePlanEdit,
+    icon: <FaEdit />,
+    label: 'Edit Rate Plan',
+    showInNav: false,
+    showInHeader: false,
+    showInFooter: false
+  }
+})
+```
+
+#### Navigation in Components
+
+```typescript
+import { useAppShell } from '@/components/base/AppShell'
+
+const MyComponent = () => {
+  const { navigateTo, openDialog } = useAppShell()
+
+  // Type-safe navigation with parameters
+  const handleEdit = () => {
+    navigateTo('rate-plan-edit', { id: ratePlanId })
+  }
+
+  // Promise-based confirmation dialog
+  const handleDelete = async () => {
+    const confirmed = await openDialog<boolean>((close) => (
+      <Box padding="2rem" textAlign="center">
+        <p>Are you sure you want to delete this rate plan?</p>
+        <Button onClick={() => close(true)}>Yes, Delete</Button>
+        <Button onClick={() => close(false)}>Cancel</Button>
+      </Box>
+    ))
+    
+    if (confirmed) {
+      // Proceed with deletion
+    }
+  }
+}
+```
+
+#### Key Features
+- **Type-Safe Navigation** - Compile-time parameter validation
+- **Promise-Based Dialogs** - Modal dialogs that return values asynchronously
+- **Navigation Guards** - Protect routes with unsaved changes warnings
+- **Browser History** - Full back/forward button support
+- **Dynamic Content Mounting** - Mount header/sidebar/footer content dynamically
 
 ## 📱 Responsive Design
 

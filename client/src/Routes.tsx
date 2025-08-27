@@ -11,7 +11,9 @@ import {
     FaChartLine,
     FaQuestionCircle,
     FaPlus,
-    FaEdit
+    FaEdit,
+    FaDollarSign,
+    FaTags
 } from "react-icons/fa";
 
 // Import page components
@@ -25,6 +27,12 @@ import Reviews from "@/pages/Reviews";
 import Finance from "@/pages/Finance";
 import Support from "@/pages/Support";
 import LandingPage from "@/pages/LandingPage";
+
+// Revenue management pages
+import RatePlans from "@/pages/revenue/RatePlans";
+import PricingCalendar from "@/pages/revenue/PricingCalendar";
+import RatePlanCreate from "@/pages/revenue/RatePlanCreate";
+import RatePlanEdit from "@/pages/revenue/RatePlanEdit";
 
 export const routes = createRoutes({
     home: {
@@ -112,6 +120,38 @@ export const routes = createRoutes({
         icon: <FaQuestionCircle />,
         label: 'Support',
         showInNav: true,
+        showInHeader: false,
+        showInFooter: false
+    },
+    'rate-plans': {
+        component: RatePlans,
+        icon: <FaTags />,
+        label: 'Rate Plans',
+        showInNav: true,
+        showInHeader: true,
+        showInFooter: false
+    },
+    'pricing-calendar': {
+        component: PricingCalendar,
+        icon: <FaDollarSign />,
+        label: 'Pricing Calendar',
+        showInNav: true,
+        showInHeader: true,
+        showInFooter: false
+    },
+    'rate-plan-create': {
+        component: RatePlanCreate,
+        icon: <FaPlus />,
+        label: 'Create Rate Plan',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false
+    },
+    'rate-plan-edit': {
+        component: RatePlanEdit,
+        icon: <FaEdit />,
+        label: 'Edit Rate Plan',
+        showInNav: false,
         showInHeader: false,
         showInFooter: false
     }

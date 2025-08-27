@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     FaBuilding,
     FaClipboardList,
@@ -8,7 +8,7 @@ import {
     FaCalendarAlt,
     FaEnvelope,
     FaExclamationTriangle,
-    FaArrowLeft
+    FaArrowLeft,
 } from 'react-icons/fa'
 import { useAppShell, useNavigation, useTheme } from '@/components/base/AppShell'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
@@ -21,6 +21,9 @@ const Dashboard: React.FC = () => {
     const { navigateBack, canNavigateBack } = useNavigation()
     const theme = useTheme()
     
+    // KYC state
+    const [kycStatus, setKycStatus] = useState<'pending' | 'submitted' | 'verified' | 'rejected'>('pending')
+    
     const stats = {
         activeProperties: 3,
         totalReservations: 12,
@@ -30,6 +33,76 @@ const Dashboard: React.FC = () => {
         newMessages: 2
     }
 
+    useEffect(() => {
+        // Fetch KYC status - in real implementation this would be an API call
+        const fetchKycStatus = async () => {
+            try {
+                // await api.get('/api/users/me/kyc-status')
+                // For demo, we'll simulate different statuses
+                setKycStatus('pending') // Could be 'pending', 'submitted', 'verified', or 'rejected'
+            } catch (error) {
+                console.error('Failed to fetch KYC status:', error)
+            }
+        }
+        fetchKycStatus()
+    }, [])
+
+    // KYC Banner component
+    const KycBanner = () => {
+        if (kycStatus === 'verified') return null
+        
+        const bannerConfig = {
+            pending: {
+                color: '#fef3c7',
+                iconColor: '#f59e0b',
+                textColor: '#92400e',
+                message: 'Complete KYC verification to receive payouts',
+                buttonText: 'Verify Now'
+            },
+            submitted: {
+                color: '#dbeafe',
+                iconColor: '#3b82f6',
+                textColor: '#1e40af',
+                message: 'Your KYC verification is under review',
+                buttonText: 'Check Status'
+            },
+            rejected: {
+                color: '#fee2e2',
+                iconColor: '#ef4444',
+                textColor: '#991b1b',
+                message: 'KYC verification failed. Please resubmit documents',
+                buttonText: 'Resubmit'
+            }
+        }
+        
+        const config = bannerConfig[kycStatus] || bannerConfig.pending
+        
+        return (
+            <Box 
+                padding="1rem" 
+                paddingX="1.5rem"
+                backgroundColor={config.color}
+                borderRadius="8px"
+                marginBottom="1.5rem"
+            >
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                    <Box display="flex" alignItems="center" gap="1rem">
+                        <FaExclamationTriangle color={config.iconColor} size={20} />
+                        <span style={{ color: config.textColor, fontWeight: '500' }}>
+                            {config.message}
+                        </span>
+                    </Box>
+                    <Button
+                        label={config.buttonText}
+                        size="small"
+                        variant="promoted"
+                        onClick={() => navigateTo('compliance/kyc-verification', {})}
+                    />
+                </Box>
+            </Box>
+        )
+    }
+
     return (
         <SecuredPage>
             <Box padding="2rem" maxWidth="1200px" margin="0 auto">
@@ -37,6 +110,9 @@ const Dashboard: React.FC = () => {
                     <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0'}}>Property Command Center</h1>
                     <p style={{color: '#666'}}>Manage all your properties and bookings from one place</p>
                 </Box>
+
+                {/* KYC Banner */}
+                <KycBanner />
 
                 {/* Quick Stats */}
                 <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap="1.5rem" marginBottom="3rem">

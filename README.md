@@ -148,6 +148,129 @@ A comprehensive 9-step wizard for property owners:
 - Quick property statistics
 - Responsive mobile interface
 
+## 🧭 AppShell Navigation System
+
+The application uses a custom AppShell routing system that provides type-safe navigation, dialog management, and UI component mounting capabilities.
+
+### Key Features
+- **Type-Safe Routing**: Navigate with compile-time parameter validation
+- **Promise-Based Dialogs**: Modal dialogs that return values asynchronously
+- **Navigation Guards**: Protect routes with unsaved changes warnings
+- **Dynamic Content Mounting**: Dynamically mount header, sidebar, and footer content
+- **Loading State Management**: Centralized loading indicators
+- **Browser History**: Full browser back/forward navigation support
+
+### Basic Usage
+
+#### 1. Define Routes
+```typescript
+// Routes.tsx
+import { createRoutes } from '@/components/base/AppShell'
+
+export const routes = createRoutes({
+  'dashboard': {
+    component: Dashboard,
+    icon: <FaTachometerAlt />,
+    label: 'Dashboard',
+    showInNav: true,
+    showInHeader: true
+  },
+  'property-edit': {
+    component: PropertyEdit,
+    icon: <FaEdit />,
+    label: 'Edit Property', 
+    showInNav: false,
+    showInHeader: false
+  }
+})
+```
+
+#### 2. Navigation in Components
+```typescript
+import { useAppShell } from '@/components/base/AppShell'
+
+const MyComponent = () => {
+  const { navigateTo, openDialog, registerNavigationGuard } = useAppShell()
+
+  // Type-safe navigation with parameters
+  const handleEdit = () => {
+    navigateTo('property-edit', { propertyId: '123' })
+  }
+
+  // Promise-based confirmation dialog
+  const handleDelete = async () => {
+    const confirmed = await openDialog<boolean>((close) => (
+      <Box>
+        <p>Are you sure you want to delete this property?</p>
+        <Button onClick={() => close(true)}>Yes, Delete</Button>
+        <Button onClick={() => close(false)}>Cancel</Button>
+      </Box>
+    ))
+    
+    if (confirmed) {
+      // Proceed with deletion
+    }
+  }
+
+  // Navigation guard for unsaved changes
+  useEffect(() => {
+    if (!hasUnsavedChanges) return
+
+    const cleanup = registerNavigationGuard(async () => {
+      const shouldLeave = await openDialog<boolean>((close) => (
+        // Unsaved changes warning dialog
+      ))
+      return shouldLeave
+    })
+
+    return cleanup
+  }, [hasUnsavedChanges])
+}
+```
+
+#### 3. Available AppShell Functions
+
+| Function | Description |
+|----------|-------------|
+| `navigateTo(route, params)` | Navigate to a route with type-safe parameters |
+| `navigateBack()` | Go back to previous route |
+| `canNavigateBack` | Boolean indicating if back navigation is possible |
+| `openDialog<T>(content)` | Show modal dialog and return promise with result |
+| `registerNavigationGuard(guard)` | Register function to protect navigation |
+| `mountHeader(content, options?)` | Dynamically mount header content |
+| `mountSideNav(content, options?)` | Dynamically mount sidebar content |
+| `mountFooter(content, options?)` | Dynamically mount footer content |
+| `setLoading(boolean)` | Show/hide global loading indicator |
+| `currentRoute` | Current active route key |
+| `currentParams` | Current route parameters |
+
+### Advanced Features
+
+#### Dialog Stacking
+Multiple dialogs can be opened simultaneously and stack properly:
+```typescript
+const result1 = await openDialog(/* first dialog */)
+const result2 = await openDialog(/* second dialog on top */)
+```
+
+#### Dynamic Content Mounting
+```typescript
+// Mount temporary header content
+const cleanup = mountHeader(
+  <CustomHeader title="Special Mode" />,
+  { visibility: 'persistent' }
+)
+
+// Clean up when done
+cleanup()
+```
+
+#### Navigation History
+- Full browser history support with proper URL updates
+- Back button integration
+- Route parameter preservation
+- Deep linking support
+
 ## 🔐 Default Admin Account
 
 After running the seed script:
@@ -171,12 +294,13 @@ After running the seed script:
 ### Frontend
 - **Framework**: React 18 with TypeScript
 - **Build Tool**: Vite
-- **Routing**: TanStack Router
+- **Routing**: Custom AppShell routing system with type safety
 - **State Management**: Redux Toolkit
 - **Styling**: CSS Modules with responsive design system
 - **Maps**: Leaflet with React Leaflet
 - **Icons**: React Icons
 - **Image Processing**: Canvas API for client-side resizing
+- **Navigation**: AppShell context with dialog management
 
 ## 📁 Project Files
 

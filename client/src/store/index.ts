@@ -8,6 +8,7 @@ import messageReducer from './slices/messageSlice'
 import financeReducer from './slices/financeSlice'
 import availabilityReducer from './slices/availabilitySlice'
 import dashboardReducer from './slices/dashboardSlice'
+import ratePlanReducer from './slices/ratePlanSlice'
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ export const store = configureStore({
     finance: financeReducer,
     availability: availabilityReducer,
     dashboard: dashboardReducer,
+    ratePlan: ratePlanReducer,
   },
 })
 

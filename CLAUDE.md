@@ -137,6 +137,208 @@ When managing application state:
 
 This ensures predictable state management and centralized business logic.
 
+## Frontend Architecture & Navigation System
+
+### AppShell Navigation System
+
+**CRITICAL**: The application uses a **custom AppShell routing system**, NOT React Router or TanStack Router. Always use the AppShell system for all navigation.
+
+#### Core Navigation Pattern
+
+```typescript
+// ✅ CORRECT - Always use this pattern
+import { useAppShell } from '@/components/base/AppShell'
+
+const MyComponent = () => {
+  const { navigateTo, openDialog } = useAppShell()
+  
+  // Navigate to routes defined in Routes.tsx
+  const handleNavigation = () => {
+    navigateTo('rate-plan-edit', { id: ratePlanId })
+  }
+  
+  return <Button onClick={handleNavigation}>Edit Rate Plan</Button>
+}
+
+// ❌ WRONG - Never use these
+import { useNavigate } from '@tanstack/react-router'
+import { useRouter } from 'next/router'
+```
+
+#### Available AppShell Functions
+
+| Function | Usage | Example |
+|----------|--------|---------|
+| `navigateTo(route, params)` | Navigate between pages | `navigateTo('property-edit', { id: '123' })` |
+| `navigateBack()` | Go to previous page | `<Button onClick={navigateBack}>Back</Button>` |
+| `canNavigateBack` | Check if back is possible | `{canNavigateBack && <BackButton />}` |
+| `openDialog<T>(content)` | Show modal dialog | `const confirmed = await openDialog<boolean>(...)` |
+| `registerNavigationGuard(fn)` | Protect unsaved changes | `registerNavigationGuard(async () => ...)` |
+| `currentRoute` | Get current route | `if (currentRoute === 'dashboard') {...}` |
+| `currentParams` | Get route parameters | `const { id } = currentParams` |
+
+#### Route Definitions
+
+All routes are defined in `client/src/Routes.tsx` using the `createRoutes()` function:
+
+```typescript
+export const routes = createRoutes({
+  'dashboard': {
+    component: Dashboard,
+    icon: <FaTachometerAlt />,
+    label: 'Dashboard',
+    showInNav: true,
+    showInHeader: true,
+    showInFooter: true
+  },
+  'rate-plan-create': {
+    component: RatePlanCreate,
+    icon: <FaPlus />,
+    label: 'Create Rate Plan',
+    showInNav: false,
+    showInHeader: false,
+    showInFooter: false
+  }
+})
+```
+
+#### Promise-Based Dialog System
+
+The AppShell provides a powerful dialog system that returns promises:
+
+```typescript
+// Confirmation dialogs
+const confirmed = await openDialog<boolean>((close) => (
+  <Box padding="2rem" textAlign="center">
+    <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem">
+      Delete Rate Plan?
+    </Box>
+    <Box marginBottom="2rem">
+      This action cannot be undone.
+    </Box>
+    <Box display="flex" gap="1rem" justifyContent="center">
+      <Button onClick={() => close(false)}>Cancel</Button>
+      <Button onClick={() => close(true)} variant="promoted">Delete</Button>
+    </Box>
+  </Box>
+))
+
+if (confirmed) {
+  // Proceed with deletion
+}
+
+// Success/Error dialogs
+await openDialog<void>((close) => (
+  <Box padding="2rem" textAlign="center">
+    <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
+      Success!
+    </Box>
+    <Box marginBottom="2rem">Operation completed successfully.</Box>
+    <Button onClick={() => close()}>Continue</Button>
+  </Box>
+))
+```
+
+#### Navigation Guards for Unsaved Changes
+
+Protect users from losing unsaved work:
+
+```typescript
+const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+const { registerNavigationGuard } = useAppShell()
+
+useEffect(() => {
+  if (!hasUnsavedChanges) return
+
+  const cleanup = registerNavigationGuard(async () => {
+    const shouldLeave = await openDialog<boolean>((close) => (
+      <Box padding="2rem" textAlign="center">
+        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
+          Unsaved Changes
+        </Box>
+        <Box marginBottom="2rem">
+          You have unsaved changes. Are you sure you want to leave?
+        </Box>
+        <Box display="flex" gap="1rem" justifyContent="center">
+          <Button onClick={() => close(false)}>Stay</Button>
+          <Button onClick={() => close(true)} variant="promoted">Yes, Leave</Button>
+        </Box>
+      </Box>
+    ))
+    return shouldLeave
+  })
+
+  return cleanup
+}, [hasUnsavedChanges, registerNavigationGuard])
+```
+
+#### Common Navigation Patterns
+
+```typescript
+// 1. Simple navigation
+navigateTo('dashboard', {})
+
+// 2. Navigation with parameters
+navigateTo('property-edit', { propertyId: currentProperty.id })
+
+// 3. Conditional navigation with confirmation
+const handleCancel = async () => {
+  if (hasUnsavedChanges) {
+    const shouldLeave = await openDialog<boolean>(/* confirmation dialog */)
+    if (shouldLeave) {
+      navigateTo('properties', {})
+    }
+  } else {
+    navigateTo('properties', {})
+  }
+}
+
+// 4. Back navigation with fallback
+const handleBack = () => {
+  if (canNavigateBack) {
+    navigateBack()
+  } else {
+    navigateTo('dashboard', {})
+  }
+}
+```
+
+#### Dynamic Content Mounting
+
+The AppShell allows dynamic mounting of header, sidebar, and footer content:
+
+```typescript
+const { mountHeader, mountSideNav, mountFooter } = useAppShell()
+
+// Mount temporary header content
+const cleanup = mountHeader(
+  <CustomHeader title="Special Mode" />,
+  { visibility: 'persistent' }
+)
+
+// Clean up when component unmounts
+useEffect(() => cleanup, [])
+```
+
+### Mobile-First Responsive Design
+
+All components must support mobile devices from 320px width:
+
+```typescript
+// Use responsive styling with window.innerWidth checks
+const buttonSize = window.innerWidth < 480 ? "small" : "medium"
+const fontSize = window.innerWidth < 480 ? '1.5rem' : '2rem'
+
+// Use responsive Box props
+<Box 
+  padding="1rem" 
+  paddingMd="2rem"
+  gridTemplateColumns="1fr"
+  gridTemplateColumnsSm="1fr 1fr" 
+  gridTemplateColumnsMd="repeat(3, 1fr)"
+/>
+```
+
 ### Testing Guidelines
 - Jest is configured for **sequential execution** (`maxWorkers: 1`, `maxConcurrency: 1`)
 - This prevents race conditions between tests that share database state
