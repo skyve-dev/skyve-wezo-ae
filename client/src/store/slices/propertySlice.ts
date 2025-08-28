@@ -15,6 +15,14 @@ const initialState: PropertyState = {
   currentProperty: null,
   wizardData: null,
   originalWizardData: null, // Baseline data for change detection
+  
+  // Form management (following RatePlanManager pattern)
+  currentForm: null,
+  originalForm: null,
+  hasUnsavedChanges: false,
+  formValidationErrors: {},
+  isSaving: false,
+  
   loading: false,
   error: null,
   validationErrors: null
@@ -294,6 +302,35 @@ export const deletePropertyPhoto = createAsyncThunk(
   }
 )
 
+// New async thunks for PropertyManager pattern (following RatePlanManager)
+export const createPropertyAsync = createAsyncThunk(
+  'property/createPropertyAsync',
+  async (data: Partial<Property>, { rejectWithValue }) => {
+    try {
+      // Transform data to server format
+      const transformedData = transformPropertyDataForServer(data as WizardFormData)
+      const response = await api.post<{ property: any }>('/api/properties', transformedData)
+      return transformServerPropertyData(response.property)
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to create property')
+    }
+  }
+)
+
+export const updatePropertyAsync = createAsyncThunk(
+  'property/updatePropertyAsync',
+  async (params: { propertyId: string; data: Partial<Property> }, { rejectWithValue }) => {
+    try {
+      // Transform data to server format
+      const transformedData = transformPropertyDataForServer(params.data as WizardFormData)
+      const response = await api.put<{ property: any }>(`/api/properties/${params.propertyId}`, transformedData)
+      return transformServerPropertyData(response.property)
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update property')
+    }
+  }
+)
+
 const propertySlice = createSlice({
   name: 'property',
   initialState: {
@@ -427,6 +464,73 @@ const propertySlice = createSlice({
         state.wizardData = { ...state.originalWizardData }
         saveWizardDataToStorage(state.wizardData)
       }
+    },
+    
+    // Form management actions (following RatePlanManager pattern)
+    initializeFormForCreate: (state) => {
+      state.currentForm = {
+        name: '',
+        address: {
+          countryOrRegion: 'UAE',
+          city: '',
+          zipCode: 0
+        },
+        // Layout fields (flattened)
+        maximumGuest: 1,
+        bathrooms: 1,
+        allowChildren: false,
+        offerCribs: false,
+        rooms: [],
+        // Services fields (flattened)
+        serveBreakfast: false,
+        parking: ParkingType.No,
+        languages: [],
+        // Rules fields (flattened)
+        smokingAllowed: false,
+        partiesOrEventsAllowed: false,
+        petsAllowed: PetPolicy.No,
+        amenities: [],
+        photos: [],
+        bookingType: BookingType.NeedToRequestBook,
+        paymentType: PaymentType.Online
+      } as Property
+      state.originalForm = { ...state.currentForm }
+      state.hasUnsavedChanges = false
+      state.formValidationErrors = {}
+    },
+    
+    initializeFormForEdit: (state, action: PayloadAction<Property>) => {
+      state.currentForm = { ...action.payload }
+      state.originalForm = { ...action.payload }
+      state.hasUnsavedChanges = false
+      state.formValidationErrors = {}
+    },
+    
+    updateFormField: (state, action: PayloadAction<Partial<Property>>) => {
+      if (state.currentForm) {
+        state.currentForm = { ...state.currentForm, ...action.payload }
+        // Detect changes
+        state.hasUnsavedChanges = JSON.stringify(state.currentForm) !== JSON.stringify(state.originalForm)
+      }
+    },
+    
+    resetFormToOriginal: (state) => {
+      if (state.originalForm) {
+        state.currentForm = { ...state.originalForm }
+        state.hasUnsavedChanges = false
+        state.formValidationErrors = {}
+      }
+    },
+    
+    clearForm: (state) => {
+      state.currentForm = null
+      state.originalForm = null
+      state.hasUnsavedChanges = false
+      state.formValidationErrors = {}
+    },
+    
+    setFormValidationErrors: (state, action: PayloadAction<Record<string, string>>) => {
+      state.formValidationErrors = action.payload
     }
   },
   extraReducers: (builder) => {
@@ -462,38 +566,52 @@ const propertySlice = createSlice({
       // Create property
       .addCase(createProperty.pending, (state) => {
         state.loading = true
+        state.isSaving = true
         state.error = null
         state.validationErrors = null
+        state.formValidationErrors = {}
       })
       .addCase(createProperty.fulfilled, (state, action) => {
         state.loading = false
+        state.isSaving = false
         state.properties.push(action.payload)
         state.currentProperty = action.payload
+        state.currentForm = action.payload
+        state.originalForm = { ...action.payload }
+        state.hasUnsavedChanges = false
         // Clear wizard data on successful creation
         state.wizardData = null
         state.validationErrors = null
+        state.formValidationErrors = {}
+        state.error = null
         saveWizardDataToStorage(null)
       })
       .addCase(createProperty.rejected, (state, action) => {
         state.loading = false
+        state.isSaving = false
         const payload = action.payload as any
         if (payload?.type === 'validation') {
           state.validationErrors = payload.errors
+          state.formValidationErrors = payload.errors || {}
           state.error = payload.message
         } else {
           state.error = payload?.message || payload || 'Failed to create property'
           state.validationErrors = null
+          state.formValidationErrors = {}
         }
       })
       
       // Update property
       .addCase(updateProperty.pending, (state) => {
         state.loading = true
+        state.isSaving = true
         state.error = null
         state.validationErrors = null
+        state.formValidationErrors = {}
       })
       .addCase(updateProperty.fulfilled, (state, action) => {
         state.loading = false
+        state.isSaving = false
         const index = state.properties.findIndex(p => p.propertyId === action.payload.propertyId)
         if (index !== -1) {
           state.properties[index] = action.payload
@@ -501,21 +619,29 @@ const propertySlice = createSlice({
         if (state.currentProperty?.propertyId === action.payload.propertyId) {
           state.currentProperty = action.payload;
         }
+        state.currentForm = action.payload
+        state.originalForm = { ...action.payload }
+        state.hasUnsavedChanges = false
         // Reset originalWizardData to match current wizardData after successful save
         if (state.wizardData) {
           state.originalWizardData = { ...state.wizardData }
         }
         state.validationErrors = null
+        state.formValidationErrors = {}
+        state.error = null
       })
       .addCase(updateProperty.rejected, (state, action) => {
         state.loading = false
+        state.isSaving = false
         const payload = action.payload as any
         if (payload?.type === 'validation') {
           state.validationErrors = payload.errors
+          state.formValidationErrors = payload.errors || {}
           state.error = payload.message
         } else {
           state.error = payload?.message || payload || 'Failed to update property'
           state.validationErrors = null
+          state.formValidationErrors = {}
         }
       })
       
@@ -570,6 +696,52 @@ const propertySlice = createSlice({
           saveWizardDataToStorage(state.wizardData)
         }
       })
+      
+      // New async thunks for PropertyManager pattern
+      .addCase(createPropertyAsync.pending, (state) => {
+        state.isSaving = true
+        state.error = null
+        state.formValidationErrors = {}
+      })
+      .addCase(createPropertyAsync.fulfilled, (state, action) => {
+        state.isSaving = false
+        state.properties.push(action.payload)
+        state.currentProperty = action.payload
+        state.currentForm = action.payload
+        state.originalForm = { ...action.payload }
+        state.hasUnsavedChanges = false
+        state.formValidationErrors = {}
+        state.error = null
+      })
+      .addCase(createPropertyAsync.rejected, (state, action) => {
+        state.isSaving = false
+        state.error = action.payload as string
+      })
+      
+      .addCase(updatePropertyAsync.pending, (state) => {
+        state.isSaving = true
+        state.error = null
+        state.formValidationErrors = {}
+      })
+      .addCase(updatePropertyAsync.fulfilled, (state, action) => {
+        state.isSaving = false
+        const index = state.properties.findIndex(p => p.propertyId === action.payload.propertyId)
+        if (index !== -1) {
+          state.properties[index] = action.payload
+        }
+        if (state.currentProperty?.propertyId === action.payload.propertyId) {
+          state.currentProperty = action.payload
+        }
+        state.currentForm = action.payload
+        state.originalForm = { ...action.payload }
+        state.hasUnsavedChanges = false
+        state.formValidationErrors = {}
+        state.error = null
+      })
+      .addCase(updatePropertyAsync.rejected, (state, action) => {
+        state.isSaving = false
+        state.error = action.payload as string
+      })
   }
 })
 
@@ -584,7 +756,16 @@ export const {
   clearWizardData,
   completeWizard,
   setOriginalWizardData,
-  resetToOriginalWizardData
+  resetToOriginalWizardData,
+  // Form management actions (following RatePlanManager pattern)
+  initializeFormForCreate,
+  initializeFormForEdit,
+  updateFormField,
+  resetFormToOriginal,
+  clearForm,
+  setFormValidationErrors
 } = propertySlice.actions
+
+// New async thunks are exported above in their declarations
 
 export default propertySlice.reducer

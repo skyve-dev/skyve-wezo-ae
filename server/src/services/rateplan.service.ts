@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { PriceAdjustmentType, RatePlanType, RatePlanRestrictionType, ReservationStatus } from '@prisma/client';
+import { PriceAdjustmentType, RatePlanType, RatePlanRestrictionType } from '@prisma/client';
 
 export interface RatePlanCreateData {
   name: string;
@@ -350,9 +350,17 @@ export class RatePlanService {
   }
 
   /**
-   * Delete a rate plan (soft delete by deactivating)
+   * Delete a rate plan (smart deletion - hard delete if clean, soft delete if has history, block if has dependencies)
    */
-  async deleteRatePlan(ratePlanId: string, userId: string): Promise<void> {
+  async deleteRatePlan(ratePlanId: string, userId: string): Promise<{
+    type: 'hard' | 'soft' | 'blocked',
+    message: string,
+    details: {
+      reservationCount?: number,
+      derivedRatePlansCount?: number,
+      derivedRatePlanNames?: string[]
+    }
+  }> {
     // Check if rate plan exists and user has permission
     const ratePlan = await prisma.ratePlan.findFirst({
       where: {
@@ -362,16 +370,17 @@ export class RatePlanService {
         },
       },
       include: {
-        derivedRatePlans: true,
+        derivedRatePlans: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
         _count: {
           select: {
-            reservations: {
-              where: {
-                status: {
-                  in: [ReservationStatus.Confirmed, ReservationStatus.Pending]
-                }
-              }
-            }
+            reservations: true, // All reservations (active and historical)
+            prices: true,
+            ratePlanRestrictions: true
           }
         }
       },
@@ -381,22 +390,53 @@ export class RatePlanService {
       throw new Error('Rate plan not found or you do not have permission to delete it');
     }
 
-    // Check for active reservations
-    if (ratePlan._count.reservations > 0) {
-      throw new Error('Cannot delete rate plan with active reservations. Deactivate instead.');
+    const reservationCount = ratePlan._count.reservations;
+    const derivedRatePlansCount = ratePlan.derivedRatePlans.length;
+    const derivedRatePlanNames = ratePlan.derivedRatePlans.map(rp => rp.name);
+
+    // BLOCKED: Has dependent rate plans - cannot delete at all
+    if (derivedRatePlansCount > 0) {
+      return {
+        type: 'blocked',
+        message: `Cannot delete rate plan because ${derivedRatePlansCount} other rate plan${derivedRatePlansCount > 1 ? 's' : ''} depend${derivedRatePlansCount === 1 ? 's' : ''} on it for percentage calculations`,
+        details: {
+          reservationCount,
+          derivedRatePlansCount,
+          derivedRatePlanNames
+        }
+      };
     }
 
-    // Check for dependent rate plans
-    if (ratePlan.derivedRatePlans.length > 0) {
-      const derivedNames = ratePlan.derivedRatePlans.map(rp => rp.name).join(', ');
-      throw new Error(`Cannot delete rate plan. It is referenced by: ${derivedNames}`);
+    // HARD DELETE: No reservations at all - can permanently delete
+    if (reservationCount === 0) {
+      await prisma.ratePlan.delete({
+        where: { id: ratePlanId },
+      });
+
+      return {
+        type: 'hard',
+        message: 'Rate plan permanently deleted - no booking history existed',
+        details: {
+          reservationCount,
+          derivedRatePlansCount
+        }
+      };
     }
 
-    // Soft delete by deactivating
+    // SOFT DELETE: Has reservations - deactivate to preserve history
     await prisma.ratePlan.update({
       where: { id: ratePlanId },
       data: { isActive: false },
     });
+
+    return {
+      type: 'soft',
+      message: `Rate plan deactivated because ${reservationCount} booking${reservationCount > 1 ? 's' : ''} exist${reservationCount === 1 ? 's' : ''} - preserving historical data`,
+      details: {
+        reservationCount,
+        derivedRatePlansCount
+      }
+    };
   }
 
   /**

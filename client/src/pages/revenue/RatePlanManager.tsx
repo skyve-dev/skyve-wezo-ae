@@ -52,7 +52,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   const { currentProperty, properties } = useAppSelector((state) => state.property)
   const propertyId = currentProperty?.propertyId
   
-  const { openDialog, registerNavigationGuard, navigateTo, mountHeader, mountFooter } = useAppShell()
+  const { openDialog, navigateTo, mountHeader, mountFooter } = useAppShell()
   const [isLoading, setIsLoading] = useState(true)
   
   // Load user's properties for selection
@@ -122,57 +122,6 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     }
   }, [hasUnsavedChanges, isSaving, formValidationErrors, currentForm, isCreateMode])
   
-  // Navigation guard for unsaved changes
-  useEffect(() => {
-    if (!hasUnsavedChanges) return
-    
-    const cleanup = registerNavigationGuard(async () => {
-      const shouldLeave = await openDialog<boolean>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
-            Unsaved Changes
-          </Box>
-          <Box marginBottom="2rem" color="#374151">
-            You have unsaved changes. Are you sure you want to leave?
-          </Box>
-          <Box display="flex" gap="1rem" justifyContent="center">
-            <Box>
-              <button 
-                onClick={() => close(false)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Stay
-              </button>
-            </Box>
-            <Box>
-              <button 
-                onClick={() => close(true)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Yes, Leave
-              </button>
-            </Box>
-          </Box>
-        </Box>
-      ))
-      return shouldLeave
-    })
-    
-    return cleanup
-  }, [hasUnsavedChanges, registerNavigationGuard, openDialog])
   
   // Form validation
   const isFormValid = () => {

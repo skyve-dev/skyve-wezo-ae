@@ -416,7 +416,7 @@ model RatePlan {
 model Price {
   id         String   @id @default(uuid()) /// Unique identifier
   ratePlanId String /// Foreign key to rate plan
-  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan
+  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id], onDelete: Cascade) /// Associated rate plan
   date       DateTime /// Date for which this price applies
   amount     Decimal  @db.Decimal(10, 2) /// Price per night (supports 2 decimal places)
   createdAt  DateTime @default(now()) /// Creation timestamp
@@ -430,7 +430,7 @@ model Price {
 model CancellationPolicy {
   id         String @id @default(uuid()) /// Unique identifier
   ratePlanId String @unique /// Foreign key to rate plan (one-to-one)
-  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan
+  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id], onDelete: Cascade) /// Associated rate plan
   
   // Cancellation tiers (ordered by days before check-in)
   tiers      CancellationTier[] /// Structured refund tiers based on timing
@@ -444,7 +444,7 @@ model CancellationPolicy {
 model CancellationTier {
   id                   String @id @default(uuid()) /// Unique identifier
   cancellationPolicyId String /// Foreign key to cancellation policy
-  cancellationPolicy   CancellationPolicy @relation(fields: [cancellationPolicyId], references: [id]) /// Associated policy
+  cancellationPolicy   CancellationPolicy @relation(fields: [cancellationPolicyId], references: [id], onDelete: Cascade) /// Associated policy
   
   daysBeforeCheckIn    Int     /// Minimum days before check-in for this tier
   refundPercentage     Float   /// Percentage of total amount to refund (0-100)
@@ -463,7 +463,7 @@ model CancellationTier {
 model RatePlanRestriction {
   id         String                  @id @default(uuid()) /// Unique identifier
   ratePlanId String /// Foreign key to rate plan
-  ratePlan   RatePlan                @relation(fields: [ratePlanId], references: [id]) /// Associated rate plan
+  ratePlan   RatePlan                @relation(fields: [ratePlanId], references: [id], onDelete: Cascade) /// Associated rate plan
   type       RatePlanRestrictionType /// Type of rate plan restriction (MinStay, MaxStay, etc.)
   value      Int /// Numerical value (e.g., 3 for minimum 3 nights, 30 for advance days)
   startDate  DateTime? /// Optional: when restriction starts (for seasonal rules)

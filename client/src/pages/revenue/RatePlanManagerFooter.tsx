@@ -25,7 +25,6 @@ const RatePlanManagerFooter: React.FC<RatePlanManagerFooterProps> = ({
             display="flex"
             alignItems="center"
             justifyContent="flex-end"
-            padding="1rem 1.5rem"
             backgroundColor="#D52122"
             height="4.5rem"
         >
@@ -41,8 +40,10 @@ const RatePlanManagerFooter: React.FC<RatePlanManagerFooterProps> = ({
                         label="Discard Changes"
                         icon={<FaUndo />}
                         onClick={onDiscard}
-                        variant="normal"
-                        size="medium"
+                        variant="text"
+                        size="small"
+                        flexDirection={'column'}
+
                         disabled={isSaving}
                         style={{
                             backgroundColor: 'transparent',
@@ -56,8 +57,9 @@ const RatePlanManagerFooter: React.FC<RatePlanManagerFooterProps> = ({
                     label={isSaving ? "Saving..." : "Save Changes"}
                     icon={isSaving ? <FaSpinner className="spin" /> : <FaSave />}
                     onClick={onSave}
-                    variant="normal"
-                    size="medium"
+                    variant="text"
+                    size="small"
+                    flexDirection={'column'}
                     disabled={isSaving || hasErrors}
                     style={{
                         backgroundColor: 'transparent',

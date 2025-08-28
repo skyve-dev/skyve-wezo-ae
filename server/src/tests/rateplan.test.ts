@@ -498,7 +498,7 @@ describe('Rate Plan API Tests', () => {
     });
   });
 
-  describe('DELETE /properties/:propertyId/rate-plans/:ratePlanId - Delete Rate Plan', () => {
+  describe('DELETE /properties/:propertyId/rate-plans/:ratePlanId - Smart Rate Plan Deletion', () => {
     let seasonalRatePlanId: string;
 
     beforeAll(async () => {
@@ -512,57 +512,61 @@ describe('Rate Plan API Tests', () => {
       seasonalRatePlanId = seasonalRatePlan?.id || ratePlanId;
     });
 
-    it('should prevent deletion of rate plan with dependents', async () => {
+    it('should block deletion of rate plan with dependents (409 Conflict)', async () => {
       // Try to delete base rate plan that has dependent percentage rate
       const response = await request(app)
         .delete(`/api/properties/${propertyId}/rate-plans/${baseRatePlanId}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(409); // System uses 409 Conflict, not 400
+        .expect(409);
 
-      expect(response.body.error).toContain('Cannot delete rate plan');
+      expect(response.body.error).toContain('Cannot delete rate plan because');
+      expect(response.body.type).toBe('blocked');
+      expect(response.body.details).toBeDefined();
+      expect(response.body.details.derivedRatePlansCount).toBeGreaterThanOrEqual(0);
     });
 
-    it('should delete dependent rate plan successfully', async () => {
+    it('should handle smart deletion of dependent rate plan', async () => {
       // Delete the seasonal rate plan first (the dependent one)
       const response = await request(app)
         .delete(`/api/properties/${propertyId}/rate-plans/${seasonalRatePlanId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      // System may deactivate instead of delete
-      expect(response.body.message).toMatch(/Rate plan (deleted|deactivated) successfully/);
+      // Should return smart deletion response
+      expect(['hard', 'soft']).toContain(response.body.type);
+      expect(response.body.message).toBeTruthy();
+      expect(response.body.details).toBeDefined();
+      expect(typeof response.body.details.reservationCount).toBe('number');
       
-      // Check if rate plan is deleted or deactivated
+      // Verify deletion behavior based on type
       const ratePlan = await prisma.ratePlan.findUnique({
         where: { id: seasonalRatePlanId },
-        include: {
-          ratePlanRestrictions: true,
-          cancellationPolicy: {
-            include: { tiers: true }
-          }
-        }
       });
-      // Either completely deleted or marked as inactive
-      if (ratePlan) {
-        expect(ratePlan.isActive).toBe(false); // Deactivated
-      } else {
+      
+      if (response.body.type === 'hard') {
         expect(ratePlan).toBeNull(); // Actually deleted
+      } else if (response.body.type === 'soft') {
+        expect(ratePlan).not.toBeNull();
+        expect(ratePlan!.isActive).toBe(false); // Deactivated
       }
     });
 
-    it('should delete base rate plan after dependents are removed', async () => {
-      // This may still fail if dependencies aren't fully cleared
+    it('should handle base rate plan deletion after dependents are removed', async () => {
+      // This may still be blocked if dependencies exist
       const response = await request(app)
         .delete(`/api/properties/${propertyId}/rate-plans/${baseRatePlanId}`)
         .set('Authorization', `Bearer ${authToken}`);
       
-      // Accept either success (200) or conflict (409) based on actual dependency handling
+      // Accept either success (200) or conflict (409)
       expect([200, 409]).toContain(response.status);
       
       if (response.status === 200) {
-        expect(response.body.message).toMatch(/Rate plan (deleted|deactivated) successfully/);
+        expect(['hard', 'soft']).toContain(response.body.type);
+        expect(response.body.message).toBeTruthy();
+        expect(response.body.details).toBeDefined();
       } else {
-        expect(response.body.error).toContain('Cannot delete rate plan');
+        expect(response.body.type).toBe('blocked');
+        expect(response.body.error).toContain('Cannot delete rate plan because');
       }
     });
 

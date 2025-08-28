@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo, useCallback, useState } from 'react'
 import { FaPlus, FaEdit, FaTrash, FaCopy, FaToggleOn, FaToggleOff, FaInfoCircle } from 'react-icons/fa'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
@@ -6,6 +6,7 @@ import Button from '@/components/base/Button'
 import { useAppShell } from '@/components/base/AppShell'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { fetchRatePlans, createRatePlan, updateRatePlanAsync, deleteRatePlanAsync } from '@/store/slices/ratePlanSlice'
+import PropertySelector from '@/components/PropertySelector'
 
 const RatePlans: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -15,21 +16,62 @@ const RatePlans: React.FC = () => {
   
   const propertyId = currentProperty?.propertyId
   
+  // Fix window.innerWidth re-render issue with state
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 480)
+  
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 480)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+  
+  // Memoize styles to prevent re-renders
+  const styles = useMemo(() => ({
+    title: {
+      fontSize: isMobile ? '1.5rem' : '2rem',
+      fontWeight: 'bold' as const,
+      marginBottom: '0.5rem'
+    },
+    subtitle: {
+      color: '#6b7280',
+      fontSize: isMobile ? '0.875rem' : '1rem'
+    },
+    cardTitle: {
+      fontSize: isMobile ? '1rem' : '1.125rem',
+      fontWeight: '600'
+    },
+    cardDescription: {
+      color: '#6b7280',
+      fontSize: isMobile ? '0.75rem' : '0.875rem',
+      marginTop: '0.25rem'
+    },
+    bannerTitle: {
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      fontSize: isMobile ? '1rem' : '1.125rem'
+    },
+    bannerText: {
+      color: '#1e40af',
+      fontSize: isMobile ? '0.75rem' : '0.875rem',
+      lineHeight: '1.4'
+    }
+  }), [isMobile])
+  
   useEffect(() => {
     if (propertyId) {
       dispatch(fetchRatePlans(propertyId))
     }
   }, [propertyId, dispatch])
 
-  const handleCreateRatePlan = () => {
+  const handleCreateRatePlan = useCallback(() => {
     navigateTo('rate-plan-create', {})
-  }
+  }, [navigateTo])
 
-  const handleEditRatePlan = (ratePlanId: string) => {
+  const handleEditRatePlan = useCallback((ratePlanId: string) => {
     navigateTo('rate-plan-edit', { id: ratePlanId })
-  }
+  }, [navigateTo])
 
-  const handleDuplicateRatePlan = async (ratePlan: any) => {
+  const handleDuplicateRatePlan = useCallback(async (ratePlan: any) => {
     try {
       const duplicatedPlan = {
         ...ratePlan,
@@ -73,16 +115,16 @@ const RatePlans: React.FC = () => {
         </Box>
       ))
     }
-  }
+  }, [dispatch, propertyId, openDialog])
 
-  const handleDelete = async (ratePlanId: string) => {
+  const handleDelete = useCallback(async (ratePlanId: string) => {
     const confirmed = await openDialog<boolean>((close) => (
       <Box padding="2rem" textAlign="center">
         <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
           Delete Rate Plan
         </Box>
         <Box marginBottom="2rem" color="#374151">
-          Are you sure you want to delete this rate plan? This action cannot be undone.
+          Are you sure you want to delete this rate plan? Depending on its usage, it may be permanently deleted or deactivated.
         </Box>
         <Box display="flex" gap="1rem" justifyContent="center">
           <Button 
@@ -103,7 +145,109 @@ const RatePlans: React.FC = () => {
     if (confirmed) {
       try {
         if (!propertyId) return
-        await dispatch(deleteRatePlanAsync({ propertyId, ratePlanId }))
+        const result = await dispatch(deleteRatePlanAsync({ propertyId, ratePlanId }))
+        
+        if (deleteRatePlanAsync.fulfilled.match(result)) {
+          const { type, message } = result.payload
+          
+          // Show appropriate success dialog based on deletion type
+          const getDialogProps = () => {
+            switch (type) {
+              case 'hard':
+                return {
+                  title: '🗑️ Permanently Deleted',
+                  titleColor: '#059669',
+                  message: message,
+                  backgroundColor: '#f0fdf4',
+                  buttonColor: '#059669'
+                }
+              case 'soft':
+                return {
+                  title: '⚠️ Rate Plan Deactivated', 
+                  titleColor: '#f59e0b',
+                  message: message,
+                  backgroundColor: '#fefbf3',
+                  buttonColor: '#f59e0b'
+                }
+              default:
+                return {
+                  title: '✓ Success',
+                  titleColor: '#059669',
+                  message: message,
+                  backgroundColor: '#f0fdf4',
+                  buttonColor: '#059669'
+                }
+            }
+          }
+          
+          const dialogProps = getDialogProps()
+          
+          await openDialog<void>((close) => (
+            <Box padding="2rem" textAlign="center" backgroundColor={dialogProps.backgroundColor} borderRadius="8px">
+              <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color={dialogProps.titleColor}>
+                {dialogProps.title}
+              </Box>
+              <Box marginBottom="2rem" color="#374151">
+                {dialogProps.message}
+              </Box>
+              <Button 
+                label="Continue"
+                onClick={() => close()}
+                variant="promoted"
+                style={{ backgroundColor: dialogProps.buttonColor, borderColor: dialogProps.buttonColor }}
+              />
+            </Box>
+          ))
+        } else {
+          // Handle rejection/error from async thunk
+          const errorPayload = result.payload as any
+          
+          if (errorPayload?.type === 'blocked') {
+            // Blocked deletion - show error with specific details
+            await openDialog<void>((close) => (
+              <Box padding="2rem" textAlign="center" backgroundColor="#fef2f2" borderRadius="8px">
+                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+                  ❌ Cannot Delete
+                </Box>
+                <Box marginBottom="1rem" color="#374151">
+                  {errorPayload.error}
+                </Box>
+                {errorPayload.details?.derivedRatePlanNames?.length > 0 && (
+                  <Box marginBottom="2rem" padding="1rem" backgroundColor="#fee2e2" borderRadius="4px">
+                    <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.5rem" color="#991b1b">
+                      Dependent Rate Plans:
+                    </Box>
+                    <Box fontSize="0.875rem" color="#991b1b">
+                      {errorPayload.details.derivedRatePlanNames.join(', ')}
+                    </Box>
+                  </Box>
+                )}
+                <Button 
+                  label="Understood"
+                  onClick={() => close()}
+                  variant="normal"
+                />
+              </Box>
+            ))
+          } else {
+            // General error
+            await openDialog<void>((close) => (
+              <Box padding="2rem" textAlign="center">
+                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+                  Error
+                </Box>
+                <Box marginBottom="2rem" color="#374151">
+                  {errorPayload?.error || 'Failed to delete rate plan. Please try again.'}
+                </Box>
+                <Button 
+                  label="Close"
+                  onClick={() => close()}
+                  variant="normal"
+                />
+              </Box>
+            ))
+          }
+        }
       } catch (error) {
         console.error('Failed to delete rate plan:', error)
         
@@ -124,18 +268,19 @@ const RatePlans: React.FC = () => {
         ))
       }
     }
-  }
+  }, [dispatch, propertyId, openDialog])
   
-  const handleToggleActive = async (ratePlan: any) => {
+  const handleToggleActive = useCallback(async (ratePlan: any) => {
     try {
       if (!propertyId) return
       await dispatch(updateRatePlanAsync({ propertyId, ratePlanId: ratePlan.id, data: { isActive: !ratePlan.isActive } }))
     } catch (error) {
       console.error('Failed to toggle rate plan status:', error)
     }
-  }
+  }, [dispatch, propertyId])
   
-  const RatePlanCard = ({ ratePlan }: { ratePlan: any }) => (
+  // Move RatePlanCard outside to prevent recreation on every render
+  const RatePlanCard = useMemo(() => React.memo(({ ratePlan }: { ratePlan: any }) => (
     <Box
       padding="1rem"
       paddingSm="1.5rem"
@@ -147,10 +292,7 @@ const RatePlans: React.FC = () => {
       <Box display="flex" justifyContent="space-between" alignItems="start" marginBottom="1rem">
         <Box>
           <Box display="flex" alignItems="center" gap="0.5rem">
-            <h3 style={{ 
-              fontSize: window.innerWidth < 480 ? '1rem' : '1.125rem', 
-              fontWeight: '600' 
-            }}>
+            <h3 style={styles.cardTitle}>
               {ratePlan.name}
             </h3>
             {ratePlan.type === 'NonRefundable' && (
@@ -166,11 +308,7 @@ const RatePlans: React.FC = () => {
               </Box>
             )}
           </Box>
-          <p style={{ 
-            color: '#6b7280', 
-            fontSize: window.innerWidth < 480 ? '0.75rem' : '0.875rem', 
-            marginTop: '0.25rem' 
-          }}>
+          <p style={styles.cardDescription}>
             {ratePlan.description || 'No description'}
           </p>
         </Box>
@@ -179,7 +317,7 @@ const RatePlans: React.FC = () => {
           <Button
             label=""
             icon={ratePlan.isActive ? <FaToggleOn /> : <FaToggleOff />}
-            onClick={() => handleToggleActive(ratePlan)}
+            onClick={useCallback(() => handleToggleActive(ratePlan), [handleToggleActive, ratePlan])}
             variant="plain"
             size="small"
             title={ratePlan.isActive ? 'Deactivate' : 'Activate'}
@@ -187,7 +325,7 @@ const RatePlans: React.FC = () => {
           <Button
             label=""
             icon={<FaCopy />}
-            onClick={() => handleDuplicateRatePlan(ratePlan)}
+            onClick={useCallback(() => handleDuplicateRatePlan(ratePlan), [handleDuplicateRatePlan, ratePlan])}
             variant="plain"
             size="small"
             title="Duplicate"
@@ -195,7 +333,7 @@ const RatePlans: React.FC = () => {
           <Button
             label=""
             icon={<FaEdit />}
-            onClick={() => handleEditRatePlan(ratePlan.id)}
+            onClick={useCallback(() => handleEditRatePlan(ratePlan.id), [handleEditRatePlan, ratePlan.id])}
             variant="plain"
             size="small"
             title="Edit"
@@ -203,7 +341,7 @@ const RatePlans: React.FC = () => {
           <Button
             label=""
             icon={<FaTrash />}
-            onClick={() => handleDelete(ratePlan.id)}
+            onClick={useCallback(() => handleDelete(ratePlan.id), [handleDelete, ratePlan.id])}
             variant="plain"
             size="small"
             title="Delete"
@@ -256,7 +394,7 @@ const RatePlans: React.FC = () => {
         </Box>
       )}
     </Box>
-  )
+  )), [handleToggleActive, handleDuplicateRatePlan, handleEditRatePlan, handleDelete, styles])
   
   return (
     <SecuredPage>
@@ -268,36 +406,55 @@ const RatePlans: React.FC = () => {
       >
         {/* Header */}
         <Box marginBottom="2rem">
-          <Box display="flex" justifyContent="space-between" alignItems="start" marginBottom="1rem">
-            <Box flex="1" marginRight="1rem">
-              <h1 style={{ 
-                fontSize: window.innerWidth < 480 ? '1.5rem' : '2rem', 
-                fontWeight: 'bold', 
-                marginBottom: '0.5rem' 
-              }}>
+          <Box display="flex" flexWrap={'wrap'} alignItems="start" marginBottom="1rem">
+            <Box flex="1" marginRight="1rem" minWidth={320}>
+              <h1 style={styles.title}>
                 Rate Plans
               </h1>
-              <p style={{ 
-                color: '#6b7280',
-                fontSize: window.innerWidth < 480 ? '0.875rem' : '1rem'
-              }}>
+              <p style={styles.subtitle}>
                 Create multiple pricing strategies to appeal to different guest segments
               </p>
             </Box>
             
-            <Button
-              label={window.innerWidth < 480 ? "Add" : "Add Rate Plan"}
-              icon={<FaPlus />}
-              variant="promoted"
-              onClick={handleCreateRatePlan}
-              size={window.innerWidth < 480 ? "small" : "medium"}
-              disabled={!propertyId}
-            />
+            <Box display="flex" gap="0.5rem" alignItems="center" marginTop={'1rem'}>
+              <PropertySelector 
+                buttonSize={isMobile ? "small" : "medium"}
+                showDetails={false}
+              />
+              <Button
+                label={isMobile ? "Add" : "Add Rate Plan"}
+                icon={<FaPlus />}
+                variant="promoted"
+                onClick={handleCreateRatePlan}
+                size={isMobile ? "small" : "medium"}
+                disabled={!propertyId}
+              />
+            </Box>
           </Box>
         </Box>
         
+        {/* Current Property Info */}
+        {propertyId && currentProperty && (
+          <Box
+            padding="1rem"
+            backgroundColor="#f0fdf4"
+            borderRadius="8px"
+            marginBottom="1.5rem"
+            borderLeft="4px solid #059669"
+          >
+            <Box display="flex" alignItems="center" gap="0.5rem">
+              <span style={{ color: '#065f46', fontSize: '0.875rem' }}>
+                Managing rate plans for:
+              </span>
+              <strong style={{ color: '#065f46' }}>
+                {currentProperty.name}
+              </strong>
+            </Box>
+          </Box>
+        )}
+        
         {/* Info Banner */}
-        {ratePlans.length === 0 && !loading && (
+        {ratePlans.length === 0 && !loading && propertyId && (
           <Box
             padding="1rem"
             paddingSm="1.5rem"
@@ -306,20 +463,12 @@ const RatePlans: React.FC = () => {
             marginBottom="2rem"
           >
             <Box display="flex" gap="0.75rem" alignItems="start">
-              <FaInfoCircle color="#3b82f6" size={window.innerWidth < 480 ? 16 : 20} style={{ flexShrink: 0 }} />
+              <FaInfoCircle color="#3b82f6" size={isMobile ? 16 : 20} style={{ flexShrink: 0 }} />
               <Box>
-                <h3 style={{ 
-                  fontWeight: '600', 
-                  marginBottom: '0.5rem',
-                  fontSize: window.innerWidth < 480 ? '1rem' : '1.125rem'
-                }}>
+                <h3 style={styles.bannerTitle}>
                   Get Started with Rate Plans
                 </h3>
-                <p style={{ 
-                  color: '#1e40af', 
-                  fontSize: window.innerWidth < 480 ? '0.75rem' : '0.875rem',
-                  lineHeight: '1.4'
-                }}>
+                <p style={styles.bannerText}>
                   Rate plans allow you to offer different pricing and cancellation policies. 
                   Start with a flexible rate plan, then add non-refundable or special deals to maximize revenue.
                 </p>
@@ -343,15 +492,8 @@ const RatePlans: React.FC = () => {
                   No Property Selected
                 </h3>
                 <p style={{ color: '#92400e', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                  Rate plans must be linked to a property. Please select a property first to manage rate plans.
+                  Rate plans must be linked to a property. Please select a property using the selector above to manage rate plans.
                 </p>
-                <Button
-                  label="Select Property"
-                  onClick={() => navigateTo('properties', {})}
-                  variant="promoted"
-                  size="small"
-                  style={{ backgroundColor: '#f59e0b', borderColor: '#f59e0b' }}
-                />
               </Box>
             </Box>
           </Box>

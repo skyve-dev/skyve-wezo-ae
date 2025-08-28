@@ -11,9 +11,10 @@ The Button component serves as the primary interactive element for user actions 
 ```typescript
 interface ButtonProps extends Omit<BoxProps<'button'>, 'onClick' | 'as' | 'size'> {
   // Core functionality
-  label: string;                                    // Text displayed inside the button
+  label?: string;                                   // Text displayed inside the button (optional if children provided)
   icon?: React.ReactNode;                          // Optional icon element
   onClick?: (event: React.MouseEvent) => void;     // Click handler function
+  children?: React.ReactNode;                      // Custom content (takes precedence over label/icon)
   
   // Visual variants
   variant?: 'promoted' | 'normal';                 // Style variant (default: 'normal')
@@ -42,8 +43,15 @@ interface ButtonProps extends Omit<BoxProps<'button'>, 'onClick' | 'as' | 'size'
 ### 🎨 Visual Variants
 - **Promoted** (`promoted`): Primary action button with blue background and white text
 - **Normal** (`normal`): Secondary action button with white background and border
+- **Plain** (`plain`): Minimal styling for subtle actions and links
 - **Consistent Heights**: All sizes align perfectly with Input component heights
 - **Hover Effects**: Subtle elevation and color changes on hover
+
+### 🎯 Flexible Content
+- **Label & Icon**: Traditional button with text and optional icon
+- **Children**: Custom JSX content for complex button layouts
+- **Precedence**: Children prop overrides label/icon when provided
+- **Loading State**: Spinner replaces all content during loading
 
 ### 📏 Size Options  
 - **Small**: 36px height - Compact interfaces and secondary actions
@@ -106,7 +114,7 @@ import { FaSave, FaPlus, FaTrash } from 'react-icons/fa'
 function BasicButtons() {
   return (
     <Box display="flex" gap="1rem" alignItems="center">
-      {/* Primary action button */}
+      {/* Primary action button with label */}
       <Button
         label="Save Property"
         variant="promoted"
@@ -114,17 +122,22 @@ function BasicButtons() {
         onClick={() => handleSave()}
       />
       
-      {/* Secondary action button */}
+      {/* Button with custom children content */}
       <Button
-        label="Cancel"
         variant="normal"
         onClick={() => handleCancel()}
-      />
+      >
+        <Box display="flex" alignItems="center" gap="0.5rem">
+          <FaBuilding />
+          <span>Select Property</span>
+          <FaChevronDown />
+        </Box>
+      </Button>
       
-      {/* Icon-only style */}
+      {/* Plain variant with icon */}
       <Button
         label="Add"
-        variant="promoted"
+        variant="plain"
         size="small"
         icon={<FaPlus />}
         onClick={() => handleAdd()}
@@ -255,6 +268,62 @@ function PropertyRegistrationForm() {
           icon={<FaHome />}
         />
       </Box>
+    </Box>
+  )
+}
+```
+
+### Custom Content with Children
+
+```tsx
+function CustomContentButtons() {
+  return (
+    <Box display="flex" flexDirection="column" gap="1rem">
+      {/* Property selector button with complex layout */}
+      <Button
+        variant="normal"
+        onClick={() => openPropertySelector()}
+      >
+        <Box display="flex" alignItems="center" gap="1rem" width="100%">
+          <FaBuilding size={20} />
+          <Box flex="1">
+            <div style={{ fontWeight: 'bold' }}>Luxury Villa Marina</div>
+            <div style={{ fontSize: '0.875rem', opacity: 0.7 }}>Dubai, UAE</div>
+          </Box>
+          <FaChevronDown />
+        </Box>
+      </Button>
+      
+      {/* Status indicator button */}
+      <Button
+        variant="plain"
+        onClick={() => toggleStatus()}
+      >
+        <Box display="flex" alignItems="center" gap="0.5rem">
+          <Box 
+            width="8px" 
+            height="8px" 
+            borderRadius="50%" 
+            backgroundColor="#10b981"
+          />
+          <span>Available</span>
+        </Box>
+      </Button>
+      
+      {/* Multi-line action button */}
+      <Button
+        variant="promoted"
+        size="large"
+        fullWidth
+        onClick={() => handleBooking()}
+      >
+        <Box textAlign="center">
+          <div style={{ fontSize: '1.125rem', fontWeight: 'bold' }}>Book Now</div>
+          <div style={{ fontSize: '0.875rem', opacity: 0.9, marginTop: '0.25rem' }}>
+            AED 2,500 per night
+          </div>
+        </Box>
+      </Button>
     </Box>
   )
 }

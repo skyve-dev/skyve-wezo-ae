@@ -1,33 +1,33 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Box } from './Box'
-import { useTheme } from '@/components/base/AppShell'
+import React, {CSSProperties, useEffect, useRef, useState} from 'react'
+import {Box} from './Box'
+import {useTheme} from '@/components/base/AppShell'
 
 export interface TabItem {
     /**
      * Unique identifier for the tab
      */
     id: string
-    
+
     /**
      * Display label for the tab
      */
     label: string
-    
+
     /**
      * Optional icon component
      */
     icon?: React.ReactNode
-    
+
     /**
      * Content to display when tab is active (optional if using as tab bar only)
      */
     content?: React.ReactNode
-    
+
     /**
      * Whether the tab is disabled
      */
     disabled?: boolean
-    
+
     /**
      * Optional badge or notification indicator
      */
@@ -39,87 +39,92 @@ export interface TabProps {
      * Array of tab items
      */
     items: TabItem[]
-    
+
     /**
      * Currently active tab ID
      */
     activeTab: string
-    
+
     /**
      * Callback when tab changes
      */
     onTabChange: (tabId: string) => void
-    
+
     /**
      * Tab layout orientation
      */
     orientation?: 'horizontal' | 'vertical'
-    
+
     /**
      * Tab size variant
      */
     size?: 'small' | 'medium' | 'large'
-    
+
     /**
      * Tab style variant
      */
     variant?: 'default' | 'pills' | 'underline' | 'minimal'
-    
+
     /**
      * Whether tabs should take full width
      */
     fullWidth?: boolean
-    
+
     /**
      * Custom class name for the container
      */
     className?: string
-    
+
     /**
      * Custom styles for the container
      */
     style?: React.CSSProperties
-    
+
     /**
      * Animation duration for focus ring in milliseconds
      */
     animationDuration?: number
-    
+
     /**
      * Whether to center tab labels
      */
     centered?: boolean
-    
+
     /**
      * Background color for the tab container
      */
     backgroundColor?: string
-    
+
     /**
      * Active tab color
      */
     activeColor?: string
-    
+
     /**
      * Inactive tab color
      */
     inactiveColor?: string
-    
+
     /**
      * Display only as tab bar without content area
      */
     tabBarOnly?: boolean
-    
+
     /**
      * Layout for icon and label arrangement
      */
     iconLayout?: 'row' | 'column'
-    
+
     /**
      * Custom icon size (takes priority over size config)
      */
-    iconSize?: string
-    
+    iconSize?: CSSProperties['fontSize']
+
+    /**
+     * Custom font size for tab labels
+     */
+    fontSize?: CSSProperties['fontSize']
+
     /**
      * Custom styles for the tab bar navigation container
      */
@@ -128,11 +133,11 @@ export interface TabProps {
 
 /**
  * # Tab Component
- * 
+ *
  * A flexible, accessible tab navigation component with animated focus indicators and multiple
  * styling variants. Features keyboard navigation, responsive design, and theme integration
  * optimized for property management and booking interfaces.
- * 
+ *
  * ## Key Features
  * - **Multiple Variants**: Pills, underline, minimal, and default styling options
  * - **Animated Focus Ring**: Smooth transitions between active tabs
@@ -142,24 +147,24 @@ export interface TabProps {
  * - **Responsive Design**: Orientation switching and flexible layouts
  * - **Theme Integration**: Automatic color theming with override options
  * - **Accessibility**: Full ARIA support and screen reader compatibility
- * 
+ *
  * ## Basic Usage
  * ```tsx
  * const [activeTab, setActiveTab] = useState('tab1')
- * 
+ *
  * const tabs = [
  *   { id: 'tab1', label: 'Overview', content: <div>Overview content</div> },
  *   { id: 'tab2', label: 'Details', content: <div>Details content</div> },
  *   { id: 'tab3', label: 'Reviews', content: <div>Reviews content</div> }
  * ]
- * 
+ *
  * <Tab
  *   items={tabs}
  *   activeTab={activeTab}
  *   onTabChange={setActiveTab}
  * />
  * ```
- * 
+ *
  * ## Tab Content Structure
  * ### With Content Panels
  * ```tsx
@@ -188,7 +193,7 @@ export interface TabProps {
  *   }
  * ]
  * ```
- * 
+ *
  * ### Tab Bar Only (No Content)
  * ```tsx
  * <Tab
@@ -198,7 +203,7 @@ export interface TabProps {
  *   tabBarOnly
  * />
  * ```
- * 
+ *
  * ## Visual Variants
  * ### Pills Variant
  * ```tsx
@@ -210,7 +215,7 @@ export interface TabProps {
  *   size="medium"
  * />
  * ```
- * 
+ *
  * ### Underline Variant
  * ```tsx
  * <Tab
@@ -221,7 +226,7 @@ export interface TabProps {
  *   orientation="horizontal"
  * />
  * ```
- * 
+ *
  * ### Minimal Variant
  * ```tsx
  * <Tab
@@ -232,7 +237,7 @@ export interface TabProps {
  *   centered
  * />
  * ```
- * 
+ *
  * ### Default Variant
  * ```tsx
  * <Tab
@@ -243,20 +248,20 @@ export interface TabProps {
  *   fullWidth
  * />
  * ```
- * 
+ *
  * ## Size and Layout Options
  * ### Size Variants
  * ```tsx
  * // Small tabs (32px min height)
  * <Tab size="small" items={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
- * 
+ *
  * // Medium tabs (40px min height) - default
  * <Tab size="medium" items={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
- * 
+ *
  * // Large tabs (48px min height)
  * <Tab size="large" items={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
  * ```
- * 
+ *
  * ### Orientation Options
  * ```tsx
  * // Horizontal layout (default)
@@ -266,7 +271,7 @@ export interface TabProps {
  *   activeTab={activeTab}
  *   onTabChange={setActiveTab}
  * />
- * 
+ *
  * // Vertical layout
  * <Tab
  *   orientation="vertical"
@@ -275,7 +280,7 @@ export interface TabProps {
  *   onTabChange={setActiveTab}
  * />
  * ```
- * 
+ *
  * ## Icons and Badges
  * ### With Icons
  * ```tsx
@@ -301,7 +306,7 @@ export interface TabProps {
  *     content: <MessagesList />
  *   }
  * ]
- * 
+ *
  * <Tab
  *   items={iconTabs}
  *   activeTab={activeTab}
@@ -310,22 +315,22 @@ export interface TabProps {
  *   iconLayout="row"
  * />
  * ```
- * 
+ *
  * ### Icon Layout Options
  * ```tsx
  * // Icons beside text (default)
  * <Tab iconLayout="row" items={iconTabs} activeTab={activeTab} onTabChange={setActiveTab} />
- * 
+ *
  * // Icons above text
  * <Tab iconLayout="column" items={iconTabs} activeTab={activeTab} onTabChange={setActiveTab} />
  * ```
- * 
+ *
  * ## Property Management Examples
  * ### Property Dashboard Navigation
  * ```tsx
  * const PropertyDashboard = ({ propertyId }) => {
  *   const [activeTab, setActiveTab] = useState('overview')
- *   
+ *
  *   const dashboardTabs = [
  *     {
  *       id: 'overview',
@@ -353,7 +358,7 @@ export interface TabProps {
  *       content: <PropertyAnalytics propertyId={propertyId} />
  *     }
  *   ]
- * 
+ *
  *   return (
  *     <Tab
  *       items={dashboardTabs}
@@ -366,12 +371,12 @@ export interface TabProps {
  *   )
  * }
  * ```
- * 
+ *
  * ### Booking Status Navigation
  * ```tsx
  * const BookingManagement = () => {
  *   const [activeStatus, setActiveStatus] = useState('pending')
- *   
+ *
  *   const statusTabs = [
  *     {
  *       id: 'pending',
@@ -391,7 +396,7 @@ export interface TabProps {
  *       content: <BookingList status="cancelled" />
  *     }
  *   ]
- * 
+ *
  *   return (
  *     <Tab
  *       items={statusTabs}
@@ -404,24 +409,24 @@ export interface TabProps {
  *   )
  * }
  * ```
- * 
+ *
  * ### Property Filter Tabs
  * ```tsx
  * const PropertyFilters = ({ onFilterChange }) => {
  *   const [activeFilter, setActiveFilter] = useState('all')
- *   
+ *
  *   const filterTabs = [
  *     { id: 'all', label: 'All Properties', badge: allCount },
  *     { id: 'available', label: 'Available', badge: availableCount },
  *     { id: 'booked', label: 'Booked', badge: bookedCount },
  *     { id: 'maintenance', label: 'Maintenance', badge: maintenanceCount }
  *   ]
- * 
+ *
  *   const handleTabChange = (tabId) => {
  *     setActiveFilter(tabId)
  *     onFilterChange(tabId)
  *   }
- * 
+ *
  *   return (
  *     <Tab
  *       items={filterTabs}
@@ -434,7 +439,7 @@ export interface TabProps {
  *   )
  * }
  * ```
- * 
+ *
  * ## Customization Options
  * ### Theme Colors
  * ```tsx
@@ -447,7 +452,7 @@ export interface TabProps {
  *   backgroundColor="transparent"   // Custom background
  * />
  * ```
- * 
+ *
  * ### Animation Timing
  * ```tsx
  * <Tab
@@ -457,7 +462,7 @@ export interface TabProps {
  *   animationDuration={300}        // Slower animation
  * />
  * ```
- * 
+ *
  * ### Custom Icon Size
  * ```tsx
  * <Tab
@@ -467,7 +472,7 @@ export interface TabProps {
  *   iconSize="1.5rem"             // Larger icons
  * />
  * ```
- * 
+ *
  * ## Disabled States
  * ```tsx
  * const tabsWithDisabled = [
@@ -475,14 +480,14 @@ export interface TabProps {
  *   { id: 'tab2', label: 'Coming Soon', disabled: true },
  *   { id: 'tab3', label: 'Active', content: <Content3 /> }
  * ]
- * 
+ *
  * <Tab
  *   items={tabsWithDisabled}
  *   activeTab={activeTab}
  *   onTabChange={setActiveTab}
  * />
  * ```
- * 
+ *
  * ## Responsive Behavior
  * ### Mobile-First Design
  * ```tsx
@@ -495,11 +500,11 @@ export interface TabProps {
  *   fullWidth                      // Mobile: full width tabs
  * />
  * ```
- * 
+ *
  * ### Adaptive Layout
  * ```tsx
  * const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
- * 
+ *
  * <Tab
  *   items={tabs}
  *   activeTab={activeTab}
@@ -510,14 +515,14 @@ export interface TabProps {
  *   iconLayout={isMobile ? 'column' : 'row'}
  * />
  * ```
- * 
+ *
  * ## Advanced Examples
  * ### Multi-Level Tab Navigation
  * ```tsx
  * const PropertySettingsPanel = ({ propertyId }) => {
  *   const [primaryTab, setPrimaryTab] = useState('general')
  *   const [secondaryTab, setSecondaryTab] = useState('basic')
- *   
+ *
  *   const primaryTabs = [
  *     {
  *       id: 'general',
@@ -540,7 +545,7 @@ export interface TabProps {
  *       content: <PricingSettings propertyId={propertyId} />
  *     }
  *   ]
- * 
+ *
  *   return (
  *     <Tab
  *       items={primaryTabs}
@@ -553,13 +558,13 @@ export interface TabProps {
  *   )
  * }
  * ```
- * 
+ *
  * ### Tab with Async Content
  * ```tsx
  * const AsyncTabContent = ({ propertyId, tabId }) => {
  *   const [data, setData] = useState(null)
  *   const [loading, setLoading] = useState(true)
- * 
+ *
  *   useEffect(() => {
  *     const loadData = async () => {
  *       setLoading(true)
@@ -572,11 +577,11 @@ export interface TabProps {
  *     }
  *     loadData()
  *   }, [propertyId, tabId])
- * 
+ *
  *   if (loading) return <LoadingSpinner />
  *   return <TabContent data={data} />
  * }
- * 
+ *
  * const dynamicTabs = [
  *   {
  *     id: 'reviews',
@@ -586,15 +591,15 @@ export interface TabProps {
  *   }
  * ]
  * ```
- * 
+ *
  * ## Keyboard Navigation
  * The component supports comprehensive keyboard navigation:
  * - **Arrow Keys**: Navigate between tabs (Left/Right or Up/Down)
  * - **Home**: Jump to first tab
- * - **End**: Jump to last tab  
+ * - **End**: Jump to last tab
  * - **Enter/Space**: Activate focused tab
  * - **Tab**: Move focus in/out of tab list
- * 
+ *
  * ## Accessibility Features
  * - **ARIA Roles**: Proper tablist, tab, and tabpanel roles
  * - **Keyboard Support**: Full keyboard navigation as per WAI-ARIA
@@ -602,19 +607,19 @@ export interface TabProps {
  * - **Focus Management**: Visual focus indicators and logical tab order
  * - **Disabled States**: Proper aria-disabled handling
  * - **Selection States**: aria-selected for current tab
- * 
+ *
  * ## Performance Optimization
  * - **Animated Focus Ring**: Hardware-accelerated CSS animations
  * - **Efficient Updates**: Optimized re-renders on tab changes
- * - **Memory Management**: Proper cleanup of resize observers and event handlers  
+ * - **Memory Management**: Proper cleanup of resize observers and event handlers
  * - **Conditional Rendering**: Content panels only render when active
- * 
+ *
  * ## Integration Notes
  * - **Theme System**: Automatically inherits app theme colors
  * - **Box Component**: Uses Box for consistent styling and layout
  * - **Responsive Design**: Inherits responsive design patterns
  * - **Icon Integration**: Works with any React icon library
- * 
+ *
  * @example
  * // Complete property management dashboard
  * const PropertyManagementDashboard = ({ propertyId }) => {
@@ -624,7 +629,7 @@ export interface TabProps {
  *     messages: 7,
  *     maintenance: 1
  *   })
- * 
+ *
  *   const managementTabs = [
  *     {
  *       id: 'dashboard',
@@ -680,7 +685,7 @@ export interface TabProps {
  *       )
  *     }
  *   ]
- * 
+ *
  *   return (
  *     <Box height="100vh" display="flex" flexDirection="column">
  *       <Box borderBottom="1px solid #e2e8f0" backgroundColor="white">
@@ -707,30 +712,31 @@ export interface TabProps {
  */
 
 const Tab: React.FC<TabProps> = ({
-    items,
-    activeTab,
-    onTabChange,
-    orientation = 'horizontal',
-    size = 'medium',
-    variant = 'default',
-    fullWidth = false,
-    className,
-    style,
-    animationDuration = 200,
-    centered = false,
-    backgroundColor = 'transparent',
-    activeColor = '#D52122',
-    inactiveColor = '#6b7280',
-    tabBarOnly = false,
-    iconLayout = 'row',
-    iconSize,
-    tabBarStyle
-}) => {
+                                     items,
+                                     activeTab,
+                                     onTabChange,
+                                     orientation = 'horizontal',
+                                     size = 'medium',
+                                     variant = 'default',
+                                     fullWidth = false,
+                                     className,
+                                     style,
+                                     animationDuration = 200,
+                                     centered = false,
+                                     backgroundColor = 'transparent',
+                                     activeColor = '#D52122',
+                                     inactiveColor = '#6b7280',
+                                     tabBarOnly = false,
+                                     iconLayout = 'row',
+                                     iconSize,
+                                     fontSize,
+                                     tabBarStyle
+                                 }) => {
     const theme = useTheme()
-    
+
     // Override activeColor with theme if not explicitly provided
     const resolvedActiveColor = activeColor === '#D52122' ? (theme?.primaryColor || '#D52122') : activeColor
-    
+
     const tabsRef = useRef<(HTMLButtonElement | null)[]>([])
     const containerRef = useRef<HTMLDivElement>(null)
     const focusRingRef = useRef<HTMLDivElement>(null)
@@ -739,11 +745,11 @@ const Tab: React.FC<TabProps> = ({
     // Size configurations
     const sizeConfig = {
         small: {
-            padding: '0.5rem 1rem',
+            padding: '0.25rem',
             fontSize: '0.875rem',
-            minHeight: '2rem',
+            minHeight: '1rem',
             iconSize: '1rem',
-            gap: '0.5rem'
+            gap: '0.2rem'
         },
         medium: {
             padding: '0.75rem 1.5rem',
@@ -767,11 +773,11 @@ const Tab: React.FC<TabProps> = ({
     useEffect(() => {
         const activeIndex = items.findIndex(item => item.id === activeTab)
         const activeTabElement = tabsRef.current[activeIndex]
-        
+
         if (activeTabElement && focusRingRef.current && containerRef.current) {
             const containerRect = containerRef.current.getBoundingClientRect()
             const tabRect = activeTabElement.getBoundingClientRect()
-            
+
             // Calculate both X and Y positions relative to container
             const translateX = tabRect.left - containerRect.left
             const translateY = tabRect.top - containerRect.top
@@ -909,8 +915,8 @@ const Tab: React.FC<TabProps> = ({
                     ...baseStyles,
                     //backgroundColor: activeColor,
                     borderRadius: 0,
-                    borderBottom : orientation === 'horizontal' ? `2px solid ${resolvedActiveColor}` : `2px solid transparent`,
-                    borderLeft : orientation === 'vertical' ? `2px solid ${resolvedActiveColor}` : `2px solid transparent`,
+                    borderBottom: orientation === 'horizontal' ? `2px solid ${resolvedActiveColor}` : `2px solid transparent`,
+                    borderLeft: orientation === 'vertical' ? `2px solid ${resolvedActiveColor}` : `2px solid transparent`,
                 }
             case 'minimal':
                 return {
@@ -958,7 +964,7 @@ const Tab: React.FC<TabProps> = ({
                 {/* Tab Buttons */}
                 {items.map((item, index) => {
                     const isActive = item.id === activeTab
-                    
+
                     return (
                         <Box
                             key={item.id}
@@ -974,7 +980,7 @@ const Tab: React.FC<TabProps> = ({
                             style={getVariantStyles(isActive, !!item.disabled)}
                             flex={fullWidth ? 1 : 'none'}
                             whileHover={!item.disabled ? {
-                                backgroundColor: variant === 'pills' 
+                                backgroundColor: variant === 'pills'
                                     ? (isActive ? resolvedActiveColor : `${resolvedActiveColor}10`)
                                     : `${resolvedActiveColor}08`
                             } : undefined}
@@ -984,7 +990,7 @@ const Tab: React.FC<TabProps> = ({
                         >
                             {/* Icon */}
                             {item.icon && (
-                                <Box 
+                                <Box
                                     fontSize={iconSize || currentSize.iconSize}
                                     display="flex"
                                     alignItems="center"
@@ -995,7 +1001,7 @@ const Tab: React.FC<TabProps> = ({
                             )}
 
                             {/* Label */}
-                            <Box as="span">
+                            <Box as="span" fontSize={fontSize || currentSize.fontSize}>
                                 {item.label}
                             </Box>
 

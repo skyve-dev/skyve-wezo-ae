@@ -19,7 +19,7 @@ import {
 // Import page components
 import Dashboard from "@/pages/Dashboard";
 import PropertiesList from "@/pages/PropertiesList";
-import PropertyEdit from "@/pages/property-edit/PropertyEdit";
+import PropertyManager from "@/pages/property/PropertyManager";
 import Availability from "@/pages/Availability";
 import Reservations from "@/pages/Reservations";
 import Inbox from "@/pages/Inbox";
@@ -58,16 +58,16 @@ export const routes = createRoutes({
         showInHeader: true,
         showInFooter: true
     },
-    'property-add': {
-        component: PropertyEdit,
+    'property-create': {
+        component: () => <PropertyManager propertyId="new" />,
         icon: <FaPlus />,
-        label: 'Add Property',
+        label: 'Create Property',
         showInNav: false,
         showInHeader: false,
         showInFooter: false
     },
     'property-edit': {
-        component: PropertyEdit,
+        component: ({ id }: { id: string }) => <PropertyManager propertyId={id} />,
         icon: <FaEdit />,
         label: 'Edit Property',
         showInNav: false,

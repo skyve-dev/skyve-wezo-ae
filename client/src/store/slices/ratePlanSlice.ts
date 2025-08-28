@@ -341,7 +341,10 @@ const ratePlanSlice = createSlice({
         state.error = null
       })
       .addCase(deleteRatePlanAsync.fulfilled, (state, action) => {
-        state.ratePlans = state.ratePlans.filter(plan => plan.id !== action.payload)
+        const { ratePlanId } = action.payload
+        
+        // For both hard and soft delete, remove from UI (soft deleted items are inactive anyway)
+        state.ratePlans = state.ratePlans.filter(plan => plan.id !== ratePlanId)
         state.loading = false
         state.error = null
       })
@@ -430,10 +433,27 @@ export const deleteRatePlanAsync = createAsyncThunk(
   'ratePlan/delete',
   async (params: { propertyId: string; ratePlanId: string }, { rejectWithValue }) => {
     try {
-      await api.delete(`/api/properties/${params.propertyId}/rate-plans/${params.ratePlanId}`)
-      return params.ratePlanId
+      const response = await api.delete<{ type: 'hard' | 'soft'; message: string; details?: any }>(`/api/properties/${params.propertyId}/rate-plans/${params.ratePlanId}`)
+      
+      // For successful deletion (hard or soft), return the response data
+      return {
+        ratePlanId: params.ratePlanId,
+        ...response
+      }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to delete rate plan')
+      // Check if it's a 409 Conflict (blocked deletion)
+      if (error.response?.status === 409) {
+        return rejectWithValue({
+          type: 'blocked',
+          error: error.response.data.error,
+          details: error.response.data.details
+        })
+      }
+      
+      return rejectWithValue({
+        type: 'error',
+        error: error.response?.data?.error || error.message || 'Failed to delete rate plan'
+      })
     }
   }
 )

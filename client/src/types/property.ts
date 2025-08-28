@@ -164,6 +164,14 @@ export interface PropertyState {
   currentProperty: Property | null
   wizardData: WizardFormData | null
   originalWizardData: WizardFormData | null // Baseline data for change detection
+  
+  // Form management (following RatePlanManager pattern)
+  currentForm: Property | null
+  originalForm: Property | null
+  hasUnsavedChanges: boolean
+  formValidationErrors: Record<string, string>
+  isSaving: boolean
+  
   loading: boolean
   error: string | null
   validationErrors: ValidationErrors | null

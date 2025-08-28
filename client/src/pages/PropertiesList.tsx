@@ -6,7 +6,7 @@ import {Box, Input} from '@/components'
 import Button from '@/components/base/Button.tsx'
 import ConfirmationDialog from '@/components/base/ConfirmationDialog'
 import {useAppDispatch, useAppSelector} from '@/store'
-import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty, initializeWizard} from '@/store/slices/propertySlice'
+import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty} from '@/store/slices/propertySlice'
 import {Property} from '@/types/property'
 import {resolvePhotoUrl} from '@/utils/api'
 
@@ -106,7 +106,7 @@ const PropertiesList: React.FC = () => {
     const handleEditProperty = (property: Property, tab?: string) => {
         dispatch(setCurrentProperty(property))
         navigateTo('property-edit', {
-            propertyId: property.propertyId,
+            id: property.propertyId,
             ...(tab && {tab})
         })
     }
@@ -279,8 +279,7 @@ const PropertiesList: React.FC = () => {
                         label="Add New Property"
                         icon={<FaPlus/>}
                         onClick={() => {
-                            dispatch(initializeWizard({}))
-                            navigateTo('property-edit', { propertyId: 'new' })
+                            navigateTo('property-create', {})
                         }}
                         variant="promoted"
                     />
@@ -336,6 +335,9 @@ const PropertiesList: React.FC = () => {
                         backgroundColor="white"
                         borderRadius="8px"
                         boxShadow="0 2px 4px rgba(0,0,0,0.1)"
+                        display="flex"
+                        flexDirection={'column'}
+                        alignItems={'center'}
                     >
                         <Box color="#9ca3af" marginBottom="1rem">
                             <FaMapMarkerAlt size={48}/>
@@ -354,8 +356,7 @@ const PropertiesList: React.FC = () => {
                                 label="Add Your First Property"
                                 icon={<FaPlus/>}
                                 onClick={() => {
-                                    dispatch(initializeWizard({}))
-                                    navigateTo('property-edit', { propertyId: 'new' })
+                                    navigateTo('property-create', {})
                                 }}
                                 variant="promoted"
                             />

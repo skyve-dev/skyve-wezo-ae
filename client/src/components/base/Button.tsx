@@ -5,12 +5,13 @@ import {useTheme} from '@/components/base/AppShell'
 
 export interface ButtonProps extends Omit<BoxProps, 'onClick' | 'as' | 'size'> {
   // Core functionality
-  label: string
+  label?: string
   icon?: React.ReactNode
   onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void
+  children?: React.ReactNode
   
   // Visual variants
-  variant?: 'promoted' | 'normal' | 'plain'
+  variant?: 'promoted' | 'normal' | 'plain' | 'text'
   size?: 'small' | 'medium' | 'large'
   
   // States
@@ -64,19 +65,28 @@ const LoadingSpinner: React.FC<{ size: 'small' | 'medium' | 'large' }> = ({ size
  * 
  * ## Key Features
  * - **Polymorphic**: Renders as button or anchor based on href prop
+ * - **Flexible Content**: Supports both label/icon props and children for custom content
  * - **Theme Integration**: Uses app theme colors and utilities automatically  
  * - **Loading States**: Built-in spinner with size-aware animations
  * - **Accessibility**: Full keyboard navigation and ARIA support
- * - **Variants**: Multiple visual styles (promoted, normal, plain)
+ * - **Variants**: Multiple visual styles (promoted, normal, plain, text)
  * - **Interactive**: Hover, tap, and focus animations via Box motion props
  * - **Icon Support**: Flexible icon positioning with proper sizing
  * 
  * ## Basic Usage
  * ```tsx
- * // Simple button
+ * // Simple button with label
  * <Button label="Click me" onClick={handleClick} />
  * 
- * // With icon
+ * // Button with children (takes precedence over label)
+ * <Button onClick={handleClick}>
+ *   <Box display="flex" alignItems="center" gap="0.5rem">
+ *     <FaSave />
+ *     <span>Save Document</span>
+ *   </Box>
+ * </Button>
+ * 
+ * // With icon and label
  * <Button 
  *   label="Save" 
  *   icon={<FaSave />} 
@@ -210,6 +220,20 @@ const LoadingSpinner: React.FC<{ size: 'small' | 'medium' | 'large' }> = ({ size
  * />
  * ```
  * 
+ * ### Custom Content with Children
+ * ```tsx
+ * <Button variant="promoted" onClick={handleSubmit}>
+ *   <Box display="flex" alignItems="center" gap="1rem">
+ *     <FaBuilding size={20} />
+ *     <Box>
+ *       <div style={{ fontWeight: 'bold' }}>Luxury Villa Marina</div>
+ *       <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>3 Beds • 2 Baths</div>
+ *     </Box>
+ *     <FaChevronRight style={{ marginLeft: 'auto' }} />
+ *   </Box>
+ * </Button>
+ * ```
+ * 
  * ### Navigation with Icon
  * ```tsx
  * <Button
@@ -258,6 +282,7 @@ const LoadingSpinner: React.FC<{ size: 'small' | 'medium' | 'large' }> = ({ size
  * ## Implementation Details
  * - Built on Box component for consistent styling API
  * - Polymorphic implementation supports both button and anchor elements
+ * - Children prop takes precedence over label/icon for maximum flexibility
  * - Size configurations match Input component heights for form consistency
  * - Loading spinner automatically scales based on button size
  * - Theme colors are resolved at render time for dynamic theme switching
@@ -297,6 +322,7 @@ export const Button = forwardRef<
   label,
   icon,
   onClick,
+  children,
   variant = 'normal',
   size = 'medium',
   disabled = false,
@@ -337,7 +363,7 @@ export const Button = forwardRef<
   }
   
   const config = sizeConfig[size]
-  
+
   // Variant styles
   const getVariantStyles = () => {
     const baseStyles = {
@@ -372,6 +398,17 @@ export const Button = forwardRef<
     if (variant === 'plain') {
       return {
         ...baseStyles,
+        backgroundColor: 'transparent',
+        color: theme.primaryColor,
+        border: 'none',
+        boxShadow: 'none'
+      }
+    }
+
+    if (variant === 'text') {
+      return {
+        ...baseStyles,
+        padding:'0px',
         backgroundColor: 'transparent',
         color: theme.primaryColor,
         border: 'none',
@@ -444,6 +481,12 @@ export const Button = forwardRef<
       return <LoadingSpinner size={size} />
     }
     
+    // If children is provided, use it instead of label/icon
+    if (children) {
+      return children
+    }
+    
+    // Otherwise use label and icon
     return (
       <>
         {icon && (

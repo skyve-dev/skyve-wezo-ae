@@ -193,8 +193,8 @@ export const updateRatePlan = async (req: Request, res: Response): Promise<void>
 };
 
 /**
- * Delete (deactivate) a rate plan
- * DELETE /api/rateplans/:ratePlanId
+ * Delete a rate plan (smart deletion - hard/soft/blocked based on dependencies)
+ * DELETE /api/properties/:propertyId/rate-plans/:ratePlanId
  */
 export const deleteRatePlan = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -204,18 +204,29 @@ export const deleteRatePlan = async (req: Request, res: Response): Promise<void>
     }
 
     const { ratePlanId } = req.params;
-    await ratePlanService.deleteRatePlan(ratePlanId, req.user.id);
+    const result = await ratePlanService.deleteRatePlan(ratePlanId, req.user.id);
 
+    // Handle blocked deletion (409 Conflict)
+    if (result.type === 'blocked') {
+      res.status(409).json({
+        error: result.message,
+        type: result.type,
+        details: result.details
+      });
+      return;
+    }
+
+    // Handle successful deletion (hard or soft)
     res.json({
-      message: 'Rate plan deactivated successfully',
+      message: result.message,
+      type: result.type,
+      details: result.details
     });
   } catch (error: any) {
     console.error('Delete rate plan error:', error);
     
     if (error.message.includes('not found') || error.message.includes('permission')) {
       res.status(404).json({ error: error.message });
-    } else if (error.message.includes('Cannot delete')) {
-      res.status(409).json({ error: error.message });
     } else {
       res.status(500).json({ error: 'Internal server error' });
     }

@@ -46,6 +46,7 @@ export const FooterDefault = <T extends Record<string, BaseRoute>>({
             centered
             tabBarOnly
             iconSize={'1.5rem'}
+            fontSize={'0.7rem'}
             iconLayout={'column'}
             activeColor={'rgba(255,255,255,1)'}
             inactiveColor="rgba(255,255,255,0.5)"
