@@ -181,7 +181,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             Property has been {isCreateMode ? 'created' : 'updated'} successfully.
           </Box>
           <Box display="flex" justifyContent="center">
-            <Button label="Continue" onClick={() => close()} variant="promoted">Continue</Button>
+            <Button label="Continue" onClick={() => close()} variant="promoted" />
           </Box>
         </Box>
       ))
@@ -197,7 +197,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             Failed to {isCreateMode ? 'create' : 'update'} property: {error.message || error}
           </Box>
           <Box display="flex" justifyContent="center">
-            <Button label="OK" onClick={() => close()}>OK</Button>
+            <Button label="OK" onClick={() => close()} />
           </Box>
         </Box>
       ))
@@ -216,8 +216,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             Do you want to save your changes before leaving?
           </Box>
           <Box display="flex" gap="1rem" justifyContent="center">
-            <Button label="Leave Without Saving" onClick={() => close(false)}>Leave Without Saving</Button>
-            <Button label="Save & Leave" onClick={() => close(true)} variant="promoted">Save & Leave</Button>
+            <Button label="Leave Without Saving" onClick={() => close(false)} />
+            <Button label="Save & Leave" onClick={() => close(true)} variant="promoted" />
           </Box>
         </Box>
       ))
@@ -501,8 +501,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           Are you sure you want to delete this photo? This action cannot be undone.
         </Box>
         <Box display="flex" gap="1rem" justifyContent="center">
-          <Button label="Cancel" onClick={() => close(false)}>Cancel</Button>
-          <Button label="Delete" onClick={() => close(true)} variant="promoted">Delete</Button>
+          <Button label="Cancel" onClick={() => close(false)} />
+          <Button label="Delete" onClick={() => close(true)} variant="promoted" />
         </Box>
       </Box>
     ))

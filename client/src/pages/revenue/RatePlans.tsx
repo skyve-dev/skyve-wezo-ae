@@ -420,6 +420,7 @@ const RatePlans: React.FC = () => {
               <PropertySelector 
                 buttonSize={isMobile ? "small" : "medium"}
                 showDetails={false}
+                placeholder="Choose a property to manage rate plans"
               />
               <Button
                 label={isMobile ? "Add" : "Add Rate Plan"}

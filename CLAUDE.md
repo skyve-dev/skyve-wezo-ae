@@ -237,7 +237,30 @@ await openDialog<void>((close) => (
     <Button onClick={() => close()}>Continue</Button>
   </Box>
 ))
+
+#### Dialog Button Alignment Rule
+
+**CRITICAL**: All dialog buttons must be center-aligned using `justifyContent="center"`.
+
+```typescript
+// ✅ CORRECT - Always use center alignment
+<Box display="flex" gap="1rem" justifyContent="center">
+  <Button label="Cancel" onClick={() => close(false)} />
+  <Button label="Confirm" onClick={() => close(true)} variant="promoted" />
+</Box>
+
+// ❌ WRONG - Never use left alignment or other positioning
+<Box display="flex" gap="1rem">
+  <Button label="Cancel" onClick={() => close(false)} />
+  <Button label="Confirm" onClick={() => close(true)} variant="promoted" />
+</Box>
 ```
+
+**Key Rules:**
+1. Always use `justifyContent="center"` for dialog button containers
+2. Use `gap="1rem"` for consistent spacing between buttons
+3. Remove redundant button children when using `label` prop
+4. Apply to ALL dialogs: confirmation, success, error, and form dialogs
 
 #### Navigation Guards for Unsaved Changes
 

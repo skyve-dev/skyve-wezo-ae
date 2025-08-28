@@ -188,13 +188,43 @@ export const fetchAvailability = createAsyncThunk(
   'availability/fetchAvailability',
   async ({ propertyId, year, month, months = 3 }: { propertyId: string; year: number; month: number; months?: number }, { rejectWithValue }) => {
     try {
+      // Convert year/month/months to startDate/endDate format for API
+      const startDate = new Date(year, month - 1, 1) // month is 1-based, Date constructor expects 0-based
+      const endDate = new Date(year, month - 1 + months, 0) // Get last day of the end month
+      
       const params = new URLSearchParams()
-      params.append('year', year.toString())
-      params.append('month', month.toString())
-      params.append('months', months.toString())
-      const response = await api.get<{ availability: CalendarMonth[] }>(`/api/properties/${propertyId}/availability?${params}`)
-      return { propertyId, availability: response.availability }
+      params.append('startDate', startDate.toISOString().split('T')[0])
+      params.append('endDate', endDate.toISOString().split('T')[0])
+      
+      console.log('📡 Redux - fetchAvailability API call:')
+      console.log('- propertyId:', propertyId)
+      console.log('- startDate:', startDate.toISOString().split('T')[0])
+      console.log('- endDate:', endDate.toISOString().split('T')[0])
+      
+      // API returns { propertyId, startDate, endDate, availability: Availability[] }
+      const response = await api.get<{ 
+        propertyId: string
+        startDate: string 
+        endDate: string
+        availability: Array<{
+          id: string
+          propertyId: string
+          date: string
+          isAvailable: boolean
+          createdAt: string
+          updatedAt: string
+        }>
+      }>(`/api/properties/${propertyId}/availability?${params}`)
+      
+      console.log('📡 Redux - API response:', response)
+      
+      // Transform backend data to frontend structure
+      const transformedData = transformAvailabilityData(response.availability, year, month, months, propertyId)
+      console.log('📡 Redux - transformed data:', transformedData)
+      
+      return { propertyId, availability: transformedData }
     } catch (error: any) {
+      console.error('❌ Redux - fetchAvailability error:', error)
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch availability')
     }
   }
@@ -256,12 +286,44 @@ export const blockDates = createAsyncThunk(
     reason?: string 
   }, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>(`/api/properties/${propertyId}/availability/block`, {
-        dates,
+      console.log('📡 Redux - blockDates API call:')
+      console.log('- propertyId:', propertyId)
+      console.log('- dates:', dates)
+      
+      // Use bulk update API to set isAvailable: false
+      const updates = dates.map(date => ({
+        date,
+        isAvailable: false,
         reason: reason || 'Blocked by host'
+      }))
+      
+      const response = await api.put<{ 
+        message: string
+        updated: number
+        failed: any[]
+      }>(`/api/properties/${propertyId}/availability/bulk`, {
+        updates
       })
-      return { propertyId, updatedSlots: response.updatedSlots }
+      
+      console.log('📡 Redux - blockDates response:', response)
+      
+      // Transform successful updates back to AvailabilitySlot format for state update
+      const updatedSlots: AvailabilitySlot[] = dates.map(date => ({
+        id: `blocked-${date}`,
+        propertyId,
+        date,
+        status: 'blocked' as const,
+        blockReason: reason || 'Blocked by host',
+        ratePlans: [],
+        minimumStay: 1,
+        availableUnits: 0,
+        totalUnits: 1,
+        lastUpdated: new Date().toISOString()
+      }))
+      
+      return { propertyId, updatedSlots }
     } catch (error: any) {
+      console.error('❌ Redux - blockDates error:', error)
       return rejectWithValue(error.response?.data?.error || 'Failed to block dates')
     }
   }
@@ -271,11 +333,43 @@ export const unblockDates = createAsyncThunk(
   'availability/unblockDates',
   async ({ propertyId, dates }: { propertyId: string; dates: string[] }, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>(`/api/properties/${propertyId}/availability/unblock`, {
-        dates
+      console.log('📡 Redux - unblockDates API call:')
+      console.log('- propertyId:', propertyId)
+      console.log('- dates:', dates)
+      
+      // Use bulk update API to set isAvailable: true
+      const updates = dates.map(date => ({
+        date,
+        isAvailable: true
+      }))
+      
+      const response = await api.put<{ 
+        message: string
+        updated: number
+        failed: any[]
+      }>(`/api/properties/${propertyId}/availability/bulk`, {
+        updates
       })
-      return { propertyId, updatedSlots: response.updatedSlots }
+      
+      console.log('📡 Redux - unblockDates response:', response)
+      
+      // Transform successful updates back to AvailabilitySlot format for state update
+      const updatedSlots: AvailabilitySlot[] = dates.map(date => ({
+        id: `available-${date}`,
+        propertyId,
+        date,
+        status: 'available' as const,
+        blockReason: undefined,
+        ratePlans: [],
+        minimumStay: 1,
+        availableUnits: 1,
+        totalUnits: 1,
+        lastUpdated: new Date().toISOString()
+      }))
+      
+      return { propertyId, updatedSlots }
     } catch (error: any) {
+      console.error('❌ Redux - unblockDates error:', error)
       return rejectWithValue(error.response?.data?.error || 'Failed to unblock dates')
     }
   }
@@ -294,6 +388,84 @@ export const syncExternalCalendar = createAsyncThunk(
     }
   }
 )
+
+// Transform backend Availability data to frontend CalendarMonth structure
+const transformAvailabilityData = (
+  backendData: Array<{
+    id: string
+    propertyId: string
+    date: string
+    isAvailable: boolean
+    createdAt: string
+    updatedAt: string
+  }>, 
+  year: number, 
+  month: number, 
+  months: number,
+  fallbackPropertyId?: string
+): CalendarMonth[] => {
+  console.log('🔄 transformAvailabilityData called with:')
+  console.log('- backendData length:', backendData.length)
+  console.log('- year:', year, 'month:', month, 'months:', months)
+  console.log('- fallbackPropertyId:', fallbackPropertyId)
+  console.log('- backendData sample:', backendData[0])
+  
+  const calendarMonths: CalendarMonth[] = []
+  
+  // Get propertyId from first backend item or use fallback
+  const propertyId = backendData.length > 0 ? backendData[0].propertyId : (fallbackPropertyId || '')
+  console.log('- determined propertyId:', propertyId)
+  
+  // Generate all months needed
+  for (let monthOffset = 0; monthOffset < months; monthOffset++) {
+    const currentDate = new Date(year, month - 1 + monthOffset, 1)
+    const currentYear = currentDate.getFullYear()
+    const currentMonth = currentDate.getMonth() + 1
+    
+    // Get all dates in this month
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate()
+    const days: AvailabilitySlot[] = []
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateString = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+      
+      // Find backend data for this date
+      const backendAvailability = backendData.find(item => 
+        item.date.startsWith(dateString) || item.date === dateString
+      )
+      
+      // Transform to frontend format
+      const availabilitySlot: AvailabilitySlot = {
+        id: backendAvailability?.id || `temp-${dateString}`,
+        propertyId: propertyId, // Always ensure propertyId is set
+        date: dateString,
+        status: backendAvailability?.isAvailable !== false ? 'available' : 'blocked',
+        blockReason: backendAvailability?.isAvailable === false ? 'Blocked by host' : undefined,
+        ratePlans: [], // Empty for now, can be populated later if needed
+        minimumStay: 1,
+        maximumStay: undefined,
+        availableUnits: 1,
+        totalUnits: 1,
+        lastUpdated: backendAvailability?.updatedAt || new Date().toISOString()
+      }
+      
+      days.push(availabilitySlot)
+    }
+    
+    calendarMonths.push({
+      year: currentYear,
+      month: currentMonth,
+      days
+    })
+  }
+  
+  console.log('🔄 transformAvailabilityData result:')
+  console.log('- months generated:', calendarMonths.length)
+  console.log('- first month sample:', calendarMonths[0])
+  console.log('- first day sample:', calendarMonths[0]?.days[0])
+  
+  return calendarMonths
+}
 
 // Helper function to update calendar data
 const updateCalendarSlots = (calendar: CalendarMonth[], updatedSlots: AvailabilitySlot[]) => {
@@ -429,15 +601,21 @@ const availabilitySlice = createSlice({
       
       // Fetch availability
       .addCase(fetchAvailability.pending, (state) => {
+        console.log('🔄 Redux - fetchAvailability.pending')
         state.loading = true
         state.error = null
       })
       .addCase(fetchAvailability.fulfilled, (state, action) => {
+        console.log('✅ Redux - fetchAvailability.fulfilled')
+        console.log('- action.payload:', action.payload)
         state.loading = false
         const { propertyId, availability } = action.payload
         state.calendar[propertyId] = availability
+        console.log('- Updated state.calendar[propertyId]:', state.calendar[propertyId])
       })
       .addCase(fetchAvailability.rejected, (state, action) => {
+        console.log('❌ Redux - fetchAvailability.rejected')
+        console.log('- error:', action.payload)
         state.loading = false
         state.error = action.payload as string
       })

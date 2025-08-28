@@ -34,13 +34,25 @@ interface PropertySelectorProps {
    * Optional flag to show property details in button
    */
   showDetails?: boolean
+  
+  /**
+   * Optional label text above the selector
+   */
+  label?: string
+  
+  /**
+   * Optional flag to show selected property status
+   */
+  showSelectedStatus?: boolean
 }
 
 const PropertySelector: React.FC<PropertySelectorProps> = ({
   onPropertyChange,
-  placeholder = 'Select Property',
+  placeholder = 'Choose a property to manage availability',
   buttonSize = 'medium',
-  showDetails = true
+  showDetails = true,
+  label = 'Select Property',
+  showSelectedStatus = true
 }) => {
   const dispatch = useAppDispatch()
   const { properties, currentProperty, loading } = useAppSelector((state) => state.property)
@@ -192,7 +204,39 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
   }
   
   return (
-    <>
+    <Box>
+      {/* Label */}
+      {label && (
+        <Box marginBottom="0.5rem">
+          <label style={{ fontWeight: '500', fontSize: '0.875rem', color: '#374151' }}>
+            {label}
+          </label>
+        </Box>
+      )}
+      
+      {/* Selected Status Display */}
+      {showSelectedStatus && currentProperty && (
+        <Box 
+          marginBottom="0.75rem" 
+          padding="0.5rem 0.75rem" 
+          backgroundColor="#f0f9ff" 
+          borderRadius="0.375rem"
+          border="1px solid #e0f2fe"
+        >
+          <Box display="flex" alignItems="center" gap="0.5rem">
+            <FaBuilding style={{ color: '#0369a1', fontSize: '0.875rem' }} />
+            <span style={{ color: '#0369a1', fontSize: '0.875rem', fontWeight: '500' }}>
+              Working with property: {currentProperty.name}
+            </span>
+            {currentProperty.address?.city && (
+              <span style={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                • {currentProperty.address.city}{currentProperty.address.countryOrRegion ? `, ${currentProperty.address.countryOrRegion}` : ''}
+              </span>
+            )}
+          </Box>
+        </Box>
+      )}
+      
       {/* Trigger Button */}
       <Button
         onClick={() => setIsDrawerOpen(true)}
@@ -233,7 +277,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
               color: '#6b7280',
               fontSize: '0.875rem'
             }}>
-              Choose a property to manage its rate plans and settings
+              Choose a property to work with
             </p>
           </Box>
           
@@ -276,7 +320,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
           </Box>
         </Box>
       </SlidingDrawer>
-    </>
+    </Box>
   )
 }
 

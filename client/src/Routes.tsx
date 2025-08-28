@@ -20,7 +20,7 @@ import {
 import Dashboard from "@/pages/Dashboard";
 import PropertiesList from "@/pages/PropertiesList";
 import PropertyManager from "@/pages/property/PropertyManager";
-import Availability from "@/pages/Availability";
+import AvailabilityManager from "@/pages/availability/AvailabilityManager";
 import Reservations from "@/pages/Reservations";
 import Inbox from "@/pages/Inbox";
 import Reviews from "@/pages/Reviews";
@@ -75,7 +75,7 @@ export const routes = createRoutes({
         showInFooter: false
     },
     availability: {
-        component: Availability,
+        component: AvailabilityManager,
         icon: <FaCalendarAlt />,
         label: 'Availability',
         showInNav: true,
