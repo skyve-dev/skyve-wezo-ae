@@ -30,7 +30,7 @@ import LandingPage from "@/pages/LandingPage";
 
 // Revenue management pages
 import RatePlans from "@/pages/revenue/RatePlans";
-import PricingCalendar from "@/pages/revenue/PricingCalendar";
+import PricingCalendar from "@/pages/pricing/PricingCalendar";
 import RatePlanManager from "@/pages/revenue/RatePlanManager";
 
 export const routes = createRoutes({
