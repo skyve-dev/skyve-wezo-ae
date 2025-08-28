@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { FaInfoCircle } from 'react-icons/fa'
+import { 
+  FaInfoCircle, FaBuilding, FaTags, FaCalculator, FaLayerGroup, 
+  FaTag, FaDollarSign, FaSortNumericUp, FaUndo, FaBan, FaPercent
+} from 'react-icons/fa'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Input from '@/components/base/Input'
@@ -169,7 +172,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
           <Box marginBottom="2rem" color="#374151">
             Rate plan "{currentForm.name}" has been {isCreateMode ? 'created' : 'updated'} successfully.
           </Box>
-          <Box>
+          <Box display="flex" justifyContent="center">
             <button
               onClick={() => close()}
               style={{
@@ -437,7 +440,10 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
               {/* Property Selection */}
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                  Property *
+                  <Box display="flex" alignItems="center" gap="0.5rem">
+                    <FaBuilding style={{color: '#374151', fontSize: '0.875rem'}} />
+                    Property *
+                  </Box>
                 </label>
                 <SelectionPicker
                   data={properties}
@@ -446,11 +452,14 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                   onChange={handlePropertyChange}
                   disabled={!!isEditMode} // Can't change property in edit mode
                   renderItem={(property, _isSelected) => (
-                    <Box>
-                      <Box fontWeight="500">{property.name}</Box>
-                      <Box fontSize="0.875rem" color="#6b7280">
-                        {property.address?.city && `${property.address.city}, `}
-                        {property.address?.countryOrRegion || 'No address'}
+                    <Box display="flex" alignItems="center" gap="0.75rem">
+                      <FaBuilding style={{color: '#6b7280', fontSize: '1rem'}} />
+                      <Box>
+                        <Box fontWeight="500">{property.name}</Box>
+                        <Box fontSize="0.875rem" color="#6b7280">
+                          {property.address?.city && `${property.address.city}, `}
+                          {property.address?.countryOrRegion || 'No address'}
+                        </Box>
                       </Box>
                     </Box>
                   )}
@@ -465,6 +474,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
 
               <Input
                 label="Rate Plan Name *"
+                icon={FaTag}
                 value={currentForm.name}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
                 placeholder="e.g., Flexible Cancellation, Early Bird Special"
@@ -474,7 +484,10 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
 
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                  Rate Plan Type *
+                  <Box display="flex" alignItems="center" gap="0.5rem">
+                    <FaTags style={{color: '#374151', fontSize: '0.875rem'}} />
+                    Rate Plan Type *
+                  </Box>
                 </label>
                 <SelectionPicker
                   data={ratePlanTypes}
@@ -482,9 +495,16 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                   value={currentForm.type}
                   onChange={(value) => handleFieldChange('type', value)}
                   renderItem={(item, _isSelected) => (
-                    <Box>
-                      <Box fontWeight="500">{item.label}</Box>
-                      <Box fontSize="0.875rem" color="#6b7280">{item.description}</Box>
+                    <Box display="flex" alignItems="center" gap="0.75rem">
+                      {item.value === 'Flexible' ? (
+                        <FaUndo style={{color: '#10b981', fontSize: '1rem'}} />
+                      ) : (
+                        <FaBan style={{color: '#ef4444', fontSize: '1rem'}} />
+                      )}
+                      <Box>
+                        <Box fontWeight="500">{item.label}</Box>
+                        <Box fontSize="0.875rem" color="#6b7280">{item.description}</Box>
+                      </Box>
                     </Box>
                   )}
                 />
@@ -525,7 +545,10 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
               {/* Adjustment Type Selection */}
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                  Pricing Type *
+                  <Box display="flex" alignItems="center" gap="0.5rem">
+                    <FaCalculator style={{color: '#374151', fontSize: '0.875rem'}} />
+                    Pricing Type *
+                  </Box>
                 </label>
                 <SelectionPicker
                   data={[
@@ -537,9 +560,18 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                   value={currentForm.adjustmentType}
                   onChange={(value) => handleFieldChange('adjustmentType', value)}
                   renderItem={(item, _isSelected) => (
-                    <Box>
-                      <Box fontWeight="500">{item.label}</Box>
-                      <Box fontSize="0.875rem" color="#6b7280">{item.description}</Box>
+                    <Box display="flex" alignItems="center" gap="0.75rem">
+                      {item.value === 'FixedPrice' ? (
+                        <FaDollarSign style={{color: '#10b981', fontSize: '1rem'}} />
+                      ) : item.value === 'Percentage' ? (
+                        <FaPercent style={{color: '#3b82f6', fontSize: '1rem'}} />
+                      ) : (
+                        <FaTag style={{color: '#f59e0b', fontSize: '1rem'}} />
+                      )}
+                      <Box>
+                        <Box fontWeight="500">{item.label}</Box>
+                        <Box fontSize="0.875rem" color="#6b7280">{item.description}</Box>
+                      </Box>
                     </Box>
                   )}
                 />
@@ -549,7 +581,10 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
               {(currentForm.adjustmentType === 'Percentage' || currentForm.adjustmentType === 'FixedDiscount') && (
                 <Box>
                   <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                    Base Rate Plan *
+                    <Box display="flex" alignItems="center" gap="0.5rem">
+                      <FaLayerGroup style={{color: '#374151', fontSize: '0.875rem'}} />
+                      Base Rate Plan *
+                    </Box>
                   </label>
                   <SelectionPicker
                     data={ratePlans.filter(rp => rp.adjustmentType === 'FixedPrice' && rp.id !== currentForm.id)}
@@ -557,9 +592,12 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                     value={currentForm.baseRatePlanId || ''}
                     onChange={(value) => handleFieldChange('baseRatePlanId', value)}
                     renderItem={(ratePlan, _isSelected) => (
-                      <Box>
-                        <Box fontWeight="500">{ratePlan.name}</Box>
-                        <Box fontSize="0.875rem" color="#6b7280">Priority: {ratePlan.priority}</Box>
+                      <Box display="flex" alignItems="center" gap="0.75rem">
+                        <FaLayerGroup style={{color: '#6b7280', fontSize: '1rem'}} />
+                        <Box>
+                          <Box fontWeight="500">{ratePlan.name}</Box>
+                          <Box fontSize="0.875rem" color="#6b7280">Priority: {ratePlan.priority}</Box>
+                        </Box>
                       </Box>
                     )}
                   />
@@ -578,6 +616,8 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                 label={currentForm.adjustmentType === 'FixedPrice' ? 'Price per Night (AED)' : 
                        currentForm.adjustmentType === 'Percentage' ? 'Percentage Adjustment (%)' : 
                        'Discount Amount (AED)'}
+                icon={currentForm.adjustmentType === 'FixedPrice' ? FaDollarSign :
+                      currentForm.adjustmentType === 'Percentage' ? FaPercent : FaTag}
                 value={currentForm.adjustmentValue}
                 onChange={(value) => handleFieldChange('adjustmentValue', value)}
                 min={currentForm.adjustmentType === 'Percentage' ? -100 : 0}
@@ -611,6 +651,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
                 <NumberStepperInput
                   label="Priority"
+                  icon={FaSortNumericUp}
                   value={currentForm.priority}
                   onChange={(value) => handleFieldChange('priority', value)}
                   min={1}
