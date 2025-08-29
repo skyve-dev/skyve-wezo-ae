@@ -14,9 +14,12 @@ import {
   startCopyOperation
 } from '@/store/slices/priceSlice'
 import { RootState } from '@/store'
+import { ApiError } from '@/utils/api'
+import useErrorHandler from '@/hooks/useErrorHandler'
 
 const BulkEditControls: React.FC = () => {
   const dispatch = useAppDispatch()
+  const { showApiError, showSuccess } = useErrorHandler()
   const {
     selectedDates,
     bulkEditAmount,
@@ -36,6 +39,29 @@ const BulkEditControls: React.FC = () => {
   const handleApplyBulkEdit = async () => {
     if (selectedDates.length === 0 || !selectedRatePlan) return
     
+    // Check if any selected dates are in the past
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const pastDates = selectedDates.filter(dateStr => {
+      const date = new Date(dateStr)
+      date.setHours(0, 0, 0, 0)
+      return date < today
+    })
+    
+    if (pastDates.length > 0) {
+      await showApiError(
+        new ApiError(
+          'Cannot modify past dates',
+          400,
+          undefined,
+          `You have selected ${pastDates.length} past date${pastDates.length > 1 ? 's' : ''} which cannot be modified. Please select only future dates.`
+        ),
+        'Date Validation'
+      )
+      return
+    }
+    
     switch (operation) {
       case 'set':
         if (bulkEditAmount <= 0) return
@@ -51,10 +77,18 @@ const BulkEditControls: React.FC = () => {
             updates
           })).unwrap()
           
+          // Show success message
+          await showSuccess(`Successfully updated ${updates.length} price${updates.length > 1 ? 's' : ''}`)
+          
           // Clear selections after successful operation
           dispatch(clearDateSelections())
-        } catch (error) {
-          console.error('Bulk update failed:', error)
+        } catch (error: any) {
+          // Error is now a string from rejectWithValue
+          const errorMessage = typeof error === 'string' ? error : 'Failed to update prices'
+          await showApiError(
+            new ApiError('Bulk price update failed', 400, undefined, errorMessage),
+            'Bulk Price Update'
+          )
         }
         break
         

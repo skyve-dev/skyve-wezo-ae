@@ -390,7 +390,9 @@ export const fetchRatePlans = createAsyncThunk(
       // Handle both camelCase and snake_case responses
       return response.ratePlans || response.rate_plans || []
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch rate plans')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch rate plans'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -407,7 +409,9 @@ export const createRatePlanAsync = createAsyncThunk(
       }
       return ratePlan
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to create rate plan')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to create rate plan'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -424,7 +428,9 @@ export const updateRatePlanAsync = createAsyncThunk(
       }
       return ratePlan
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to update rate plan')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update rate plan'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -441,19 +447,18 @@ export const deleteRatePlanAsync = createAsyncThunk(
         ...response
       }
     } catch (error: any) {
-      // Check if it's a 409 Conflict (blocked deletion)
-      if (error.response?.status === 409) {
-        return rejectWithValue({
+      // For delete operations, we need to preserve special business logic
+      // but still pass the full ApiError for proper error dialog handling
+      if (error.status === 409) {
+        // Create enhanced error with business context for blocked deletions
+        error.businessContext = {
           type: 'blocked',
-          error: error.response.data.error,
-          details: error.response.data.details
-        })
+          details: error.errors || {}
+        }
       }
-      
-      return rejectWithValue({
-        type: 'error',
-        error: error.response?.data?.error || error.message || 'Failed to delete rate plan'
-      })
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to delete rate plan'
+      return rejectWithValue(errorMessage)
     }
   }
 )

@@ -43,6 +43,14 @@ const PricingCalendar: React.FC = () => {
   // Local state
   const [isInitialized, setIsInitialized] = useState(false)
   
+  // Helper function to format date without timezone issues
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  
   // Initialize date range to current month
   useEffect(() => {
     if (!dateRange.startDate) {
@@ -51,8 +59,8 @@ const PricingCalendar: React.FC = () => {
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
       
       dispatch(setDateRange({
-        startDate: startOfMonth.toISOString().split('T')[0],
-        endDate: endOfMonth.toISOString().split('T')[0]
+        startDate: formatDateLocal(startOfMonth),
+        endDate: formatDateLocal(endOfMonth)
       }))
     }
   }, [dispatch, dateRange.startDate])

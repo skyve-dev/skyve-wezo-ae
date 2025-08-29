@@ -143,7 +143,9 @@ export const fetchRatePlans = createAsyncThunk(
       const response = await api.get<{ ratePlans: RatePlan[] }>(`/api/properties/${propertyId}/rate-plans`)
       return response.ratePlans
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch rate plans')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch rate plans'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -155,7 +157,9 @@ export const createRatePlan = createAsyncThunk(
       const response = await api.post<{ ratePlan: RatePlan }>(`/api/properties/${propertyId}/rate-plans`, ratePlanData)
       return response.ratePlan
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to create rate plan')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to create rate plan'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -167,7 +171,9 @@ export const updateRatePlan = createAsyncThunk(
       const response = await api.patch<{ ratePlan: RatePlan }>(`/api/properties/${propertyId}/rate-plans/${ratePlanId}`, updates)
       return response.ratePlan
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update rate plan')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update rate plan'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -179,7 +185,9 @@ export const deleteRatePlan = createAsyncThunk(
       await api.delete(`/api/properties/${propertyId}/rate-plans/${ratePlanId}`)
       return ratePlanId
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete rate plan')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to delete rate plan'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -225,7 +233,9 @@ export const fetchAvailability = createAsyncThunk(
       return { propertyId, availability: transformedData }
     } catch (error: any) {
       console.error('❌ Redux - fetchAvailability error:', error)
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch availability')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch availability'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -245,7 +255,9 @@ export const updateAvailability = createAsyncThunk(
       const response = await api.patch<{ availability: AvailabilitySlot }>(`/api/properties/${propertyId}/availability/${date}`, updates)
       return { propertyId, availability: response.availability }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update availability')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update availability'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -257,7 +269,9 @@ export const bulkUpdatePrices = createAsyncThunk(
       const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>('/api/availability/bulk-update-prices', bulkUpdate)
       return { propertyId: bulkUpdate.propertyId, updatedSlots: response.updatedSlots }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to bulk update prices')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to bulk update prices'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -269,7 +283,9 @@ export const bulkUpdateAvailability = createAsyncThunk(
       const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>('/api/availability/bulk-update-availability', bulkUpdate)
       return { propertyId: bulkUpdate.propertyId, updatedSlots: response.updatedSlots }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to bulk update availability')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to bulk update availability'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -324,7 +340,9 @@ export const blockDates = createAsyncThunk(
       return { propertyId, updatedSlots }
     } catch (error: any) {
       console.error('❌ Redux - blockDates error:', error)
-      return rejectWithValue(error.response?.data?.error || 'Failed to block dates')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to block dates'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -370,7 +388,9 @@ export const unblockDates = createAsyncThunk(
       return { propertyId, updatedSlots }
     } catch (error: any) {
       console.error('❌ Redux - unblockDates error:', error)
-      return rejectWithValue(error.response?.data?.error || 'Failed to unblock dates')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to unblock dates'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -384,7 +404,9 @@ export const syncExternalCalendar = createAsyncThunk(
       })
       return { propertyId, syncedSlots: response.syncedSlots, syncStats: response.syncStats }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to sync external calendar')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to sync external calendar'
+      return rejectWithValue(errorMessage)
     }
   }
 )

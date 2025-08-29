@@ -78,11 +78,13 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                         onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
                         variant="minimal"
                         tabBarOnly={true}
+                        tabButtonMinWidth={'7rem'}
                         size="small"
                         fullWidth
                         centered
                         activeColor={theme.backgroundColor}
                         inactiveColor={'rgba(255,255,255,0.8)'}
+
                     />
                 )}
             </Box>

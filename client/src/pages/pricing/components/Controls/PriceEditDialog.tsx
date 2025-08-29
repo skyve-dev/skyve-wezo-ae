@@ -12,6 +12,8 @@ import {
   createOrUpdatePrice
 } from '@/store/slices/priceSlice'
 import { RootState } from '@/store'
+import { ApiError } from '@/utils/api'
+import useErrorHandler from '@/hooks/useErrorHandler'
 
 const PriceEditDialog: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -21,6 +23,7 @@ const PriceEditDialog: React.FC = () => {
   } = useSelector((state: RootState) => state.price)
   
   const { ratePlans } = useSelector((state: RootState) => state.ratePlan)
+  const { showApiError, showSuccess } = useErrorHandler()
   
   const [localAmount, setLocalAmount] = useState(priceEditForm.amount)
   const [hasChanges, setHasChanges] = useState(false)
@@ -49,6 +52,25 @@ const PriceEditDialog: React.FC = () => {
   const handleSave = async () => {
     if (!priceEditForm.date || !priceEditForm.ratePlanId || localAmount < 0) return
     
+    // Check if the date is in the past
+    const selectedDate = new Date(priceEditForm.date)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    selectedDate.setHours(0, 0, 0, 0)
+    
+    if (selectedDate < today) {
+      await showApiError(
+        new ApiError(
+          'Cannot modify past dates', 
+          400, 
+          undefined, 
+          'You cannot modify prices for dates that have already passed. Please select a future date.'
+        ),
+        'Date Validation'
+      )
+      return
+    }
+    
     try {
       await dispatch(createOrUpdatePrice({
         ratePlanId: priceEditForm.ratePlanId,
@@ -56,9 +78,17 @@ const PriceEditDialog: React.FC = () => {
         amount: localAmount
       })).unwrap()
       
+      // Show success message
+      await showSuccess('Price has been updated successfully.')
+      
       // Form will be closed automatically by the reducer
-    } catch (error) {
-      console.error('Failed to save price:', error)
+    } catch (error: any) {
+      // Error is now a string from rejectWithValue
+      const errorMessage = typeof error === 'string' ? error : 'Failed to update price'
+      await showApiError(
+        new ApiError('Price update failed', 400, undefined, errorMessage),
+        'Price Update'
+      )
     }
   }
   

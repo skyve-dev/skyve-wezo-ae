@@ -22,6 +22,8 @@ import {
   type CancellationPolicy
 } from '@/store/slices/ratePlanSlice'
 import { fetchMyProperties, setCurrentProperty } from '@/store/slices/propertySlice'
+import { ApiError } from '@/utils/api'
+import useErrorHandler from '@/hooks/useErrorHandler'
 import RatePlanManagerHeader from './RatePlanManagerHeader'
 import RatePlanManagerFooter from './RatePlanManagerFooter'
 import CancellationPolicyBuilder from '@/components/CancellationPolicyBuilder'
@@ -33,6 +35,7 @@ interface RatePlanManagerProps {
 
 const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   const dispatch = useAppDispatch()
+  const { showApiError, showSuccess } = useErrorHandler()
   const { currentParams } = useAppShell()
   const params = { ratePlanId, ...currentParams }
   
@@ -82,7 +85,14 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
           try {
             await dispatch(fetchRatePlans(propertyId)).unwrap()
           } catch (error) {
-            console.error('Failed to fetch rate plans:', error)
+            if (error instanceof ApiError) {
+              await showApiError(error, 'Rate Plans Loading')
+            } else {
+              await showApiError(
+                new ApiError('Failed to load rate plans', 500, undefined, 'Unable to fetch rate plans'),
+                'Rate Plans Loading'
+              )
+            }
           }
         }
         
@@ -164,36 +174,22 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
       await new Promise(resolve => setTimeout(resolve, 100))
       
       // Show success dialog
-      await openDialog<void>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
-            Success!
-          </Box>
-          <Box marginBottom="2rem" color="#374151">
-            Rate plan "{currentForm.name}" has been {isCreateMode ? 'created' : 'updated'} successfully.
-          </Box>
-          <Box display="flex" justifyContent="center">
-            <button
-              onClick={() => close()}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#059669',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer'
-              }}
-            >
-              Continue
-            </button>
-          </Box>
-        </Box>
-      ))
+      await showSuccess(`Rate plan "${currentForm.name}" has been ${isCreateMode ? 'created' : 'updated'} successfully.`)
       
       // Navigation guard should now be automatically removed since hasUnsavedChanges = false
       navigateTo('rate-plans', {})
     } catch (error) {
-      // Error dialog will be shown by Redux state
+      // Handle different types of errors
+      if (error instanceof ApiError) {
+        await showApiError(error, `Rate Plan ${isCreateMode ? 'Creation' : 'Update'}`)
+      } else if (typeof error === 'string') {
+        await showApiError(new ApiError(error, 400, undefined, error), `Rate Plan ${isCreateMode ? 'Creation' : 'Update'}`)
+      } else {
+        await showApiError(
+          new ApiError('An unexpected error occurred', 500, undefined, `Failed to ${isCreateMode ? 'create' : 'update'} rate plan`),
+          `Rate Plan ${isCreateMode ? 'Creation' : 'Update'}`
+        )
+      }
     }
   }
   

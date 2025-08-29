@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (existingUser) {
-      res.status(409).json({ error: 'Username or email already exists' });
+      res.status(409).json({ error: 'This username or email is already registered. Please use a different one or sign in to your existing account.' });
       return;
     }
 
@@ -49,7 +49,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Registration error:', error);
     logError(error as Error, req);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'We encountered an issue creating your account. Please try again in a moment.' });
   }
 };
 
@@ -65,14 +65,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!user) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'The username or password you entered is incorrect. Please check your credentials and try again.' });
       return;
     }
 
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'The username or password you entered is incorrect. Please check your credentials and try again.' });
       return;
     }
 
@@ -92,7 +92,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Login error:', error);
     logError(error as Error, req);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'We encountered an issue signing you in. Please try again in a moment.' });
   }
 };
 
@@ -129,7 +129,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
   } catch (error) {
     console.error('Password reset request error:', error);
     logError(error as Error, req);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'We encountered an issue processing your request. Please try again in a moment.' });
   }
 };
 
@@ -150,7 +150,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     });
 
     if (!user) {
-      res.status(400).json({ error: 'Invalid or expired reset token' });
+      res.status(400).json({ error: 'This password reset link is invalid or has expired. Please request a new password reset.' });
       return;
     }
 
@@ -170,7 +170,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     } catch (updateError: any) {
       // If user was deleted after we found them, treat as invalid token
       if (updateError.code === 'P2025') {
-        res.status(400).json({ error: 'Invalid or expired reset token' });
+        res.status(400).json({ error: 'This password reset link is invalid or has expired. Please request a new password reset.' });
         return;
       }
       throw updateError;
@@ -178,7 +178,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error('Password reset error:', error);
     logError(error as Error, req);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'We encountered an issue processing your request. Please try again in a moment.' });
   }
 };
 
@@ -186,7 +186,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
   logControllerAction('AuthController', 'getProfile', req);
   try {
     if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'You need to be signed in to access this feature. Please sign in and try again.' });
       return;
     }
 
@@ -204,7 +204,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     });
 
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'We could not find your account information. Please sign in again.' });
       return;
     }
 
@@ -212,7 +212,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
   } catch (error) {
     console.error('Get profile error:', error);
     logError(error as Error, req);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'We encountered an issue processing your request. Please try again in a moment.' });
   }
 };
 
@@ -220,7 +220,7 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
   logControllerAction('AuthController', 'updateUserRole', req);
   try {
     if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'You need to be signed in to access this feature. Please sign in and try again.' });
       return;
     }
 
@@ -228,7 +228,7 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
 
     // Validate role
     if (!['Tenant', 'HomeOwner', 'Manager'].includes(role)) {
-      res.status(400).json({ error: 'Invalid role' });
+      res.status(400).json({ error: 'The selected account type is not valid. Please choose Tenant, HomeOwner, or Manager.' });
       return;
     }
 
@@ -241,7 +241,7 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
       });
 
       if (propertyCount === 0) {
-        res.status(400).json({ error: 'Can only upgrade to HomeOwner role after creating a property' });
+        res.status(400).json({ error: 'To become a HomeOwner, you need to add at least one property first. Please add a property and try again.' });
         return;
       }
     }
@@ -271,6 +271,6 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
   } catch (error) {
     console.error('Update role error:', error);
     logError(error as Error, req);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'We encountered an issue processing your request. Please try again in a moment.' });
   }
 };

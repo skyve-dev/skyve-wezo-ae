@@ -62,9 +62,21 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   const isMobile = window.innerWidth < 768
   const isSelected = selectedDates.includes(day.dateString)
   
+  // Check if the date is in the past
+  const isPastDate = () => {
+    const dayDate = new Date(day.dateString)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    dayDate.setHours(0, 0, 0, 0)
+    return dayDate < today
+  }
+  
+  const isDisabled = isPastDate()
+  
   // Handle day click
   const handleDayClick = () => {
     if (!day.isCurrentMonth) return
+    if (isDisabled) return // Prevent clicks on past dates
     
     if (bulkEditMode) {
       dispatch(toggleDateSelection(day.dateString))
@@ -102,6 +114,8 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   const handlePriceClick = (e: React.MouseEvent, priceData: PriceData) => {
     e.stopPropagation()
     
+    if (isDisabled) return // Prevent editing past dates
+    
     if (!bulkEditMode) {
       dispatch(openPriceEditForm({
         date: day.dateString,
@@ -114,6 +128,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   // Get background color based on state
   const getBackgroundColor = () => {
     if (!day.isCurrentMonth) return '#f9fafb'
+    if (isDisabled) return '#f3f4f6' // Gray background for past dates
     if (isSelected && bulkEditMode) return '#dbeafe'
     if (day.isToday) return '#eff6ff'
     if (day.isWeekend) return '#fffbeb'
@@ -140,8 +155,8 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
       minHeight={isMobile ? '80px' : '120px'}
       backgroundColor={getBackgroundColor()}
       border={`2px solid ${getBorderColor()}`}
-      cursor={day.isCurrentMonth ? 'pointer' : 'default'}
-      opacity={day.isCurrentMonth ? 1 : 0.5}
+      cursor={day.isCurrentMonth && !isDisabled ? 'pointer' : 'not-allowed'}
+      opacity={day.isCurrentMonth && !isDisabled ? 1 : 0.5}
       onClick={handleDayClick}
       padding="0.5rem"
       position="relative"
@@ -159,14 +174,14 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
           style={{ 
             fontWeight: day.isToday ? '600' : '500',
             fontSize: isMobile ? '0.875rem' : '1rem',
-            color: day.isToday ? '#1d4ed8' : (day.isCurrentMonth ? '#374151' : '#9ca3af')
+            color: isDisabled ? '#9ca3af' : (day.isToday ? '#1d4ed8' : (day.isCurrentMonth ? '#374151' : '#9ca3af'))
           }}
         >
           {day.date.getDate()}
         </span>
         
         {/* Bulk Edit Selection Indicator */}
-        {bulkEditMode && day.isCurrentMonth && (
+        {bulkEditMode && day.isCurrentMonth && !isDisabled && (
           <Box
             width="16px"
             height="16px"
@@ -191,8 +206,20 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         )}
       </Box>
       
+      {/* Past Date Indicator */}
+      {isDisabled && (
+        <Box 
+          textAlign="center" 
+          fontSize="0.625rem" 
+          color="#9ca3af"
+          marginTop="0.5rem"
+        >
+          Past Date
+        </Box>
+      )}
+      
       {/* Price Items */}
-      {day.isCurrentMonth && (
+      {day.isCurrentMonth && !isDisabled && (
         <Box display="flex" flexDirection="column" gap="0.25rem" flex="1">
           {prices.length === 0 && selectedRatePlans.length > 0 && (
             <Box 

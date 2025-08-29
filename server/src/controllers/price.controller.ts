@@ -108,8 +108,16 @@ export const createPrice = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    console.log('=== PRICE CONTROLLER DEBUG ===');
+    console.log('Raw date from request:', date);
+    console.log('Raw amount from request:', amount);
+    
     // Parse and validate date
     const parsedDate = new Date(date);
+    console.log('Parsed date:', parsedDate);
+    console.log('Parsed date ISO:', parsedDate.toISOString());
+    console.log('Is date valid:', !isNaN(parsedDate.getTime()));
+    
     if (isNaN(parsedDate.getTime())) {
       res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD format' });
       return;

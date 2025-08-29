@@ -21,21 +21,31 @@ const initialState: AuthState = {
 // Async thunks for API calls
 export const login = createAsyncThunk(
   'auth/login',
-  async (credentials: LoginRequest) => {
-    const response = await apiClient.login(credentials)
-    apiClient.setToken(response.token)
-    localStorage.setItem('authToken', response.token)
-    return response
+  async (credentials: LoginRequest, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.login(credentials)
+      apiClient.setToken(response.token)
+      localStorage.setItem('authToken', response.token)
+      return response
+    } catch (error: any) {
+      // Pass the user-friendly message from the server
+      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Unable to sign in. Please check your credentials and try again.')
+    }
   }
 )
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (userData: RegisterRequest) => {
-    const response = await apiClient.register(userData)
-    apiClient.setToken(response.token)
-    localStorage.setItem('authToken', response.token)
-    return response
+  async (userData: RegisterRequest, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.register(userData)
+      apiClient.setToken(response.token)
+      localStorage.setItem('authToken', response.token)
+      return response
+    } catch (error: any) {
+      // Pass the user-friendly message from the server
+      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Unable to create your account. Please try again.')
+    }
   }
 )
 
@@ -51,19 +61,25 @@ export const checkAuth = createAsyncThunk(
       apiClient.setToken(token)
       const user = await apiClient.getProfile()
       return { user, token }
-    } catch (error) {
+    } catch (error: any) {
       localStorage.removeItem('authToken')
       apiClient.setToken(null)
-      return rejectWithValue('Invalid token')
+      // For token validation, a simple message is appropriate
+      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Invalid token')
     }
   }
 )
 
 export const requestPasswordReset = createAsyncThunk(
   'auth/requestPasswordReset',
-  async (data: PasswordResetRequest) => {
-    await apiClient.requestPasswordReset(data)
-    return { success: true }
+  async (data: PasswordResetRequest, { rejectWithValue }) => {
+    try {
+      await apiClient.requestPasswordReset(data)
+      return { success: true }
+    } catch (error: any) {
+      // Pass the user-friendly message from the server
+      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Unable to process password reset request. Please try again.')
+    }
   }
 )
 
@@ -99,7 +115,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || 'Login failed'
+        state.error = action.payload as string || 'Unable to sign in. Please check your credentials and try again.'
         state.isAuthenticated = false
       })
     
@@ -118,7 +134,7 @@ const authSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || 'Registration failed'
+        state.error = action.payload as string || 'Unable to create your account. Please try again.'
         state.isAuthenticated = false
       })
     
@@ -153,7 +169,7 @@ const authSlice = createSlice({
       })
       .addCase(requestPasswordReset.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message || 'Password reset request failed'
+        state.error = action.payload as string || 'Unable to process password reset request. Please try again.'
       })
   },
 })

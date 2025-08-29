@@ -13,10 +13,43 @@ class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public errors?: Record<string, string[]>
+    public errors?: Record<string, string[]>,
+    public serverMessage?: string,
+    public endpoint?: string
   ) {
     super(message);
     this.name = 'ApiError';
+  }
+
+  /**
+   * Get user-friendly error message
+   */
+  getUserMessage(): string {
+    // Return server message if available, otherwise fallback to generic message
+    return this.serverMessage || this.message;
+  }
+
+  /**
+   * Check if this is a specific type of error
+   */
+  isValidationError(): boolean {
+    return this.status === 400;
+  }
+
+  isAuthError(): boolean {
+    return this.status === 401;
+  }
+
+  isPermissionError(): boolean {
+    return this.status === 403;
+  }
+
+  isNotFoundError(): boolean {
+    return this.status === 404;
+  }
+
+  isServerError(): boolean {
+    return this.status >= 500;
   }
 }
 
@@ -60,27 +93,95 @@ class ApiClient {
     }
     // Following is the request headers requested by ngrok
     headers['ngrok-skip-browser-warning'] = `true`;
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
 
-    let data;
     try {
-      data = await response.json();
-    } catch {
-      data = {};
-    }
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
 
-    if (!response.ok) {
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      if (!response.ok) {
+        // Enhanced error parsing to handle multiple server response formats
+        const serverMessage = this.extractServerMessage(data, response.status);
+        const fallbackMessage = `HTTP error! status: ${response.status}`;
+        
+        throw new ApiError(
+          fallbackMessage,
+          response.status,
+          data.errors,
+          serverMessage,
+          endpoint
+        );
+      }
+
+      return data;
+    } catch (error) {
+      // Handle network errors (no response from server)
+      if (error instanceof ApiError) {
+        throw error; // Re-throw API errors as-is
+      }
+      
+      // Network or other errors
       throw new ApiError(
-        data.message || `HTTP error! status: ${response.status}`,
-        response.status,
-        data.errors
+        'Network error occurred',
+        0,
+        undefined,
+        'Unable to connect to server. Please check your connection.',
+        endpoint
       );
     }
+  }
 
-    return data;
+  /**
+   * Extract server error message from different response formats
+   */
+  private extractServerMessage(data: any, status: number): string {
+    // Handle different server response formats
+    if (typeof data === 'string') {
+      return data;
+    }
+    
+    if (data && typeof data === 'object') {
+      // Common formats: {error: "message"}, {message: "error"}, {errors: [...]}
+      const message = data.error || data.message || data.msg;
+      if (message) {
+        return message;
+      }
+      
+      // Handle validation errors array
+      if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        return data.errors.join(', ');
+      }
+      
+      // Handle validation errors object
+      if (data.errors && typeof data.errors === 'object') {
+        const errorMessages = Object.values(data.errors).flat();
+        if (errorMessages.length > 0) {
+          return errorMessages.join(', ');
+        }
+      }
+    }
+    
+    // Fallback messages based on status code
+    switch (status) {
+      case 400: return 'Invalid request data';
+      case 401: return 'Authentication required';
+      case 403: return 'Permission denied';
+      case 404: return 'Resource not found';
+      case 409: return 'Resource conflict';
+      case 422: return 'Validation failed';
+      case 500: return 'Internal server error';
+      case 502: return 'Server temporarily unavailable';
+      case 503: return 'Service unavailable';
+      default: return 'An error occurred';
+    }
   }
 
   // Authentication endpoints

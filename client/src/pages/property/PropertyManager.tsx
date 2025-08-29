@@ -19,6 +19,8 @@ import {
   resetFormToOriginal,
   fetchPropertyById
 } from '@/store/slices/propertySlice'
+import { ApiError } from '@/utils/api'
+import useErrorHandler from '@/hooks/useErrorHandler'
 import PropertyManagerHeader from './PropertyManagerHeader'
 import PropertyManagerFooter from './PropertyManagerFooter'
 import { Address, Bed, Room } from '@/types/property'
@@ -62,6 +64,7 @@ function MapClickHandler({ onLocationSelect }: { onLocationSelect: (lat: number,
 
 const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   const dispatch = useAppDispatch()
+  const { showApiError, showSuccess } = useErrorHandler()
   const { currentParams } = useAppShell()
   const params = { propertyId, ...currentParams }
   
@@ -174,35 +177,21 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
       await new Promise(resolve => setTimeout(resolve, 100))
       
       // Show success dialog
-      await openDialog<void>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
-            Success!
-          </Box>
-          <Box marginBottom="2rem">
-            Property has been {isCreateMode ? 'created' : 'updated'} successfully.
-          </Box>
-          <Box display="flex" justifyContent="center">
-            <Button label="Continue" onClick={() => close()} variant="promoted" />
-          </Box>
-        </Box>
-      ))
+      await showSuccess(`Property has been ${isCreateMode ? 'created' : 'updated'} successfully.`)
       
       navigateTo('properties', {})
     } catch (error: any) {
-      await openDialog<void>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-            Error
-          </Box>
-          <Box marginBottom="2rem">
-            Failed to {isCreateMode ? 'create' : 'update'} property: {error.message || error}
-          </Box>
-          <Box display="flex" justifyContent="center">
-            <Button label="OK" onClick={() => close()} />
-          </Box>
-        </Box>
-      ))
+      // Handle different types of errors
+      if (error instanceof ApiError) {
+        await showApiError(error, `Property ${isCreateMode ? 'Creation' : 'Update'}`)
+      } else if (typeof error === 'string') {
+        await showApiError(new ApiError(error, 400, undefined, error), `Property ${isCreateMode ? 'Creation' : 'Update'}`)
+      } else {
+        await showApiError(
+          new ApiError('An unexpected error occurred', 500, undefined, `Failed to ${isCreateMode ? 'create' : 'update'} property`),
+          `Property ${isCreateMode ? 'Creation' : 'Update'}`
+        )
+      }
     }
   }
   

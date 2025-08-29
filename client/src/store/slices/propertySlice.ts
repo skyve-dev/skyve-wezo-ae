@@ -187,7 +187,9 @@ export const fetchMyProperties = createAsyncThunk(
       const response = await api.get<{ properties: any[] }>('/api/properties/my-properties')
       return response.properties.map(transformServerPropertyData)
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch properties')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch properties'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -199,7 +201,9 @@ export const fetchPropertyById = createAsyncThunk(
       const response = await api.get<{ property: any }>(`/api/properties/${propertyId}`)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch property')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch property'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -213,21 +217,16 @@ export const createProperty = createAsyncThunk(
       const serverProperty = transformServerPropertyData(response.property)
       return serverProperty
     } catch (error: any) {
-      
-      // Handle field-specific validation errors
-      if (error.response?.data?.errors) {
-        return rejectWithValue({
+      // Enhance ApiError with validation context for property creation
+      if (error.errors && Object.keys(error.errors).length > 0) {
+        error.validationContext = {
           type: 'validation',
-          errors: error.response.data.errors,
           message: 'Please fix the following validation errors:'
-        })
+        }
       }
-      // Handle general errors
-      console.log('❌ Redux createProperty: General error, returning rejectWithValue')
-      return rejectWithValue({
-        type: 'general',
-        message: error.response?.data?.error || 'Failed to create property'
-      })
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to create property'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -244,19 +243,16 @@ export const updateProperty = createAsyncThunk(
       const response = await api.put<{ property: any }>(`/api/properties/${propertyId}`, dataToSend)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
-      // Handle field-specific validation errors
-      if (error.response?.data?.errors) {
-        return rejectWithValue({
+      // Enhance ApiError with validation context for property updates
+      if (error.errors && Object.keys(error.errors).length > 0) {
+        error.validationContext = {
           type: 'validation',
-          errors: error.response.data.errors,
           message: 'Please fix the following validation errors:'
-        })
+        }
       }
-      // Handle general errors
-      return rejectWithValue({
-        type: 'general',
-        message: error.response?.data?.error || 'Failed to update property'
-      })
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update property'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -268,7 +264,9 @@ export const deleteProperty = createAsyncThunk(
       await api.delete(`/api/properties/${propertyId}`)
       return propertyId
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete property')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to delete property'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -285,7 +283,9 @@ export const uploadPropertyPhotos = createAsyncThunk(
       const response = await api.post<{ photos: Photo[] }>(`/api/properties/${propertyId}/photos`, formData, {})
       return response.photos
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to upload photos')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to upload photos'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -297,7 +297,9 @@ export const deletePropertyPhoto = createAsyncThunk(
       await api.delete(`/api/properties/${propertyId}/photos/${photoId}`)
       return photoId
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete photo')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to delete photo'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -312,7 +314,9 @@ export const createPropertyAsync = createAsyncThunk(
       const response = await api.post<{ property: any }>('/api/properties', transformedData)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create property')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to create property'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -326,7 +330,9 @@ export const updatePropertyAsync = createAsyncThunk(
       const response = await api.put<{ property: any }>(`/api/properties/${params.propertyId}`, transformedData)
       return transformServerPropertyData(response.property)
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update property')
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update property'
+      return rejectWithValue(errorMessage)
     }
   }
 )

@@ -39,7 +39,7 @@ export const routes = createRoutes({
         icon: <FaHome/>,
         label: 'Home',
         showInNav: true,
-        showInHeader: true,
+        showInHeader: false,
         showInFooter: true
     },
     dashboard: {
@@ -87,7 +87,7 @@ export const routes = createRoutes({
         icon: <FaClipboardList />,
         label: 'Reservations',
         showInNav: true,
-        showInHeader: true,
+        showInHeader: false,
         showInFooter: true
     },
     inbox: {
@@ -95,7 +95,7 @@ export const routes = createRoutes({
         icon: <FaEnvelope />,
         label: 'Messages',
         showInNav: true,
-        showInHeader: true,
+        showInHeader: false,
         showInFooter: false
     },
     reviews: {
@@ -133,7 +133,7 @@ export const routes = createRoutes({
     'pricing-calendar': {
         component: PricingCalendar,
         icon: <FaDollarSign />,
-        label: 'Pricing Calendar',
+        label: 'Pricing',
         showInNav: true,
         showInHeader: true,
         showInFooter: false

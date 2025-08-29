@@ -10,6 +10,7 @@ import availabilityReducer from './slices/availabilitySlice'
 import dashboardReducer from './slices/dashboardSlice'
 import ratePlanReducer from './slices/ratePlanSlice'
 import priceReducer from './slices/priceSlice'
+import errorReducer from './slices/errorSlice'
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     ratePlan: ratePlanReducer,
     price: priceReducer,
+    error: errorReducer,
   },
 })
 

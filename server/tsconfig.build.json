@@ -20,11 +20,8 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "types": ["node", "jest"],
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "src/types/*.d.ts"],
-  "files": ["src/types/index.d.ts"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "src/tests/**/*"]
 }

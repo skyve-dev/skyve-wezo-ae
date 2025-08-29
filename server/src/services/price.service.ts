@@ -114,6 +114,29 @@ export class PriceService {
       throw new Error('Cannot set prices for past dates');
     }
 
+    console.log('=== PRICE UPSERT DEBUG ===');
+    console.log('Rate Plan ID:', ratePlanId);
+    console.log('Date received:', data.date);
+    console.log('Date type:', typeof data.date);
+    console.log('Date ISO:', data.date.toISOString());
+    console.log('Amount:', data.amount);
+
+    // Check if price already exists
+    const existingPrice = await prisma.price.findUnique({
+      where: {
+        ratePlanId_date: {
+          ratePlanId,
+          date: data.date,
+        },
+      },
+    });
+
+    console.log('Existing price found:', existingPrice ? {
+      id: existingPrice.id,
+      amount: existingPrice.amount.toString(),
+      date: existingPrice.date.toISOString()
+    } : null);
+
     // Upsert price (create or update if exists)
     const price = await prisma.price.upsert({
       where: {
@@ -147,6 +170,14 @@ export class PriceService {
         }
       }
     });
+
+    console.log('Upsert result:', {
+      id: price.id,
+      amount: price.amount.toString(),
+      date: price.date.toISOString(),
+      operation: existingPrice ? 'UPDATE' : 'CREATE'
+    });
+    console.log('=== END PRICE UPSERT DEBUG ===');
 
     return {
       id: price.id,

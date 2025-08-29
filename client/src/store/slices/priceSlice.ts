@@ -149,6 +149,9 @@ const priceSlice = createSlice({
     },
     
     setDateRange: (state, action: PayloadAction<{ startDate: string | null; endDate: string | null }>) => {
+      console.log('=== REDUX - setDateRange action ===')
+      console.log('Previous dateRange:', state.dateRange)
+      console.log('New dateRange:', action.payload)
       state.dateRange = action.payload
     },
     
@@ -515,7 +518,10 @@ export const fetchPricesForRatePlan = createAsyncThunk(
         prices: response.prices || []
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch prices')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to perform operation'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -532,7 +538,10 @@ export const createOrUpdatePrice = createAsyncThunk(
       
       return response.price
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to save price')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update price'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -551,7 +560,10 @@ export const bulkUpdatePrices = createAsyncThunk(
         prices: response.prices || []
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to bulk update prices')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to perform operation'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -572,7 +584,10 @@ export const fetchPriceStatistics = createAsyncThunk(
         statistics: response.statistics
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch price statistics')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to perform operation'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -589,7 +604,10 @@ export const fetchPriceGaps = createAsyncThunk(
         gaps: response.gaps || []
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch price gaps')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to perform operation'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -614,7 +632,10 @@ export const copyPrices = createAsyncThunk(
         copiedCount: response.copiedCount
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to copy prices')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to perform operation'
+      return rejectWithValue(errorMessage)
     }
   }
 )
@@ -627,7 +648,10 @@ export const deletePriceAsync = createAsyncThunk(
       await api.delete(`/api/prices/${params.priceId}`)
       return params
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to delete price')
+      // Serialize the error for Redux state
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to perform operation'
+      return rejectWithValue(errorMessage)
     }
   }
 )

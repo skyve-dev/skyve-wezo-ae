@@ -36,15 +36,36 @@ const CalendarControls: React.FC = () => {
   const currentDate = dateRange.startDate ? new Date(dateRange.startDate) : new Date()
   const currentMonth = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   
+  console.log('=== CALENDAR CONTROLS RENDER ===')
+  console.log('dateRange from Redux:', dateRange)
+  console.log('currentDate calculated:', currentDate)
+  console.log('currentMonth display:', currentMonth)
+  
+  // Helper function to format date without timezone issues
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  
   // Navigation handlers
   const handlePreviousMonth = () => {
+    console.log('=== PREVIOUS MONTH CLICKED ===')
+    console.log('Current date:', currentDate)
+    console.log('Current dateRange:', dateRange)
+    
     const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
     const endOfMonth = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0)
     
     const newRange = {
-      startDate: prevMonth.toISOString().split('T')[0],
-      endDate: endOfMonth.toISOString().split('T')[0]
+      startDate: formatDateLocal(prevMonth),
+      endDate: formatDateLocal(endOfMonth)
     }
+    
+    console.log('New range calculated:', newRange)
+    console.log('Previous month:', prevMonth)
+    console.log('End of month:', endOfMonth)
     
     dispatch(setDateRange(newRange))
     
@@ -59,13 +80,21 @@ const CalendarControls: React.FC = () => {
   }
   
   const handleNextMonth = () => {
+    console.log('=== NEXT MONTH CLICKED ===')
+    console.log('Current date:', currentDate)
+    console.log('Current dateRange:', dateRange)
+    
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
-    const endOfMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 2, 0)
+    const endOfMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0)
     
     const newRange = {
-      startDate: nextMonth.toISOString().split('T')[0],
-      endDate: endOfMonth.toISOString().split('T')[0]
+      startDate: formatDateLocal(nextMonth),
+      endDate: formatDateLocal(endOfMonth)
     }
+    
+    console.log('New range calculated:', newRange)
+    console.log('Next month:', nextMonth)
+    console.log('End of month:', endOfMonth)
     
     dispatch(setDateRange(newRange))
     

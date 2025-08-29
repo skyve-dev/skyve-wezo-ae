@@ -66,6 +66,14 @@ export interface TabProps {
     variant?: 'default' | 'pills' | 'underline' | 'minimal'
 
     /**
+     * Represents the minimum width for a tab button component.
+     * This property is optional and corresponds to the 'minWidth' property
+     * defined in CSS, allowing the customization of the minimum width
+     * for the tab button's styling.
+     */
+    tabButtonMinWidth? : CSSProperties['minWidth']
+
+    /**
      * Whether tabs should take full width
      */
     fullWidth?: boolean
@@ -730,7 +738,8 @@ const Tab: React.FC<TabProps> = ({
                                      iconLayout = 'row',
                                      iconSize,
                                      fontSize,
-                                     tabBarStyle
+                                     tabBarStyle,
+                                     tabButtonMinWidth
                                  }) => {
     const theme = useTheme()
 
@@ -979,6 +988,7 @@ const Tab: React.FC<TabProps> = ({
                             onKeyDown={(e) => handleKeyDown(e, item.id)}
                             style={getVariantStyles(isActive, !!item.disabled)}
                             flex={fullWidth ? 1 : 'none'}
+                            minWidth={tabButtonMinWidth}
                             whileHover={!item.disabled ? {
                                 backgroundColor: variant === 'pills'
                                     ? (isActive ? resolvedActiveColor : `${resolvedActiveColor}10`)
