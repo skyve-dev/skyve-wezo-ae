@@ -146,17 +146,54 @@ const CalendarView: React.FC = () => {
         // These need a base rate plan to calculate from
         if (ratePlan.baseRatePlanId && ratePlan.adjustmentValue !== undefined) {
           const baseRatePlan = selectedRatePlans.find(rp => rp.id === ratePlan.baseRatePlanId)
+          
+          // Debug logging for base rate plan resolution
+          if (dateString === '2025-08-30') {
+            console.log('🔍 BASE RATE PLAN DEBUG:', {
+              weeklyPlanName: ratePlan.name,
+              baseRatePlanId: ratePlan.baseRatePlanId,
+              baseRatePlanFound: !!baseRatePlan,
+              baseRatePlanName: baseRatePlan?.name,
+              selectedRatePlanIds: selectedRatePlans.map(rp => ({ id: rp.id, name: rp.name }))
+            })
+          }
+          
           if (baseRatePlan) {
             // Get base price from the base rate plan
             const baseRatePlanPrices = pricesByRatePlan[baseRatePlan.id] || []
             const basePriceForDate = baseRatePlanPrices.find(p => normalizeDate(p.date) === dateString)
             
             let baseAmount = basePriceForDate?.amount || baseRatePlan.adjustmentValue || 0
+            
+            // Debug logging for base price resolution
+            if (dateString === '2025-08-30') {
+              console.log('🔍 BASE PRICE DEBUG:', {
+                baseRatePlanName: baseRatePlan.name,
+                hasCustomPriceForDate: !!basePriceForDate,
+                customPrice: basePriceForDate?.amount,
+                baseRatePlanAdjustmentValue: baseRatePlan.adjustmentValue,
+                finalBaseAmount: baseAmount
+              })
+            }
             let calculatedAmount = baseAmount
             
             if (ratePlan.adjustmentType === 'Percentage') {
-              // Apply percentage adjustment (e.g., 85% of base price for weekly discount)
-              calculatedAmount = baseAmount * (ratePlan.adjustmentValue / 100)
+              // Apply percentage adjustment 
+              // Positive values: +10% = 110% of base price (baseAmount * 1.10)
+              // Negative values: -15% = 85% of base price (baseAmount * 0.85)
+              calculatedAmount = baseAmount * (1 + ratePlan.adjustmentValue / 100)
+              
+              // Debug logging for percentage calculations
+              if (dateString === '2025-08-30') {
+                console.log('🔍 PERCENTAGE CALCULATION DEBUG:', {
+                  ratePlanName: ratePlan.name,
+                  adjustmentValue: ratePlan.adjustmentValue,
+                  baseAmount,
+                  calculationFormula: `${baseAmount} * (1 + ${ratePlan.adjustmentValue}/100) = ${baseAmount} * ${(1 + ratePlan.adjustmentValue / 100)}`,
+                  calculatedAmount,
+                  willShow: calculatedAmount > 0
+                })
+              }
             } else if (ratePlan.adjustmentType === 'FixedDiscount') {
               // Apply fixed discount (e.g., base price minus fixed amount)
               calculatedAmount = baseAmount - ratePlan.adjustmentValue
