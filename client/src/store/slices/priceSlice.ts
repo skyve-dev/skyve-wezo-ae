@@ -149,9 +149,6 @@ const priceSlice = createSlice({
     },
     
     setDateRange: (state, action: PayloadAction<{ startDate: string | null; endDate: string | null }>) => {
-      console.log('=== REDUX - setDateRange action ===')
-      console.log('Previous dateRange:', state.dateRange)
-      console.log('New dateRange:', action.payload)
       state.dateRange = action.payload
     },
     

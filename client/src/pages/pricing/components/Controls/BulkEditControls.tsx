@@ -105,7 +105,7 @@ const BulkEditControls: React.FC = () => {
       case 'clear':
         // Clear prices for selected dates
         // This would require a delete operation
-        console.log('Clear operation not yet implemented')
+        // Clear operation implementation would go here
         break
     }
   }

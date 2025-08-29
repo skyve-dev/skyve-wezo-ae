@@ -23,26 +23,18 @@ const CalendarView: React.FC = () => {
   
   // Monitor dateRange changes
   useEffect(() => {
-    console.log('=== CALENDAR VIEW - dateRange changed ===')
-    console.log('New dateRange:', dateRange)
+    // dateRange changed - component will re-render
   }, [dateRange])
   
   // Generate calendar days for current month
   const calendarDays = useMemo(() => {
-    console.log('=== CALENDAR VIEW - GENERATING DAYS ===')
-    console.log('dateRange:', dateRange)
-    
     if (!dateRange.startDate || !dateRange.endDate) {
-      console.log('No date range, returning empty array')
       return []
     }
     
     const startDate = new Date(dateRange.startDate)
     const year = startDate.getFullYear()
     const month = startDate.getMonth()
-    
-    console.log('Start date:', startDate)
-    console.log('Year:', year, 'Month:', month)
     
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
@@ -87,10 +79,6 @@ const CalendarView: React.FC = () => {
         isWeekend: date.getDay() === 0 || date.getDay() === 6
       })
     }
-    
-    console.log('Total days generated:', days.length)
-    console.log('First day:', days[0]?.dateString)
-    console.log('Last day:', days[days.length - 1]?.dateString)
     
     return days
   }, [dateRange])
