@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {Button} from './Button'
 import {Box} from './Box'
 import {IoClose} from "react-icons/io5"
-import { disableScroller, enableScroller } from '../../utils/scrollUtils'
+import {disableScroller, enableScroller} from '../../utils/scrollUtils'
 
 // Global portal manager to track multiple drawers using the same portal
 class PortalManager {
@@ -35,6 +35,7 @@ class PortalManager {
             }
             portalInfo = {activeDrawers: 0, container, pendingDeactivation: new Set()}
             this.portals.set(portalId, portalInfo)
+        } else {
         }
 
         return portalInfo.container
@@ -47,6 +48,7 @@ class PortalManager {
             portalInfo.pendingDeactivation.delete(drawerId)
             portalInfo.activeDrawers++
             this.updatePortalStyles(portalId)
+        } else {
         }
     }
 
@@ -69,6 +71,7 @@ class PortalManager {
             portalInfo.pendingDeactivation.delete(drawerId)
             portalInfo.activeDrawers = Math.max(0, portalInfo.activeDrawers - 1)
             this.updatePortalStyles(portalId)
+        } else {
         }
     }
 
@@ -76,14 +79,30 @@ class PortalManager {
     static deactivateDrawer(portalId: string): void {
         const portalInfo = this.portals.get(portalId)
         if (portalInfo) {
-            portalInfo.activeDrawers = Math.max(0, portalInfo.activeDrawers - 1)
-            this.updatePortalStyles(portalId)
+
+            // CRITICAL FIX: Check if there are any pending scheduled deactivations
+            // If there are scheduled deactivations, it means drawers are properly managed
+            // through the new system, so legacy calls should be ignored
+            const hasPendingDeactivations = portalInfo.pendingDeactivation.size > 0
+            
+            if (hasPendingDeactivations) {
+                return
+            }
+            
+            // Only decrement if there are actually active drawers and no new system management
+            if (portalInfo.activeDrawers > 0) {
+                portalInfo.activeDrawers = portalInfo.activeDrawers - 1
+                    this.updatePortalStyles(portalId)
+            } else {
+            }
         }
     }
 
     private static updatePortalStyles(portalId: string): void {
         const portalInfo = this.portals.get(portalId)
-        if (!portalInfo) return
+        if (!portalInfo) {
+            return
+        }
 
         const {container, activeDrawers} = portalInfo
 
@@ -95,8 +114,12 @@ class PortalManager {
             container.style.zIndex = '9999';
         } else {
             // When no drawers are active: minimal footprint to avoid blocking interactions
-            // This has cause some bugs, for time being we'll comment it out'
-            // container.style.zIndex = '-1'
+            // Portal deactivation (normal behavior)
+            
+            // Multiple portals with different states is normal behavior
+            // No need to log this as an error
+            
+            container.style.zIndex = '-1'
             enableScroller();
             
             // Only restore scroll if we actually saved a meaningful position
@@ -106,6 +129,7 @@ class PortalManager {
             }
         }
     }
+
 }
 
 

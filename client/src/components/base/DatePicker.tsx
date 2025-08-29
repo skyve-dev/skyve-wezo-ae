@@ -544,6 +544,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 side="bottom"
                 height="auto"
                 zIndex={drawerManager.getDrawerZIndex(drawerId)}
+                portalId="datepicker-portal"
                 showCloseButton={false}
                 contentStyles={{
                     maxWidth: 600,
@@ -728,6 +729,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 side="bottom"
                 height="70vh"
                 zIndex={drawerManager.getDrawerZIndex(yearDrawerId)}
+                portalId="datepicker-portal"
                 contentStyles={{
                     maxWidth: 600,
                     marginLeft: 'auto',
