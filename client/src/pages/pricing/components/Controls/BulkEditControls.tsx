@@ -133,7 +133,7 @@ const BulkEditControls: React.FC = () => {
   const getOperationDescription = () => {
     switch (operation) {
       case 'set':
-        return `Set ${bulkEditAmount > 0 ? `$${bulkEditAmount.toLocaleString()}` : 'price'} for ${selectedDates.length} selected dates`
+        return `Set ${bulkEditAmount > 0 ? `AED ${bulkEditAmount.toLocaleString()}` : 'price'} for ${selectedDates.length} selected dates`
       case 'copy':
         return `Copy prices from selected date range to another period`
       case 'clear':
@@ -268,9 +268,9 @@ const BulkEditControls: React.FC = () => {
               onChange={(value) => dispatch(setBulkEditAmount(value))}
               min={0}
               max={50000}
-              step={10}
+              step={100}
               format="currency"
-              currency="$"
+              currency="AED"
               currencyPosition="prefix"
               width="100%"
             />

@@ -133,7 +133,7 @@ const DashboardView: React.FC = () => {
                 </span>
               </Box>
               <Box fontSize="1.75rem" fontWeight="700" color="#15803d">
-                ${summaryStats.averagePrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                AED ${summaryStats.averagePrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </Box>
             </Box>
             
@@ -150,7 +150,7 @@ const DashboardView: React.FC = () => {
                 </span>
               </Box>
               <Box fontSize="1.25rem" fontWeight="600" color="#a16207">
-                ${summaryStats.minPrice.toLocaleString()} - ${summaryStats.maxPrice.toLocaleString()}
+                AED ${summaryStats.minPrice.toLocaleString()} - AED ${summaryStats.maxPrice.toLocaleString()}
               </Box>
             </Box>
             

@@ -619,9 +619,11 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                 min={currentForm.adjustmentType === 'Percentage' ? -100 : 0}
                 max={currentForm.adjustmentType === 'FixedPrice' ? 50000 : 
                      currentForm.adjustmentType === 'Percentage' ? 100 : 10000}
-                step={currentForm.adjustmentType === 'FixedPrice' ? 10 : 
-                      currentForm.adjustmentType === 'Percentage' ? 5 : 1}
-                format={currentForm.adjustmentType === 'Percentage' ? 'integer' : 'decimal'}
+                step={currentForm.adjustmentType === 'FixedPrice' ? 100 : 
+                      currentForm.adjustmentType === 'Percentage' ? 5 : 100}
+                format={currentForm.adjustmentType === 'Percentage' ? 'integer' : 'currency'}
+                currency={currentForm.adjustmentType === 'Percentage' ? undefined : 'AED'}
+                currencyPosition={currentForm.adjustmentType === 'Percentage' ? undefined : 'prefix'}
                 helperText={
                   currentForm.adjustmentType === 'FixedPrice' ? 'Base price per night for this rate plan' :
                   currentForm.adjustmentType === 'Percentage' ? 'Positive % increases price, negative % decreases price' :

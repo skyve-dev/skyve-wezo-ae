@@ -44,12 +44,8 @@ const AvailabilityManager: React.FC = () => {
 
   // Load availability data when property changes
   useEffect(() => {
-    console.log('🔄 AvailabilityManager - useEffect triggered:')
-    console.log('- currentPropertyId:', currentPropertyId)
-    console.log('- currentMonth:', currentMonth)
-    
+
     if (currentPropertyId && currentMonth) {
-      console.log('✅ Fetching availability data...')
       dispatch(fetchAvailability({
         propertyId: currentPropertyId,
         year: currentMonth.year,
@@ -57,7 +53,6 @@ const AvailabilityManager: React.FC = () => {
         months: 3 // Load 3 months at a time
       }))
     } else {
-      console.log('❌ Not fetching - missing propertyId or currentMonth')
     }
   }, [currentPropertyId, currentMonth, dispatch])
 
@@ -78,18 +73,12 @@ const AvailabilityManager: React.FC = () => {
 
   // Current property availability data
   const currentAvailability = useMemo(() => {
-    console.log('📊 AvailabilityManager - currentAvailability calculation:')
-    console.log('- currentPropertyId:', currentPropertyId)
-    console.log('- calendar object:', calendar)
-    console.log('- calendar[currentPropertyId]:', currentPropertyId ? calendar[currentPropertyId] : 'N/A (no propertyId)')
-    
+
     if (!currentPropertyId || !calendar[currentPropertyId]) {
-      console.log('❌ No availability data - returning empty array')
       return []
     }
     
     const result = calendar[currentPropertyId]
-    console.log('✅ Returning availability data:', result)
     return result
   }, [currentPropertyId, calendar])
 

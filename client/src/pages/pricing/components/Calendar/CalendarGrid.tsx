@@ -138,7 +138,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   <Box fontSize="0.75rem" color="#6b7280">
                     {ratePlan.adjustmentType === 'FixedPrice' && 'Fixed Price'}
                     {ratePlan.adjustmentType === 'Percentage' && `${ratePlan.adjustmentValue}% adjustment`}
-                    {ratePlan.adjustmentType === 'FixedDiscount' && `$${ratePlan.adjustmentValue} discount`}
+                    {ratePlan.adjustmentType === 'FixedDiscount' && `AED ${ratePlan.adjustmentValue} discount`}
                   </Box>
                 </Box>
               </Box>

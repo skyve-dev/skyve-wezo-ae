@@ -230,9 +230,9 @@ const PriceEditDialog: React.FC = () => {
               onChange={handleAmountChange}
               min={0}
               max={50000}
-              step={10}
+              step={100}
               format="currency"
-              currency="$"
+              currency="AED"
               currencyPosition="prefix"
               helperText="Set the specific price for this date"
               width="100%"
@@ -259,7 +259,7 @@ const PriceEditDialog: React.FC = () => {
                 <Box textAlign="center">
                   <Box color="#6b7280" marginBottom="0.25rem">Base Rate</Box>
                   <Box fontWeight="600" color="#374151">
-                    ${derivedPrice.baseAmount.toLocaleString()}
+                    AED ${derivedPrice.baseAmount.toLocaleString()}
                   </Box>
                 </Box>
                 
@@ -270,7 +270,7 @@ const PriceEditDialog: React.FC = () => {
                     {selectedRatePlan?.adjustmentType} Applied
                   </Box>
                   <Box fontWeight="600" color="#3b82f6">
-                    ${derivedPrice.adjustedAmount.toLocaleString()}
+                    AED ${derivedPrice.adjustedAmount.toLocaleString()}
                   </Box>
                 </Box>
                 
@@ -279,7 +279,7 @@ const PriceEditDialog: React.FC = () => {
                 <Box textAlign="center">
                   <Box color="#6b7280" marginBottom="0.25rem">Your Price</Box>
                   <Box fontWeight="700" color="#D52122" fontSize="1rem">
-                    ${localAmount.toLocaleString()}
+                    AED ${localAmount.toLocaleString()}
                   </Box>
                 </Box>
               </Box>
@@ -295,7 +295,7 @@ const PriceEditDialog: React.FC = () => {
                 >
                   <strong>Override:</strong> You're setting a custom price different from the calculated rate 
                   ({localAmount > derivedPrice.adjustedAmount ? 'higher' : 'lower'} by 
-                  ${Math.abs(localAmount - derivedPrice.adjustedAmount).toLocaleString()})
+                  AED ${Math.abs(localAmount - derivedPrice.adjustedAmount).toLocaleString()})
                 </Box>
               )}
             </Box>
@@ -312,9 +312,9 @@ const PriceEditDialog: React.FC = () => {
               Pricing Context
             </Box>
             <Box fontSize="0.75rem" color="#6b7280">
-              • Last year same date: $1,200 (placeholder)
-              • Average for this month: $1,100 (placeholder)
-              • Competitor average: $1,150 (placeholder)
+              • Last year same date: AED 1,200 (placeholder)
+              • Average for this month: AED 1,100 (placeholder)
+              • Competitor average: AED 1,150 (placeholder)
             </Box>
           </Box>
         </Box>

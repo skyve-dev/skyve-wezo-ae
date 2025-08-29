@@ -21,7 +21,7 @@ const PricingInsights: React.FC<PricingInsightsProps> = ({
   statistics
 }) => {
   const formatPrice = (amount: number) => {
-    return `$${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+    return `AED ${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
   }
   
   // Generate insights based on statistics

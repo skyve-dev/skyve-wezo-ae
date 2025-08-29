@@ -84,6 +84,12 @@ interface PriceState {
     sourceEndDate: string | null
     targetStartDate: string | null
   }
+  
+  // Refresh trigger for server sync
+  needsRefresh: {
+    ratePlanId: string
+    timestamp: number
+  } | null
 }
 
 const initialState: PriceState = {
@@ -131,7 +137,10 @@ const initialState: PriceState = {
     sourceStartDate: null,
     sourceEndDate: null,
     targetStartDate: null
-  }
+  },
+  
+  // Refresh trigger
+  needsRefresh: null
 }
 
 const priceSlice = createSlice({
@@ -325,6 +334,11 @@ const priceSlice = createSlice({
       state.statistics = {}
       state.priceGaps = {}
       state.error = null
+    },
+    
+    // Clear refresh trigger
+    clearRefreshTrigger: (state) => {
+      state.needsRefresh = null
     }
   },
   
@@ -365,10 +379,18 @@ const priceSlice = createSlice({
         
         state.loading = false
         // Close edit form on successful save
+        // Fix: Normalize date comparison to handle ISO timestamp format
+        const normalizeDate = (date: string) => date.split('T')[0]
+        
         if (state.priceEditForm.isOpen && 
-            state.priceEditForm.date === price.date && 
-            state.priceEditForm.ratePlanId === price.ratePlanId) {
+            state.priceEditForm.date === normalizeDate(price.date)) {
           state.priceEditForm.isOpen = false
+        }
+        
+        // Mark that we need to refresh prices for this rate plan
+        state.needsRefresh = {
+          ratePlanId: price.ratePlanId || state.priceEditForm.ratePlanId,
+          timestamp: Date.now()
         }
       })
       .addCase(createOrUpdatePrice.rejected, (state, action) => {
@@ -494,7 +516,8 @@ export const {
   setStatisticsLoading,
   setBulkOperationLoading,
   setError,
-  clearPrices
+  clearPrices,
+  clearRefreshTrigger
 } = priceSlice.actions
 
 // Async Thunks with API Integration

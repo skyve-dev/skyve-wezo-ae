@@ -57,13 +57,6 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     const dateString = date.toISOString().split('T')[0]
     const foundAvailability = currentMonthData?.days.find(day => day.date === dateString)
     
-    // Debug logging for first few dates
-    if (date.getDate() <= 5) {
-      console.log(`📅 CalendarGrid - Date ${dateString}:`)
-      console.log('- currentMonthData:', currentMonthData)
-      console.log('- foundAvailability:', foundAvailability)
-    }
-    
     return foundAvailability
   }
 

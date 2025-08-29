@@ -17,7 +17,8 @@ import {
   setDateRange,
   setSelectedRatePlans,
   fetchPricesForRatePlan,
-  clearPrices
+  clearPrices,
+  clearRefreshTrigger
 } from '@/store/slices/priceSlice'
 import { fetchRatePlans } from '@/store/slices/ratePlanSlice'
 import { RootState } from '@/store'
@@ -34,7 +35,8 @@ const PricingCalendar: React.FC = () => {
     priceEditForm,
     bulkEditMode,
     loading,
-    error
+    error,
+    needsRefresh
   } = useSelector((state: RootState) => state.price)
   
   const { ratePlans, loading: ratePlansLoading } = useSelector((state: RootState) => state.ratePlan)
@@ -107,6 +109,21 @@ const PricingCalendar: React.FC = () => {
       })
     }
   }, [selectedRatePlanIds, dateRange, dispatch])
+  
+  // Refresh prices when server data changes after save
+  useEffect(() => {
+    if (needsRefresh && dateRange.startDate && dateRange.endDate) {
+      // Re-fetch prices for the updated rate plan
+      dispatch(fetchPricesForRatePlan({
+        ratePlanId: needsRefresh.ratePlanId,
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate
+      }))
+      
+      // Clear the refresh trigger
+      dispatch(clearRefreshTrigger())
+    }
+  }, [needsRefresh, dateRange, dispatch])
   
   // Handle mode change
   const handleModeChange = (mode: 'calendar' | 'dashboard') => {

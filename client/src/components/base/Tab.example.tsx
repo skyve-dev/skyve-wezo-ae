@@ -67,7 +67,7 @@ const TabExample: React.FC = () => {
                         </Box>
                         <Box padding="1rem" backgroundColor="white" borderRadius="6px" border="1px solid #e5e7eb">
                             <h4 style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Revenue</h4>
-                            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>$12,345</p>
+                            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>AED 12,345</p>
                         </Box>
                     </Box>
                 </Box>
@@ -319,7 +319,7 @@ const TabExample: React.FC = () => {
                         <Box padding="1.5rem" backgroundColor="white" borderRadius="8px" border="1px solid #e5e7eb">
                             <h4 style={{ fontWeight: '600', marginBottom: '1rem' }}>Monthly Revenue</h4>
                             <p style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981', marginBottom: '0.5rem' }}>
-                                $24,567
+                                AED 24,567
                             </p>
                             <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>+12% from last month</span>
                         </Box>

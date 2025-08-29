@@ -145,9 +145,9 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   // Format currency
   const formatPrice = (amount: number) => {
     if (isMobile && amount >= 1000) {
-      return `$${(amount / 1000).toFixed(1)}k`
+      return `AED ${(amount / 1000).toFixed(1)}k`
     }
-    return `$${amount.toLocaleString()}`
+    return `AED ${amount.toLocaleString()}`
   }
   
   return (

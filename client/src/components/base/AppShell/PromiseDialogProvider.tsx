@@ -73,7 +73,7 @@ export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ ch
                 <DialogOverlay 
                     key={dialog.id}
                     isVisible={index === dialogStack.length - 1} // Only show the topmost dialog
-                    zIndex={1000 + index} // Stack dialogs with increasing z-index
+                    zIndex={10100 + index} // Stack dialogs above SlidingDrawer (which uses ~10000)
                     onBackdropClick={() => {
                         // Optional: close dialog when clicking backdrop
                         // dialog.resolve(undefined);

@@ -276,15 +276,15 @@ export function NumberStepperInputExample() {
                                 gap="1.5rem"
                             >
                                 <NumberStepperInput
-                                    label="USD Dollar (Prefix)"
+                                    label="AED Dirham (Prefix)"
                                     value={1234.56}
                                     onChange={() => {}}
                                     format="currency"
-                                    currency="$"
+                                    currency="AED"
                                     currencyPosition="prefix"
                                     decimalPlaces={2}
                                     readOnly
-                                    helperText="$1,234.56"
+                                    helperText="AED 1,234.56"
                                 />
                                 
                                 <NumberStepperInput

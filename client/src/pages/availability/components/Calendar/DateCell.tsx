@@ -36,40 +36,25 @@ export const DateCell: React.FC<DateCellProps> = ({
   
   // Handle cell click - toggle availability
   const handleClick = useCallback(() => {
-    console.log('=== DateCell Click Debug ===')
-    console.log('Date clicked:', dateString)
-    console.log('isCurrentMonth:', isCurrentMonth)
-    console.log('availability object:', availability)
-    console.log('status:', status)
-    console.log('dayNumber:', dayNumber)
-    
+
     if (!isCurrentMonth) {
-      console.log('❌ Click ignored: Not current month')
       return
     }
     
     // Get propertyId from availability object, fallback to checking if it exists at all
     const propertyId = availability?.propertyId
     if (!propertyId) {
-      console.log('❌ Click ignored: No propertyId available')
-      console.log('availability?.propertyId:', availability?.propertyId)
       return
     }
     
     const isCurrentlyBlocked = status === 'blocked'
     const dates = [dateString]
     
-    console.log('✅ Processing click:')
-    console.log('- isCurrentlyBlocked:', isCurrentlyBlocked)
-    console.log('- dates to toggle:', dates)
-    console.log('- propertyId:', propertyId)
-    
+
     if (isCurrentlyBlocked) {
-      console.log('🔄 Dispatching unblockDates...')
       dispatch(unblockDates({ propertyId, dates }))
     } else {
-      console.log('🔄 Dispatching blockDates...')
-      dispatch(blockDates({ 
+      dispatch(blockDates({
         propertyId, 
         dates,
         reason: 'Blocked by host'

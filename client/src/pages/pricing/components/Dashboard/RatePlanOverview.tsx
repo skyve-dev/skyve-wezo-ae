@@ -27,7 +27,7 @@ const RatePlanOverview: React.FC<RatePlanOverviewProps> = ({
   const { navigateTo } = useAppShell()
   
   const formatPrice = (amount: number) => {
-    return `$${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+    return `AED ${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
   }
   
   const getAdjustmentDescription = (ratePlan: RatePlan) => {

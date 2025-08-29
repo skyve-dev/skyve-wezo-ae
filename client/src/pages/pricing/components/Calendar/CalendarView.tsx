@@ -94,15 +94,34 @@ const CalendarView: React.FC = () => {
       }))
   }, [ratePlans, selectedRatePlanIds])
   
+  // Helper function to normalize date for comparison
+  const normalizeDate = (date: string): string => {
+    // Handle both 'YYYY-MM-DD' and 'YYYY-MM-DDTHH:mm:ss.sssZ' formats
+    return date.split('T')[0]
+  }
+  
   // Get pricing data for display
   const getPricesForDate = (dateString: string) => {
     const prices = []
     
+    // Get day of week for the date (0=Sunday, 1=Monday, ..., 6=Saturday)
+    const date = new Date(dateString)
+    const dayOfWeek = date.getDay()
+    
     for (const ratePlan of selectedRatePlans) {
+      // Check if rate plan is active for this day of week
+      if (ratePlan.activeDays && ratePlan.activeDays.length > 0) {
+        if (!ratePlan.activeDays.includes(dayOfWeek)) {
+          continue // Skip this rate plan for this day
+        }
+      }
+      
       const ratePlanPrices = pricesByRatePlan[ratePlan.id] || []
-      const priceForDate = ratePlanPrices.find(p => p.date === dateString)
+      // Fix: Normalize both stored date and search date for comparison
+      const priceForDate = ratePlanPrices.find(p => normalizeDate(p.date) === dateString)
       
       if (priceForDate) {
+        // Show custom price if available
         prices.push({
           ratePlan,
           price: priceForDate,
@@ -122,6 +141,43 @@ const CalendarView: React.FC = () => {
           },
           hasCustomPrice: false
         })
+      } else if (ratePlan.adjustmentType === 'Percentage' || ratePlan.adjustmentType === 'FixedDiscount') {
+        // Show percentage/discount rate plans (like weekly plans)
+        // These need a base rate plan to calculate from
+        if (ratePlan.baseRatePlanId && ratePlan.adjustmentValue !== undefined) {
+          const baseRatePlan = selectedRatePlans.find(rp => rp.id === ratePlan.baseRatePlanId)
+          if (baseRatePlan) {
+            // Get base price from the base rate plan
+            const baseRatePlanPrices = pricesByRatePlan[baseRatePlan.id] || []
+            const basePriceForDate = baseRatePlanPrices.find(p => normalizeDate(p.date) === dateString)
+            
+            let baseAmount = basePriceForDate?.amount || baseRatePlan.adjustmentValue || 0
+            let calculatedAmount = baseAmount
+            
+            if (ratePlan.adjustmentType === 'Percentage') {
+              // Apply percentage adjustment (e.g., 85% of base price for weekly discount)
+              calculatedAmount = baseAmount * (ratePlan.adjustmentValue / 100)
+            } else if (ratePlan.adjustmentType === 'FixedDiscount') {
+              // Apply fixed discount (e.g., base price minus fixed amount)
+              calculatedAmount = baseAmount - ratePlan.adjustmentValue
+            }
+            
+            if (calculatedAmount > 0) {
+              prices.push({
+                ratePlan,
+                price: {
+                  id: `calculated-${ratePlan.id}-${dateString}`,
+                  ratePlanId: ratePlan.id,
+                  date: dateString,
+                  amount: calculatedAmount,
+                  createdAt: '',
+                  updatedAt: ''
+                },
+                hasCustomPrice: false
+              })
+            }
+          }
+        }
       }
     }
     
