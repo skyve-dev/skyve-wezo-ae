@@ -3,8 +3,10 @@ import prisma from '../config/database';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
 import crypto from 'crypto';
+import { logControllerAction, logError } from '../middleware/logger';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
+  logControllerAction('AuthController', 'register', req);
   try {
     const { username, email, password } = req.body;
 
@@ -46,11 +48,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Registration error:', error);
+    logError(error as Error, req);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
+  logControllerAction('AuthController', 'login', req);
   try {
     const { username, password } = req.body;
 
@@ -87,11 +91,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    logError(error as Error, req);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+  logControllerAction('AuthController', 'requestPasswordReset', req);
   try {
     const { email } = req.body;
 
@@ -122,11 +128,13 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     });
   } catch (error) {
     console.error('Password reset request error:', error);
+    logError(error as Error, req);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  logControllerAction('AuthController', 'resetPassword', req);
   try {
     const { token, newPassword } = req.body;
 
@@ -169,11 +177,13 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }
   } catch (error) {
     console.error('Password reset error:', error);
+    logError(error as Error, req);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
+  logControllerAction('AuthController', 'getProfile', req);
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });
@@ -201,11 +211,13 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     res.json({ user });
   } catch (error) {
     console.error('Get profile error:', error);
+    logError(error as Error, req);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const updateUserRole = async (req: Request, res: Response): Promise<void> => {
+  logControllerAction('AuthController', 'updateUserRole', req);
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });
@@ -258,6 +270,7 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
     });
   } catch (error) {
     console.error('Update role error:', error);
+    logError(error as Error, req);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { JWTPayload } from '../utils/jwt';
 
 declare global {

@@ -133,7 +133,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     const title = isCreateMode ? 'Create Property' : `Edit ${currentForm?.name || 'Property'}`
     
     const unmountHeader = mountHeader(
-      <PropertyManagerHeader title={title} onBack={handleBack} />
+      <PropertyManagerHeader title={title} onBack={handleBack} />,
+      { visibility: 'persistent' }
     )
     
     // IMPORTANT: Always mount footer (no hasUnsavedChanges condition) like RatePlanManager
@@ -153,6 +154,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     }
   }, [isSaving, formValidationErrors, currentForm, isCreateMode])
   
+  // Removed debugging code - scroll issue fixed in SlidingDrawer
   
   // Unified save handler
   const handleSave = async () => {
@@ -255,7 +257,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     }))
   }
 
-  // Preserve scroll position after state updates
+  // Preserve scroll position after state updates (simplified since SlidingDrawer issue is fixed)
   useEffect(() => {
     if (shouldPreserveScrollRef.current) {
       requestAnimationFrame(() => {

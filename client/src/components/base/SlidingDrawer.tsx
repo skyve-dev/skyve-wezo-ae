@@ -98,7 +98,12 @@ class PortalManager {
             // This has cause some bugs, for time being we'll comment it out'
             // container.style.zIndex = '-1'
             enableScroller();
-            window.scrollTo({top:parseInt(container.getAttribute('data-scroll-y') ?? '0'),behavior:'instant'})
+            
+            // Only restore scroll if we actually saved a meaningful position
+            const savedScrollY = container.getAttribute('data-scroll-y')
+            if (savedScrollY && parseInt(savedScrollY) > 0) {
+                window.scrollTo({top: parseInt(savedScrollY), behavior: 'instant'})
+            }
         }
     }
 }

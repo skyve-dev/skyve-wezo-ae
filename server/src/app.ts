@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import routes from './routes';
+import { requestLogger } from './middleware/logger';
 
 dotenv.config();
 
@@ -17,6 +18,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Add request logging middleware
+app.use(requestLogger);
 
 // Serve static files from uploads directory (public access, no authentication)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {

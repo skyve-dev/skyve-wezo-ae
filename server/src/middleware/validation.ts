@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { logMiddleware } from './logger';
 
 // Helper interface for validation errors
 interface ValidationErrors {
@@ -28,6 +29,7 @@ const returnValidationResponse = (res: Response, errors: ValidationErrors): void
 };
 
 export const validateRegistration = (req: Request, res: Response, next: NextFunction): void => {
+  logMiddleware('validateRegistration')(req, res, () => {});
   const { username, email, password } = req.body;
 
   const validations = [
@@ -56,6 +58,7 @@ export const validateRegistration = (req: Request, res: Response, next: NextFunc
 };
 
 export const validateLogin = (req: Request, res: Response, next: NextFunction): void => {
+  logMiddleware('validateLogin')(req, res, () => {});
   const { username, password } = req.body;
 
   const validations = [
@@ -74,6 +77,7 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction): 
 };
 
 export const validatePasswordReset = (req: Request, res: Response, next: NextFunction): void => {
+  logMiddleware('validatePasswordReset')(req, res, () => {});
   const { email } = req.body;
 
   const validations = [
@@ -98,6 +102,7 @@ export const validatePasswordReset = (req: Request, res: Response, next: NextFun
 };
 
 export const validateNewPassword = (req: Request, res: Response, next: NextFunction): void => {
+  logMiddleware('validateNewPassword')(req, res, () => {});
   const { token, newPassword } = req.body;
 
   const validations = [
