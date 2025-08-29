@@ -554,7 +554,17 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                   ]}
                   idAccessor={(item) => item.value}
                   value={currentForm.adjustmentType}
-                  onChange={(value) => handleFieldChange('adjustmentType', value)}
+                  onChange={(value) => {
+                    // When adjustment type changes, reset adjustmentValue to appropriate default
+                    const newDefaults = {
+                      'FixedPrice': 500,     // AED 500 default base price
+                      'Percentage': 0,       // 0% default (neutral)
+                      'FixedDiscount': 100   // AED 100 default discount
+                    }
+                    
+                    handleFieldChange('adjustmentType', value)
+                    handleFieldChange('adjustmentValue', newDefaults[value as keyof typeof newDefaults] || 0)
+                  }}
                   renderItem={(item, _isSelected) => (
                     <Box display="flex" alignItems="center" gap="0.75rem">
                       {item.value === 'FixedPrice' ? (

@@ -184,6 +184,14 @@ export class RatePlanService {
       throw new Error('Rate plan not found or you do not have permission to update it');
     }
 
+    // Validate adjustment value for negative values (only allowed for percentage adjustments)
+    if (data.adjustmentValue !== undefined && data.adjustmentValue < 0) {
+      const finalAdjustmentType = data.adjustmentType || existingRatePlan.adjustmentType;
+      if (finalAdjustmentType !== PriceAdjustmentType.Percentage) {
+        throw new Error('adjustmentValue must be a positive number for FixedPrice and FixedDiscount rate plans');
+      }
+    }
+
     // Validate base rate plan if changing to percentage type
     if (data.adjustmentType === PriceAdjustmentType.Percentage && data.baseRatePlanId) {
       const baseRatePlan = await prisma.ratePlan.findFirst({

@@ -32,20 +32,28 @@ export const createRatePlan = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Validate adjustment value
-    if (ratePlanData.adjustmentValue < 0) {
+    // Validate adjustment value (negative values allowed only for percentage adjustments)
+    if (ratePlanData.adjustmentValue < 0 && ratePlanData.adjustmentType !== PriceAdjustmentType.Percentage) {
       res.status(400).json({ 
-        error: 'adjustmentValue must be a positive number' 
+        error: 'adjustmentValue must be a positive number for FixedPrice and FixedDiscount rate plans' 
       });
       return;
     }
 
-    // Validate percentage values
-    if (ratePlanData.adjustmentType === PriceAdjustmentType.Percentage && ratePlanData.adjustmentValue > 100) {
-      res.status(400).json({ 
-        error: 'Percentage adjustment cannot exceed 100%' 
-      });
-      return;
+    // Validate percentage values bounds
+    if (ratePlanData.adjustmentType === PriceAdjustmentType.Percentage) {
+      if (ratePlanData.adjustmentValue > 100) {
+        res.status(400).json({ 
+          error: 'Percentage adjustment cannot exceed 100%' 
+        });
+        return;
+      }
+      if (ratePlanData.adjustmentValue < -100) {
+        res.status(400).json({ 
+          error: 'Percentage adjustment cannot be less than -100%' 
+        });
+        return;
+      }
     }
 
     // Validate priority if provided
@@ -148,21 +156,35 @@ export const updateRatePlan = async (req: Request, res: Response): Promise<void>
     const { ratePlanId } = req.params;
     const updateData = req.body;
 
-    // Validate adjustment value if provided
+    // Validate adjustment value if provided (negative values allowed only for percentage adjustments)
     if (updateData.adjustmentValue !== undefined && updateData.adjustmentValue < 0) {
-      res.status(400).json({ 
-        error: 'adjustmentValue must be a positive number' 
-      });
-      return;
+      // If adjustmentType is also being updated, check that
+      // Otherwise, let the service layer handle validation with existing data
+      if (updateData.adjustmentType && updateData.adjustmentType !== PriceAdjustmentType.Percentage) {
+        res.status(400).json({ 
+          error: 'adjustmentValue must be a positive number for FixedPrice and FixedDiscount rate plans' 
+        });
+        return;
+      }
+      // Note: If only adjustmentValue is being updated without adjustmentType,
+      // we let the service layer validate against the existing adjustmentType
     }
 
-    // Validate percentage values
+    // Validate percentage values bounds
     if (updateData.adjustmentType === PriceAdjustmentType.Percentage && 
-        updateData.adjustmentValue > 100) {
-      res.status(400).json({ 
-        error: 'Percentage adjustment cannot exceed 100%' 
-      });
-      return;
+        updateData.adjustmentValue !== undefined) {
+      if (updateData.adjustmentValue > 100) {
+        res.status(400).json({ 
+          error: 'Percentage adjustment cannot exceed 100%' 
+        });
+        return;
+      }
+      if (updateData.adjustmentValue < -100) {
+        res.status(400).json({ 
+          error: 'Percentage adjustment cannot be less than -100%' 
+        });
+        return;
+      }
     }
 
     // Validate priority if provided
