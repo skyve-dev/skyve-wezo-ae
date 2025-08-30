@@ -1,7 +1,7 @@
 import React from 'react'
-import {FaArrowDown, FaArrowUp, FaChartLine, FaExclamationTriangle, FaLightbulb} from 'react-icons/fa'
-import {Box} from '@/components'
-import {PriceStatistics} from '@/store/slices/priceSlice'
+import { FaArrowUp, FaArrowDown, FaChartLine, FaExclamationTriangle, FaLightbulb } from 'react-icons/fa'
+import { Box } from '@/components'
+import { PriceStatistics } from '@/store/slices/priceSlice'
 
 interface RatePlan {
   id: string

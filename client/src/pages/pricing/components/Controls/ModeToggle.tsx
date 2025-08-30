@@ -1,6 +1,6 @@
 import React from 'react'
-import {FaCalendarAlt, FaChartLine} from 'react-icons/fa'
-import {Box} from '@/components'
+import { FaCalendarAlt, FaChartLine } from 'react-icons/fa'
+import { Box } from '@/components'
 import Button from '@/components/base/Button'
 
 interface ModeToggleProps {

@@ -68,15 +68,10 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
   const handlePropertySelect = (value: string | number | (string | number)[]) => {
     const selectedId = value as string
     const selectedProperty = properties.find(p => p.propertyId === selectedId) || null
-    
-
-    
-
     dispatch(setCurrentProperty(selectedProperty))
     
     // Call callback if provided
     if (onPropertyChange) {
-
       onPropertyChange(selectedProperty)
     }
     

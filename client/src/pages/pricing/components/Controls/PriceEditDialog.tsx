@@ -1,13 +1,18 @@
-import React, {useEffect, useState} from 'react'
-import {useSelector} from 'react-redux'
-import {RootState, useAppDispatch} from '@/store'
-import {FaCalendarAlt, FaDollarSign, FaSave, FaTags, FaTimes} from 'react-icons/fa'
-import {Box} from '@/components'
+import React, { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useAppDispatch } from '@/store'
+import { FaSave, FaTimes, FaCalendarAlt, FaTags, FaDollarSign } from 'react-icons/fa'
+import { Box } from '@/components'
 import Button from '@/components/base/Button'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
-import {closePriceEditForm, createOrUpdatePrice, updatePriceEditAmount} from '@/store/slices/priceSlice'
-import {ApiError} from '@/utils/api'
+import {
+  closePriceEditForm,
+  updatePriceEditAmount,
+  createOrUpdatePrice
+} from '@/store/slices/priceSlice'
+import { RootState } from '@/store'
+import { ApiError } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
 
 const PriceEditDialog: React.FC = () => {
@@ -254,7 +259,7 @@ const PriceEditDialog: React.FC = () => {
                 <Box textAlign="center">
                   <Box color="#6b7280" marginBottom="0.25rem">Base Rate</Box>
                   <Box fontWeight="600" color="#374151">
-                    AED {derivedPrice.baseAmount.toLocaleString()}
+                    AED ${derivedPrice.baseAmount.toLocaleString()}
                   </Box>
                 </Box>
                 
@@ -265,7 +270,7 @@ const PriceEditDialog: React.FC = () => {
                     {selectedRatePlan?.adjustmentType} Applied
                   </Box>
                   <Box fontWeight="600" color="#3b82f6">
-                    AED {derivedPrice.adjustedAmount.toLocaleString()}
+                    AED ${derivedPrice.adjustedAmount.toLocaleString()}
                   </Box>
                 </Box>
                 
@@ -274,7 +279,7 @@ const PriceEditDialog: React.FC = () => {
                 <Box textAlign="center">
                   <Box color="#6b7280" marginBottom="0.25rem">Your Price</Box>
                   <Box fontWeight="700" color="#D52122" fontSize="1rem">
-                    AED {localAmount.toLocaleString()}
+                    AED ${localAmount.toLocaleString()}
                   </Box>
                 </Box>
               </Box>
@@ -290,7 +295,7 @@ const PriceEditDialog: React.FC = () => {
                 >
                   <strong>Override:</strong> You're setting a custom price different from the calculated rate 
                   ({localAmount > derivedPrice.adjustedAmount ? 'higher' : 'lower'} by 
-                  AED {Math.abs(localAmount - derivedPrice.adjustedAmount).toLocaleString()})
+                  AED ${Math.abs(localAmount - derivedPrice.adjustedAmount).toLocaleString()})
                 </Box>
               )}
             </Box>

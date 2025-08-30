@@ -1,8 +1,8 @@
-import React, {useEffect, useMemo} from 'react'
-import {useSelector} from 'react-redux'
+import React, { useMemo, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import CalendarGrid from './CalendarGrid'
-import {RootState} from '@/store'
-import {Box} from '@/components'
+import { RootState } from '@/store'
+import { Box } from '@/components'
 
 const CalendarView: React.FC = () => {
   const {
@@ -147,7 +147,16 @@ const CalendarView: React.FC = () => {
         if (ratePlan.baseRatePlanId && ratePlan.adjustmentValue !== undefined) {
           const baseRatePlan = selectedRatePlans.find(rp => rp.id === ratePlan.baseRatePlanId)
           
-
+          // Debug logging for base rate plan resolution
+          if (dateString === '2025-08-30') {
+            console.log('🔍 BASE RATE PLAN DEBUG:', {
+              weeklyPlanName: ratePlan.name,
+              baseRatePlanId: ratePlan.baseRatePlanId,
+              baseRatePlanFound: !!baseRatePlan,
+              baseRatePlanName: baseRatePlan?.name,
+              selectedRatePlanIds: selectedRatePlans.map(rp => ({ id: rp.id, name: rp.name }))
+            })
+          }
           
           if (baseRatePlan) {
             // Get base price from the base rate plan
@@ -174,7 +183,17 @@ const CalendarView: React.FC = () => {
               // Negative values: -15% = 85% of base price (baseAmount * 0.85)
               calculatedAmount = baseAmount * (1 + ratePlan.adjustmentValue / 100)
               
-
+              // Debug logging for percentage calculations
+              if (dateString === '2025-08-30') {
+                console.log('🔍 PERCENTAGE CALCULATION DEBUG:', {
+                  ratePlanName: ratePlan.name,
+                  adjustmentValue: ratePlan.adjustmentValue,
+                  baseAmount,
+                  calculationFormula: `${baseAmount} * (1 + ${ratePlan.adjustmentValue}/100) = ${baseAmount} * ${(1 + ratePlan.adjustmentValue / 100)}`,
+                  calculatedAmount,
+                  willShow: calculatedAmount > 0
+                })
+              }
             } else if (ratePlan.adjustmentType === 'FixedDiscount') {
               // Apply fixed discount (e.g., base price minus fixed amount)
               calculatedAmount = baseAmount - ratePlan.adjustmentValue

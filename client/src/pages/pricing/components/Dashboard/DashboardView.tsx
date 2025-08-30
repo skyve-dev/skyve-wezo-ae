@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from 'react'
-import {useSelector} from 'react-redux'
-import {RootState, useAppDispatch} from '@/store'
-import {FaArrowDown, FaArrowUp, FaCalendarCheck, FaChartLine, FaEdit, FaEye, FaPlus} from 'react-icons/fa'
-import {Box} from '@/components'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useAppDispatch } from '@/store'
+import { FaChartLine, FaPlus, FaEdit, FaEye, FaCalendarCheck, FaArrowUp, FaArrowDown } from 'react-icons/fa'
+import { Box } from '@/components'
 import Button from '@/components/base/Button'
 import RatePlanOverview from './RatePlanOverview'
 import PricingInsights from './PricingInsights'
 import QuickActions from './QuickActions'
-import {fetchPriceStatistics} from '@/store/slices/priceSlice'
-import {useAppShell} from '@/components/base/AppShell'
+import { fetchPriceStatistics } from '@/store/slices/priceSlice'
+import { useAppShell } from '@/components/base/AppShell'
+import { RootState } from '@/store'
 
 const DashboardView: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -132,7 +133,7 @@ const DashboardView: React.FC = () => {
                 </span>
               </Box>
               <Box fontSize="1.75rem" fontWeight="700" color="#15803d">
-                AED {summaryStats.averagePrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                AED ${summaryStats.averagePrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </Box>
             </Box>
             
@@ -149,7 +150,7 @@ const DashboardView: React.FC = () => {
                 </span>
               </Box>
               <Box fontSize="1.25rem" fontWeight="600" color="#a16207">
-                AED {summaryStats.minPrice.toLocaleString()} - AED {summaryStats.maxPrice.toLocaleString()}
+                AED ${summaryStats.minPrice.toLocaleString()} - AED ${summaryStats.maxPrice.toLocaleString()}
               </Box>
             </Box>
             

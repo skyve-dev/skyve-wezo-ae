@@ -1,19 +1,20 @@
-import React, {useState} from 'react'
-import {useSelector} from 'react-redux'
-import {RootState, useAppDispatch} from '@/store'
-import {FaCheck, FaCopy, FaEdit, FaTimes, FaTrash} from 'react-icons/fa'
-import {Box} from '@/components'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useAppDispatch } from '@/store'
+import { FaEdit, FaCheck, FaTimes, FaCopy, FaTrash } from 'react-icons/fa'
+import { Box } from '@/components'
 import Button from '@/components/base/Button'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import {
-    bulkUpdatePrices,
-    clearDateSelections,
-    setBulkEditAmount,
-    startCopyOperation,
-    toggleBulkEditMode
+  toggleBulkEditMode,
+  setBulkEditAmount,
+  clearDateSelections,
+  bulkUpdatePrices,
+  startCopyOperation
 } from '@/store/slices/priceSlice'
-import {ApiError} from '@/utils/api'
+import { RootState } from '@/store'
+import { ApiError } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
 
 const BulkEditControls: React.FC = () => {
