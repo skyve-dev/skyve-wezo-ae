@@ -2,10 +2,8 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: 'Tenant' | 'HomeOwner' | 'Manager';  // Fixed: Match server enum exactly
+  role: 'TENANT' | 'HOMEOWNER' | 'MANAGER';
   isAdmin: boolean;
-  firstName?: string;  // Added for user display
-  lastName?: string;   // Added for user display
   createdAt: string;
   updatedAt: string;
 }

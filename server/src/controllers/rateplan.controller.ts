@@ -114,33 +114,6 @@ export const getRatePlansForProperty = async (req: Request, res: Response): Prom
 };
 
 /**
- * Get public rate plans for a property (no authentication required)
- * GET /api/properties/:propertyId/rate-plans/public
- */
-export const getPublicRatePlansForProperty = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { propertyId } = req.params;
-    
-    // Get only active, public rate plans for guest browsing
-    const ratePlans = await ratePlanService.getPublicRatePlansForProperty(propertyId);
-
-    res.json({
-      message: 'Public rate plans retrieved successfully',
-      ratePlans,
-      count: ratePlans.length,
-    });
-  } catch (error: any) {
-    console.error('Get public rate plans error:', error);
-    
-    if (error.message.includes('not found')) {
-      res.status(404).json({ error: 'Property not found or has no available rate plans' });
-    } else {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-};
-
-/**
  * Get a single rate plan by ID
  * GET /api/rateplans/:ratePlanId
  */
@@ -366,62 +339,6 @@ export const searchAvailableRates = async (req: Request, res: Response): Promise
     
     if (error.message.includes('must be') || error.message.includes('cannot be')) {
       res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-};
-
-/**
- * Calculate rate pricing for guest count and date range (public endpoint)
- * POST /api/properties/:propertyId/rate-plans/calculate
- */
-export const calculateRatePricing = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { propertyId } = req.params;
-    const { checkInDate, checkOutDate, numGuests } = req.body;
-
-    // Validate required fields
-    if (!checkInDate || !checkOutDate || !numGuests) {
-      res.status(400).json({ 
-        error: 'Missing required fields: checkInDate, checkOutDate, numGuests' 
-      });
-      return;
-    }
-
-    // Validate dates
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-    
-    if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
-      res.status(400).json({ 
-        error: 'Invalid date format. Use YYYY-MM-DD format' 
-      });
-      return;
-    }
-
-    if (checkIn >= checkOut) {
-      res.status(400).json({ 
-        error: 'Check-out date must be after check-in date' 
-      });
-      return;
-    }
-
-    const calculation = await ratePlanService.calculatePricingForStay(
-      propertyId,
-      checkIn,
-      checkOut,
-      parseInt(numGuests)
-    );
-
-    res.json({
-      message: 'Pricing calculated successfully',
-      calculation
-    });
-  } catch (error: any) {
-    console.error('Calculate rate pricing error:', error);
-    if (error.message.includes('not found')) {
-      res.status(404).json({ error: 'Property not found' });
     } else {
       res.status(500).json({ error: 'Internal server error' });
     }

@@ -1,16 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import Tab, {TabItem} from '../Tab'
 import {FaBars} from 'react-icons/fa'
 import {BaseRoute} from './types'
-import { filterRoutesByRole } from './roleUtils'
-import RoleToggleButton from '../RoleToggleButton'
-import RoleSlidingDrawer from '../RoleSlidingDrawer'
 import wezoAe from "../../../assets/wezo-optimized.svg"
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '../../../store'
-import { switchUserRole } from '../../../store/slices/authSlice'
 
 interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
@@ -18,8 +12,6 @@ interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     navigateTo: (route: keyof T, params?: any) => void
     setSideNavOpen: (open: boolean) => void
     isMobile: boolean
-    currentRole: 'Tenant' | 'HomeOwner' | 'Manager' | null
-    isAuthenticated: boolean
     headerConfig?: {
         title?: string
         logo?: React.ReactNode
@@ -39,33 +31,12 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                                                                        navigateTo,
                                                                        setSideNavOpen,
                                                                        isMobile,
-                                                                       currentRole,
-                                                                       isAuthenticated,
                                                                        theme
                                                                    }: HeaderDefaultProps<T>) => {
-    
-    // State for role switching drawer
-    const [isRoleDrawerOpen, setIsRoleDrawerOpen] = useState(false)
-    const dispatch = useDispatch<AppDispatch>()
 
-    // Handle role switching
-    const handleRoleSelect = async (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
-        try {
-            await dispatch(switchUserRole(role)).unwrap()
-            setIsRoleDrawerOpen(false)
-        } catch (error: any) {
-            console.error('Role switch failed:', error)
-            // Show error message to user
-            const errorMessage = error.message || error || 'Failed to switch role'
-            alert(`Role switch failed: ${errorMessage}`)
-        }
-    }
-
-    // Filter routes based on current user role
-    const accessibleRoutes = filterRoutesByRole(routes, currentRole, isAuthenticated)
 
     // Get header quick nav items
-    const headerNavItems: TabItem[] = Object.entries(accessibleRoutes)
+    const headerNavItems: TabItem[] = Object.entries(routes)
         .filter(([_, route]) => route.showInHeader !== false && (!isMobile || route.showInFooter !== false))
         .slice(0, isMobile ? 4 : undefined)
         .map(([path, route]) => ({
@@ -118,48 +89,24 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                 )}
             </Box>
 
-            {/* Right: Role Toggle + Menu Button */}
-            <Box display="flex" alignItems="center" gap="0.5rem">
-                {/* Role Toggle Button - only show for authenticated users */}
-                {isAuthenticated && currentRole && (
-                    <RoleToggleButton
-                        currentRole={currentRole}
-                        onClick={() => setIsRoleDrawerOpen(true)}
-                    />
-                )}
 
-                <Button
-                    label=""
-                    icon={<FaBars fontSize={'1.2rem'}/>}
-                    onClick={() => setSideNavOpen(true)}
-                    variant="plain"
-                    size="small"
-                    border="1px solid #CCC"
-                    borderRadius="8px"
-                    aria-label="Open navigation menu"
-                    style={{
-                        color: 'white',
-                        padding: 0
-                    }}
-                    whileHover={{
-                        backgroundColor: 'rgba(213, 33, 34, 0.1)',
-                        borderColor: theme.primaryColor
-                    }}
-                />
-            </Box>
-
-            {/* Role Switching Drawer */}
-            <RoleSlidingDrawer
-                isOpen={isRoleDrawerOpen}
-                onClose={() => setIsRoleDrawerOpen(false)}
-                userInfo={{
-                    firstName: 'Admin',
-                    lastName: 'User', 
-                    email: 'admin@wezo.ae',
-                    role: currentRole || 'Tenant'
+            <Button
+                label=""
+                icon={<FaBars fontSize={'1.2rem'}/>}
+                onClick={() => setSideNavOpen(true)}
+                variant="plain"
+                size="small"
+                border="1px solid #CCC"
+                borderRadius="8px"
+                aria-label="Open navigation menu"
+                style={{
+                    color: 'white',
+                    padding: 0
                 }}
-                availableRoles={['Tenant', 'HomeOwner', 'Manager']}
-                onRoleSelect={handleRoleSelect}
+                whileHover={{
+                    backgroundColor: 'rgba(213, 33, 34, 0.1)',
+                    borderColor: theme.primaryColor
+                }}
             />
         </Box>
     )

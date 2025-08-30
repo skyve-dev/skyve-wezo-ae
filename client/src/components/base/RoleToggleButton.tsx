@@ -106,12 +106,12 @@ const RoleToggleButton: React.FC<RoleToggleButtonProps> = ({
                 minWidth: 'unset',
                 transition: 'all 0.2s ease',
                 cursor: disabled ? 'not-allowed' : 'pointer',
-                opacity: disabled ? 0.6 : 1
-            }}
-            whileHover={disabled ? {} : {
-                backgroundColor: config.hoverBackgroundColor,
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                opacity: disabled ? 0.6 : 1,
+                ':hover': disabled ? {} : {
+                    backgroundColor: config.hoverBackgroundColor,
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                }
             }}
         >
             {/* Role Icon */}
@@ -127,9 +127,11 @@ const RoleToggleButton: React.FC<RoleToggleButtonProps> = ({
                 fontSize="0.875rem"
                 fontWeight="600" 
                 color={config.color}
-                style={{ whiteSpace: 'nowrap' }}
-                display="none"
-                displaySm="block"
+                whiteSpace="nowrap"
+                display={{
+                    base: 'none',  // Hide on mobile
+                    sm: 'block'    // Show on desktop
+                }}
             >
                 {config.displayName}
             </Box>

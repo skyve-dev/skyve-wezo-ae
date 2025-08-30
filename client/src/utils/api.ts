@@ -218,13 +218,6 @@ class ApiClient {
     return response.user;
   }
 
-  async updateUserRole(role: 'Tenant' | 'HomeOwner' | 'Manager'): Promise<AuthResponse> {
-    return this.makeRequest<AuthResponse>('/api/auth/update-role', {
-      method: 'PUT',
-      body: JSON.stringify({ role }),
-    });
-  }
-
   async healthCheck(): Promise<{ status: string }> {
     return this.makeRequest<{ status: string }>('/api/health');
   }

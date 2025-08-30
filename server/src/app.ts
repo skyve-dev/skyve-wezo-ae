@@ -5,11 +5,7 @@ import path from 'path';
 import routes from './routes';
 import { requestLogger } from './middleware/logger';
 
-// Load environment configuration first
 dotenv.config();
-
-// Initialize JWT configuration early to ensure consistency
-import './config/jwt';
 
 const app: Application = express();
 

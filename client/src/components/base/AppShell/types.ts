@@ -8,7 +8,6 @@ export interface BaseRoute {
     showInNav?: boolean
     showInHeader?: boolean
     showInFooter?: boolean
-    roles?: ('Tenant' | 'HomeOwner' | 'Manager')[]  // Role-based access control
 }
 
 // Extract component props type

@@ -20,7 +20,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     const decoded = verifyToken(token);
     req.user = decoded;
     next();
-  } catch (error: any) {
+  } catch (error) {
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 };

@@ -208,20 +208,6 @@ export const fetchPropertyById = createAsyncThunk(
   }
 )
 
-export const fetchPublicPropertyById = createAsyncThunk(
-  'property/fetchPublicPropertyById',
-  async (propertyId: string, { rejectWithValue }) => {
-    try {
-      const response = await api.get<{ property: any }>(`/api/properties/${propertyId}/public`)
-      return transformServerPropertyData(response.property)
-    } catch (error: any) {
-      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
-                          error.serverMessage || error.message || 'Failed to fetch property details'
-      return rejectWithValue(errorMessage)
-    }
-  }
-)
-
 export const createProperty = createAsyncThunk(
   'property/createProperty',
   async (propertyData: WizardFormData, { rejectWithValue }) => {
@@ -579,20 +565,6 @@ const propertySlice = createSlice({
         state.currentProperty = action.payload
       })
       .addCase(fetchPropertyById.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload as string
-      })
-      
-      // Fetch public property by ID
-      .addCase(fetchPublicPropertyById.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(fetchPublicPropertyById.fulfilled, (state, action) => {
-        state.loading = false
-        state.currentProperty = action.payload
-      })
-      .addCase(fetchPublicPropertyById.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

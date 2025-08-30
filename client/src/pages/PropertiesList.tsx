@@ -16,14 +16,9 @@ const PropertiesList: React.FC = () => {
 
     // Redux state
     const {properties, loading, error} = useAppSelector((state) => state.property)
-    const {currentRoleMode} = useAppSelector((state) => state.auth)
 
     // Local state
     const [searchTerm, setSearchTerm] = useState('')
-    
-    // Role-based permissions
-    const canManageProperties = currentRoleMode === 'HomeOwner' || currentRoleMode === 'Manager'
-    const isReadOnlyMode = currentRoleMode === 'Tenant'
 
     // Fetch properties on component mount
     useEffect(() => {
@@ -118,7 +113,7 @@ const PropertiesList: React.FC = () => {
 
     const handleViewProperty = (property: Property) => {
         dispatch(setCurrentProperty(property))
-        navigateTo('property-view', {id: property.propertyId})
+        navigateTo('property-view', {propertyId: property.propertyId})
     }
 
     const handleManageAvailability = (property: Property) => {
@@ -222,40 +217,37 @@ const PropertiesList: React.FC = () => {
                     variant="normal"
                     size="small"
                 />
-                {canManageProperties && (
-                    <>
-                        <Button
-                            label="Edit"
-                            icon={<FaEdit/>}
-                            onClick={() => handleEditProperty(property)}
-                            variant="normal"
-                            size="small"
-                        />
-                        <Button
-                            label="Edit Photos"
-                            icon={<FaEdit/>}
-                            onClick={() => handleEditProperty(property, 'photos')}
-                            variant="normal"
-                            size="small"
-                            style={{fontSize: '0.75rem'}}
-                        />
-                        <Button
-                            label="Calendar"
-                            icon={<FaCalendarAlt/>}
-                            onClick={() => handleManageAvailability(property)}
-                            variant="normal"
-                            size="small"
-                        />
-                        <Button
-                            label=""
-                            icon={<FaTrash/>}
-                            onClick={() => handleDeleteProperty(property)}
-                            variant="normal"
-                            size="small"
-                            style={{color: '#dc2626'}}
-                        />
-                    </>
-                )}
+                <Button
+                    label="Edit"
+                    icon={<FaEdit/>}
+                    onClick={() => handleEditProperty(property)}
+                    variant="normal"
+                    size="small"
+                />
+                <Button
+                    label="Edit Photos"
+                    icon={<FaEdit/>}
+                    onClick={() => handleEditProperty(property, 'photos')}
+                    variant="normal"
+                    size="small"
+                    style={{fontSize: '0.75rem'}}
+                />
+                <Button
+                    label="Calendar"
+                    icon={<FaCalendarAlt/>}
+                    onClick={() => handleManageAvailability(property)}
+                    variant="normal"
+                    size="small"
+                />
+
+                <Button
+                    label=""
+                    icon={<FaTrash/>}
+                    onClick={() => handleDeleteProperty(property)}
+                    variant="normal"
+                    size="small"
+                    style={{color: '#dc2626'}}
+                />
             </Box>
         </Box>
     )
@@ -278,26 +270,19 @@ const PropertiesList: React.FC = () => {
                 {/* Header */}
                 <Box display="flex" flexDirection={'column'} flexDirectionSm={'row'} justifyContent="space-between" gap={'1rem'} marginBottom="2rem">
                     <Box>
-                        <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>
-                            {isReadOnlyMode ? 'Browse Properties' : 'My Properties'}
-                        </h1>
+                        <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>My Properties</h1>
                         <p style={{color: '#666', margin: '0.5rem 0 0 0'}}>
-                            {isReadOnlyMode 
-                                ? 'Discover and explore available properties for your next stay'
-                                : 'Manage your property listings and track their performance'
-                            }
+                            Manage your property listings and track their performance
                         </p>
                     </Box>
-                    {canManageProperties && (
-                        <Button
-                            label="Add New Property"
-                            icon={<FaPlus/>}
-                            onClick={() => {
-                                navigateTo('property-create', {})
-                            }}
-                            variant="promoted"
-                        />
-                    )}
+                    <Button
+                        label="Add New Property"
+                        icon={<FaPlus/>}
+                        onClick={() => {
+                            navigateTo('property-create', {})
+                        }}
+                        variant="promoted"
+                    />
                 </Box>
 
                 {/* Error Display */}
@@ -358,17 +343,15 @@ const PropertiesList: React.FC = () => {
                             <FaMapMarkerAlt size={48}/>
                         </Box>
                         <h3 style={{margin: '0 0 1rem 0', color: '#4b5563'}}>
-                            {properties.length === 0 ? 'No properties available' : 'No properties match your search'}
+                            {properties.length === 0 ? 'No properties yet' : 'No properties match your search'}
                         </h3>
                         <p style={{color: '#6b7280', marginBottom: '1.5rem'}}>
                             {properties.length === 0
-                                ? (isReadOnlyMode 
-                                    ? 'There are no properties available to browse at the moment'
-                                    : 'Start by adding your first property to begin managing your listings')
+                                ? 'Start by adding your first property to begin managing your listings'
                                 : 'Try adjusting your search criteria'
                             }
                         </p>
-                        {properties.length === 0 && canManageProperties && (
+                        {properties.length === 0 && (
                             <Button
                                 label="Add Your First Property"
                                 icon={<FaPlus/>}

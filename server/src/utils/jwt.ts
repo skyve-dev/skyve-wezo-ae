@@ -1,9 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from '@prisma/client';
-import JWT_CONFIG from '../config/jwt';
 
-// Use centralized JWT configuration
-const { secret: JWT_SECRET, expiresIn: JWT_EXPIRES_IN } = JWT_CONFIG;
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-this';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface JWTPayload {
   id: string;
@@ -26,17 +25,13 @@ export const generateToken = (user: Pick<User, 'id' | 'username' | 'email' | 'ro
 };
 
 export const verifyToken = (token: string): JWTPayload => {
-  try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
-  } catch (error: any) {
-    throw error;
-  }
+  return jwt.verify(token, JWT_SECRET) as JWTPayload;
 };
 
 export const generatePasswordResetToken = (userId: string): string => {
   return jwt.sign(
     { userId, type: 'password-reset' }, 
     JWT_SECRET, 
-    { expiresIn: JWT_CONFIG.passwordResetExpiresIn } as any
+    { expiresIn: process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN || '1h' } as any
   );
 };

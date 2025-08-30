@@ -1,8 +1,8 @@
 import React from 'react'
 import { FaHome, FaBuilding, FaCog } from 'react-icons/fa'
 import { Box } from './Box'
-import SlidingDrawer from './SlidingDrawer'
-import SelectionPicker from './SelectionPicker'
+import { SlidingDrawer } from './SlidingDrawer'
+import { SelectionPicker } from './SelectionPicker'
 
 interface UserInfo {
     firstName?: string
@@ -148,8 +148,10 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
             border={isSelected ? '2px solid #3b82f6' : '2px solid transparent'}
             cursor="pointer"
             transition="all 0.2s ease"
-            whileHover={{
-                backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 0, 0, 0.05)'
+            style={{
+                ':hover': {
+                    backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 0, 0, 0.05)'
+                }
             }}
         >
             {/* Role Icon */}
@@ -258,7 +260,7 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
 
                     <SelectionPicker
                         data={availableRoleOptions}
-                        idAccessor={(option: RoleOption) => option.id}
+                        idAccessor={(option) => option.id}
                         value={selectedRole || userInfo.role}
                         onChange={handleRoleChange}
                         isMultiSelect={false}

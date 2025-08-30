@@ -1,7 +1,6 @@
 import {Box} from '../Box'
 import Tab, {TabItem} from '../Tab'
 import {BaseRoute} from './types'
-import { filterRoutesByRole } from './roleUtils'
 import wezoAe from "@/assets/wezo-optimized.svg";
 
 interface SideNavDefaultProps<T extends Record<string, BaseRoute>> {
@@ -9,8 +8,6 @@ interface SideNavDefaultProps<T extends Record<string, BaseRoute>> {
     currentRoute: string
     navigateTo: (route: keyof T, params?: any) => void
     setSideNavOpen: (open: boolean) => void
-    currentRole: 'Tenant' | 'HomeOwner' | 'Manager' | null
-    isAuthenticated: boolean
     theme: {
         primaryColor: string
         backgroundColor: string
@@ -23,15 +20,10 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
     currentRoute,
     navigateTo,
     setSideNavOpen,
-    currentRole,
-    isAuthenticated,
     theme
 }: SideNavDefaultProps<T>) => {
-    // Filter routes based on current user role
-    const accessibleRoutes = filterRoutesByRole(routes, currentRole, isAuthenticated)
-    
     // Get navigation items for side drawer (Tab format)
-    const navTabItems: TabItem[] = Object.entries(accessibleRoutes)
+    const navTabItems: TabItem[] = Object.entries(routes)
         .filter(([_, route]) => route.showInNav !== false)
         .map(([path, route]) => ({
             id: path,
