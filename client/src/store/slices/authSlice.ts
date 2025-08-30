@@ -8,6 +8,10 @@ interface AuthState {
   isLoading: boolean
   error: string | null
   isAuthenticated: boolean
+  // Role management
+  currentRoleMode: 'Tenant' | 'HomeOwner' | 'Manager' | null  // Current UI mode
+  availableRoles: ('Tenant' | 'HomeOwner' | 'Manager')[]  // Roles user can switch to
+  rolePreference: string | null  // Persisted role preference
 }
 
 const initialState: AuthState = {
@@ -16,6 +20,10 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: false,
+  // Role management
+  currentRoleMode: null,
+  availableRoles: [],
+  rolePreference: localStorage.getItem('user_role_preference'),
 }
 
 // Async thunks for API calls
@@ -83,6 +91,22 @@ export const requestPasswordReset = createAsyncThunk(
   }
 )
 
+// Role management async thunks
+export const switchUserRole = createAsyncThunk(
+  'auth/switchRole',
+  async (role: 'Tenant' | 'HomeOwner' | 'Manager', { rejectWithValue }) => {
+    try {
+      const response = await apiClient.updateUserRole(role)
+      apiClient.setToken(response.token)
+      localStorage.setItem('authToken', response.token)
+      localStorage.setItem('user_role_preference', role)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Unable to switch role. Please try again.')
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -92,11 +116,53 @@ const authSlice = createSlice({
       state.token = null
       state.isAuthenticated = false
       state.error = null
+      state.currentRoleMode = null
+      state.availableRoles = []
       localStorage.removeItem('authToken')
+      localStorage.removeItem('user_role_preference')
       apiClient.setToken(null)
     },
     clearError: (state) => {
       state.error = null
+    },
+    setCurrentRoleMode: (state, action) => {
+      state.currentRoleMode = action.payload
+      localStorage.setItem('user_role_preference', action.payload)
+    },
+    updateAvailableRoles: (state, action) => {
+      state.availableRoles = action.payload
+    },
+    initializeRoleMode: (state) => {
+      if (state.user) {
+        // Determine available roles based on user
+        const availableRoles: ('Tenant' | 'HomeOwner' | 'Manager')[] = ['Tenant']
+        
+        if (state.user.role === 'HomeOwner' || state.user.role === 'Manager') {
+          availableRoles.push('HomeOwner')
+        }
+        
+        if (state.user.role === 'Manager') {
+          availableRoles.push('Manager')
+        }
+        
+        state.availableRoles = availableRoles
+        
+        // Set current role mode based on preference or user role
+        const preference = localStorage.getItem('user_role_preference') as 'Tenant' | 'HomeOwner' | 'Manager' | null
+        if (preference && availableRoles.includes(preference)) {
+          state.currentRoleMode = preference
+        } else {
+          // Default to highest available role
+          if (state.user.role === 'Manager') {
+            state.currentRoleMode = 'Manager'
+          } else if (state.user.role === 'HomeOwner') {
+            state.currentRoleMode = 'HomeOwner'
+          } else {
+            state.currentRoleMode = 'Tenant'
+          }
+          localStorage.setItem('user_role_preference', state.currentRoleMode)
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -112,6 +178,8 @@ const authSlice = createSlice({
         state.token = action.payload.token
         state.isAuthenticated = true
         state.error = null
+        // Initialize role mode after successful login
+        authSlice.caseReducers.initializeRoleMode(state)
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false
@@ -131,6 +199,8 @@ const authSlice = createSlice({
         state.token = action.payload.token
         state.isAuthenticated = true
         state.error = null
+        // Initialize role mode after successful registration
+        authSlice.caseReducers.initializeRoleMode(state)
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false
@@ -149,6 +219,8 @@ const authSlice = createSlice({
         state.token = action.payload.token
         state.isAuthenticated = true
         state.error = null
+        // Initialize role mode after successful auth check
+        authSlice.caseReducers.initializeRoleMode(state)
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false
@@ -171,10 +243,29 @@ const authSlice = createSlice({
         state.isLoading = false
         state.error = action.payload as string || 'Unable to process password reset request. Please try again.'
       })
+    
+    // Role Switching
+    builder
+      .addCase(switchUserRole.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(switchUserRole.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.user = action.payload.user
+        state.token = action.payload.token
+        state.error = null
+        // Reinitialize role mode after role switch to update available roles
+        authSlice.caseReducers.initializeRoleMode(state)
+      })
+      .addCase(switchUserRole.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string || 'Unable to switch role. Please try again.'
+      })
   },
 })
 
-export const { logout, clearError } = authSlice.actions
+export const { logout, clearError, setCurrentRoleMode, updateAvailableRoles, initializeRoleMode } = authSlice.actions
 
 // Selectors - memoized for performance
 export const selectUser = (state: { auth: AuthState }) => state.auth.user
@@ -182,5 +273,10 @@ export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.
 export const selectIsLoading = (state: { auth: AuthState }) => state.auth.isLoading
 export const selectError = (state: { auth: AuthState }) => state.auth.error
 export const selectToken = (state: { auth: AuthState }) => state.auth.token
+
+// Role management selectors
+export const selectCurrentRoleMode = (state: { auth: AuthState }) => state.auth.currentRoleMode
+export const selectAvailableRoles = (state: { auth: AuthState }) => state.auth.availableRoles
+export const selectRolePreference = (state: { auth: AuthState }) => state.auth.rolePreference
 
 export default authSlice.reducer

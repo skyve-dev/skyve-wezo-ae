@@ -6,6 +6,7 @@ export {
 } from './AppShellContext'
 export { useNavigation } from './useNavigation'
 export { useTheme } from './useTheme'
+export { filterRoutesByRole, hasRouteAccess, getAvailableRoles } from './roleUtils'
 export {
   getBasePath,
   getCurrentPath,

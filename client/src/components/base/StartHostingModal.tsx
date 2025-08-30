@@ -391,10 +391,8 @@ const StartHostingModal: React.FC<StartHostingModalProps> = ({
                         display="flex"
                         gap="0.75rem"
                         justifyContent="center"
-                        flexDirection={{
-                            base: 'column',
-                            sm: 'row'
-                        }}
+                        flexDirection="column"
+                        flexDirectionSm="row"
                     >
                         <Button
                             label="Get Started"
@@ -402,10 +400,8 @@ const StartHostingModal: React.FC<StartHostingModalProps> = ({
                             onClick={onGetStarted}
                             variant="promoted"
                             size="large"
-                            flex={{
-                                base: '1',
-                                sm: 'unset'
-                            }}
+                            flex="1"
+                            flexSm="unset"
                             style={{
                                 background: 'linear-gradient(135deg, #D52122 0%, #ff4444 100%)',
                                 border: 'none',
@@ -419,10 +415,8 @@ const StartHostingModal: React.FC<StartHostingModalProps> = ({
                             onClick={onMaybeLater}
                             variant="normal"
                             size="large"
-                            flex={{
-                                base: '1',
-                                sm: 'unset'
-                            }}
+                            flex="1"
+                            flexSm="unset"
                             backgroundColor="#f8fafc"
                             color="#6b7280"
                             border="1px solid #e2e8f0"

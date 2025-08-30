@@ -306,6 +306,53 @@ export class RatePlanService {
   }
 
   /**
+   * Get public rate plans for a property (no authentication required)
+   * Returns only active rate plans visible to guests
+   */
+  async getPublicRatePlansForProperty(propertyId: string): Promise<any[]> {
+    // First verify property exists and is live
+    const property = await prisma.property.findUnique({
+      where: { propertyId },
+      select: { propertyId: true, name: true }
+    });
+
+    if (!property) {
+      throw new Error('Property not found');
+    }
+
+    // Get only active rate plans for public viewing
+    const ratePlans = await prisma.ratePlan.findMany({
+      where: { 
+        propertyId,
+        isActive: true
+      },
+      include: {
+        ratePlanRestrictions: true,
+        cancellationPolicy: {
+          include: {
+            tiers: {
+              orderBy: { daysBeforeCheckIn: 'desc' }
+            }
+          }
+        },
+        prices: {
+          select: {
+            date: true,
+            amount: true
+          },
+          orderBy: { date: 'asc' }
+        }
+      },
+      orderBy: [
+        { priority: 'asc' },
+        { name: 'asc' }
+      ],
+    });
+
+    return ratePlans;
+  }
+
+  /**
    * Get a single rate plan by ID
    */
   async getRatePlanById(ratePlanId: string, userId: string): Promise<any> {
@@ -774,6 +821,145 @@ export class RatePlanService {
     }
 
     return dates;
+  }
+
+  /**
+   * Calculate pricing for a guest stay with guest count and date range
+   */
+  async calculatePricingForStay(
+    propertyId: string,
+    checkInDate: Date,
+    checkOutDate: Date,
+    numGuests: number
+  ): Promise<any> {
+    
+    // Verify property exists
+    const property = await prisma.property.findUnique({
+      where: { propertyId },
+      select: { propertyId: true, name: true, maximumGuest: true }
+    });
+
+    if (!property) {
+      throw new Error('Property not found');
+    }
+
+
+    // Validate guest count
+    if (numGuests > property.maximumGuest) {
+      throw new Error(`Maximum ${property.maximumGuest} guests allowed for this property`);
+    }
+
+    // Get active rate plans with all related data
+    const ratePlans = await prisma.ratePlan.findMany({
+      where: {
+        propertyId,
+        isActive: true
+      },
+      include: {
+        ratePlanRestrictions: true,
+        prices: {
+          where: {
+            date: {
+              gte: checkInDate,
+              lt: checkOutDate
+            }
+          }
+        }
+      }
+    });
+
+    const stayDuration = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+    const dateRange = this.getDateRange(checkInDate, checkOutDate);
+    
+    // Day-by-day pricing calculation with activeDays validation
+    const dayPricing: { [date: string]: { ratePlanId: string; name: string; price: number; dayOfWeek: number }[] } = {};
+    let totalStayPrice = 0;
+    
+    // For each day in the stay, find applicable rate plans
+    for (const date of dateRange) {
+      const dayOfWeek = date.getDay();
+      const dateString = date.toISOString().split('T')[0];
+      dayPricing[dateString] = [];
+      
+      // Find rate plans that apply to this specific day
+      for (const ratePlan of ratePlans) {
+        // Check if rate plan applies to this day of week
+        if (!ratePlan.activeDays.includes(dayOfWeek)) {
+          continue;
+        }
+        
+        // Skip restrictions for now - focus on basic pricing
+        
+        // Get price for this specific date
+        let dayPrice = 0;
+        const priceEntry = ratePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
+        
+        if (priceEntry && priceEntry.amount) {
+          // Use specific price if set for this date
+          dayPrice = Number(priceEntry.amount);
+        } else {
+          // Use base adjustment value as fallback
+          dayPrice = Number(ratePlan.adjustmentValue) || 0;
+        }
+        
+        
+        dayPricing[dateString].push({
+          ratePlanId: ratePlan.id,
+          name: ratePlan.name,
+          price: dayPrice,
+          dayOfWeek
+        });
+      }
+    }
+    
+    // Create rate plan summaries with day-by-day totals
+    const ratePlanSummaries: { [ratePlanId: string]: any } = {};
+    
+    for (const [dateString, dayRates] of Object.entries(dayPricing)) {
+      for (const dayRate of dayRates) {
+        if (!ratePlanSummaries[dayRate.ratePlanId]) {
+          const ratePlan = ratePlans.find(rp => rp.id === dayRate.ratePlanId);
+          ratePlanSummaries[dayRate.ratePlanId] = {
+            ratePlanId: dayRate.ratePlanId,
+            name: dayRate.name,
+            type: ratePlan?.type,
+            includesBreakfast: ratePlan?.includesBreakfast,
+            applicableDays: 0,
+            totalPrice: 0,
+            dayBreakdown: [],
+            isEligible: true
+          };
+        }
+        
+        ratePlanSummaries[dayRate.ratePlanId].applicableDays++;
+        ratePlanSummaries[dayRate.ratePlanId].totalPrice += dayRate.price;
+        ratePlanSummaries[dayRate.ratePlanId].dayBreakdown.push({
+          date: dateString,
+          dayOfWeek: dayRate.dayOfWeek,
+          price: dayRate.price
+        });
+        
+        totalStayPrice += dayRate.price;
+      }
+    }
+    
+    // Convert to array and calculate per-night averages
+    const ratePlanCalculations = Object.values(ratePlanSummaries).map((summary: any) => ({
+      ...summary,
+      pricePerNight: summary.totalPrice / summary.applicableDays,
+      stayDuration: summary.applicableDays
+    }));
+
+    return {
+      propertyId,
+      checkInDate: checkInDate.toISOString().split('T')[0],
+      checkOutDate: checkOutDate.toISOString().split('T')[0],
+      numGuests,
+      stayDuration,
+      totalStayPrice,
+      dayByDayPricing: dayPricing,
+      ratePlans: ratePlanCalculations.sort((a, b) => a.totalPrice - b.totalPrice)
+    };
   }
 
   /**

@@ -1,10 +1,13 @@
 import Tab, { TabItem } from '../Tab'
 import { BaseRoute } from './types'
+import { filterRoutesByRole } from './roleUtils'
 
 interface FooterDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
     currentRoute: string
     navigateTo: (route: keyof T, params?: any) => void
+    currentRole: 'Tenant' | 'HomeOwner' | 'Manager' | null
+    isAuthenticated: boolean
     footerConfig?: {
         maxItems?: number
     }
@@ -19,13 +22,18 @@ export const FooterDefault = <T extends Record<string, BaseRoute>>({
     routes,
     currentRoute,
     navigateTo,
+    currentRole,
+    isAuthenticated,
     footerConfig,
     theme
 }: FooterDefaultProps<T>) => {
     const { maxItems = 3 } = footerConfig || {}
 
+    // Filter routes based on current user role
+    const accessibleRoutes = filterRoutesByRole(routes, currentRole, isAuthenticated)
+
     // Get footer nav items (mobile only) - formatted as TabItem[]
-    const footerNavItems: TabItem[] = Object.entries(routes)
+    const footerNavItems: TabItem[] = Object.entries(accessibleRoutes)
         .filter(([_, route]) => route.showInFooter !== false)
         .slice(0, maxItems)
         .map(([path, route]) => ({

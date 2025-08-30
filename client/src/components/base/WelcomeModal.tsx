@@ -214,10 +214,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({
                         display="flex"
                         gap="0.75rem"
                         justifyContent="center"
-                        flexDirection={{
-                            base: 'column',    // Stack on mobile
-                            sm: 'row'         // Side by side on desktop
-                        }}
+                        flexDirection="column"
+                        flexDirectionSm="row"
                     >
                         <Button
                             label="Start Browsing"
@@ -225,10 +223,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({
                             onClick={onStartBrowsing}
                             variant="promoted"
                             size="medium"
-                            flex={{
-                                base: '1',     // Full width on mobile
-                                sm: 'unset'   // Auto width on desktop  
-                            }}
+                            flex="1"
+                            flexSm="unset"
                             style={{
                                 background: 'linear-gradient(135deg, #D52122 0%, #ff4444 100%)',
                                 border: 'none',
@@ -241,10 +237,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({
                             onClick={onMaybeLater}
                             variant="normal"
                             size="medium"
-                            flex={{
-                                base: '1',     // Full width on mobile
-                                sm: 'unset'   // Auto width on desktop
-                            }}
+                            flex="1"
+                            flexSm="unset"
                             backgroundColor="#f8fafc"
                             color="#6b7280"
                             border="1px solid #e2e8f0"

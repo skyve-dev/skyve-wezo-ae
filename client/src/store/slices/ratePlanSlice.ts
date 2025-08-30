@@ -292,6 +292,35 @@ const ratePlanSlice = createSlice({
         state.error = action.payload as string
       })
       
+      // Fetch public rate plans
+      .addCase(fetchPublicRatePlans.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPublicRatePlans.fulfilled, (state, action) => {
+        state.ratePlans = (action.payload || []).filter(plan => plan && plan.id)
+        state.loading = false
+        state.error = null
+      })
+      .addCase(fetchPublicRatePlans.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Calculate rate pricing
+      .addCase(calculateRatePricing.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(calculateRatePricing.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(calculateRatePricing.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
       // Create rate plan
       .addCase(createRatePlanAsync.pending, (state) => {
         state.isSaving = true
@@ -398,6 +427,39 @@ export const fetchRatePlans = createAsyncThunk(
       console.log('🟣 fetchRatePlans ERROR:', error)
       const errorMessage = error.getUserMessage ? error.getUserMessage() : 
                           error.serverMessage || error.message || 'Failed to fetch rate plans'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+export const fetchPublicRatePlans = createAsyncThunk(
+  'ratePlan/fetchPublicRatePlans',
+  async (propertyId: string, { rejectWithValue }) => {
+    try {
+      const response = await api.get<{ ratePlans?: RatePlan[]; rate_plans?: RatePlan[] }>(`/api/properties/${propertyId}/rate-plans/public`)
+      const result = response.ratePlans || response.rate_plans || []
+      return result
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch public rate plans'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+export const calculateRatePricing = createAsyncThunk(
+  'ratePlan/calculatePricing',
+  async (params: { propertyId: string; checkInDate: string; checkOutDate: string; numGuests: number }, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ calculation: any }>(`/api/properties/${params.propertyId}/rate-plans/calculate`, {
+        checkInDate: params.checkInDate,
+        checkOutDate: params.checkOutDate,
+        numGuests: params.numGuests
+      })
+      return response.calculation
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to calculate pricing'
       return rejectWithValue(errorMessage)
     }
   }

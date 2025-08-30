@@ -8,6 +8,8 @@ import {DynamicContentProvider, useDynamicContent} from './DynamicContentProvide
 import HeaderDefault from './HeaderDefault'
 import SideNavDefault from './SideNavDefault'
 import FooterDefault from './FooterDefault'
+import { useSelector } from 'react-redux'
+import { selectCurrentRoleMode, selectIsAuthenticated } from '@/store/slices/authSlice'
 import {
     AppShellConfig,
     AppShellContextType,
@@ -52,6 +54,10 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                                                }: AppShellProps<T>) => {
     const {openDialog, addToast} = usePromiseDialog();
     const {content, visibility, mountHeader, mountSideNav, mountFooter} = useDynamicContent();
+    
+    // Get current role and authentication state from Redux
+    const currentRole = useSelector(selectCurrentRoleMode)
+    const isAuthenticated = useSelector(selectIsAuthenticated)
     // Helper function to get initial route and params from URL
     const getInitialRouteAndParams = useCallback((): { route: string; params: Record<string, any> } => {
         if (typeof window === 'undefined') {
@@ -511,7 +517,8 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 navigateTo={navigateTo}
                                 setSideNavOpen={setSideNavOpen}
                                 isMobile={isMobile}
-
+                                currentRole={currentRole}
+                                isAuthenticated={isAuthenticated}
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',
@@ -557,6 +564,8 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 routes={routes}
                                 currentRoute={currentRoute}
                                 navigateTo={navigateTo}
+                                currentRole={currentRole}
+                                isAuthenticated={isAuthenticated}
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',
@@ -580,6 +589,8 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 currentRoute={currentRoute}
                                 navigateTo={navigateTo}
                                 setSideNavOpen={setSideNavOpen}
+                                currentRole={currentRole}
+                                isAuthenticated={isAuthenticated}
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',
