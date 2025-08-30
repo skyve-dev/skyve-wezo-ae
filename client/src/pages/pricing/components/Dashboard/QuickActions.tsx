@@ -1,8 +1,8 @@
 import React from 'react'
-import { FaPlus, FaCopy, FaCalendarPlus, FaChartLine, FaEdit, FaDownload, FaUpload } from 'react-icons/fa'
-import { Box } from '@/components'
+import {FaCalendarPlus, FaChartLine, FaCopy, FaDownload, FaEdit, FaPlus, FaUpload} from 'react-icons/fa'
+import {Box} from '@/components'
 import Button from '@/components/base/Button'
-import { useAppShell } from '@/components/base/AppShell'
+import {useAppShell} from '@/components/base/AppShell'
 
 interface RatePlan {
   id: string

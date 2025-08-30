@@ -304,7 +304,7 @@ export const blockDates = createAsyncThunk(
         reason: reason || 'Blocked by host'
       }))
       
-      const response = await api.put<{ 
+      await api.put<{ 
         message: string
         updated: number
         failed: any[]
@@ -348,7 +348,7 @@ export const unblockDates = createAsyncThunk(
         isAvailable: true
       }))
       
-      const response = await api.put<{ 
+      await api.put<{ 
         message: string
         updated: number
         failed: any[]

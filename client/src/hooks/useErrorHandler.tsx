@@ -1,16 +1,10 @@
-import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useAppShell } from '../components/base/AppShell'
-import { ApiError } from '../utils/api'
-import { 
-  setApiError, 
-  setError, 
-  clearCurrentError, 
-  selectCurrentError,
-  ErrorInfo
-} from '../store/slices/errorSlice'
-import { Box } from '../components/base/Box'
-import { Button } from '../components/base/Button'
+import {useCallback} from 'react'
+import {useDispatch, useSelector} from 'react-redux'
+import {useAppShell} from '../components/base/AppShell'
+import {ApiError} from '../utils/api'
+import {clearCurrentError, ErrorInfo, selectCurrentError, setApiError, setError} from '../store/slices/errorSlice'
+import {Box} from '../components/base/Box'
+import {Button} from '../components/base/Button'
 
 export interface UseErrorHandlerReturn {
   /**

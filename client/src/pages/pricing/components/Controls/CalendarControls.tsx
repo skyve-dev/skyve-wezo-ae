@@ -1,24 +1,12 @@
-import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
-import { useAppDispatch } from '@/store'
-import { 
-  FaChevronLeft, 
-  FaChevronRight, 
-  FaCalendarCheck, 
-  FaEdit,
-  FaFilter
-} from 'react-icons/fa'
-import { Box } from '@/components'
+import React, {useState} from 'react'
+import {useSelector} from 'react-redux'
+import {RootState, useAppDispatch} from '@/store'
+import {FaCalendarCheck, FaChevronLeft, FaChevronRight, FaEdit, FaFilter} from 'react-icons/fa'
+import {Box} from '@/components'
 import Button from '@/components/base/Button'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
-import {
-  setDateRange,
-  toggleBulkEditMode,
-  setSelectedRatePlans,
-  fetchPricesForRatePlan
-} from '@/store/slices/priceSlice'
-import { RootState } from '@/store'
+import {fetchPricesForRatePlan, setDateRange, setSelectedRatePlans, toggleBulkEditMode} from '@/store/slices/priceSlice'
 
 const CalendarControls: React.FC = () => {
   const dispatch = useAppDispatch()

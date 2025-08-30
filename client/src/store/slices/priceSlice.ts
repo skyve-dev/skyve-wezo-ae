@@ -163,6 +163,7 @@ const priceSlice = createSlice({
     
     // Rate Plan Selection (Multi-select for comparison)
     setSelectedRatePlans: (state, action: PayloadAction<string[]>) => {
+
       state.selectedRatePlanIds = action.payload
     },
     
@@ -330,6 +331,7 @@ const priceSlice = createSlice({
     
     // Clear State
     clearPrices: (state) => {
+
       state.pricesByRatePlan = {}
       state.statistics = {}
       state.priceGaps = {}
@@ -345,12 +347,17 @@ const priceSlice = createSlice({
   extraReducers: (builder) => {
     // Fetch Prices
     builder
-      .addCase(fetchPricesForRatePlan.pending, (state) => {
+      .addCase(fetchPricesForRatePlan.pending, (state, action) => {
+        console.log('🔷 priceSlice - fetchPricesForRatePlan.pending:', {
+          ratePlanId: action.meta.arg.ratePlanId,
+          dateRange: { start: action.meta.arg.startDate, end: action.meta.arg.endDate }
+        })
         state.loading = true
         state.error = null
       })
       .addCase(fetchPricesForRatePlan.fulfilled, (state, action) => {
         const { ratePlanId, prices } = action.payload
+
         state.pricesByRatePlan[ratePlanId] = prices
         state.loading = false
       })
@@ -389,7 +396,7 @@ const priceSlice = createSlice({
         
         // Mark that we need to refresh prices for this rate plan
         state.needsRefresh = {
-          ratePlanId: price.ratePlanId || state.priceEditForm.ratePlanId,
+          ratePlanId: price.ratePlanId || state.priceEditForm.ratePlanId || '',
           timestamp: Date.now()
         }
       })
@@ -526,12 +533,15 @@ export const {
 export const fetchPricesForRatePlan = createAsyncThunk(
   'price/fetchPricesForRatePlan',
   async (params: { ratePlanId: string; startDate?: string; endDate?: string }, { rejectWithValue }) => {
+    console.log('🔷 fetchPricesForRatePlan THUNK called:', params)
     try {
       const queryParams = new URLSearchParams()
       if (params.startDate) queryParams.append('startDate', params.startDate)
       if (params.endDate) queryParams.append('endDate', params.endDate)
       
       const response = await api.get<{ prices: Price[] }>(`/api/rate-plans/${params.ratePlanId}/prices?${queryParams}`)
+      
+
       
       return {
         ratePlanId: params.ratePlanId,
