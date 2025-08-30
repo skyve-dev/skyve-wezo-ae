@@ -1,8 +1,8 @@
-import React, { useMemo, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import React, {useEffect, useMemo} from 'react'
+import {useSelector} from 'react-redux'
 import CalendarGrid from './CalendarGrid'
-import { RootState } from '@/store'
-import { Box } from '@/components'
+import {RootState} from '@/store'
+import {Box} from '@/components'
 
 const CalendarView: React.FC = () => {
   const {
@@ -83,16 +83,48 @@ const CalendarView: React.FC = () => {
     return days
   }, [dateRange])
   
+  // Get current month info for filtering
+  const currentDate = dateRange.startDate ? new Date(dateRange.startDate) : new Date()
+  
+  // Filter rate plans based on seasonal restrictions for the current month
+  const getFilteredRatePlansForMonth = () => {
+    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+    
+    return ratePlans.filter(rp => {
+      if (!rp.isActive) return false
+      
+      // Check if rate plan has seasonal date range restrictions
+      const seasonalRestriction = rp.ratePlanRestrictions?.find(
+        r => r.type === 'SeasonalDateRange'
+      )
+      
+      if (seasonalRestriction) {
+        // Use startDate and endDate directly from the restriction object
+        if (seasonalRestriction.startDate && seasonalRestriction.endDate) {
+          const seasonStart = new Date(seasonalRestriction.startDate)
+          const seasonEnd = new Date(seasonalRestriction.endDate)
+          
+          // Check if current month overlaps with seasonal period
+          return !(monthEnd < seasonStart || monthStart > seasonEnd)
+        }
+      }
+      
+      // If no seasonal restriction, show the rate plan
+      return true
+    })
+  }
+
   // Get selected rate plans with color assignments
   const selectedRatePlans = useMemo(() => {
-    return ratePlans
+    return getFilteredRatePlansForMonth()
       .filter(rp => selectedRatePlanIds.includes(rp.id))
       .map((rp, index) => ({
         ...rp,
         color: `hsl(${(index * 137.508) % 360}deg, 70%, 50%)`,
         lightColor: `hsl(${(index * 137.508) % 360}deg, 70%, 95%)`
       }))
-  }, [ratePlans, selectedRatePlanIds])
+  }, [ratePlans, selectedRatePlanIds, dateRange.startDate])
   
   // Helper function to normalize date for comparison
   const normalizeDate = (date: string): string => {
@@ -147,16 +179,7 @@ const CalendarView: React.FC = () => {
         if (ratePlan.baseRatePlanId && ratePlan.adjustmentValue !== undefined) {
           const baseRatePlan = selectedRatePlans.find(rp => rp.id === ratePlan.baseRatePlanId)
           
-          // Debug logging for base rate plan resolution
-          if (dateString === '2025-08-30') {
-            console.log('🔍 BASE RATE PLAN DEBUG:', {
-              weeklyPlanName: ratePlan.name,
-              baseRatePlanId: ratePlan.baseRatePlanId,
-              baseRatePlanFound: !!baseRatePlan,
-              baseRatePlanName: baseRatePlan?.name,
-              selectedRatePlanIds: selectedRatePlans.map(rp => ({ id: rp.id, name: rp.name }))
-            })
-          }
+
           
           if (baseRatePlan) {
             // Get base price from the base rate plan
@@ -183,17 +206,7 @@ const CalendarView: React.FC = () => {
               // Negative values: -15% = 85% of base price (baseAmount * 0.85)
               calculatedAmount = baseAmount * (1 + ratePlan.adjustmentValue / 100)
               
-              // Debug logging for percentage calculations
-              if (dateString === '2025-08-30') {
-                console.log('🔍 PERCENTAGE CALCULATION DEBUG:', {
-                  ratePlanName: ratePlan.name,
-                  adjustmentValue: ratePlan.adjustmentValue,
-                  baseAmount,
-                  calculationFormula: `${baseAmount} * (1 + ${ratePlan.adjustmentValue}/100) = ${baseAmount} * ${(1 + ratePlan.adjustmentValue / 100)}`,
-                  calculatedAmount,
-                  willShow: calculatedAmount > 0
-                })
-              }
+
             } else if (ratePlan.adjustmentType === 'FixedDiscount') {
               // Apply fixed discount (e.g., base price minus fixed amount)
               calculatedAmount = baseAmount - ratePlan.adjustmentValue

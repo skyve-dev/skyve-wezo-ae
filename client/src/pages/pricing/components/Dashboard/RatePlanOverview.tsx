@@ -1,9 +1,9 @@
 import React from 'react'
-import { FaEdit, FaChartBar, FaEye, FaCalendarAlt } from 'react-icons/fa'
-import { Box } from '@/components'
+import {FaCalendarAlt, FaChartBar, FaEdit, FaEye} from 'react-icons/fa'
+import {Box} from '@/components'
 import Button from '@/components/base/Button'
-import { useAppShell } from '@/components/base/AppShell'
-import { PriceStatistics } from '@/store/slices/priceSlice'
+import {useAppShell} from '@/components/base/AppShell'
+import {PriceStatistics} from '@/store/slices/priceSlice'
 
 interface RatePlan {
   id: string

@@ -11,11 +11,17 @@ router.post(
   ratePlanController.createRatePlan
 );
 
-// Get all rate plans for a property
+// Get all rate plans for a property (private - owner/manager only)
 router.get(
   '/properties/:propertyId/rate-plans',
   authenticate,
   ratePlanController.getRatePlansForProperty
+);
+
+// Get public rate plans for a property (no auth required - for guest browsing)
+router.get(
+  '/properties/:propertyId/rate-plans/public',
+  ratePlanController.getPublicRatePlansForProperty
 );
 
 // Get a specific rate plan
@@ -43,6 +49,12 @@ router.delete(
 router.post(
   '/properties/:propertyId/rate-plans/search',
   ratePlanController.searchAvailableRates
+);
+
+// Calculate pricing for guest count and date range (public endpoint)
+router.post(
+  '/properties/:propertyId/rate-plans/calculate',
+  ratePlanController.calculateRatePricing
 );
 
 // Calculate cancellation refund

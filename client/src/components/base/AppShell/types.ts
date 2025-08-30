@@ -8,6 +8,7 @@ export interface BaseRoute {
     showInNav?: boolean
     showInHeader?: boolean
     showInFooter?: boolean
+    roles?: ('Tenant' | 'HomeOwner' | 'Manager')[]  // Role-based access control
 }
 
 // Extract component props type
@@ -62,6 +63,25 @@ export interface DialogState<T = any> {
     reject: (reason?: any) => void
 }
 
+// Toast system types
+export interface ToastOptions {
+    autoHide?: boolean
+    duration?: number
+    type?: 'info' | 'success' | 'warning' | 'error'
+    showCloseButton?: boolean
+}
+
+export interface ToastState {
+    id: string
+    content: React.ReactNode
+    options: ToastOptions
+    timestamp: number
+}
+
+export type ToastCloseFunction = () => void
+export type ToastContentFunction = (close: ToastCloseFunction) => React.ReactNode
+export type AddToastFunction = (content: React.ReactNode | ToastContentFunction, options?: ToastOptions) => string
+
 
 // Visibility mode for mounted content
 export type VisibilityMode = 'auto' | 'persistent' | 'disabled'
@@ -99,6 +119,9 @@ export interface AppShellContextType<T extends Record<string, BaseRoute> = Recor
 
     // Promise-based dialog system
     openDialog: PromiseDialogFunction
+
+    // Toast notification system  
+    addToast: AddToastFunction
 
     // Dynamic content mounting
     mountHeader: MountFunction

@@ -1,14 +1,9 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
-import { useAppDispatch } from '@/store'
-import { FaEdit, FaPlus } from 'react-icons/fa'
-import { Box } from '@/components'
-import { 
-  openPriceEditForm, 
-  toggleDateSelection,
-  setSelectedDate
-} from '@/store/slices/priceSlice'
-import { RootState } from '@/store'
+import {useSelector} from 'react-redux'
+import {RootState, useAppDispatch} from '@/store'
+import {FaEdit, FaPlus} from 'react-icons/fa'
+import {Box} from '@/components'
+import {openPriceEditForm, setSelectedDate, toggleDateSelection} from '@/store/slices/priceSlice'
 
 interface CalendarDayData {
   date: Date

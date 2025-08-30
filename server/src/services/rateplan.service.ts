@@ -13,7 +13,7 @@ export interface RatePlanCreateData {
   allowConcurrentRates?: boolean;
   isActive?: boolean;
   activeDays?: number[];
-  restrictions?: RatePlanRestrictionData[];
+  ratePlanRestrictions?: RatePlanRestrictionData[];
   cancellationPolicy?: CancellationPolicyData;
 }
 
@@ -115,8 +115,8 @@ export class RatePlanService {
         activeDays,
         
         // Create restrictions if provided
-        ratePlanRestrictions: data.restrictions ? {
-          create: data.restrictions.map(r => ({
+        ratePlanRestrictions: data.ratePlanRestrictions ? {
+          create: data.ratePlanRestrictions.map(r => ({
             type: r.type,
             value: r.value || 0,
             startDate: r.startDate,
@@ -167,6 +167,14 @@ export class RatePlanService {
    * Update an existing rate plan
    */
   async updateRatePlan(ratePlanId: string, userId: string, data: Partial<RatePlanCreateData>): Promise<any> {
+    console.log('🔧 UPDATE RATE PLAN DEBUG:', {
+      ratePlanId,
+      userId,
+      hasRatePlanRestrictions: !!data.ratePlanRestrictions,
+      restrictionsCount: data.ratePlanRestrictions?.length || 0,
+      restrictionsData: data.ratePlanRestrictions
+    })
+    
     // Verify ownership through property
     const existingRatePlan = await prisma.ratePlan.findFirst({
       where: {
@@ -221,6 +229,21 @@ export class RatePlanService {
         priority: data.priority,
         allowConcurrentRates: data.allowConcurrentRates,
         activeDays: data.activeDays,
+        
+        // Update restrictions if provided
+        ratePlanRestrictions: data.ratePlanRestrictions ? {
+          deleteMany: {}, // Delete all existing restrictions first
+          create: data.ratePlanRestrictions.map(r => {
+            const restrictionData = {
+              type: r.type,
+              value: r.value || 0,
+              startDate: r.startDate,
+              endDate: r.endDate,
+            }
+            console.log('📝 Creating restriction:', restrictionData)
+            return restrictionData
+          }),
+        } : undefined,
       },
       include: {
         baseRatePlan: true,
@@ -244,6 +267,13 @@ export class RatePlanService {
         },
       },
     });
+
+    console.log('✅ RATE PLAN UPDATED:', {
+      ratePlanId: updatedRatePlan.id,
+      name: updatedRatePlan.name,
+      restrictionsCount: updatedRatePlan.ratePlanRestrictions?.length || 0,
+      savedRestrictions: updatedRatePlan.ratePlanRestrictions
+    })
 
     return updatedRatePlan;
   }
@@ -294,6 +324,53 @@ export class RatePlanService {
             reservations: true,
             prices: true,
           }
+        }
+      },
+      orderBy: [
+        { priority: 'asc' },
+        { name: 'asc' }
+      ],
+    });
+
+    return ratePlans;
+  }
+
+  /**
+   * Get public rate plans for a property (no authentication required)
+   * Returns only active rate plans visible to guests
+   */
+  async getPublicRatePlansForProperty(propertyId: string): Promise<any[]> {
+    // First verify property exists and is live
+    const property = await prisma.property.findUnique({
+      where: { propertyId },
+      select: { propertyId: true, name: true }
+    });
+
+    if (!property) {
+      throw new Error('Property not found');
+    }
+
+    // Get only active rate plans for public viewing
+    const ratePlans = await prisma.ratePlan.findMany({
+      where: { 
+        propertyId,
+        isActive: true
+      },
+      include: {
+        ratePlanRestrictions: true,
+        cancellationPolicy: {
+          include: {
+            tiers: {
+              orderBy: { daysBeforeCheckIn: 'desc' }
+            }
+          }
+        },
+        prices: {
+          select: {
+            date: true,
+            amount: true
+          },
+          orderBy: { date: 'asc' }
         }
       },
       orderBy: [
@@ -774,6 +851,185 @@ export class RatePlanService {
     }
 
     return dates;
+  }
+
+  /**
+   * Calculate pricing for a guest stay with guest count and date range
+   */
+  async calculatePricingForStay(
+    propertyId: string,
+    checkInDate: Date,
+    checkOutDate: Date,
+    numGuests: number
+  ): Promise<any> {
+    
+    // Verify property exists
+    const property = await prisma.property.findUnique({
+      where: { propertyId },
+      select: { propertyId: true, name: true, maximumGuest: true }
+    });
+
+    if (!property) {
+      throw new Error('Property not found');
+    }
+
+
+    // Validate guest count
+    if (numGuests > property.maximumGuest) {
+      throw new Error(`Maximum ${property.maximumGuest} guests allowed for this property`);
+    }
+
+    // Get active rate plans with all related data
+    const ratePlans = await prisma.ratePlan.findMany({
+      where: {
+        propertyId,
+        isActive: true
+      },
+      include: {
+        ratePlanRestrictions: true,
+        prices: {
+          where: {
+            date: {
+              gte: checkInDate,
+              lt: checkOutDate
+            }
+          }
+        }
+      }
+    });
+
+    const stayDuration = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+    const dateRange = this.getDateRange(checkInDate, checkOutDate);
+    
+    // Day-by-day pricing calculation with activeDays validation
+    const dayPricing: { [date: string]: { ratePlanId: string; name: string; price: number; dayOfWeek: number }[] } = {};
+    
+    // For each day in the stay, find applicable rate plans
+    for (const date of dateRange) {
+      const dayOfWeek = date.getDay();
+      const dateString = date.toISOString().split('T')[0];
+      dayPricing[dateString] = [];
+      
+      // Find rate plans that apply to this specific day
+      for (const ratePlan of ratePlans) {
+        // Check if rate plan applies to this day of week
+        if (!ratePlan.activeDays.includes(dayOfWeek)) {
+          continue;
+        }
+        
+        // Skip restrictions for now - focus on basic pricing
+        
+        // Get price for this specific date
+        let dayPrice = 0;
+        const priceEntry = ratePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
+        
+        if (priceEntry && priceEntry.amount) {
+          // Use specific price if set for this date
+          dayPrice = Number(priceEntry.amount);
+        } else {
+          // Calculate price based on adjustment type
+          if (ratePlan.adjustmentType === 'FixedPrice') {
+            dayPrice = Number(ratePlan.adjustmentValue) || 0;
+          } else if (ratePlan.adjustmentType === 'Percentage' && ratePlan.baseRatePlanId) {
+            // Find base rate plan and calculate percentage
+            const baseRatePlan = ratePlans.find(rp => rp.id === ratePlan.baseRatePlanId);
+            if (baseRatePlan) {
+              // Get base price for this date
+              const basePriceEntry = baseRatePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
+              const basePrice = basePriceEntry?.amount ? Number(basePriceEntry.amount) : Number(baseRatePlan.adjustmentValue) || 0;
+              
+              // Apply percentage: +50% = 150% of base price
+              dayPrice = basePrice * (1 + Number(ratePlan.adjustmentValue) / 100);
+              
+              console.log(`💰 Percentage calculation for ${ratePlan.name} on ${dateString}:`, {
+                baseRatePlan: baseRatePlan.name,
+                basePrice,
+                adjustmentValue: ratePlan.adjustmentValue,
+                calculatedPrice: dayPrice
+              });
+            }
+          } else if (ratePlan.adjustmentType === 'FixedDiscount' && ratePlan.baseRatePlanId) {
+            // Find base rate plan and apply discount
+            const baseRatePlan = ratePlans.find(rp => rp.id === ratePlan.baseRatePlanId);
+            if (baseRatePlan) {
+              const basePriceEntry = baseRatePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
+              const basePrice = basePriceEntry?.amount ? Number(basePriceEntry.amount) : Number(baseRatePlan.adjustmentValue) || 0;
+              
+              // Apply fixed discount
+              dayPrice = Math.max(0, basePrice - Number(ratePlan.adjustmentValue));
+            }
+          }
+        }
+        
+        
+        dayPricing[dateString].push({
+          ratePlanId: ratePlan.id,
+          name: ratePlan.name,
+          price: dayPrice,
+          dayOfWeek
+        });
+      }
+    }
+    
+    // Create separate rate plan options (parallel pricing, not combined)
+    const ratePlanSummaries: { [ratePlanId: string]: any } = {};
+    
+    for (const [dateString, dayRates] of Object.entries(dayPricing)) {
+      for (const dayRate of dayRates) {
+        if (!ratePlanSummaries[dayRate.ratePlanId]) {
+          const ratePlan = ratePlans.find(rp => rp.id === dayRate.ratePlanId);
+          ratePlanSummaries[dayRate.ratePlanId] = {
+            ratePlanId: dayRate.ratePlanId,
+            name: dayRate.name,
+            type: ratePlan?.type,
+            adjustmentType: ratePlan?.adjustmentType,
+            includesBreakfast: ratePlan?.includesBreakfast,
+            allowConcurrentRates: ratePlan?.allowConcurrentRates,
+            applicableDays: 0,
+            totalPrice: 0,
+            dayBreakdown: [],
+            isEligible: true
+          };
+        }
+        
+        ratePlanSummaries[dayRate.ratePlanId].applicableDays++;
+        ratePlanSummaries[dayRate.ratePlanId].totalPrice += dayRate.price;
+        ratePlanSummaries[dayRate.ratePlanId].dayBreakdown.push({
+          date: dateString,
+          dayOfWeek: dayRate.dayOfWeek,
+          price: dayRate.price
+        });
+      }
+    }
+    
+    // Convert to array of separate rate plan options
+    const availableRateOptions = Object.values(ratePlanSummaries).map((summary: any) => ({
+      ...summary,
+      pricePerNight: summary.totalPrice / summary.applicableDays,
+      stayDuration: summary.applicableDays
+    })).sort((a, b) => a.totalPrice - b.totalPrice);
+
+    // For backward compatibility, include the cheapest option as "selected"
+    const cheapestOption = availableRateOptions[0];
+
+    return {
+      propertyId,
+      checkInDate: checkInDate.toISOString().split('T')[0],
+      checkOutDate: checkOutDate.toISOString().split('T')[0],
+      numGuests,
+      stayDuration,
+      // Legacy fields for backward compatibility
+      totalPrice: cheapestOption?.totalPrice || 0,
+      pricePerNight: cheapestOption?.pricePerNight || 0,
+      // New structure: separate rate plan options
+      availableRateOptions,
+      dayByDayPricing: dayPricing,
+      message: availableRateOptions.length > 1 
+        ? `${availableRateOptions.length} rate plans available for your dates`
+        : availableRateOptions.length === 1 
+        ? `1 rate plan available for your dates`
+        : 'No rate plans available for your selected dates'
+    };
   }
 
   /**

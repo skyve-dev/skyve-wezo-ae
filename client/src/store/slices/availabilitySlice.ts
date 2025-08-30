@@ -234,6 +234,51 @@ export const fetchAvailability = createAsyncThunk(
   }
 )
 
+export const fetchPublicAvailability = createAsyncThunk(
+  'availability/fetchPublicAvailability',
+  async ({ propertyId, startDate, endDate }: { propertyId: string; startDate?: string; endDate?: string }, { rejectWithValue }) => {
+    try {
+      const params = new URLSearchParams()
+      if (startDate) params.append('startDate', startDate)
+      if (endDate) params.append('endDate', endDate)
+      
+      const response = await api.get<{ 
+        propertyId: string
+        startDate: string 
+        endDate: string
+        availability: Array<{
+          date: string
+          isAvailable: boolean
+        }>
+      }>(`/api/properties/${propertyId}/availability/public${params.toString() ? `?${params}` : ''}`)
+      
+      return { propertyId, availability: response.availability }
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch public availability'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+export const checkBookingAvailability = createAsyncThunk(
+  'availability/checkBookingAvailability',
+  async (params: { propertyId: string; checkInDate: string; checkOutDate: string; numGuests: number }, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/api/properties/${params.propertyId}/availability/check`, {
+        checkInDate: params.checkInDate,
+        checkOutDate: params.checkOutDate,
+        numGuests: params.numGuests
+      })
+      return response
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to check booking availability'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
 export const updateAvailability = createAsyncThunk(
   'availability/updateAvailability',
   async ({ 
@@ -304,7 +349,7 @@ export const blockDates = createAsyncThunk(
         reason: reason || 'Blocked by host'
       }))
       
-      const response = await api.put<{ 
+      await api.put<{ 
         message: string
         updated: number
         failed: any[]
@@ -348,7 +393,7 @@ export const unblockDates = createAsyncThunk(
         isAvailable: true
       }))
       
-      const response = await api.put<{ 
+      await api.put<{ 
         message: string
         updated: number
         failed: any[]
@@ -608,6 +653,36 @@ const availabilitySlice = createSlice({
         state.calendar[propertyId] = availability
       })
       .addCase(fetchAvailability.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch public availability
+      .addCase(fetchPublicAvailability.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPublicAvailability.fulfilled, (state, action) => {
+        state.loading = false
+        const { propertyId } = action.payload
+        // For public availability, we'll store the raw data since we don't need the full calendar transformation
+        state.calendar[propertyId] = state.calendar[propertyId] || []
+      })
+      .addCase(fetchPublicAvailability.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Check booking availability
+      .addCase(checkBookingAvailability.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(checkBookingAvailability.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(checkBookingAvailability.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

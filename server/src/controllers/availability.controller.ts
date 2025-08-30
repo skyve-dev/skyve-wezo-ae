@@ -34,6 +34,67 @@ export const getPropertyAvailability = async (req: Request, res: Response): Prom
   }
 };
 
+export const getPublicPropertyAvailability = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { propertyId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    const availability = await availabilityService.getPublicAvailability(
+      propertyId,
+      startDate as string,
+      endDate as string
+    );
+
+    res.json({
+      propertyId,
+      startDate,
+      endDate,
+      availability,
+    });
+  } catch (error: any) {
+    console.error('Get public availability error:', error);
+    if (error.message.includes('not found')) {
+      res.status(404).json({ error: 'Property not found' });
+      return;
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const checkBookingAvailability = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { propertyId } = req.params;
+    const { checkInDate, checkOutDate, numGuests } = req.body;
+
+    // Validate required fields
+    if (!checkInDate || !checkOutDate || !numGuests) {
+      res.status(400).json({ 
+        error: 'Missing required fields: checkInDate, checkOutDate, numGuests' 
+      });
+      return;
+    }
+
+    const result = await availabilityService.checkBookingAvailability(
+      propertyId,
+      new Date(checkInDate),
+      new Date(checkOutDate),
+      parseInt(numGuests)
+    );
+
+    res.json({
+      message: 'Availability check completed',
+      ...result
+    });
+  } catch (error: any) {
+    console.error('Check booking availability error:', error);
+    if (error.message.includes('not found')) {
+      res.status(404).json({ error: 'Property not found' });
+    } else {
+      res.status(400).json({ error: error.message });
+    }
+  }
+};
+
 export const updateAvailability = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {

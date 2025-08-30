@@ -626,6 +626,25 @@ export class PropertyService {
       where: { propertyId },
     });
 
+    // Delete availability records first (they reference propertyId)
+    await prisma.availability.deleteMany({
+      where: { propertyId },
+    });
+
+    // Delete reviews (they reference propertyId)
+    await prisma.review.deleteMany({
+      where: { propertyId },
+    });
+
+    // Delete prices first (they reference rate plans)
+    await prisma.price.deleteMany({
+      where: { 
+        ratePlan: {
+          propertyId
+        }
+      },
+    });
+
     // Delete rate plans (with their restrictions and cancellation policies)
     const ratePlans = await prisma.ratePlan.findMany({
       where: { propertyId },

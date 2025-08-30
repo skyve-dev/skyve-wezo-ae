@@ -1,24 +1,12 @@
-import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
-import { useAppDispatch } from '@/store'
-import { 
-  FaChevronLeft, 
-  FaChevronRight, 
-  FaCalendarCheck, 
-  FaEdit,
-  FaFilter
-} from 'react-icons/fa'
-import { Box } from '@/components'
+import React, {useState} from 'react'
+import {useSelector} from 'react-redux'
+import {RootState, useAppDispatch} from '@/store'
+import {FaCalendarCheck, FaChevronLeft, FaChevronRight, FaEdit, FaFilter} from 'react-icons/fa'
+import {Box} from '@/components'
 import Button from '@/components/base/Button'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
-import {
-  setDateRange,
-  toggleBulkEditMode,
-  setSelectedRatePlans,
-  fetchPricesForRatePlan
-} from '@/store/slices/priceSlice'
-import { RootState } from '@/store'
+import {fetchPricesForRatePlan, setDateRange, setSelectedRatePlans, toggleBulkEditMode} from '@/store/slices/priceSlice'
 
 const CalendarControls: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -108,6 +96,37 @@ const CalendarControls: React.FC = () => {
   }
   
   const selectedRatePlans = ratePlans.filter(rp => selectedRatePlanIds.includes(rp.id))
+
+  // Filter rate plans based on seasonal restrictions for the current month
+  const getFilteredRatePlansForMonth = () => {
+    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+    
+    return ratePlans.filter(rp => {
+      if (!rp.isActive) return false
+      
+      // Check if rate plan has seasonal date range restrictions
+      const seasonalRestriction = rp.ratePlanRestrictions?.find(
+        r => r.type === 'SeasonalDateRange'
+      )
+      
+      if (seasonalRestriction) {
+        // Use startDate and endDate directly from the restriction object
+        if (seasonalRestriction.startDate && seasonalRestriction.endDate) {
+          const seasonStart = new Date(seasonalRestriction.startDate)
+          const seasonEnd = new Date(seasonalRestriction.endDate)
+          
+          // Check if current month overlaps with seasonal period
+          return !(monthEnd < seasonStart || monthStart > seasonEnd)
+        }
+      }
+      
+      // If no seasonal restriction, show the rate plan
+      return true
+    })
+  }
+  
+  const filteredRatePlans = getFilteredRatePlansForMonth()
   
   return (
     <Box>
@@ -248,7 +267,7 @@ const CalendarControls: React.FC = () => {
           
           <Box flex="1" overflow="auto">
             <SelectionPicker
-              data={ratePlans.filter(rp => rp.isActive)}
+              data={filteredRatePlans}
               idAccessor={(rp) => rp.id}
               value={selectedRatePlanIds}
               onChange={handleRatePlanSelection}

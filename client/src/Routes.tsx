@@ -27,6 +27,7 @@ import Reviews from "@/pages/Reviews";
 import Finance from "@/pages/Finance";
 import Support from "@/pages/Support";
 import LandingPage from "@/pages/LandingPage";
+import PropertyDetail from "@/pages/PropertyDetail";
 
 // Revenue management pages
 import RatePlans from "@/pages/revenue/RatePlans";
@@ -40,7 +41,8 @@ export const routes = createRoutes({
         label: 'Home',
         showInNav: true,
         showInHeader: false,
-        showInFooter: true
+        showInFooter: true,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // Public page - all roles
     },
     dashboard: {
         component: Dashboard,
@@ -48,7 +50,8 @@ export const routes = createRoutes({
         label: 'Dashboard',
         showInNav: true,
         showInHeader: true,
-        showInFooter: true
+        showInFooter: true,
+        roles: ['HomeOwner', 'Manager']  // Property managers only
     },
     properties: {
         component: PropertiesList,
@@ -56,7 +59,17 @@ export const routes = createRoutes({
         label: 'Properties',
         showInNav: true,
         showInHeader: true,
-        showInFooter: true
+        showInFooter: true,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can browse (with different capabilities)
+    },
+    'property-view': {
+        component: ({ id }: { id: string }) => <PropertyDetail propertyId={id} />,
+        icon: <FaBuilding />,
+        label: 'Property Details',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view property details
     },
     'property-create': {
         component: () => <PropertyManager propertyId="new" />,
@@ -64,7 +77,8 @@ export const routes = createRoutes({
         label: 'Create Property',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Only homeowners and managers can create
     },
     'property-edit': {
         component: ({ id }: { id: string }) => <PropertyManager propertyId={id} />,
@@ -72,7 +86,8 @@ export const routes = createRoutes({
         label: 'Edit Property',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Only homeowners and managers can edit
     },
     availability: {
         component: AvailabilityManager,
@@ -80,7 +95,8 @@ export const routes = createRoutes({
         label: 'Availability',
         showInNav: true,
         showInHeader: true,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Host-only feature
     },
     reservations: {
         component: Reservations,
@@ -88,7 +104,8 @@ export const routes = createRoutes({
         label: 'Reservations',
         showInNav: true,
         showInHeader: false,
-        showInFooter: true
+        showInFooter: true,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles (different views)
     },
     inbox: {
         component: Inbox,
@@ -96,7 +113,8 @@ export const routes = createRoutes({
         label: 'Messages',
         showInNav: true,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can message
     },
     reviews: {
         component: Reviews,
@@ -104,7 +122,8 @@ export const routes = createRoutes({
         label: 'Reviews',
         showInNav: true,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view/manage reviews
     },
     finance: {
         component: Finance,
@@ -112,7 +131,8 @@ export const routes = createRoutes({
         label: 'Finance',
         showInNav: true,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Host/Manager financial data only
     },
     support: {
         component: Support,
@@ -120,7 +140,8 @@ export const routes = createRoutes({
         label: 'Support',
         showInNav: true,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can access support
     },
     'rate-plans': {
         component: RatePlans,
@@ -128,7 +149,8 @@ export const routes = createRoutes({
         label: 'Rate Plans',
         showInNav: true,
         showInHeader: true,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Revenue management - Host/Manager only
     },
     'pricing-calendar': {
         component: PricingCalendar,
@@ -136,7 +158,8 @@ export const routes = createRoutes({
         label: 'Pricing',
         showInNav: true,
         showInHeader: true,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Pricing management - Host/Manager only
     },
     'rate-plan-create': {
         component: () => <RatePlanManager ratePlanId="new" />,
@@ -144,7 +167,8 @@ export const routes = createRoutes({
         label: 'Create Rate Plan',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Revenue management - Host/Manager only
     },
     'rate-plan-edit': {
         component: ({ id }: { id: string }) => <RatePlanManager ratePlanId={id} />,
@@ -152,7 +176,8 @@ export const routes = createRoutes({
         label: 'Edit Rate Plan',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false
+        showInFooter: false,
+        roles: ['HomeOwner', 'Manager']  // Revenue management - Host/Manager only
     }
 })
 

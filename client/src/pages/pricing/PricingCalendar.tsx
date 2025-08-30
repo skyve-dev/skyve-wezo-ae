@@ -20,7 +20,7 @@ import {
   clearPrices,
   clearRefreshTrigger
 } from '@/store/slices/priceSlice'
-import { fetchRatePlans } from '@/store/slices/ratePlanSlice'
+import { fetchRatePlans, clearRatePlans } from '@/store/slices/ratePlanSlice'
 import { RootState } from '@/store'
 import type { Property } from '@/types/property'
 
@@ -44,6 +44,8 @@ const PricingCalendar: React.FC = () => {
   
   // Local state
   const [isInitialized, setIsInitialized] = useState(false)
+  
+
   
   // Helper function to format date without timezone issues
   const formatDateLocal = (date: Date): string => {
@@ -69,17 +71,27 @@ const PricingCalendar: React.FC = () => {
   
   // Handle property change
   const handlePropertyChange = (property: Property | null) => {
+
+    
     if (property?.propertyId) {
       // Clear existing data and fetch new data for the selected property
+
       dispatch(clearPrices())
+      dispatch(clearRatePlans()) // Clear the old rate plans from Redux
+      dispatch(setSelectedRatePlans([])) // Clear selected rate plans from previous property
+
       dispatch(fetchRatePlans(property.propertyId))
+
       setIsInitialized(false)
     }
   }
   
   // Load rate plans when property changes
   useEffect(() => {
+
+    
     if (currentProperty?.propertyId && !isInitialized) {
+
       dispatch(fetchRatePlans(currentProperty.propertyId))
       setIsInitialized(true)
     }
@@ -87,19 +99,24 @@ const PricingCalendar: React.FC = () => {
   
   // Auto-select all active rate plans when they load
   useEffect(() => {
+
     if (ratePlans.length > 0 && selectedRatePlanIds.length === 0) {
       const activeRatePlans = ratePlans
         .filter(rp => rp.isActive)
         .map(rp => rp.id)
         .slice(0, 5) // Limit to 5 rate plans for performance
       
+      console.log('🟠 AUTO-SELECTING rate plans:', activeRatePlans)
       dispatch(setSelectedRatePlans(activeRatePlans))
     }
   }, [ratePlans, selectedRatePlanIds.length, dispatch])
   
   // Load prices when rate plans and date range are selected
   useEffect(() => {
+
+    
     if (selectedRatePlanIds.length > 0 && dateRange.startDate && dateRange.endDate) {
+
       selectedRatePlanIds.forEach(ratePlanId => {
         dispatch(fetchPricesForRatePlan({
           ratePlanId,

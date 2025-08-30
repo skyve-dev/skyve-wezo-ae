@@ -9,6 +9,19 @@ const Finance: React.FC = () => {
     return (
         <SecuredPage>
             <Box padding="2rem" maxWidth="1200px" margin="0 auto">
+                {/* Demo Page Notice */}
+                <Box 
+                    padding="1rem" 
+                    backgroundColor="#fef3c7" 
+                    border="1px solid #fde68a"
+                    borderRadius="8px" 
+                    marginBottom="2rem"
+                >
+                    <p style={{ color: '#92400e', fontWeight: '600', margin: 0 }}>
+                        This page is a demo page
+                    </p>
+                </Box>
+
                 <Box marginBottom="2rem">
                     <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0'}}>Finance & Earnings</h1>
                     <p style={{color: '#666'}}>Monitor your earnings and manage financial operations</p>

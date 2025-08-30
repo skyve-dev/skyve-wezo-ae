@@ -36,10 +36,29 @@ model RatePlan {
 ### PriceAdjustmentType Enum
 ```typescript
 enum PriceAdjustmentType {
-  Percentage    // Apply percentage adjustment (20 = 20% discount)
+  Percentage    // Apply percentage adjustment (+50 = 50% price hike, -20 = 20% discount)
   FixedDiscount // Apply fixed amount discount per night (50 = AED 50 off)
   FixedPrice    // Set absolute price per night (200 = AED 200 total)
 }
+```
+
+### Percentage Adjustment Value Rules
+```typescript
+// Positive values = Price increase (surcharge)
+adjustmentValue: +50  → Base price + 50% (1.5x base price)
+adjustmentValue: +25  → Base price + 25% (1.25x base price)
+
+// Negative values = Price decrease (discount)  
+adjustmentValue: -20  → Base price - 20% (0.8x base price)
+adjustmentValue: -15  → Base price - 15% (0.85x base price)
+
+// Calculation formula:
+finalPrice = basePrice * (1 + adjustmentValue/100)
+
+// Examples:
+Base price: AED 1000
++50% adjustment: 1000 * (1 + 50/100) = 1000 * 1.5 = AED 1500
+-20% adjustment: 1000 * (1 + (-20)/100) = 1000 * 0.8 = AED 800
 ```
 
 ### RatePlanRestrictionType Enum
@@ -148,7 +167,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
 
 ---
 
-### Scenario 2: Percentage-Based Discount
+### Scenario 2: Percentage-Based Discount (Negative Adjustment)
 
 **Use Case:** Early booking discount referencing base rate
 
@@ -161,7 +180,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
   "type": "Custom",
   "description": "Book 30+ days in advance and save 20%",
   "adjustmentType": "Percentage",
-  "adjustmentValue": 20.0,
+  "adjustmentValue": -20.0,
   "baseRatePlanId": "rp_standard_001",
   "isActive": true,
   "activeDays": [0,1,2,3,4,5,6],
@@ -177,8 +196,48 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
 **Booking Engine Logic:**
 1. Check if booking is ≥30 days in advance
 2. Fetch base rate plan (rp_standard_001) = AED 250
-3. Calculate: 250 - (250 × 20%) = AED 200 per night
+3. Calculate: 250 × (1 + (-20)/100) = 250 × 0.8 = AED 200 per night
 4. Available all days if advance booking requirement met
+
+---
+
+### Scenario 2B: Percentage-Based Price Hike (Positive Adjustment)
+
+**Use Case:** Holiday season premium pricing
+
+**Data:**
+```json
+{
+  "id": "rp_holiday_premium_001",
+  "propertyId": "prop_villa_123", 
+  "name": "Holiday Season +75%",
+  "type": "FullyFlexible",
+  "description": "Premium pricing for holiday season",
+  "adjustmentType": "Percentage",
+  "adjustmentValue": 75.0,
+  "baseRatePlanId": "rp_standard_001",
+  "isActive": true,
+  "activeDays": [0,1,2,3,4,5,6],
+  "ratePlanRestrictions": [
+    {
+      "type": "SeasonalDateRange",
+      "startDate": "2024-12-20",
+      "endDate": "2025-01-05"
+    },
+    {
+      "type": "MinLengthOfStay",
+      "value": 5
+    }
+  ]
+}
+```
+
+**Booking Engine Logic:**
+1. Check if dates fall within Dec 20 - Jan 5
+2. Check if stay is ≥5 nights
+3. Fetch base rate plan (rp_standard_001) = AED 250
+4. Calculate: 250 × (1 + 75/100) = 250 × 1.75 = AED 437.50 per night
+5. Available during holiday season with minimum 5-night stays
 
 ---
 
@@ -264,7 +323,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
   "type": "NonRefundable",
   "description": "Save 15% with no refund policy",
   "adjustmentType": "Percentage",
-  "adjustmentValue": 15.0,
+  "adjustmentValue": -15.0,
   "baseRatePlanId": "rp_standard_001",
   "isActive": true,
   "activeDays": [0,1,2,3,4,5,6],
@@ -403,7 +462,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
   "type": "FullyFlexible",
   "description": "Weekday rate for business guests",
   "adjustmentType": "Percentage",
-  "adjustmentValue": 10.0,
+  "adjustmentValue": -10.0,
   "baseRatePlanId": "rp_standard_001", 
   "isActive": true,
   "activeDays": [1,2,3,4,5],
@@ -424,7 +483,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
 **Booking Engine Logic:**
 1. Check arrival day is Monday-Friday only
 2. Check ≤2 guests and ≤5 nights
-3. Calculate: 250 - (250 × 10%) = AED 225 per night
+3. Calculate: 250 × (1 + (-10)/100) = 250 × 0.9 = AED 225 per night
 4. Includes breakfast
 5. Perfect for business travelers
 
@@ -443,7 +502,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
   "type": "NonRefundable",
   "description": "Book within 48 hours and save big",
   "adjustmentType": "Percentage", 
-  "adjustmentValue": 25.0,
+  "adjustmentValue": -25.0,
   "baseRatePlanId": "rp_standard_001",
   "isActive": true,
   "activeDays": [0,1,2,3,4,5,6],
@@ -463,7 +522,7 @@ Result: Only VIP and Premium shown (Standard/Promo hidden)
 
 **Booking Engine Logic:**
 1. Check if booking is ≤2 days before arrival
-2. Calculate: 250 - (250 × 25%) = AED 187.50 per night  
+2. Calculate: 250 × (1 + (-25)/100) = 250 × 0.75 = AED 187.50 per night  
 3. Non-refundable once booked
 4. Great for filling last-minute availability
 
@@ -578,6 +637,76 @@ const visibleRates = applicableRates.filter(rate =>
 - **Inventory Control**: Minimum 7-night stays during busy periods  
 - **Simple Management**: Property owners just toggle `isActive` on/off
 - **Guest Clarity**: No confusing multiple options during peak times
+
+---
+
+### Scenario 10B: Weekend Premium with Percentage Hike
+
+**Use Case:** Weekend rate using percentage adjustment instead of fixed price
+
+**Data:**
+```json
+{
+  "id": "rp_weekend_percentage_001",
+  "propertyId": "prop_villa_123",
+  "name": "Weekend Premium +30%",
+  "type": "FullyFlexible",
+  "description": "30% surcharge for weekend stays",
+  "adjustmentType": "Percentage",
+  "adjustmentValue": 30.0,
+  "baseRatePlanId": "rp_standard_001",
+  "priority": 90,
+  "allowConcurrentRates": true,
+  "isActive": true,
+  "activeDays": [5, 6, 0],
+  "ratePlanRestrictions": [
+    {
+      "type": "MinLengthOfStay",
+      "value": 2
+    }
+  ]
+}
+```
+
+**Booking Engine Logic:**
+1. Check if arrival day is Friday, Saturday, or Sunday
+2. Check if stay is ≥2 nights
+3. Calculate: 250 × (1 + 30/100) = 250 × 1.3 = AED 325 per night
+4. Shows alongside standard rate (both concurrent)
+
+---
+
+### Scenario 10C: Extreme Percentage Examples
+
+**Flash Sale - 40% Off:**
+```json
+{
+  "adjustmentType": "Percentage",
+  "adjustmentValue": -40.0,
+  "baseRatePlanId": "rp_standard_001"
+}
+```
+**Calculation:** 250 × (1 + (-40)/100) = 250 × 0.6 = **AED 150/night**
+
+**New Year Premium - 200% Surcharge:**
+```json
+{
+  "adjustmentType": "Percentage", 
+  "adjustmentValue": 200.0,
+  "baseRatePlanId": "rp_standard_001"
+}
+```
+**Calculation:** 250 × (1 + 200/100) = 250 × 3.0 = **AED 750/night**
+
+**Small Discount - 5% Off:**
+```json
+{
+  "adjustmentType": "Percentage",
+  "adjustmentValue": -5.0,
+  "baseRatePlanId": "rp_standard_001"  
+}
+```
+**Calculation:** 250 × (1 + (-5)/100) = 250 × 0.95 = **AED 237.50/night**
 
 ---
 
@@ -762,8 +891,8 @@ function calculateRatePlanPrice(ratePlan: RatePlan, date: Date): number {
       
     case 'Percentage':
       const baseAmount = getBaseRateForDate(ratePlan.baseRatePlan, date)
-      const discount = baseAmount * (ratePlan.adjustmentValue / 100)
-      return Math.max(0, baseAmount - discount)
+      // Positive values = price increase, negative values = discount
+      return Math.max(0, baseAmount * (1 + ratePlan.adjustmentValue / 100))
       
     default:
       throw new Error(`Unknown adjustment type: ${ratePlan.adjustmentType}`)

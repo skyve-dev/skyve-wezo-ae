@@ -21,8 +21,8 @@ import {AppShellContextType, BaseRoute, RouteDefinition} from './types'
  *   'profile-edit': { component: ProfileEdit, label: 'Edit Profile', showInNav: false }
  * })
  * 
- * // In components, use the hook for navigation and dialogs
- * const { navigateTo, openDialog, registerNavigationGuard } = useAppShell()
+ * // In components, use the hook for navigation, dialogs, and toasts
+ * const { navigateTo, openDialog, addToast, registerNavigationGuard } = useAppShell()
  * 
  * // Navigate with type-safe parameters
  * navigateTo('profile-edit', { userId: '123' })
@@ -31,6 +31,10 @@ import {AppShellContextType, BaseRoute, RouteDefinition} from './types'
  * const confirmed = await openDialog<boolean>((close) => (
  *   <ConfirmDialog onConfirm={() => close(true)} onCancel={() => close(false)} />
  * ))
+ * 
+ * // Show toast notifications
+ * addToast("Switching to Host mode...", { type: 'info', autoHide: true, duration: 3000 })
+ * addToast(<Box>Custom toast content</Box>, { type: 'success' })
  * ```
  */
 const AppShellContext = createContext<AppShellContextType | null>(null)
@@ -41,6 +45,7 @@ const AppShellContext = createContext<AppShellContextType | null>(null)
  * Provides type-safe access to:
  * - Navigation functions (navigateTo, navigateBack)
  * - Dialog management (openDialog)
+ * - Toast notifications (addToast)
  * - Content mounting (mountHeader, mountSideNav, mountFooter)
  * - Navigation guards (registerNavigationGuard)
  * - Loading state (isLoading, setLoading)
@@ -53,7 +58,7 @@ const AppShellContext = createContext<AppShellContextType | null>(null)
  * @example
  * ```typescript
  * // Basic usage
- * const { navigateTo, openDialog } = useAppShell()
+ * const { navigateTo, openDialog, addToast } = useAppShell()
  * 
  * // With type-safe routes
  * const { navigateTo } = useAppShell<typeof routes>()
@@ -71,6 +76,18 @@ const AppShellContext = createContext<AppShellContextType | null>(null)
  *   
  *   if (shouldLeave) {
  *     navigateTo('dashboard', {})
+ *   }
+ * }
+ * 
+ * // Toast notifications
+ * const handleSave = async () => {
+ *   addToast("Saving changes...", { type: 'info', duration: 2000 })
+ *   
+ *   try {
+ *     await saveData()
+ *     addToast("Changes saved successfully!", { type: 'success' })
+ *   } catch (error) {
+ *     addToast("Failed to save changes", { type: 'error', autoHide: false })
  *   }
  * }
  * ```
