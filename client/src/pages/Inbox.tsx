@@ -38,21 +38,6 @@ const Inbox: React.FC = () => {
                 maxWidth="1200px" 
                 margin="0 auto"
             >
-                {/* Demo Page Notice - only show when not viewing message on mobile */}
-                {(!isMobile || !showMessageView) && (
-                    <Box 
-                        padding="1rem" 
-                        backgroundColor="#fef3c7" 
-                        border="1px solid #fde68a"
-                        borderRadius="8px" 
-                        marginBottom="2rem"
-                    >
-                        <p style={{ color: '#92400e', fontWeight: '600', margin: 0 }}>
-                            This page is a demo page
-                        </p>
-                    </Box>
-                )}
-
                 {/* Header - only show when not viewing message on mobile */}
                 {(!isMobile || !showMessageView) && (
                     <Box marginBottom="2rem">
