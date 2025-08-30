@@ -50,7 +50,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                                                    onAfterNavigate,
                                                                    children
                                                                }: AppShellProps<T>) => {
-    const {openDialog, addToast} = usePromiseDialog();
+    const {openDialog} = usePromiseDialog();
     const {content, visibility, mountHeader, mountSideNav, mountFooter} = useDynamicContent();
     // Helper function to get initial route and params from URL
     const getInitialRouteAndParams = useCallback((): { route: string; params: Record<string, any> } => {
@@ -361,8 +361,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
         routes,
         // Promise-based dialog system
         openDialog,
-        // Toast notification system
-        addToast,
         // Dynamic content mounting
         mountHeader,
         mountSideNav,

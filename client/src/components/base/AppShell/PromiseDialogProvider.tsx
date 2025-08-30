@@ -1,13 +1,10 @@
 import React, { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
-import { DialogState, DialogContentFunction, PromiseDialogFunction, DialogCloseFunction, ToastState, ToastOptions, AddToastFunction, ToastContentFunction, ToastCloseFunction } from './types';
+import { DialogState, DialogContentFunction, PromiseDialogFunction, DialogCloseFunction } from './types';
 import { Box } from '../Box';
-import { Button } from '../Button';
 import { disableScroller, enableScroller } from '../../../utils/scrollUtils';
-import { FaTimes, FaInfoCircle, FaCheckCircle, FaExclamationTriangle, FaExclamationCircle } from 'react-icons/fa';
 
 interface PromiseDialogContextType {
     openDialog: PromiseDialogFunction;
-    addToast: AddToastFunction;
 }
 
 const PromiseDialogContext = createContext<PromiseDialogContextType | undefined>(undefined);
@@ -18,11 +15,8 @@ interface PromiseDialogProviderProps {
 
 export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ children }) => {
     const [dialogStack, setDialogStack] = useState<DialogState[]>([]);
-    const [toastStack, setToastStack] = useState<ToastState[]>([]);
     const dialogCounter = useRef(0);
-    const toastCounter = useRef(0);
     const scrollPositionRef = useRef<number>(0);
-    const toastCloseFunctions = useRef<Map<string, ToastCloseFunction>>(new Map());
 
     const openDialog: PromiseDialogFunction = <T = any>(content: DialogContentFunction<T>): Promise<T> => {
         return new Promise<T>((resolve, reject) => {
@@ -48,49 +42,6 @@ export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ ch
         });
     };
 
-    const addToast: AddToastFunction = (content: React.ReactNode | ToastContentFunction, options: ToastOptions = {}): string => {
-        const toastId = `toast-${++toastCounter.current}`;
-        
-        const defaultOptions: ToastOptions = {
-            autoHide: true,
-            duration: 4000,
-            type: 'info',
-            showCloseButton: true,
-            ...options
-        };
-
-        const closeFunction: ToastCloseFunction = () => {
-            setToastStack(prev => prev.filter(toast => toast.id !== toastId));
-            toastCloseFunctions.current.delete(toastId);
-        };
-
-        // Store close function for later use
-        toastCloseFunctions.current.set(toastId, closeFunction);
-
-        const toastContent = typeof content === 'function' 
-            ? (content as ToastContentFunction)(closeFunction)
-            : content;
-        
-        const newToast: ToastState = {
-            id: toastId,
-            content: toastContent,
-            options: defaultOptions,
-            timestamp: Date.now()
-        };
-
-        // Add to the toast stack
-        setToastStack(prev => [...prev, newToast]);
-
-        // Auto-hide if enabled
-        if (defaultOptions.autoHide && defaultOptions.duration) {
-            setTimeout(() => {
-                closeFunction();
-            }, defaultOptions.duration);
-        }
-
-        return toastId;
-    };
-
     // Manage scroll behavior when dialogs open/close
     useEffect(() => {
         if (dialogStack.length > 0) {
@@ -110,8 +61,7 @@ export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ ch
     }, [dialogStack.length]);
 
     const contextValue: PromiseDialogContextType = {
-        openDialog,
-        addToast
+        openDialog
     };
 
     return (
@@ -133,11 +83,6 @@ export const PromiseDialogProvider: React.FC<PromiseDialogProviderProps> = ({ ch
                     {dialog.content}
                 </DialogOverlay>
             ))}
-            
-            {/* Render toast stack */}
-            {toastStack.length > 0 && (
-                <ToastContainer toasts={toastStack} closeFunctions={toastCloseFunctions.current} />
-            )}
         </PromiseDialogContext.Provider>
     );
 };
@@ -212,152 +157,6 @@ const DialogOverlay: React.FC<DialogOverlayProps> = ({
                     to {
                         opacity: 0;
                         transform: scale(0.9) translateY(-10px);
-                    }
-                }
-            `}</style>
-        </Box>
-    );
-};
-
-// Toast Container Component
-interface ToastContainerProps {
-    toasts: ToastState[];
-    closeFunctions: Map<string, ToastCloseFunction>;
-}
-
-const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, closeFunctions }) => {
-    return (
-        <Box
-            position="fixed"
-            top="1rem"
-            right="1rem"
-            display="flex"
-            flexDirection="column"
-            gap="0.75rem"
-            style={{ zIndex: 10200 }} // Above dialogs
-            pointerEvents="none" // Let clicks pass through container
-        >
-            {toasts.map((toast) => (
-                <ToastComponent 
-                    key={toast.id} 
-                    toast={toast}
-                    onClose={() => {
-                        const closeFunction = closeFunctions.get(toast.id);
-                        if (closeFunction) {
-                            closeFunction();
-                        }
-                    }}
-                />
-            ))}
-        </Box>
-    );
-};
-
-// Individual Toast Component
-interface ToastComponentProps {
-    toast: ToastState;
-    onClose: () => void;
-}
-
-const ToastComponent: React.FC<ToastComponentProps> = ({ toast, onClose }) => {
-    const getToastConfig = () => {
-        switch (toast.options.type) {
-            case 'success':
-                return {
-                    icon: <FaCheckCircle />,
-                    backgroundColor: '#d1fae5',
-                    borderColor: '#059669',
-                    iconColor: '#059669',
-                    textColor: '#064e3b'
-                };
-            case 'warning':
-                return {
-                    icon: <FaExclamationTriangle />,
-                    backgroundColor: '#fef3c7',
-                    borderColor: '#d97706',
-                    iconColor: '#d97706',
-                    textColor: '#92400e'
-                };
-            case 'error':
-                return {
-                    icon: <FaExclamationCircle />,
-                    backgroundColor: '#fee2e2',
-                    borderColor: '#dc2626',
-                    iconColor: '#dc2626',
-                    textColor: '#991b1b'
-                };
-            default: // info
-                return {
-                    icon: <FaInfoCircle />,
-                    backgroundColor: '#dbeafe',
-                    borderColor: '#2563eb',
-                    iconColor: '#2563eb',
-                    textColor: '#1e3a8a'
-                };
-        }
-    };
-
-    const config = getToastConfig();
-
-    return (
-        <Box
-            padding="1rem"
-            backgroundColor={config.backgroundColor}
-            border={`2px solid ${config.borderColor}`}
-            borderRadius="8px"
-            boxShadow="0 10px 25px rgba(0, 0, 0, 0.15)"
-            display="flex"
-            alignItems="flex-start"
-            gap="0.75rem"
-            minWidth="320px"
-            maxWidth="420px"
-            pointerEvents="auto" // Enable clicks on toast
-            style={{
-                animation: 'toastSlideIn 0.3s ease-out',
-                transform: 'translateX(0)'
-            }}
-        >
-            {/* Toast Icon */}
-            <Box color={config.iconColor} fontSize="1.25rem" flexShrink={0} marginTop="0.125rem">
-                {config.icon}
-            </Box>
-
-            {/* Toast Content */}
-            <Box flex="1" color={config.textColor} fontSize="0.875rem" lineHeight="1.4">
-                {toast.content}
-            </Box>
-
-            {/* Close Button */}
-            {toast.options.showCloseButton && (
-                <Button
-                    label=""
-                    icon={<FaTimes />}
-                    onClick={onClose}
-                    variant="normal"
-                    size="small"
-                    flexShrink={0}
-                    backgroundColor="transparent"
-                    border="none"
-                    color={config.iconColor}
-                    padding="0.25rem"
-                    style={{
-                        minWidth: 'unset',
-                        height: '1.5rem',
-                        width: '1.5rem'
-                    }}
-                />
-            )}
-
-            {/* Toast Animation Styles */}
-            <style>{`
-                @keyframes toastSlideIn {
-                    from {
-                        opacity: 0;
-                        transform: translateX(100%);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0);
                     }
                 }
             `}</style>
