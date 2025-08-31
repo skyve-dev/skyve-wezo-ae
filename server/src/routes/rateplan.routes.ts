@@ -45,29 +45,30 @@ router.delete(
   ratePlanController.deleteRatePlan
 );
 
-// Search for available rates (public endpoint for booking engine)
+// Calculate booking options (New booking engine endpoint)
 router.post(
-  '/properties/:propertyId/rate-plans/search',
-  ratePlanController.searchAvailableRates
+  '/properties/:propertyId/calculate-booking',
+  ratePlanController.calculateBookingOptions
 );
 
-// Calculate pricing for guest count and date range (public endpoint)
-router.post(
-  '/properties/:propertyId/rate-plans/calculate',
-  ratePlanController.calculateRatePricing
-);
-
-// Calculate cancellation refund
-router.post(
-  '/properties/:propertyId/rate-plans/:ratePlanId/cancellation-refund',
+// Toggle rate plan status
+router.patch(
+  '/rate-plans/:ratePlanId/toggle-status',
   authenticate,
-  ratePlanController.calculateCancellationRefund
+  ratePlanController.toggleRatePlanStatus
+);
+
+// Get rate plan statistics
+router.get(
+  '/rate-plans/:ratePlanId/stats',
+  authenticate,
+  ratePlanController.getRatePlanStats
 );
 
 // Get rate plan metadata
 router.get(
-  '/rate-plans/metadata/adjustment-types',
-  ratePlanController.getAdjustmentTypesMetadata
+  '/rate-plans/metadata/modifier-types',
+  ratePlanController.getModifierTypesMetadata
 );
 
 export default router;

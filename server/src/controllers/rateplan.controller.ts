@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import ratePlanService, { RatePlanCreateData, RateSearchCriteria } from '../services/rateplan.service';
-import { PriceAdjustmentType, RatePlanType, RatePlanRestrictionType } from '@prisma/client';
+import ratePlanService, { RatePlanCreateData, BookingSearchCriteria } from '../services/rateplan.service';
+import { ModifierType, CancellationType } from '@prisma/client';
 
 /**
  * Create a new rate plan for a property
- * POST /api/properties/:propertyId/rateplans
+ * POST /api/properties/:propertyId/rate-plans
  */
 export const createRatePlan = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -17,49 +17,25 @@ export const createRatePlan = async (req: Request, res: Response): Promise<void>
     const ratePlanData: RatePlanCreateData = req.body;
 
     // Validate required fields
-    if (!ratePlanData.name || !ratePlanData.adjustmentType || ratePlanData.adjustmentValue === undefined) {
+    if (!ratePlanData.name || !ratePlanData.priceModifierType || ratePlanData.priceModifierValue === undefined) {
       res.status(400).json({ 
-        error: 'Missing required fields: name, adjustmentType, adjustmentValue' 
+        error: 'Missing required fields: name, priceModifierType, priceModifierValue' 
       });
       return;
     }
 
-    // Validate adjustment type and base rate plan reference
-    if (ratePlanData.adjustmentType === PriceAdjustmentType.Percentage && !ratePlanData.baseRatePlanId) {
+    // Validate modifier type
+    if (!Object.values(ModifierType).includes(ratePlanData.priceModifierType)) {
       res.status(400).json({ 
-        error: 'baseRatePlanId is required for percentage-based rate plans' 
+        error: 'Invalid priceModifierType. Must be Percentage or FixedAmount' 
       });
       return;
     }
 
-    // Validate adjustment value (negative values allowed only for percentage adjustments)
-    if (ratePlanData.adjustmentValue < 0 && ratePlanData.adjustmentType !== PriceAdjustmentType.Percentage) {
+    // Validate cancellation policy type if provided
+    if (ratePlanData.cancellationPolicy?.type && !Object.values(CancellationType).includes(ratePlanData.cancellationPolicy.type)) {
       res.status(400).json({ 
-        error: 'adjustmentValue must be a positive number for FixedPrice and FixedDiscount rate plans' 
-      });
-      return;
-    }
-
-    // Validate percentage values bounds
-    if (ratePlanData.adjustmentType === PriceAdjustmentType.Percentage) {
-      if (ratePlanData.adjustmentValue > 100) {
-        res.status(400).json({ 
-          error: 'Percentage adjustment cannot exceed 100%' 
-        });
-        return;
-      }
-      if (ratePlanData.adjustmentValue < -100) {
-        res.status(400).json({ 
-          error: 'Percentage adjustment cannot be less than -100%' 
-        });
-        return;
-      }
-    }
-
-    // Validate priority if provided
-    if (ratePlanData.priority !== undefined && (ratePlanData.priority < 1 || ratePlanData.priority > 999)) {
-      res.status(400).json({ 
-        error: 'Priority must be between 1 and 999' 
+        error: 'Invalid cancellation policy type. Must be FullyFlexible, Moderate, or NonRefundable' 
       });
       return;
     }
@@ -75,7 +51,7 @@ export const createRatePlan = async (req: Request, res: Response): Promise<void>
     
     if (error.message.includes('not found') || error.message.includes('permission')) {
       res.status(404).json({ error: error.message });
-    } else if (error.message.includes('required') || error.message.includes('must be') || error.message.includes('Invalid value for argument')) {
+    } else if (error.message.includes('required') || error.message.includes('must be') || error.message.includes('cannot exceed')) {
       res.status(400).json({ error: error.message });
     } else {
       res.status(500).json({ error: 'Internal server error' });
@@ -85,7 +61,7 @@ export const createRatePlan = async (req: Request, res: Response): Promise<void>
 
 /**
  * Get all rate plans for a property
- * GET /api/properties/:propertyId/rateplans
+ * GET /api/properties/:propertyId/rate-plans
  */
 export const getRatePlansForProperty = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -132,7 +108,7 @@ export const getPublicRatePlansForProperty = async (req: Request, res: Response)
   } catch (error: any) {
     console.error('Get public rate plans error:', error);
     
-    if (error.message.includes('not found')) {
+    if (error.message.includes('not found') || error.message.includes('not available')) {
       res.status(404).json({ error: 'Property not found or has no available rate plans' });
     } else {
       res.status(500).json({ error: 'Internal server error' });
@@ -142,7 +118,7 @@ export const getPublicRatePlansForProperty = async (req: Request, res: Response)
 
 /**
  * Get a single rate plan by ID
- * GET /api/rateplans/:ratePlanId
+ * GET /api/rate-plans/:ratePlanId
  */
 export const getRatePlanById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -171,7 +147,7 @@ export const getRatePlanById = async (req: Request, res: Response): Promise<void
 
 /**
  * Update a rate plan
- * PUT /api/rateplans/:ratePlanId
+ * PUT /api/rate-plans/:ratePlanId
  */
 export const updateRatePlan = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -183,41 +159,10 @@ export const updateRatePlan = async (req: Request, res: Response): Promise<void>
     const { ratePlanId } = req.params;
     const updateData = req.body;
 
-    // Validate adjustment value if provided (negative values allowed only for percentage adjustments)
-    if (updateData.adjustmentValue !== undefined && updateData.adjustmentValue < 0) {
-      // If adjustmentType is also being updated, check that
-      // Otherwise, let the service layer handle validation with existing data
-      if (updateData.adjustmentType && updateData.adjustmentType !== PriceAdjustmentType.Percentage) {
-        res.status(400).json({ 
-          error: 'adjustmentValue must be a positive number for FixedPrice and FixedDiscount rate plans' 
-        });
-        return;
-      }
-      // Note: If only adjustmentValue is being updated without adjustmentType,
-      // we let the service layer validate against the existing adjustmentType
-    }
-
-    // Validate percentage values bounds
-    if (updateData.adjustmentType === PriceAdjustmentType.Percentage && 
-        updateData.adjustmentValue !== undefined) {
-      if (updateData.adjustmentValue > 100) {
-        res.status(400).json({ 
-          error: 'Percentage adjustment cannot exceed 100%' 
-        });
-        return;
-      }
-      if (updateData.adjustmentValue < -100) {
-        res.status(400).json({ 
-          error: 'Percentage adjustment cannot be less than -100%' 
-        });
-        return;
-      }
-    }
-
-    // Validate priority if provided
-    if (updateData.priority !== undefined && (updateData.priority < 1 || updateData.priority > 999)) {
+    // Validate modifier type if provided
+    if (updateData.priceModifierType && !Object.values(ModifierType).includes(updateData.priceModifierType)) {
       res.status(400).json({ 
-        error: 'Priority must be between 1 and 999' 
+        error: 'Invalid priceModifierType. Must be Percentage or FixedAmount' 
       });
       return;
     }
@@ -233,7 +178,7 @@ export const updateRatePlan = async (req: Request, res: Response): Promise<void>
     
     if (error.message.includes('not found') || error.message.includes('permission')) {
       res.status(404).json({ error: error.message });
-    } else if (error.message.includes('required') || error.message.includes('must be') || error.message.includes('Invalid value for argument')) {
+    } else if (error.message.includes('required') || error.message.includes('must be') || error.message.includes('cannot exceed')) {
       res.status(400).json({ error: error.message });
     } else {
       res.status(500).json({ error: 'Internal server error' });
@@ -243,7 +188,7 @@ export const updateRatePlan = async (req: Request, res: Response): Promise<void>
 
 /**
  * Delete a rate plan (smart deletion - hard/soft/blocked based on dependencies)
- * DELETE /api/properties/:propertyId/rate-plans/:ratePlanId
+ * DELETE /api/rate-plans/:ratePlanId
  */
 export const deleteRatePlan = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -283,40 +228,49 @@ export const deleteRatePlan = async (req: Request, res: Response): Promise<void>
 };
 
 /**
- * Search available rates for booking (Main booking engine endpoint)
- * GET /api/properties/:propertyId/search-rates
+ * Calculate booking options for property (New booking engine endpoint)
+ * POST /api/properties/:propertyId/calculate-booking
  */
-export const searchAvailableRates = async (req: Request, res: Response): Promise<void> => {
+export const calculateBookingOptions = async (req: Request, res: Response): Promise<void> => {
   try {
     const { propertyId } = req.params;
     const { 
       checkInDate, 
       checkOutDate, 
-      numGuests, 
+      isHalfDay,
+      guestCount, 
       bookingDate 
-    } = req.query;
+    } = req.body;
 
     // Validate required parameters
-    if (!checkInDate || !checkOutDate || !numGuests) {
+    if (!checkInDate || !guestCount) {
       res.status(400).json({ 
-        error: 'Missing required query parameters: checkInDate, checkOutDate, numGuests' 
+        error: 'Missing required fields: checkInDate and guestCount' 
+      });
+      return;
+    }
+
+    // Validate checkOutDate for full-day bookings
+    if (!isHalfDay && !checkOutDate) {
+      res.status(400).json({ 
+        error: 'checkOutDate is required for full-day bookings' 
       });
       return;
     }
 
     // Parse and validate dates
-    const checkIn = new Date(checkInDate as string);
-    const checkOut = new Date(checkOutDate as string);
-    const booking = bookingDate ? new Date(bookingDate as string) : new Date();
+    const checkIn = new Date(checkInDate);
+    const checkOut = checkOutDate ? new Date(checkOutDate) : undefined;
+    const booking = bookingDate ? new Date(bookingDate) : new Date();
 
-    if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+    if (isNaN(checkIn.getTime()) || (checkOut && isNaN(checkOut.getTime()))) {
       res.status(400).json({ 
         error: 'Invalid date format. Use YYYY-MM-DD format' 
       });
       return;
     }
 
-    if (checkIn >= checkOut) {
+    if (checkOut && checkIn >= checkOut) {
       res.status(400).json({ 
         error: 'Check-in date must be before check-out date' 
       });
@@ -331,7 +285,7 @@ export const searchAvailableRates = async (req: Request, res: Response): Promise
     }
 
     // Parse and validate number of guests
-    const guests = parseInt(numGuests as string);
+    const guests = parseInt(guestCount);
     if (isNaN(guests) || guests < 1 || guests > 20) {
       res.status(400).json({ 
         error: 'Number of guests must be between 1 and 20' 
@@ -339,32 +293,27 @@ export const searchAvailableRates = async (req: Request, res: Response): Promise
       return;
     }
 
-    const criteria: RateSearchCriteria = {
+    const criteria: BookingSearchCriteria = {
       propertyId,
       checkInDate: checkIn,
       checkOutDate: checkOut,
-      numGuests: guests,
+      isHalfDay: Boolean(isHalfDay),
+      guestCount: guests,
       bookingDate: booking,
     };
 
-    const results = await ratePlanService.searchAvailableRates(criteria);
+    const results = await ratePlanService.calculateBookingOptions(criteria);
 
     res.json({
-      message: results.length > 0 ? 'Available rates found' : 'No rates available for the selected dates',
-      searchCriteria: {
-        propertyId,
-        checkInDate: checkIn,
-        checkOutDate: checkOut,
-        numGuests: guests,
-        numNights: Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)),
-      },
-      availableRates: results,
-      count: results.length,
+      message: results.options.length > 0 ? 'Booking options calculated successfully' : 'No booking options available for the selected criteria',
+      ...results
     });
   } catch (error: any) {
-    console.error('Search rates error:', error);
+    console.error('Calculate booking options error:', error);
     
-    if (error.message.includes('must be') || error.message.includes('cannot be')) {
+    if (error.message.includes('not found') || error.message.includes('not available')) {
+      res.status(404).json({ error: error.message });
+    } else if (error.message.includes('must be') || error.message.includes('cannot be') || error.message.includes('required')) {
       res.status(400).json({ error: error.message });
     } else {
       res.status(500).json({ error: 'Internal server error' });
@@ -373,110 +322,8 @@ export const searchAvailableRates = async (req: Request, res: Response): Promise
 };
 
 /**
- * Calculate rate pricing for guest count and date range (public endpoint)
- * POST /api/properties/:propertyId/rate-plans/calculate
- */
-export const calculateRatePricing = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { propertyId } = req.params;
-    const { checkInDate, checkOutDate, numGuests } = req.body;
-
-    // Validate required fields
-    if (!checkInDate || !checkOutDate || !numGuests) {
-      res.status(400).json({ 
-        error: 'Missing required fields: checkInDate, checkOutDate, numGuests' 
-      });
-      return;
-    }
-
-    // Validate dates
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-    
-    if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
-      res.status(400).json({ 
-        error: 'Invalid date format. Use YYYY-MM-DD format' 
-      });
-      return;
-    }
-
-    if (checkIn >= checkOut) {
-      res.status(400).json({ 
-        error: 'Check-out date must be after check-in date' 
-      });
-      return;
-    }
-
-    const calculation = await ratePlanService.calculatePricingForStay(
-      propertyId,
-      checkIn,
-      checkOut,
-      parseInt(numGuests)
-    );
-
-    res.json({
-      message: 'Pricing calculated successfully',
-      calculation
-    });
-  } catch (error: any) {
-    console.error('Calculate rate pricing error:', error);
-    if (error.message.includes('not found')) {
-      res.status(404).json({ error: 'Property not found' });
-    } else {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-};
-
-/**
- * Calculate cancellation refund for a reservation
- * POST /api/reservations/:reservationId/calculate-refund
- */
-export const calculateCancellationRefund = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    const { reservationId } = req.params;
-    const { cancellationDate } = req.body;
-
-    if (!cancellationDate) {
-      res.status(400).json({ error: 'cancellationDate is required' });
-      return;
-    }
-
-    const cancelDate = new Date(cancellationDate);
-    if (isNaN(cancelDate.getTime())) {
-      res.status(400).json({ error: 'Invalid cancellationDate format' });
-      return;
-    }
-
-    const refundDetails = await ratePlanService.calculateCancellationRefund(
-      reservationId, 
-      cancelDate
-    );
-
-    res.json({
-      message: 'Refund calculation completed',
-      cancellationDate: cancelDate,
-      refundDetails,
-    });
-  } catch (error: any) {
-    console.error('Calculate refund error:', error);
-    
-    if (error.message.includes('not found')) {
-      res.status(404).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-};
-
-/**
  * Toggle rate plan activation status
- * PATCH /api/rateplans/:ratePlanId/toggle-status
+ * PATCH /api/rate-plans/:ratePlanId/toggle-status
  */
 export const toggleRatePlanStatus = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -516,7 +363,7 @@ export const toggleRatePlanStatus = async (req: Request, res: Response): Promise
 
 /**
  * Get rate plan statistics and analytics
- * GET /api/rateplans/:ratePlanId/stats
+ * GET /api/rate-plans/:ratePlanId/stats
  */
 export const getRatePlanStats = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -533,37 +380,28 @@ export const getRatePlanStats = async (req: Request, res: Response): Promise<voi
       ratePlan: {
         id: ratePlan.id,
         name: ratePlan.name,
-        type: ratePlan.type,
+        priceModifierType: ratePlan.priceModifierType,
+        priceModifierValue: ratePlan.priceModifierValue,
         priority: ratePlan.priority,
         isActive: ratePlan.isActive,
+        isDefault: ratePlan.isDefault,
       },
       usage: {
-        totalReservations: ratePlan._count?.reservations || 0,
-        totalPricesSet: ratePlan._count?.prices || 0,
-        hasBaseRatePlan: !!ratePlan.baseRatePlan,
-        derivedRatePlansCount: ratePlan.derivedRatePlans?.length || 0,
-        restrictionsCount: ratePlan.ratePlanRestrictions?.length || 0,
+        totalReservations: ratePlan.stats?.reservationCount || 0,
       },
       configuration: {
-        adjustmentType: ratePlan.adjustmentType,
-        adjustmentValue: ratePlan.adjustmentValue,
-        allowConcurrentRates: ratePlan.allowConcurrentRates,
-        includesBreakfast: ratePlan.includesBreakfast,
-        activeDaysCount: ratePlan.activeDays?.length || 0,
+        hasFeatures: !!ratePlan.features,
         hasCancellationPolicy: !!ratePlan.cancellationPolicy,
+        includedAmenitiesCount: ratePlan.features?.includedAmenityIds?.length || 0,
       },
-      relationships: {
-        baseRatePlan: ratePlan.baseRatePlan ? {
-          id: ratePlan.baseRatePlan.id,
-          name: ratePlan.baseRatePlan.name,
-          adjustmentValue: ratePlan.baseRatePlan.adjustmentValue,
-        } : null,
-        derivedRatePlans: ratePlan.derivedRatePlans?.map((derived: any) => ({
-          id: derived.id,
-          name: derived.name,
-          adjustmentValue: derived.adjustmentValue,
-        })) || [],
-      },
+      restrictions: {
+        minStay: ratePlan.minStay,
+        maxStay: ratePlan.maxStay,
+        minAdvanceBooking: ratePlan.minAdvanceBooking,
+        maxAdvanceBooking: ratePlan.maxAdvanceBooking,
+        minGuests: ratePlan.minGuests,
+        maxGuests: ratePlan.maxGuests,
+      }
     };
 
     res.json({
@@ -582,145 +420,70 @@ export const getRatePlanStats = async (req: Request, res: Response): Promise<voi
 };
 
 /**
- * Get available adjustment types and validation rules
- * GET /api/rateplans/metadata/adjustment-types
+ * Get available modifier types and validation rules
+ * GET /api/rate-plans/metadata/modifier-types
  */
-export const getAdjustmentTypesMetadata = async (_req: Request, res: Response): Promise<void> => {
+export const getModifierTypesMetadata = async (_req: Request, res: Response): Promise<void> => {
   try {
     const metadata = {
-      adjustmentTypes: [
+      modifierTypes: [
         {
-          value: PriceAdjustmentType.FixedPrice,
-          label: 'Fixed Price',
-          description: 'Set absolute price per night (e.g., AED 200 per night)',
-          requiresBaseRate: false,
+          value: ModifierType.Percentage,
+          label: 'Percentage Modifier',
+          description: 'Apply percentage change to base price (e.g., -20% = 20% discount, +30% = 30% surcharge)',
           valueValidation: {
-            min: 1,
-            max: 10000,
-            unit: 'AED',
-          }
-        },
-        {
-          value: PriceAdjustmentType.FixedDiscount,
-          label: 'Fixed Discount',
-          description: 'Apply fixed amount discount per night (e.g., AED 50 off per night)',
-          requiresBaseRate: true,
-          valueValidation: {
-            min: 1,
-            max: 1000,
-            unit: 'AED',
-          }
-        },
-        {
-          value: PriceAdjustmentType.Percentage,
-          label: 'Percentage Discount',
-          description: 'Apply percentage discount (e.g., 20% off base rate)',
-          requiresBaseRate: true,
-          valueValidation: {
-            min: 1,
+            min: -100,
             max: 100,
             unit: '%',
-          }
+          },
+          examples: [
+            { value: -20, description: '20% discount from base price' },
+            { value: 0, description: 'No change from base price' },
+            { value: 30, description: '30% surcharge on base price' }
+          ]
+        },
+        {
+          value: ModifierType.FixedAmount,
+          label: 'Fixed Amount Modifier',
+          description: 'Apply fixed AED amount change to base price (e.g., -50 = 50 AED discount, +100 = 100 AED surcharge)',
+          valueValidation: {
+            min: -99999.99,
+            max: 99999.99,
+            unit: 'AED',
+          },
+          examples: [
+            { value: -50, description: '50 AED discount per night' },
+            { value: 0, description: 'No change from base price' },
+            { value: 100, description: '100 AED surcharge per night' }
+          ]
         },
       ],
-      ratePlanTypes: [
+      cancellationTypes: [
         {
-          value: RatePlanType.FullyFlexible,
+          value: CancellationType.FullyFlexible,
           label: 'Fully Flexible',
-          description: 'Offers guests flexibility for cancellations (typically at higher price)',
+          description: 'Full refund based on days before check-in',
         },
         {
-          value: RatePlanType.NonRefundable,
+          value: CancellationType.Moderate,
+          label: 'Moderate',
+          description: 'Partial refund based on days before check-in',
+        },
+        {
+          value: CancellationType.NonRefundable,
           label: 'Non-Refundable',
-          description: 'Secures guaranteed bookings and revenue (typically at lower price)',
-        },
-        {
-          value: RatePlanType.Custom,
-          label: 'Custom',
-          description: 'Allows unique rate plans for specific guest segments or special discounts',
+          description: 'No refund under any circumstances',
         },
       ],
-      restrictionTypes: [
-        {
-          value: RatePlanRestrictionType.MinLengthOfStay,
-          label: 'Minimum Length of Stay',
-          description: 'Minimum number of nights required for booking',
-          requiresValue: true,
-          valueUnit: 'nights',
-        },
-        {
-          value: RatePlanRestrictionType.MaxLengthOfStay,
-          label: 'Maximum Length of Stay',
-          description: 'Maximum number of nights allowed for booking',
-          requiresValue: true,
-          valueUnit: 'nights',
-        },
-        {
-          value: RatePlanRestrictionType.MinGuests,
-          label: 'Minimum Guests',
-          description: 'Minimum number of guests required',
-          requiresValue: true,
-          valueUnit: 'guests',
-        },
-        {
-          value: RatePlanRestrictionType.MaxGuests,
-          label: 'Maximum Guests',
-          description: 'Maximum number of guests allowed',
-          requiresValue: true,
-          valueUnit: 'guests',
-        },
-        {
-          value: RatePlanRestrictionType.MinAdvancedReservation,
-          label: 'Minimum Advanced Reservation',
-          description: 'Minimum days before arrival for booking',
-          requiresValue: true,
-          valueUnit: 'days',
-        },
-        {
-          value: RatePlanRestrictionType.MaxAdvancedReservation,
-          label: 'Maximum Advanced Reservation',
-          description: 'Maximum days before arrival for booking',
-          requiresValue: true,
-          valueUnit: 'days',
-        },
-        {
-          value: RatePlanRestrictionType.NoArrivals,
-          label: 'No Arrivals',
-          description: 'Block arrivals on specific dates',
-          requiresValue: false,
-          requiresDates: true,
-        },
-        {
-          value: RatePlanRestrictionType.NoDepartures,
-          label: 'No Departures',
-          description: 'Block departures on specific dates',
-          requiresValue: false,
-          requiresDates: true,
-        },
-        {
-          value: RatePlanRestrictionType.SeasonalDateRange,
-          label: 'Seasonal Date Range',
-          description: 'Rate plan active only within specific date range',
-          requiresValue: false,
-          requiresDates: true,
-        },
-      ],
-      priorityLevels: {
-        vipExclusive: { range: [1, 49], label: 'VIP/Exclusive rates (highest priority)' },
-        seasonal: { range: [50, 99], label: 'Seasonal/Holiday rates' },
-        standard: { range: [100, 199], label: 'Standard base rates' },
-        promotional: { range: [200, 299], label: 'Promotional rates' },
-        special: { range: [300, 999], label: 'Special offers (lowest priority)' },
-      },
-      activeDays: [
-        { value: 0, label: 'Sunday' },
-        { value: 1, label: 'Monday' },
-        { value: 2, label: 'Tuesday' },
-        { value: 3, label: 'Wednesday' },
-        { value: 4, label: 'Thursday' },
-        { value: 5, label: 'Friday' },
-        { value: 6, label: 'Saturday' },
-      ],
+      restrictionRanges: {
+        minStay: { min: 1, max: 365, unit: 'nights' },
+        maxStay: { min: 1, max: 365, unit: 'nights' },
+        minAdvanceBooking: { min: 0, max: 365, unit: 'days' },
+        maxAdvanceBooking: { min: 0, max: 365, unit: 'days' },
+        minGuests: { min: 1, max: 20, unit: 'guests' },
+        maxGuests: { min: 1, max: 20, unit: 'guests' },
+        priority: { min: 1, max: 999, unit: 'priority level' }
+      }
     };
 
     res.json({

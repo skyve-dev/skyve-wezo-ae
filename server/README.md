@@ -11,7 +11,7 @@ A robust, scalable TypeScript-based backend server for the Wezo.ae property rent
 - **ORM**: Prisma - Type-safe database client with migrations
 - **Authentication**: JWT - Stateless token-based authentication
 - **Password Security**: bcrypt - Adaptive hashing with salt rounds
-- **Testing**: Jest + Supertest - Comprehensive test coverage (46+ tests)
+- **Testing**: Jest + Supertest - Comprehensive test coverage (237 tests, 100% passing)
 - **Development**: Nodemon + ts-node - Hot reload development experience
 
 ### Design Patterns & Principles
@@ -94,10 +94,20 @@ server/
 │   │
 │   ├── controllers/                  # Request/Response handlers
 │   │   ├── auth.controller.ts        # Authentication endpoints
-│   │   └── property.controller.ts    # Property management endpoints
+│   │   ├── property.controller.ts    # Property management endpoints
+│   │   ├── property-pricing.controller.ts # Property pricing management
+│   │   ├── rateplan.controller.ts    # Rate plan management
+│   │   ├── reservation.controller.ts # Reservation management
+│   │   ├── review.controller.ts      # Review management
+│   │   └── notification.controller.ts # Notification system
 │   │
 │   ├── services/                     # Business logic layer
-│   │   └── property.service.ts       # Property domain logic
+│   │   ├── property.service.ts       # Property domain logic
+│   │   ├── property-pricing.service.ts # Property pricing calculations
+│   │   ├── rateplan.service.ts       # Rate plan business logic
+│   │   ├── reservation.service.ts    # Reservation management
+│   │   ├── review.service.ts         # Review system
+│   │   └── notification.service.ts   # Notification handling
 │   │
 │   ├── middleware/                   # Cross-cutting concerns
 │   │   ├── auth.ts                   # JWT authentication
@@ -107,7 +117,12 @@ server/
 │   ├── routes/                       # API route definitions
 │   │   ├── index.ts                  # Main router aggregation
 │   │   ├── auth.routes.ts            # Authentication routes
-│   │   └── property.routes.ts        # Property management routes
+│   │   ├── property.routes.ts        # Property management routes
+│   │   ├── property-pricing.routes.ts # Property pricing routes
+│   │   ├── rateplan.routes.ts        # Rate plan routes
+│   │   ├── reservation.routes.ts     # Reservation routes
+│   │   ├── review.routes.ts          # Review routes
+│   │   └── notification.routes.ts    # Notification routes
 │   │
 │   ├── utils/                        # Utility functions
 │   │   ├── jwt.ts                    # JWT token utilities
@@ -116,10 +131,18 @@ server/
 │   ├── types/                        # TypeScript definitions
 │   │   └── index.d.ts                # Global type definitions
 │   │
-│   └── tests/                        # Test suites
+│   └── tests/                        # Test suites (237 tests total)
 │       ├── setup.ts                  # Test configuration
-│       ├── auth.test.ts              # Authentication tests (15 tests)
-│       └── property.test.ts          # Property tests (31 tests)
+│       ├── auth.test.ts              # Authentication tests (22 tests)
+│       ├── property.test.ts          # Property tests (31 tests)
+│       ├── property-pricing.test.ts  # Property pricing tests (23 tests)
+│       ├── rateplan.test.ts          # Rate plan tests (30 tests)
+│       ├── reservation.test.ts       # Reservation tests (19 tests)
+│       ├── review.test.ts            # Review system tests (45 tests)
+│       ├── notification.test.ts      # Notification tests (15 tests)
+│       ├── static-files.test.ts      # Static file serving tests (12 tests)
+│       ├── health.test.ts            # Health check tests (3 tests)
+│       └── availability.test.ts      # Availability tests (37 tests)
 │
 ├── prisma/                           # Database layer
 │   ├── schema.prisma                 # Database schema definition
@@ -288,6 +311,203 @@ app.use('/uploads/photos', express.static('uploads/photos', {
 - `DELETE /api/photos/:photoId` - Delete photo and file
 - `PUT /api/photos/:photoId` - Update photo metadata
 - `DELETE /api/properties/:propertyId/photos/:photoId` - Detach photo from property
+
+### Advanced Pricing & Booking System
+
+#### **Dynamic Pricing Engine**
+```typescript
+// ✅ Flexible pricing with base rates + modifiers
+interface WeeklyPricingData {
+  monday: number;
+  tuesday: number;
+  wednesday: number;
+  thursday: number;
+  friday: number;
+  saturday: number;
+  sunday: number;
+  halfDayMonday: number;
+  halfDayTuesday: number;
+  // ... additional half-day rates
+}
+
+interface DatePriceOverride {
+  date: Date;
+  price: number;
+  halfDayPrice?: number;
+  reason?: string; // "Holiday Premium", "Special Event", etc.
+}
+```
+
+#### **Rate Plan System**
+```typescript
+// ✅ Sophisticated rate plan management
+interface RatePlan {
+  id: string;
+  name: string;
+  description?: string;
+  priceModifierType: 'Percentage' | 'FixedAmount';
+  priceModifierValue: number; // e.g., -20 for 20% discount, 100 for 100 AED surcharge
+  priority: number; // Higher priority plans displayed first
+  isActive: boolean;
+  isDefault: boolean;
+  
+  // Booking restrictions
+  minStay?: number;
+  maxStay?: number;
+  minAdvanceBooking?: number;
+  maxAdvanceBooking?: number;
+  minGuests?: number;
+  maxGuests?: number;
+  
+  // Features and amenities
+  features?: {
+    includedAmenityIds: string[];
+    extraCostAmenityIds: string[];
+  };
+  
+  // Cancellation policy
+  cancellationPolicy?: {
+    type: 'FullyFlexible' | 'Moderate' | 'NonRefundable';
+    freeCancellationDays?: number;
+    partialRefundDays?: number;
+  };
+}
+```
+
+#### **Pricing API Endpoints**
+```typescript
+// Property Base Pricing
+PUT    /api/properties/:propertyId/pricing/weekly     # Set weekly base pricing
+GET    /api/properties/:propertyId/pricing/weekly     # Get weekly base pricing
+POST   /api/properties/:propertyId/pricing/overrides  # Set date-specific overrides
+DELETE /api/properties/:propertyId/pricing/overrides  # Delete date overrides
+GET    /api/properties/:propertyId/pricing/calendar   # Get pricing calendar
+GET    /api/properties/:propertyId/pricing/base-price # Get base price for specific date
+
+// Rate Plan Management
+POST   /api/properties/:propertyId/rate-plans         # Create rate plan
+GET    /api/properties/:propertyId/rate-plans         # Get all rate plans for property
+GET    /api/properties/:propertyId/rate-plans/public  # Get public rate plans (no auth)
+GET    /api/rate-plans/:ratePlanId                     # Get specific rate plan
+PUT    /api/rate-plans/:ratePlanId                     # Update rate plan
+DELETE /api/rate-plans/:ratePlanId                     # Delete rate plan (smart deletion)
+PATCH  /api/rate-plans/:ratePlanId/toggle-status      # Toggle active/inactive
+GET    /api/rate-plans/:ratePlanId/stats              # Get rate plan analytics
+
+// Booking Engine
+POST   /api/properties/:propertyId/calculate-booking  # Calculate all booking options
+GET    /api/rate-plans/metadata/modifier-types        # Get pricing metadata
+```
+
+#### **Smart Booking Calculation**
+```typescript
+// ✅ Advanced booking options calculation
+interface BookingSearchCriteria {
+  propertyId: string;
+  checkInDate: Date;
+  checkOutDate?: Date;
+  isHalfDay?: boolean;
+  guestCount: number;
+  bookingDate?: Date;
+}
+
+interface BookingOption {
+  ratePlan: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  pricing: {
+    basePrice: number;
+    modifier: number;
+    totalPrice: number;
+    pricePerNight: number;
+    savings: number; // Negative for surcharges
+  };
+  isEligible: boolean;
+  ineligibilityReasons: string[];
+  duration: {
+    nights: number;
+    isHalfDay: boolean;
+  };
+  restrictions: {
+    minStay?: number;
+    maxStay?: number;
+    minAdvanceBooking?: number;
+    maxAdvanceBooking?: number;
+    minGuests?: number;
+    maxGuests?: number;
+  };
+  amenities: {
+    included: Amenity[];
+    extraCost: Amenity[];
+  };
+  cancellation: {
+    type: string;
+    description: string;
+    freeCancellationDays?: number;
+    partialRefundDays?: number;
+  };
+}
+```
+
+### Reservation Management System
+
+#### **Reservation Lifecycle**
+```typescript
+// ✅ Complete reservation workflow
+enum ReservationStatus {
+  PENDING = 'Pending',
+  CONFIRMED = 'Confirmed',
+  CANCELLED = 'Cancelled',
+  COMPLETED = 'Completed',
+  NO_SHOW = 'NoShow'
+}
+
+interface Reservation {
+  id: string;
+  ratePlanId: string;
+  guestId: string;
+  propertyId: string;
+  
+  // Booking details
+  checkInDate: Date;
+  checkOutDate?: Date;
+  isHalfDay: boolean;
+  guestCount: number;
+  
+  // Pricing
+  basePrice: number;
+  modifier: number;
+  totalPrice: number;
+  commissionAmount: number;
+  
+  // Status tracking
+  status: ReservationStatus;
+  paymentStatus: 'Pending' | 'Paid' | 'Refunded';
+  
+  // Communication
+  messages: ReservationMessage[];
+  noShowReason?: string;
+  
+  // Review system
+  review?: Review;
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+#### **Reservation API Endpoints**
+```typescript
+GET    /api/reservations                           # List reservations with filters
+GET    /api/reservations/:id                       # Get specific reservation
+PUT    /api/reservations/:id                       # Update reservation
+POST   /api/reservations/:id/no-show              # Report guest no-show
+POST   /api/reservations/:id/messages             # Send message to guest
+GET    /api/reservations/:id/messages             # Get conversation history
+POST   /api/reviews/:reviewId/response            # Respond to guest review
+```
 
 ### Database Best Practices
 
@@ -762,9 +982,9 @@ router.delete('/api/properties/:id', authenticateToken, deleteProperty);
 
 ## 📚 Key Resources & Documentation
 
-- **API Documentation**: All 46 endpoints with comprehensive examples
-- **Database Schema**: Complete Prisma schema with relationships
-- **Test Coverage**: 46+ tests covering all functionality
+- **API Documentation**: All 80+ endpoints with comprehensive examples
+- **Database Schema**: Complete Prisma schema with advanced relationships
+- **Test Coverage**: 237 tests covering all functionality (100% passing)
 - **Environment Setup**: Complete configuration guide
 - **Security Guidelines**: JWT, bcrypt, and validation patterns
 
@@ -795,8 +1015,10 @@ router.delete('/api/properties/:id', authenticateToken, deleteProperty);
 
 ## 📈 Current Status
 
-✅ **46/46 Tests Passing**  
-✅ **Comprehensive API Coverage**  
+✅ **237/237 Tests Passing (100% Success Rate)**  
+✅ **Comprehensive API Coverage (80+ endpoints)**  
+✅ **Advanced Pricing & Booking Engine**  
+✅ **Complete Reservation Management System**  
 ✅ **Production-Ready Security**  
 ✅ **Type-Safe Database Layer**  
 ✅ **Enterprise Architecture Patterns**

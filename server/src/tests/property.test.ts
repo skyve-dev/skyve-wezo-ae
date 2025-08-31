@@ -66,7 +66,6 @@ describe('Property API Tests', () => {
         },
       ],
       services: {
-        serveBreakfast: true,
         parking: 'YesFree',
         languages: ['English', 'Arabic'],
       },
@@ -202,7 +201,6 @@ describe('Property API Tests', () => {
           },
         ],
         services: {
-          serveBreakfast: true,
           parking: 'YesFree',
           languages: ['English', 'Arabic'],
         },
@@ -399,7 +397,6 @@ describe('Property API Tests', () => {
           offerCribs: false,
         },
         services: {
-          serveBreakfast: true,
           parking: 'YesFree',
           languages: ['English'],
         },
@@ -457,7 +454,6 @@ describe('Property API Tests', () => {
           },
         ],
         services: {
-          serveBreakfast: false,
           parking: 'No',
           languages: ['English'],
         },
@@ -789,7 +785,6 @@ describe('Property API Tests', () => {
       const testPropertyId = await createTestProperty();
       
       const servicesUpdate = {
-        serveBreakfast: false,
         parking: 'YesPaid',
         languages: ['English', 'Arabic', 'French'],
       };
@@ -801,7 +796,6 @@ describe('Property API Tests', () => {
         .expect(200);
 
       expect(response.body.message).toBe('Property services updated successfully');
-      expect(response.body.property.serveBreakfast).toBe(false);
       expect(response.body.property.parking).toBe('YesPaid');
     });
 
@@ -809,7 +803,6 @@ describe('Property API Tests', () => {
       const testPropertyId = await createTestProperty();
       
       const invalidServices = {
-        serveBreakfast: true,
         parking: 'InvalidParking',
         languages: ['English'],
       };
@@ -889,7 +882,6 @@ describe('Property API Tests', () => {
           offerCribs: false,
         },
         services: {
-          serveBreakfast: false,
           parking: 'YesFree',
           languages: ['English'],
         },
@@ -975,7 +967,6 @@ describe('Property API Tests', () => {
           offerCribs: false,
         },
         services: {
-          serveBreakfast: false,
           parking: 'No',
           languages: ['English'],
         },
@@ -1385,7 +1376,6 @@ describe('Property API Tests', () => {
             },
           ],
           services: {
-            serveBreakfast: false,
             parking: 'No',
             languages: ['English'],
           },
@@ -1499,7 +1489,6 @@ describe('Property API Tests', () => {
               offerCribs: false,
             },
             services: {
-              serveBreakfast: false,
               parking: 'No',
               languages: ['English'],
             },
@@ -1553,7 +1542,6 @@ describe('Property API Tests', () => {
               offerCribs: true,
             },
             services: {
-              serveBreakfast: true,
               parking: 'YesFree',
               languages: ['English', 'Arabic'],
             },
@@ -1599,7 +1587,6 @@ describe('Property API Tests', () => {
               offerCribs: false,
             },
             services: {
-              serveBreakfast: false,
               parking: 'No',
               languages: ['English'],
             },
@@ -1646,7 +1633,6 @@ describe('Property API Tests', () => {
               offerCribs: false,
             },
             services: {
-              serveBreakfast: false,
               parking: 'YesPaid',
               languages: ['English'],
             },
@@ -1756,7 +1742,6 @@ describe('Property API Tests', () => {
           },
         ],
         services: {
-          serveBreakfast: false,
           parking: 'No',
           languages: ['English'],
         },
@@ -1889,7 +1874,6 @@ describe('Property API Tests', () => {
           },
         ],
         services: {
-          serveBreakfast: true,
           parking: 'YesFree',
           languages: ['English', 'Arabic'],
         },

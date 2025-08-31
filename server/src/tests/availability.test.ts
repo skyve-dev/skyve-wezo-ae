@@ -46,7 +46,6 @@ describe('Availability API Tests', () => {
         propertySizeSqMtr: 100,
       },
       services: {
-        serveBreakfast: false,
         parking: 'No',
         languages: ['English'],
       },

@@ -64,7 +64,6 @@ describe('Reservation API Tests', () => {
         propertySizeSqMtr: 100,
       },
       services: {
-        serveBreakfast: false,
         parking: 'No',
         languages: ['English'],
       },
@@ -90,27 +89,16 @@ describe('Reservation API Tests', () => {
       data: {
         propertyId,
         name: 'Test Rate Plan',
-        type: 'FullyFlexible',
         description: 'Test rate plan',
-        adjustmentType: 'FixedPrice',
-        adjustmentValue: 1200,
+        priceModifierType: 'FixedAmount',
+        priceModifierValue: 1200,
         cancellationPolicy: {
           create: {
-            tiers: {
-              create: [
-                {
-                  daysBeforeCheckIn: 1,
-                  refundPercentage: 100,
-                },
-                {
-                  daysBeforeCheckIn: 0,
-                  refundPercentage: 0,
-                },
-              ],
-            },
+            type: 'Moderate',
+            freeCancellationDays: 7,
+            partialRefundDays: 3,
           },
         },
-        includesBreakfast: true,
       },
     });
     

@@ -53,7 +53,6 @@ export class ReservationService {
             select: {
               id: true,
               name: true,
-              type: true,
               property: {
                 select: {
                   propertyId: true,
@@ -114,7 +113,6 @@ export class ReservationService {
       include: {
         ratePlan: {
           include: {
-            ratePlanRestrictions: true,
             property: {
               select: {
                 propertyId: true,

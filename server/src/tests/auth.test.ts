@@ -55,7 +55,7 @@ describe('Authentication Tests', () => {
         .send(newUser)
         .expect(409);
 
-      expect(response.body.error).toBe('Username or email already exists');
+      expect(response.body.error).toBe('This username or email is already registered. Please use a different one or sign in to your existing account.');
     });
 
     it('should reject registration with invalid email', async () => {
@@ -150,7 +150,7 @@ describe('Authentication Tests', () => {
         .send(credentials)
         .expect(401);
 
-      expect(response.body.error).toBe('Invalid credentials');
+      expect(response.body.error).toBe('The username or password you entered is incorrect. Please check your credentials and try again.');
     });
 
     it('should reject login with non-existent user', async () => {
@@ -164,7 +164,7 @@ describe('Authentication Tests', () => {
         .send(credentials)
         .expect(401);
 
-      expect(response.body.error).toBe('Invalid credentials');
+      expect(response.body.error).toBe('The username or password you entered is incorrect. Please check your credentials and try again.');
     });
   });
 
@@ -296,7 +296,7 @@ describe('Authentication Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Invalid or expired reset token');
+      expect(response.body.error).toBe('This password reset link is invalid or has expired. Please request a new password reset.');
     });
   });
 
@@ -357,7 +357,6 @@ describe('Authentication Tests', () => {
           }
         ],
         services: {
-          serveBreakfast: false,
           parking: 'YesFree',
           languages: ['English', 'Arabic']
         },
@@ -395,7 +394,7 @@ describe('Authentication Tests', () => {
         .send({ role: 'HomeOwner' })
         .expect(400);
 
-      expect(response.body.error).toBe('Can only upgrade to HomeOwner role after creating a property');
+      expect(response.body.error).toBe('To become a HomeOwner, you need to add at least one property first. Please add a property and try again.');
     });
 
     it('should reject role upgrade with invalid role', async () => {
@@ -405,7 +404,7 @@ describe('Authentication Tests', () => {
         .send({ role: 'INVALID_ROLE' })
         .expect(400);
 
-      expect(response.body.error).toBe('Invalid role');
+      expect(response.body.error).toBe('The selected account type is not valid. Please choose Tenant, HomeOwner, or Manager.');
     });
 
     it('should reject role upgrade without authentication', async () => {
@@ -434,7 +433,7 @@ describe('Authentication Tests', () => {
         .send({})
         .expect(400);
 
-      expect(response.body.error).toBe('Invalid role');
+      expect(response.body.error).toBe('The selected account type is not valid. Please choose Tenant, HomeOwner, or Manager.');
     });
 
     it('should allow Tenant to upgrade to Manager role without properties', async () => {

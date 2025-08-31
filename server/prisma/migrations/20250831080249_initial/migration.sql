@@ -2,13 +2,10 @@
 CREATE TYPE "public"."PropertyStatus" AS ENUM ('Draft', 'Live', 'Closed');
 
 -- CreateEnum
-CREATE TYPE "public"."RatePlanType" AS ENUM ('FullyFlexible', 'NonRefundable', 'Custom');
+CREATE TYPE "public"."ModifierType" AS ENUM ('Percentage', 'FixedAmount');
 
 -- CreateEnum
-CREATE TYPE "public"."PriceAdjustmentType" AS ENUM ('Percentage', 'FixedDiscount', 'FixedPrice');
-
--- CreateEnum
-CREATE TYPE "public"."RatePlanRestrictionType" AS ENUM ('MinLengthOfStay', 'MaxLengthOfStay', 'MinAdvancedReservation', 'MaxAdvancedReservation', 'MinGuests', 'MaxGuests', 'NoArrivals', 'NoDepartures', 'SeasonalDateRange');
+CREATE TYPE "public"."CancellationType" AS ENUM ('FullyFlexible', 'Moderate', 'NonRefundable');
 
 -- CreateEnum
 CREATE TYPE "public"."ReservationStatus" AS ENUM ('Confirmed', 'Pending', 'Modified', 'Cancelled', 'NoShow', 'Completed');
@@ -101,7 +98,6 @@ CREATE TABLE "public"."Property" (
     "allowChildren" BOOLEAN NOT NULL,
     "offerCribs" BOOLEAN NOT NULL,
     "propertySizeSqMtr" INTEGER,
-    "serveBreakfast" BOOLEAN NOT NULL,
     "parking" "public"."ParkingType" NOT NULL,
     "languages" TEXT[],
     "smokingAllowed" BOOLEAN NOT NULL,
@@ -117,8 +113,6 @@ CREATE TABLE "public"."Property" (
     "ownerId" TEXT NOT NULL,
     "status" "public"."PropertyStatus" NOT NULL DEFAULT 'Draft',
     "minPhotosRequired" INTEGER NOT NULL DEFAULT 5,
-    "reservationPolicy" TEXT,
-    "paymentPolicy" TEXT,
     "houseRules" TEXT,
 
     CONSTRAINT "Property_pkey" PRIMARY KEY ("propertyId")
@@ -201,12 +195,42 @@ CREATE TABLE "public"."Amenity" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Pricing" (
+CREATE TABLE "public"."PropertyPricing" (
     "id" TEXT NOT NULL,
-    "currency" "public"."Currency" NOT NULL,
     "propertyId" TEXT NOT NULL,
+    "priceMonday" DECIMAL(10,2) NOT NULL,
+    "priceTuesday" DECIMAL(10,2) NOT NULL,
+    "priceWednesday" DECIMAL(10,2) NOT NULL,
+    "priceThursday" DECIMAL(10,2) NOT NULL,
+    "priceFriday" DECIMAL(10,2) NOT NULL,
+    "priceSaturday" DECIMAL(10,2) NOT NULL,
+    "priceSunday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceMonday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceTuesday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceWednesday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceThursday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceFriday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceSaturday" DECIMAL(10,2) NOT NULL,
+    "halfDayPriceSunday" DECIMAL(10,2) NOT NULL,
+    "currency" "public"."Currency" NOT NULL DEFAULT 'AED',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Pricing_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PropertyPricing_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."DatePriceOverride" (
+    "id" TEXT NOT NULL,
+    "propertyId" TEXT NOT NULL,
+    "date" DATE NOT NULL,
+    "price" DECIMAL(10,2) NOT NULL,
+    "halfDayPrice" DECIMAL(10,2),
+    "reason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DatePriceOverride_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -226,16 +250,18 @@ CREATE TABLE "public"."RatePlan" (
     "id" TEXT NOT NULL,
     "propertyId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "type" "public"."RatePlanType" NOT NULL,
     "description" TEXT,
-    "includesBreakfast" BOOLEAN NOT NULL DEFAULT false,
-    "adjustmentType" "public"."PriceAdjustmentType" NOT NULL DEFAULT 'Percentage',
-    "adjustmentValue" DOUBLE PRECISION NOT NULL,
-    "baseRatePlanId" TEXT,
-    "priority" INTEGER NOT NULL DEFAULT 100,
-    "allowConcurrentRates" BOOLEAN NOT NULL DEFAULT true,
+    "priceModifierType" "public"."ModifierType" NOT NULL DEFAULT 'Percentage',
+    "priceModifierValue" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "minStay" INTEGER,
+    "maxStay" INTEGER,
+    "minAdvanceBooking" INTEGER,
+    "maxAdvanceBooking" INTEGER,
+    "minGuests" INTEGER,
+    "maxGuests" INTEGER,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "activeDays" INTEGER[] DEFAULT ARRAY[0, 1, 2, 3, 4, 5, 6]::INTEGER[],
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "priority" INTEGER NOT NULL DEFAULT 100,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -243,52 +269,27 @@ CREATE TABLE "public"."RatePlan" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Price" (
+CREATE TABLE "public"."RatePlanFeatures" (
     "id" TEXT NOT NULL,
     "ratePlanId" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
-    "amount" DECIMAL(10,2) NOT NULL,
+    "includedAmenityIds" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Price_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "RatePlanFeatures_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "public"."CancellationPolicy" (
     "id" TEXT NOT NULL,
     "ratePlanId" TEXT NOT NULL,
+    "type" "public"."CancellationType" NOT NULL DEFAULT 'FullyFlexible',
+    "freeCancellationDays" INTEGER,
+    "partialRefundDays" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "CancellationPolicy_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."CancellationTier" (
-    "id" TEXT NOT NULL,
-    "cancellationPolicyId" TEXT NOT NULL,
-    "daysBeforeCheckIn" INTEGER NOT NULL,
-    "refundPercentage" DOUBLE PRECISION NOT NULL,
-    "description" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "CancellationTier_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."RatePlanRestriction" (
-    "id" TEXT NOT NULL,
-    "ratePlanId" TEXT NOT NULL,
-    "type" "public"."RatePlanRestrictionType" NOT NULL,
-    "value" INTEGER NOT NULL,
-    "startDate" TIMESTAMP(3),
-    "endDate" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "RatePlanRestriction_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -541,19 +542,22 @@ CREATE UNIQUE INDEX "LatLong_addressId_key" ON "public"."LatLong"("addressId");
 CREATE UNIQUE INDEX "CheckInOutTimes_propertyId_key" ON "public"."CheckInOutTimes"("propertyId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Pricing_propertyId_key" ON "public"."Pricing"("propertyId");
+CREATE UNIQUE INDEX "PropertyPricing_propertyId_key" ON "public"."PropertyPricing"("propertyId");
+
+-- CreateIndex
+CREATE INDEX "DatePriceOverride_date_idx" ON "public"."DatePriceOverride"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DatePriceOverride_propertyId_date_key" ON "public"."DatePriceOverride"("propertyId", "date");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Availability_propertyId_date_key" ON "public"."Availability"("propertyId", "date");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Price_ratePlanId_date_key" ON "public"."Price"("ratePlanId", "date");
+CREATE UNIQUE INDEX "RatePlanFeatures_ratePlanId_key" ON "public"."RatePlanFeatures"("ratePlanId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CancellationPolicy_ratePlanId_key" ON "public"."CancellationPolicy"("ratePlanId");
-
--- CreateIndex
-CREATE INDEX "CancellationTier_cancellationPolicyId_daysBeforeCheckIn_idx" ON "public"."CancellationTier"("cancellationPolicyId", "daysBeforeCheckIn");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Review_reservationId_key" ON "public"."Review"("reservationId");
@@ -592,7 +596,10 @@ ALTER TABLE "public"."Photo" ADD CONSTRAINT "Photo_propertyId_fkey" FOREIGN KEY 
 ALTER TABLE "public"."Amenity" ADD CONSTRAINT "Amenity_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Pricing" ADD CONSTRAINT "Pricing_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."PropertyPricing" ADD CONSTRAINT "PropertyPricing_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."DatePriceOverride" ADD CONSTRAINT "DatePriceOverride_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Availability" ADD CONSTRAINT "Availability_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -601,19 +608,10 @@ ALTER TABLE "public"."Availability" ADD CONSTRAINT "Availability_propertyId_fkey
 ALTER TABLE "public"."RatePlan" ADD CONSTRAINT "RatePlan_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "public"."Property"("propertyId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."RatePlan" ADD CONSTRAINT "RatePlan_baseRatePlanId_fkey" FOREIGN KEY ("baseRatePlanId") REFERENCES "public"."RatePlan"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Price" ADD CONSTRAINT "Price_ratePlanId_fkey" FOREIGN KEY ("ratePlanId") REFERENCES "public"."RatePlan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."RatePlanFeatures" ADD CONSTRAINT "RatePlanFeatures_ratePlanId_fkey" FOREIGN KEY ("ratePlanId") REFERENCES "public"."RatePlan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."CancellationPolicy" ADD CONSTRAINT "CancellationPolicy_ratePlanId_fkey" FOREIGN KEY ("ratePlanId") REFERENCES "public"."RatePlan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."CancellationTier" ADD CONSTRAINT "CancellationTier_cancellationPolicyId_fkey" FOREIGN KEY ("cancellationPolicyId") REFERENCES "public"."CancellationPolicy"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."RatePlanRestriction" ADD CONSTRAINT "RatePlanRestriction_ratePlanId_fkey" FOREIGN KEY ("ratePlanId") REFERENCES "public"."RatePlan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Reservation" ADD CONSTRAINT "Reservation_ratePlanId_fkey" FOREIGN KEY ("ratePlanId") REFERENCES "public"."RatePlan"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

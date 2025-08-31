@@ -65,7 +65,6 @@ describe('Review Management API Tests', () => {
         propertySizeSqMtr: 100,
       },
       services: {
-        serveBreakfast: false,
         parking: 'No',
         languages: ['English'],
       },
@@ -89,27 +88,16 @@ describe('Review Management API Tests', () => {
       data: {
         propertyId,
         name: 'Standard Rate',
-        type: 'FullyFlexible',
         description: 'Standard flexible rate',
-        adjustmentType: 'FixedPrice',
-        adjustmentValue: 800,
+        priceModifierType: 'FixedAmount',
+        priceModifierValue: 800,
         cancellationPolicy: {
           create: {
-            tiers: {
-              create: [
-                {
-                  daysBeforeCheckIn: 1,
-                  refundPercentage: 100,
-                },
-                {
-                  daysBeforeCheckIn: 0,
-                  refundPercentage: 0,
-                },
-              ],
-            },
+            type: 'Moderate',
+            freeCancellationDays: 7,
+            partialRefundDays: 3,
           },
         },
-        includesBreakfast: false,
       },
     });
     ratePlanId = ratePlan.id;

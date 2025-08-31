@@ -9,10 +9,9 @@ export async function cleanupDatabase() {
     // Use raw SQL to truncate tables and reset sequences
     // This bypasses foreign key checks during the operation
     const tableNames = [
-      'CancellationTier',
-      'CancellationPolicy', 
-      'RatePlanRestriction',
-      'Price',
+      'RatePlanFeatures',
+      'DatePriceOverride',
+      'PropertyPricing',
       'RatePlan',
       'Review',
       'Reservation',
@@ -40,10 +39,9 @@ export async function cleanupDatabase() {
     // If the above fails, try the manual approach with error handling
     try {
       // Delete in proper order due to foreign key constraints
-      await prisma.cancellationTier.deleteMany();
-      await prisma.cancellationPolicy.deleteMany();
-      await prisma.ratePlanRestriction.deleteMany();
-      await prisma.price.deleteMany();
+      await prisma.ratePlanFeatures.deleteMany();
+      await prisma.datePriceOverride.deleteMany();
+      await prisma.propertyPricing.deleteMany();
       await prisma.ratePlan.deleteMany();
       await prisma.review.deleteMany();
       await prisma.reservation.deleteMany();

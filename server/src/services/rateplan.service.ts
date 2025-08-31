@@ -1,281 +1,217 @@
 import prisma from '../config/database';
-import { PriceAdjustmentType, RatePlanType, RatePlanRestrictionType } from '@prisma/client';
+import { ModifierType, CancellationType } from '@prisma/client';
+import propertyPricingService from './property-pricing.service';
 
 export interface RatePlanCreateData {
   name: string;
-  type: RatePlanType;
   description?: string;
-  includesBreakfast?: boolean;
-  adjustmentType: PriceAdjustmentType;
-  adjustmentValue: number;
-  baseRatePlanId?: string;
-  priority?: number;
-  allowConcurrentRates?: boolean;
+  priceModifierType: ModifierType;
+  priceModifierValue: number;
+  minStay?: number;
+  maxStay?: number;
+  minAdvanceBooking?: number;
+  maxAdvanceBooking?: number;
+  minGuests?: number;
+  maxGuests?: number;
   isActive?: boolean;
-  activeDays?: number[];
-  ratePlanRestrictions?: RatePlanRestrictionData[];
-  cancellationPolicy?: CancellationPolicyData;
-}
-
-export interface RatePlanRestrictionData {
-  type: RatePlanRestrictionType;
-  value?: number;
-  startDate?: Date;
-  endDate?: Date;
-}
-
-export interface CancellationPolicyData {
-  tiers: CancellationTierData[];
-}
-
-export interface CancellationTierData {
-  daysBeforeCheckIn: number;
-  refundPercentage: number;
-  description?: string;
-}
-
-export interface RateSearchCriteria {
-  propertyId: string;
-  checkInDate: Date;
-  checkOutDate: Date;
-  numGuests: number;
-  bookingDate?: Date;
-}
-
-export interface RateSearchResult {
-  ratePlan: any;
-  totalPrice: number;
-  nightlyRates: { date: Date; rate: number }[];
-  averageNightlyRate: number;
-  cancellationPolicy?: any;
-  includesBreakfast: boolean;
-  savings?: {
-    amount: number;
-    percentage: number;
-    comparedTo: string;
+  isDefault?: boolean;
+  priority?: number;
+  features?: {
+    includedAmenityIds: string[];
+  };
+  cancellationPolicy?: {
+    type: CancellationType;
+    freeCancellationDays?: number;
+    partialRefundDays?: number;
   };
 }
 
+export interface RatePlanUpdateData {
+  name?: string;
+  description?: string;
+  priceModifierType?: ModifierType;
+  priceModifierValue?: number;
+  minStay?: number;
+  maxStay?: number;
+  minAdvanceBooking?: number;
+  maxAdvanceBooking?: number;
+  minGuests?: number;
+  maxGuests?: number;
+  isActive?: boolean;
+  isDefault?: boolean;
+  priority?: number;
+}
+
+export interface BookingSearchCriteria {
+  propertyId: string;
+  checkInDate: Date;
+  checkOutDate?: Date;  // Optional for half-day bookings
+  isHalfDay?: boolean;
+  guestCount: number;
+  bookingDate?: Date;   // When the booking is being made (for advance booking restrictions)
+}
+
+export interface BookingOption {
+  ratePlan: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  pricing: {
+    totalPrice: number;
+    basePrice: number;
+    modifier: number;
+    savings: number;
+    pricePerNight?: number;  // For multi-night stays
+  };
+  duration: {
+    isHalfDay: boolean;
+    nights: number;
+  };
+  amenities: {
+    included: Array<{ id: string; name: string; category: string }>;
+    extraCost: Array<{ id: string; name: string; category: string }>;
+  };
+  cancellation: {
+    type: CancellationType;
+    freeCancellationDays?: number;
+    partialRefundDays?: number;
+    description: string;
+  };
+  restrictions: {
+    minStay?: number;
+    maxStay?: number;
+    minGuests?: number;
+    maxGuests?: number;
+    minAdvanceBooking?: number;
+    maxAdvanceBooking?: number;
+  };
+  isEligible: boolean;
+  ineligibilityReasons: string[];
+}
+
 export class RatePlanService {
-  
+
   /**
    * Create a new rate plan for a property
    */
-  async createRatePlan(propertyId: string, userId: string, data: RatePlanCreateData): Promise<any> {
+  async createRatePlan(
+    propertyId: string,
+    userId: string,
+    ratePlanData: RatePlanCreateData
+  ): Promise<any> {
     // Verify property ownership
-    const property = await prisma.property.findFirst({
-      where: {
-        propertyId,
-        ownerId: userId,
-      },
-    });
+    await this.verifyPropertyOwnership(propertyId, userId);
 
-    if (!property) {
-      throw new Error('Property not found or you do not have permission to update it');
+    // Validate rate plan data
+    this.validateRatePlanData(ratePlanData);
+
+    // If this is set as default, unset other defaults first
+    if (ratePlanData.isDefault) {
+      await prisma.ratePlan.updateMany({
+        where: { propertyId, isDefault: true },
+        data: { isDefault: false }
+      });
     }
 
-    // Validate base rate plan reference for percentage adjustments
-    if (data.adjustmentType === PriceAdjustmentType.Percentage) {
-      if (!data.baseRatePlanId) {
-        throw new Error('baseRatePlanId is required for percentage-based rate plans');
-      }
-
-      const baseRatePlan = await prisma.ratePlan.findFirst({
-        where: {
-          id: data.baseRatePlanId,
+    const ratePlan = await prisma.$transaction(async (tx) => {
+      // Create the rate plan
+      const createdRatePlan = await tx.ratePlan.create({
+        data: {
           propertyId,
-          adjustmentType: PriceAdjustmentType.FixedPrice,
-        },
+          name: ratePlanData.name,
+          description: ratePlanData.description,
+          priceModifierType: ratePlanData.priceModifierType,
+          priceModifierValue: ratePlanData.priceModifierValue,
+          minStay: ratePlanData.minStay,
+          maxStay: ratePlanData.maxStay,
+          minAdvanceBooking: ratePlanData.minAdvanceBooking,
+          maxAdvanceBooking: ratePlanData.maxAdvanceBooking,
+          minGuests: ratePlanData.minGuests,
+          maxGuests: ratePlanData.maxGuests,
+          isActive: ratePlanData.isActive ?? true,
+          isDefault: ratePlanData.isDefault ?? false,
+          priority: ratePlanData.priority ?? 100
+        }
       });
 
-      if (!baseRatePlan) {
-        throw new Error('Base rate plan must be a FixedPrice type and belong to the same property');
+      // Create features if provided
+      if (ratePlanData.features) {
+        await tx.ratePlanFeatures.create({
+          data: {
+            ratePlanId: createdRatePlan.id,
+            includedAmenityIds: ratePlanData.features.includedAmenityIds
+          }
+        });
       }
-    }
 
-    // Validate activeDays array
-    const activeDays = data.activeDays || [0, 1, 2, 3, 4, 5, 6];
-    if (!Array.isArray(activeDays) || activeDays.some(day => day < 0 || day > 6)) {
-      throw new Error('activeDays must be an array of integers between 0-6');
-    }
-
-    // Create rate plan with related data
-    const ratePlan = await prisma.ratePlan.create({
-      data: {
-        propertyId,
-        name: data.name,
-        type: data.type,
-        description: data.description,
-        includesBreakfast: data.includesBreakfast || false,
-        adjustmentType: data.adjustmentType,
-        adjustmentValue: data.adjustmentValue,
-        baseRatePlanId: data.baseRatePlanId,
-        priority: data.priority || 100,
-        allowConcurrentRates: data.allowConcurrentRates ?? true,
-        activeDays,
-        
-        // Create restrictions if provided
-        ratePlanRestrictions: data.ratePlanRestrictions ? {
-          create: data.ratePlanRestrictions.map(r => ({
-            type: r.type,
-            value: r.value || 0,
-            startDate: r.startDate,
-            endDate: r.endDate,
-          })),
-        } : undefined,
-
-        // Create cancellation policy if provided
-        cancellationPolicy: data.cancellationPolicy ? {
-          create: {
-            tiers: {
-              create: data.cancellationPolicy.tiers.map(tier => ({
-                daysBeforeCheckIn: tier.daysBeforeCheckIn,
-                refundPercentage: tier.refundPercentage,
-                description: tier.description,
-              })),
-            },
-          },
-        } : undefined,
-      },
-      include: {
-        baseRatePlan: true,
-        derivedRatePlans: true,
-        ratePlanRestrictions: true,
-        cancellationPolicy: {
-          include: {
-            tiers: {
-              orderBy: { daysBeforeCheckIn: 'desc' }
-            }
+      // Create cancellation policy if provided
+      if (ratePlanData.cancellationPolicy) {
+        await tx.cancellationPolicy.create({
+          data: {
+            ratePlanId: createdRatePlan.id,
+            type: ratePlanData.cancellationPolicy.type,
+            freeCancellationDays: ratePlanData.cancellationPolicy.freeCancellationDays,
+            partialRefundDays: ratePlanData.cancellationPolicy.partialRefundDays
           }
-        },
-        prices: {
-          take: 30,
-          orderBy: { date: 'asc' },
-          where: {
-            date: {
-              gte: new Date(),
-            }
-          }
-        },
-      },
+        });
+      }
+
+      return createdRatePlan;
     });
 
-    return ratePlan;
+    // Return with relations
+    return await this.getRatePlanById(ratePlan.id, userId);
   }
 
   /**
-   * Update an existing rate plan
+   * Update a rate plan
    */
-  async updateRatePlan(ratePlanId: string, userId: string, data: Partial<RatePlanCreateData>): Promise<any> {
-    console.log('🔧 UPDATE RATE PLAN DEBUG:', {
-      ratePlanId,
-      userId,
-      hasRatePlanRestrictions: !!data.ratePlanRestrictions,
-      restrictionsCount: data.ratePlanRestrictions?.length || 0,
-      restrictionsData: data.ratePlanRestrictions
-    })
-    
-    // Verify ownership through property
-    const existingRatePlan = await prisma.ratePlan.findFirst({
-      where: {
-        id: ratePlanId,
-        property: {
-          ownerId: userId,
-        },
-      },
-      include: {
-        property: true,
-      },
-    });
+  async updateRatePlan(
+    ratePlanId: string,
+    userId: string,
+    updateData: RatePlanUpdateData
+  ): Promise<any> {
+    // Verify rate plan ownership
+    await this.verifyRatePlanOwnership(ratePlanId, userId);
 
-    if (!existingRatePlan) {
-      throw new Error('Rate plan not found or you do not have permission to update it');
+    // Validate update data
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('No update data provided');
     }
 
-    // Validate adjustment value for negative values (only allowed for percentage adjustments)
-    if (data.adjustmentValue !== undefined && data.adjustmentValue < 0) {
-      const finalAdjustmentType = data.adjustmentType || existingRatePlan.adjustmentType;
-      if (finalAdjustmentType !== PriceAdjustmentType.Percentage) {
-        throw new Error('adjustmentValue must be a positive number for FixedPrice and FixedDiscount rate plans');
-      }
+    // Validate rate plan data if pricing fields are being updated
+    if (updateData.priceModifierType || updateData.priceModifierValue !== undefined) {
+      const tempData = { ...updateData } as RatePlanCreateData;
+      if (!tempData.name) tempData.name = 'temp'; // Required for validation
+      this.validateRatePlanData(tempData);
     }
 
-    // Validate base rate plan if changing to percentage type
-    if (data.adjustmentType === PriceAdjustmentType.Percentage && data.baseRatePlanId) {
-      const baseRatePlan = await prisma.ratePlan.findFirst({
-        where: {
-          id: data.baseRatePlanId,
-          propertyId: existingRatePlan.propertyId,
-          adjustmentType: PriceAdjustmentType.FixedPrice,
-        },
+    // If setting as default, unset other defaults first
+    if (updateData.isDefault) {
+      const ratePlan = await prisma.ratePlan.findUnique({
+        where: { id: ratePlanId },
+        select: { propertyId: true }
       });
-
-      if (!baseRatePlan) {
-        throw new Error('Base rate plan must be a FixedPrice type and belong to the same property');
+      
+      if (ratePlan) {
+        await prisma.ratePlan.updateMany({
+          where: { 
+            propertyId: ratePlan.propertyId,
+            id: { not: ratePlanId },
+            isDefault: true 
+          },
+          data: { isDefault: false }
+        });
       }
     }
 
-    // Update rate plan
-    const updatedRatePlan = await prisma.ratePlan.update({
+    await prisma.ratePlan.update({
       where: { id: ratePlanId },
-      data: {
-        name: data.name,
-        type: data.type,
-        description: data.description,
-        includesBreakfast: data.includesBreakfast,
-        adjustmentType: data.adjustmentType,
-        adjustmentValue: data.adjustmentValue,
-        baseRatePlanId: data.baseRatePlanId,
-        priority: data.priority,
-        allowConcurrentRates: data.allowConcurrentRates,
-        activeDays: data.activeDays,
-        
-        // Update restrictions if provided
-        ratePlanRestrictions: data.ratePlanRestrictions ? {
-          deleteMany: {}, // Delete all existing restrictions first
-          create: data.ratePlanRestrictions.map(r => {
-            const restrictionData = {
-              type: r.type,
-              value: r.value || 0,
-              startDate: r.startDate,
-              endDate: r.endDate,
-            }
-            console.log('📝 Creating restriction:', restrictionData)
-            return restrictionData
-          }),
-        } : undefined,
-      },
-      include: {
-        baseRatePlan: true,
-        derivedRatePlans: true,
-        ratePlanRestrictions: true,
-        cancellationPolicy: {
-          include: {
-            tiers: {
-              orderBy: { daysBeforeCheckIn: 'desc' }
-            }
-          }
-        },
-        prices: {
-          take: 30,
-          orderBy: { date: 'asc' },
-          where: {
-            date: {
-              gte: new Date(),
-            }
-          }
-        },
-      },
+      data: updateData
     });
 
-    console.log('✅ RATE PLAN UPDATED:', {
-      ratePlanId: updatedRatePlan.id,
-      name: updatedRatePlan.name,
-      restrictionsCount: updatedRatePlan.ratePlanRestrictions?.length || 0,
-      savedRestrictions: updatedRatePlan.ratePlanRestrictions
-    })
-
-    return updatedRatePlan;
+    return await this.getRatePlanById(ratePlanId, userId);
   }
 
   /**
@@ -283,822 +219,661 @@ export class RatePlanService {
    */
   async getRatePlansForProperty(propertyId: string, userId: string): Promise<any[]> {
     // Verify property ownership
-    const property = await prisma.property.findFirst({
-      where: {
-        propertyId,
-        ownerId: userId,
-      },
-    });
-
-    if (!property) {
-      throw new Error('Property not found or you do not have permission to view it');
-    }
+    await this.verifyPropertyOwnership(propertyId, userId);
 
     const ratePlans = await prisma.ratePlan.findMany({
       where: { propertyId },
       include: {
-        baseRatePlan: {
-          select: {
-            id: true,
-            name: true,
-            adjustmentValue: true,
-          }
-        },
-        derivedRatePlans: {
-          select: {
-            id: true,
-            name: true,
-            adjustmentValue: true,
-          }
-        },
-        ratePlanRestrictions: true,
-        cancellationPolicy: {
-          include: {
-            tiers: {
-              orderBy: { daysBeforeCheckIn: 'desc' }
-            }
-          }
-        },
-        _count: {
-          select: {
-            reservations: true,
-            prices: true,
-          }
-        }
+        features: true,
+        cancellationPolicy: true,
+        _count: { select: { reservations: true } }
       },
       orderBy: [
         { priority: 'asc' },
-        { name: 'asc' }
-      ],
+        { createdAt: 'desc' }
+      ]
     });
 
-    return ratePlans;
+    // Get property amenities for reference
+    const property = await prisma.property.findUnique({
+      where: { propertyId },
+      include: { amenities: true }
+    });
+
+    return ratePlans.map(ratePlan => this.formatRatePlanResponse(ratePlan, property?.amenities || []));
   }
 
   /**
-   * Get public rate plans for a property (no authentication required)
-   * Returns only active rate plans visible to guests
+   * Get public rate plans for a property (no auth required)
    */
   async getPublicRatePlansForProperty(propertyId: string): Promise<any[]> {
-    // First verify property exists and is live
-    const property = await prisma.property.findUnique({
-      where: { propertyId },
-      select: { propertyId: true, name: true }
+    // Verify property exists and is active
+    const property = await prisma.property.findFirst({
+      where: { 
+        propertyId,
+        status: 'Live' // Only show rate plans for live properties
+      },
+      include: { amenities: true }
     });
 
     if (!property) {
-      throw new Error('Property not found');
+      throw new Error('Property not found or not available for booking');
     }
 
-    // Get only active rate plans for public viewing
     const ratePlans = await prisma.ratePlan.findMany({
       where: { 
         propertyId,
         isActive: true
       },
       include: {
-        ratePlanRestrictions: true,
-        cancellationPolicy: {
-          include: {
-            tiers: {
-              orderBy: { daysBeforeCheckIn: 'desc' }
-            }
-          }
-        },
-        prices: {
-          select: {
-            date: true,
-            amount: true
-          },
-          orderBy: { date: 'asc' }
-        }
+        features: true,
+        cancellationPolicy: true
       },
       orderBy: [
         { priority: 'asc' },
-        { name: 'asc' }
-      ],
+        { priceModifierValue: 'asc' } // Show cheapest first
+      ]
     });
 
-    return ratePlans;
+    return ratePlans.map(ratePlan => this.formatRatePlanResponse(ratePlan, property.amenities));
   }
 
   /**
    * Get a single rate plan by ID
    */
   async getRatePlanById(ratePlanId: string, userId: string): Promise<any> {
-    const ratePlan = await prisma.ratePlan.findFirst({
-      where: {
-        id: ratePlanId,
-        property: {
-          ownerId: userId,
-        },
-      },
+    // Verify rate plan ownership
+    await this.verifyRatePlanOwnership(ratePlanId, userId);
+
+    const ratePlan = await prisma.ratePlan.findUnique({
+      where: { id: ratePlanId },
       include: {
-        property: {
-          select: {
-            propertyId: true,
-            name: true,
-          }
-        },
-        baseRatePlan: true,
-        derivedRatePlans: true,
-        ratePlanRestrictions: true,
-        cancellationPolicy: {
-          include: {
-            tiers: {
-              orderBy: { daysBeforeCheckIn: 'desc' }
-            }
-          }
-        },
-        prices: {
-          take: 90,
-          orderBy: { date: 'asc' },
-          where: {
-            date: {
-              gte: new Date(),
-            }
-          }
-        },
-        _count: {
-          select: {
-            reservations: true,
-          }
-        }
-      },
+        property: { include: { amenities: true } },
+        features: true,
+        cancellationPolicy: true,
+        _count: { select: { reservations: true } }
+      }
     });
 
     if (!ratePlan) {
-      throw new Error('Rate plan not found or you do not have permission to view it');
+      throw new Error('Rate plan not found');
     }
 
-    return ratePlan;
+    return this.formatRatePlanResponse(ratePlan, ratePlan.property.amenities);
   }
 
   /**
-   * Delete a rate plan (smart deletion - hard delete if clean, soft delete if has history, block if has dependencies)
+   * Delete a rate plan
    */
-  async deleteRatePlan(ratePlanId: string, userId: string): Promise<{
-    type: 'hard' | 'soft' | 'blocked',
-    message: string,
-    details: {
-      reservationCount?: number,
-      derivedRatePlansCount?: number,
-      derivedRatePlanNames?: string[]
-    }
-  }> {
-    // Check if rate plan exists and user has permission
-    const ratePlan = await prisma.ratePlan.findFirst({
-      where: {
-        id: ratePlanId,
-        property: {
-          ownerId: userId,
-        },
-      },
-      include: {
-        derivedRatePlans: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        _count: {
-          select: {
-            reservations: true, // All reservations (active and historical)
-            prices: true,
-            ratePlanRestrictions: true
-          }
-        }
-      },
+  async deleteRatePlan(ratePlanId: string, userId: string): Promise<any> {
+    // Verify rate plan ownership
+    const ratePlan = await this.verifyRatePlanOwnership(ratePlanId, userId);
+
+    // Check for active reservations
+    const reservationCount = await prisma.reservation.count({
+      where: { 
+        ratePlanId,
+        status: { in: ['Confirmed', 'Pending'] }
+      }
     });
 
-    if (!ratePlan) {
-      throw new Error('Rate plan not found or you do not have permission to delete it');
-    }
-
-    const reservationCount = ratePlan._count.reservations;
-    const derivedRatePlansCount = ratePlan.derivedRatePlans.length;
-    const derivedRatePlanNames = ratePlan.derivedRatePlans.map(rp => rp.name);
-
-    // BLOCKED: Has dependent rate plans - cannot delete at all
-    if (derivedRatePlansCount > 0) {
+    if (reservationCount > 0) {
       return {
         type: 'blocked',
-        message: `Cannot delete rate plan because ${derivedRatePlansCount} other rate plan${derivedRatePlansCount > 1 ? 's' : ''} depend${derivedRatePlansCount === 1 ? 's' : ''} on it for percentage calculations`,
-        details: {
-          reservationCount,
-          derivedRatePlansCount,
-          derivedRatePlanNames
-        }
+        message: 'Cannot delete rate plan with active reservations',
+        details: { activeReservations: reservationCount }
       };
     }
 
-    // HARD DELETE: No reservations at all - can permanently delete
-    if (reservationCount === 0) {
-      await prisma.ratePlan.delete({
-        where: { id: ratePlanId },
-      });
+    // Check if it's the only rate plan for the property
+    const propertyRatePlansCount = await prisma.ratePlan.count({
+      where: { 
+        propertyId: ratePlan.propertyId,
+        id: { not: ratePlanId }
+      }
+    });
 
+    if (propertyRatePlansCount === 0) {
       return {
-        type: 'hard',
-        message: 'Rate plan permanently deleted - no booking history existed',
-        details: {
-          reservationCount,
-          derivedRatePlansCount
-        }
+        type: 'blocked',
+        message: 'Cannot delete the last rate plan for a property',
+        details: { reason: 'At least one rate plan must exist per property' }
       };
     }
 
-    // SOFT DELETE: Has reservations - deactivate to preserve history
-    await prisma.ratePlan.update({
-      where: { id: ratePlanId },
-      data: { isActive: false },
+    // Perform cascading deletion
+    await prisma.$transaction(async (tx) => {
+      // Delete related records (CASCADE should handle this, but being explicit)
+      await tx.ratePlanFeatures.deleteMany({ where: { ratePlanId } });
+      await tx.cancellationPolicy.deleteMany({ where: { ratePlanId } });
+      
+      // Delete the rate plan
+      await tx.ratePlan.delete({ where: { id: ratePlanId } });
     });
 
     return {
-      type: 'soft',
-      message: `Rate plan deactivated because ${reservationCount} booking${reservationCount > 1 ? 's' : ''} exist${reservationCount === 1 ? 's' : ''} - preserving historical data`,
-      details: {
-        reservationCount,
-        derivedRatePlansCount
-      }
+      type: 'hard',
+      message: 'Rate plan deleted successfully',
+      details: { ratePlanId, ratePlanName: ratePlan.name }
     };
   }
 
   /**
-   * Search available rates for booking (Main booking engine)
+   * Calculate all booking options for a property and criteria
    */
-  async searchAvailableRates(criteria: RateSearchCriteria): Promise<RateSearchResult[]> {
-    const {
-      propertyId,
-      checkInDate,
-      checkOutDate,
-      numGuests,
-      bookingDate = new Date()
-    } = criteria;
+  async calculateBookingOptions(criteria: BookingSearchCriteria): Promise<{
+    property: { id: string; name: string };
+    booking: {
+      checkIn: Date;
+      checkOut?: Date;
+      isHalfDay: boolean;
+      nights: number;
+      guests: number;
+    };
+    basePricing: {
+      total: number;
+      breakdown: Array<{ date: Date; price: number; isHalfDay: boolean }>;
+    };
+    options: BookingOption[];
+  }> {
+    const { propertyId, checkInDate, checkOutDate, isHalfDay = false, guestCount, bookingDate = new Date() } = criteria;
 
-    // Validate dates
-    if (checkInDate >= checkOutDate) {
-      throw new Error('Check-in date must be before check-out date');
-    }
-
-    if (checkInDate < new Date()) {
-      throw new Error('Check-in date cannot be in the past');
-    }
-
-    // Check property availability
-    const unavailableDates = await this.getUnavailableDates(propertyId, checkInDate, checkOutDate);
-    if (unavailableDates.length > 0) {
-      return []; // Property not available
-    }
-
-    // Get all active rate plans for property
-    const ratePlans = await prisma.ratePlan.findMany({
-      where: {
+    // Verify property exists and is active
+    const property = await prisma.property.findFirst({
+      where: { 
         propertyId,
-        isActive: true,
+        status: 'Live'
       },
-      include: {
-        baseRatePlan: true,
-        ratePlanRestrictions: true,
-        cancellationPolicy: {
-          include: {
-            tiers: {
-              orderBy: { daysBeforeCheckIn: 'desc' }
-            }
-          }
-        },
-        prices: {
-          where: {
-            date: {
-              gte: checkInDate,
-              lt: checkOutDate,
-            }
-          }
-        },
-      },
-    });
-
-    // Filter applicable rate plans
-    const applicableRatePlans = await this.filterApplicableRatePlans(
-      ratePlans,
-      checkInDate,
-      checkOutDate,
-      numGuests,
-      bookingDate
-    );
-
-    // Apply priority logic
-    const visibleRatePlans = this.applyPriorityLogic(applicableRatePlans);
-
-    // Calculate pricing for each visible rate plan
-    const results: RateSearchResult[] = [];
-
-    for (const ratePlan of visibleRatePlans) {
-      try {
-        const nightlyRates = await this.calculateNightlyRates(ratePlan, checkInDate, checkOutDate);
-        const totalPrice = nightlyRates.reduce((sum, night) => sum + night.rate, 0);
-        const averageNightlyRate = totalPrice / nightlyRates.length;
-
-        results.push({
-          ratePlan: {
-            id: ratePlan.id,
-            name: ratePlan.name,
-            type: ratePlan.type,
-            description: ratePlan.description,
-            priority: ratePlan.priority,
-            adjustmentType: ratePlan.adjustmentType,
-            adjustmentValue: ratePlan.adjustmentValue,
-          },
-          totalPrice,
-          nightlyRates,
-          averageNightlyRate,
-          cancellationPolicy: ratePlan.cancellationPolicy,
-          includesBreakfast: ratePlan.includesBreakfast,
-        });
-      } catch (error) {
-        console.error(`Error calculating price for rate plan ${ratePlan.id}:`, error);
-        continue; // Skip this rate plan
-      }
-    }
-
-    // Sort by total price (cheapest first)
-    results.sort((a, b) => a.totalPrice - b.totalPrice);
-
-    // Add savings information
-    if (results.length > 1) {
-      const mostExpensive = Math.max(...results.map(r => r.totalPrice));
-      results.forEach(result => {
-        if (result.totalPrice < mostExpensive) {
-          const savings = mostExpensive - result.totalPrice;
-          result.savings = {
-            amount: savings,
-            percentage: Math.round((savings / mostExpensive) * 100),
-            comparedTo: 'highest rate'
-          };
-        }
-      });
-    }
-
-    return results;
-  }
-
-  /**
-   * Filter rate plans based on restrictions and criteria
-   */
-  private async filterApplicableRatePlans(
-    ratePlans: any[],
-    checkInDate: Date,
-    checkOutDate: Date,
-    numGuests: number,
-    bookingDate: Date
-  ): Promise<any[]> {
-    const dayOfWeek = checkInDate.getDay();
-    const lengthOfStay = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-    const daysInAdvance = Math.ceil((checkInDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    return ratePlans.filter(ratePlan => {
-      // Check day of week availability
-      if (!ratePlan.activeDays.includes(dayOfWeek)) {
-        return false;
-      }
-
-      // Check all restrictions
-      for (const restriction of ratePlan.ratePlanRestrictions) {
-        switch (restriction.type) {
-          case RatePlanRestrictionType.MinLengthOfStay:
-            if (lengthOfStay < restriction.value) return false;
-            break;
-
-          case RatePlanRestrictionType.MaxLengthOfStay:
-            if (lengthOfStay > restriction.value) return false;
-            break;
-
-          case RatePlanRestrictionType.MinGuests:
-            if (numGuests < restriction.value) return false;
-            break;
-
-          case RatePlanRestrictionType.MaxGuests:
-            if (numGuests > restriction.value) return false;
-            break;
-
-          case RatePlanRestrictionType.MinAdvancedReservation:
-            if (daysInAdvance < restriction.value) return false;
-            break;
-
-          case RatePlanRestrictionType.MaxAdvancedReservation:
-            if (daysInAdvance > restriction.value) return false;
-            break;
-
-          case RatePlanRestrictionType.NoArrivals:
-            if (this.isDateInRange(checkInDate, restriction.startDate, restriction.endDate)) {
-              return false;
-            }
-            break;
-
-          case RatePlanRestrictionType.NoDepartures:
-            if (this.isDateInRange(checkOutDate, restriction.startDate, restriction.endDate)) {
-              return false;
-            }
-            break;
-
-          case RatePlanRestrictionType.SeasonalDateRange:
-            if (!this.isDateInRange(checkInDate, restriction.startDate, restriction.endDate)) {
-              return false;
-            }
-            break;
-        }
-      }
-
-      return true;
-    });
-  }
-
-  /**
-   * Apply priority logic for concurrent vs exclusive rates
-   */
-  private applyPriorityLogic(ratePlans: any[]): any[] {
-    // Find highest priority exclusive rate
-    const exclusiveRates = ratePlans
-      .filter(plan => !plan.allowConcurrentRates)
-      .sort((a, b) => a.priority - b.priority);
-
-    if (exclusiveRates.length > 0) {
-      const highestPriorityExclusive = exclusiveRates[0];
-      
-      // Show only exclusive rate and higher/equal priority concurrent rates
-      return ratePlans
-        .filter(plan => plan.priority <= highestPriorityExclusive.priority)
-        .sort((a, b) => a.priority - b.priority);
-    }
-
-    // No exclusive rates - show all concurrent rates
-    return ratePlans.sort((a, b) => a.priority - b.priority);
-  }
-
-  /**
-   * Calculate nightly rates for a rate plan over a date range
-   */
-  private async calculateNightlyRates(
-    ratePlan: any,
-    checkInDate: Date,
-    checkOutDate: Date
-  ): Promise<{ date: Date; rate: number }[]> {
-    const nights = this.getDateRange(checkInDate, checkOutDate);
-    const nightlyRates: { date: Date; rate: number }[] = [];
-
-    for (const night of nights) {
-      const rate = await this.calculateRateForDate(ratePlan, night);
-      nightlyRates.push({ date: night, rate });
-    }
-
-    return nightlyRates;
-  }
-
-  /**
-   * Calculate rate for a specific date
-   */
-  private async calculateRateForDate(ratePlan: any, date: Date): Promise<number> {
-    // Check for date-specific pricing first
-    const specificPrice = ratePlan.prices.find((price: any) => 
-      this.isSameDay(price.date, date)
-    );
-    if (specificPrice) {
-      return parseFloat(specificPrice.amount);
-    }
-
-    // Calculate based on adjustment type
-    switch (ratePlan.adjustmentType) {
-      case PriceAdjustmentType.FixedPrice:
-        return ratePlan.adjustmentValue;
-
-      case PriceAdjustmentType.FixedDiscount:
-        const baseRateForDiscount = await this.getBaseRateForDate(ratePlan.baseRatePlan, date);
-        return Math.max(0, baseRateForDiscount - ratePlan.adjustmentValue);
-
-      case PriceAdjustmentType.Percentage:
-        const baseAmount = await this.getBaseRateForDate(ratePlan.baseRatePlan, date);
-        // Apply percentage: positive values = surcharge, negative values = discount
-        // Formula: finalPrice = basePrice * (1 + adjustmentValue/100)
-        // Examples: +50% = 1.5x base, -20% = 0.8x base
-        return Math.max(0, baseAmount * (1 + ratePlan.adjustmentValue / 100));
-
-      default:
-        throw new Error(`Unknown adjustment type: ${ratePlan.adjustmentType}`);
-    }
-  }
-
-  /**
-   * Get base rate for a specific date (recursive for nested percentage plans)
-   */
-  private async getBaseRateForDate(baseRatePlan: any, date: Date): Promise<number> {
-    if (!baseRatePlan) {
-      throw new Error('Base rate plan not found for percentage calculation');
-    }
-    
-    return this.calculateRateForDate(baseRatePlan, date);
-  }
-
-  /**
-   * Get unavailable dates for a property
-   */
-  private async getUnavailableDates(
-    propertyId: string,
-    checkInDate: Date,
-    checkOutDate: Date
-  ): Promise<Date[]> {
-    const unavailableSlots = await prisma.availability.findMany({
-      where: {
-        propertyId,
-        date: {
-          gte: checkInDate,
-          lt: checkOutDate,
-        },
-        isAvailable: false,
-      },
-      select: {
-        date: true,
-      },
-    });
-
-    return unavailableSlots.map(slot => slot.date);
-  }
-
-  /**
-   * Utility: Check if date is within a range
-   */
-  private isDateInRange(date: Date, startDate: Date | null, endDate: Date | null): boolean {
-    if (!startDate || !endDate) return false;
-    return date >= startDate && date <= endDate;
-  }
-
-  /**
-   * Utility: Check if two dates are the same day
-   */
-  private isSameDay(date1: Date, date2: Date): boolean {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
-  }
-
-  /**
-   * Utility: Generate date range (excluding checkout date)
-   */
-  private getDateRange(startDate: Date, endDate: Date): Date[] {
-    const dates: Date[] = [];
-    const currentDate = new Date(startDate);
-
-    while (currentDate < endDate) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dates;
-  }
-
-  /**
-   * Calculate pricing for a guest stay with guest count and date range
-   */
-  async calculatePricingForStay(
-    propertyId: string,
-    checkInDate: Date,
-    checkOutDate: Date,
-    numGuests: number
-  ): Promise<any> {
-    
-    // Verify property exists
-    const property = await prisma.property.findUnique({
-      where: { propertyId },
-      select: { propertyId: true, name: true, maximumGuest: true }
+      include: { amenities: true }
     });
 
     if (!property) {
-      throw new Error('Property not found');
+      throw new Error('Property not found or not available for booking');
     }
 
+    // Calculate dates and duration
+    let dates: Date[];
+    let nights: number;
 
-    // Validate guest count
-    if (numGuests > property.maximumGuest) {
-      throw new Error(`Maximum ${property.maximumGuest} guests allowed for this property`);
+    if (isHalfDay) {
+      dates = [checkInDate];
+      nights = 0;
+    } else {
+      if (!checkOutDate) {
+        throw new Error('Check-out date is required for full-day bookings');
+      }
+      dates = this.getDateRange(checkInDate, checkOutDate);
+      nights = dates.length;
     }
 
-    // Get active rate plans with all related data
+    // Calculate base pricing
+    let baseTotal = 0;
+    let hasBasePrice = true;
+    const priceBreakdown: Array<{ date: Date; price: number; isHalfDay: boolean }> = [];
+
+    try {
+      for (const date of dates) {
+        const dayPrice = await propertyPricingService.getBasePrice(propertyId, date, isHalfDay);
+        baseTotal += dayPrice;
+        priceBreakdown.push({
+          date: new Date(date),
+          price: dayPrice,
+          isHalfDay
+        });
+      }
+    } catch (error: any) {
+      // If no base pricing is configured, return empty options
+      if (error.message.includes('No base pricing configured')) {
+        hasBasePrice = false;
+      } else {
+        throw error; // Re-throw other errors
+      }
+    }
+
+    // If no base pricing, return empty options
+    if (!hasBasePrice) {
+      return {
+        property: {
+          id: property.propertyId,
+          name: property.name
+        },
+        booking: {
+          checkIn: checkInDate,
+          checkOut: checkOutDate,
+          isHalfDay,
+          nights,
+          guests: guestCount
+        },
+        basePricing: {
+          total: 0,
+          breakdown: []
+        },
+        options: []
+      };
+    }
+
+    // Get all rate plans for the property
     const ratePlans = await prisma.ratePlan.findMany({
-      where: {
+      where: { 
         propertyId,
         isActive: true
       },
       include: {
-        ratePlanRestrictions: true,
-        prices: {
-          where: {
-            date: {
-              gte: checkInDate,
-              lt: checkOutDate
-            }
-          }
-        }
-      }
+        features: true,
+        cancellationPolicy: true
+      },
+      orderBy: [
+        { priority: 'asc' }
+      ]
     });
 
-    const stayDuration = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-    const dateRange = this.getDateRange(checkInDate, checkOutDate);
-    
-    // Day-by-day pricing calculation with activeDays validation
-    const dayPricing: { [date: string]: { ratePlanId: string; name: string; price: number; dayOfWeek: number }[] } = {};
-    
-    // For each day in the stay, find applicable rate plans
-    for (const date of dateRange) {
-      const dayOfWeek = date.getDay();
-      const dateString = date.toISOString().split('T')[0];
-      dayPricing[dateString] = [];
-      
-      // Find rate plans that apply to this specific day
-      for (const ratePlan of ratePlans) {
-        // Check if rate plan applies to this day of week
-        if (!ratePlan.activeDays.includes(dayOfWeek)) {
-          continue;
-        }
-        
-        // Skip restrictions for now - focus on basic pricing
-        
-        // Get price for this specific date
-        let dayPrice = 0;
-        const priceEntry = ratePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
-        
-        if (priceEntry && priceEntry.amount) {
-          // Use specific price if set for this date
-          dayPrice = Number(priceEntry.amount);
-        } else {
-          // Calculate price based on adjustment type
-          if (ratePlan.adjustmentType === 'FixedPrice') {
-            dayPrice = Number(ratePlan.adjustmentValue) || 0;
-          } else if (ratePlan.adjustmentType === 'Percentage' && ratePlan.baseRatePlanId) {
-            // Find base rate plan and calculate percentage
-            const baseRatePlan = ratePlans.find(rp => rp.id === ratePlan.baseRatePlanId);
-            if (baseRatePlan) {
-              // Get base price for this date
-              const basePriceEntry = baseRatePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
-              const basePrice = basePriceEntry?.amount ? Number(basePriceEntry.amount) : Number(baseRatePlan.adjustmentValue) || 0;
-              
-              // Apply percentage: +50% = 150% of base price
-              dayPrice = basePrice * (1 + Number(ratePlan.adjustmentValue) / 100);
-              
-              console.log(`💰 Percentage calculation for ${ratePlan.name} on ${dateString}:`, {
-                baseRatePlan: baseRatePlan.name,
-                basePrice,
-                adjustmentValue: ratePlan.adjustmentValue,
-                calculatedPrice: dayPrice
-              });
-            }
-          } else if (ratePlan.adjustmentType === 'FixedDiscount' && ratePlan.baseRatePlanId) {
-            // Find base rate plan and apply discount
-            const baseRatePlan = ratePlans.find(rp => rp.id === ratePlan.baseRatePlanId);
-            if (baseRatePlan) {
-              const basePriceEntry = baseRatePlan.prices.find(p => this.isSameDay(new Date(p.date), date));
-              const basePrice = basePriceEntry?.amount ? Number(basePriceEntry.amount) : Number(baseRatePlan.adjustmentValue) || 0;
-              
-              // Apply fixed discount
-              dayPrice = Math.max(0, basePrice - Number(ratePlan.adjustmentValue));
-            }
-          }
-        }
-        
-        
-        dayPricing[dateString].push({
-          ratePlanId: ratePlan.id,
-          name: ratePlan.name,
-          price: dayPrice,
-          dayOfWeek
-        });
-      }
-    }
-    
-    // Create separate rate plan options (parallel pricing, not combined)
-    const ratePlanSummaries: { [ratePlanId: string]: any } = {};
-    
-    for (const [dateString, dayRates] of Object.entries(dayPricing)) {
-      for (const dayRate of dayRates) {
-        if (!ratePlanSummaries[dayRate.ratePlanId]) {
-          const ratePlan = ratePlans.find(rp => rp.id === dayRate.ratePlanId);
-          ratePlanSummaries[dayRate.ratePlanId] = {
-            ratePlanId: dayRate.ratePlanId,
-            name: dayRate.name,
-            type: ratePlan?.type,
-            adjustmentType: ratePlan?.adjustmentType,
-            includesBreakfast: ratePlan?.includesBreakfast,
-            allowConcurrentRates: ratePlan?.allowConcurrentRates,
-            applicableDays: 0,
-            totalPrice: 0,
-            dayBreakdown: [],
-            isEligible: true
-          };
-        }
-        
-        ratePlanSummaries[dayRate.ratePlanId].applicableDays++;
-        ratePlanSummaries[dayRate.ratePlanId].totalPrice += dayRate.price;
-        ratePlanSummaries[dayRate.ratePlanId].dayBreakdown.push({
-          date: dateString,
-          dayOfWeek: dayRate.dayOfWeek,
-          price: dayRate.price
-        });
-      }
-    }
-    
-    // Convert to array of separate rate plan options
-    const availableRateOptions = Object.values(ratePlanSummaries).map((summary: any) => ({
-      ...summary,
-      pricePerNight: summary.totalPrice / summary.applicableDays,
-      stayDuration: summary.applicableDays
-    })).sort((a, b) => a.totalPrice - b.totalPrice);
+    // Calculate options for each rate plan
+    const options: BookingOption[] = [];
 
-    // For backward compatibility, include the cheapest option as "selected"
-    const cheapestOption = availableRateOptions[0];
+    for (const ratePlan of ratePlans) {
+      const option = await this.calculateRatePlanOption(
+        ratePlan,
+        property,
+        baseTotal,
+        nights,
+        guestCount,
+        bookingDate,
+        checkInDate,
+        isHalfDay
+      );
+      // Only include eligible rate plans in the options
+      if (option.isEligible) {
+        options.push(option);
+      }
+    }
+
+    // Sort options by price (cheapest eligible first)
+    options.sort((a, b) => {
+      if (a.isEligible && !b.isEligible) return -1;
+      if (!a.isEligible && b.isEligible) return 1;
+      return a.pricing.totalPrice - b.pricing.totalPrice;
+    });
 
     return {
-      propertyId,
-      checkInDate: checkInDate.toISOString().split('T')[0],
-      checkOutDate: checkOutDate.toISOString().split('T')[0],
-      numGuests,
-      stayDuration,
-      // Legacy fields for backward compatibility
-      totalPrice: cheapestOption?.totalPrice || 0,
-      pricePerNight: cheapestOption?.pricePerNight || 0,
-      // New structure: separate rate plan options
-      availableRateOptions,
-      dayByDayPricing: dayPricing,
-      message: availableRateOptions.length > 1 
-        ? `${availableRateOptions.length} rate plans available for your dates`
-        : availableRateOptions.length === 1 
-        ? `1 rate plan available for your dates`
-        : 'No rate plans available for your selected dates'
+      property: {
+        id: property.propertyId,
+        name: property.name
+      },
+      booking: {
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        isHalfDay,
+        nights,
+        guests: guestCount
+      },
+      basePricing: {
+        total: baseTotal,
+        breakdown: priceBreakdown
+      },
+      options
     };
   }
 
   /**
-   * Calculate refund amount based on cancellation policy
+   * Calculate pricing for a specific rate plan option
    */
-  async calculateCancellationRefund(
-    reservationId: string,
-    cancellationDate: Date
-  ): Promise<{ refundAmount: number; refundPercentage: number; description: string }> {
-    const reservation = await prisma.reservation.findUnique({
-      where: { id: reservationId },
-      include: {
-        ratePlan: {
-          include: {
-            cancellationPolicy: {
-              include: {
-                tiers: {
-                  orderBy: { daysBeforeCheckIn: 'desc' }
-                }
-              }
-            }
-          }
+  private async calculateRatePlanOption(
+    ratePlan: any,
+    property: any,
+    baseTotal: number,
+    nights: number,
+    guestCount: number,
+    bookingDate: Date,
+    checkInDate: Date,
+    isHalfDay: boolean
+  ): Promise<BookingOption> {
+    // Apply price modifier
+    let finalPrice = baseTotal;
+    if (ratePlan.priceModifierType === ModifierType.Percentage) {
+      finalPrice = baseTotal * (1 + ratePlan.priceModifierValue / 100);
+    } else if (ratePlan.priceModifierType === ModifierType.FixedAmount) {
+      if (isHalfDay) {
+        finalPrice = baseTotal + ratePlan.priceModifierValue;
+      } else {
+        // For multi-night stays, apply fixed amount per night
+        finalPrice = baseTotal + (ratePlan.priceModifierValue * nights);
+      }
+    }
+
+    // Ensure price is not negative
+    finalPrice = Math.max(0, finalPrice);
+
+    // Check eligibility
+    const { isEligible, reasons } = this.checkRatePlanEligibility(
+      ratePlan,
+      nights,
+      guestCount,
+      bookingDate,
+      checkInDate,
+      isHalfDay
+    );
+
+    // Get included and excluded amenities
+    const includedAmenityIds = ratePlan.features?.includedAmenityIds || [];
+    const includedAmenities = property.amenities.filter((amenity: any) =>
+      includedAmenityIds.includes(amenity.id)
+    );
+    const excludedAmenities = property.amenities.filter((amenity: any) =>
+      !includedAmenityIds.includes(amenity.id)
+    );
+
+    // Format cancellation policy
+    const cancellationDescription = this.formatCancellationPolicy(ratePlan.cancellationPolicy);
+
+    return {
+      ratePlan: {
+        id: ratePlan.id,
+        name: ratePlan.name,
+        description: ratePlan.description
+      },
+      pricing: {
+        totalPrice: Math.round(finalPrice * 100) / 100,
+        basePrice: baseTotal,
+        modifier: ratePlan.priceModifierValue,
+        savings: baseTotal - finalPrice,
+        pricePerNight: nights > 0 ? Math.round((finalPrice / nights) * 100) / 100 : undefined
+      },
+      duration: {
+        isHalfDay,
+        nights
+      },
+      amenities: {
+        included: includedAmenities.map((amenity: any) => ({
+          id: amenity.id,
+          name: amenity.name,
+          category: amenity.category
+        })),
+        extraCost: excludedAmenities.map((amenity: any) => ({
+          id: amenity.id,
+          name: amenity.name,
+          category: amenity.category
+        }))
+      },
+      cancellation: {
+        type: ratePlan.cancellationPolicy?.type || CancellationType.FullyFlexible,
+        freeCancellationDays: ratePlan.cancellationPolicy?.freeCancellationDays,
+        partialRefundDays: ratePlan.cancellationPolicy?.partialRefundDays,
+        description: cancellationDescription
+      },
+      restrictions: {
+        minStay: ratePlan.minStay,
+        maxStay: ratePlan.maxStay,
+        minGuests: ratePlan.minGuests,
+        maxGuests: ratePlan.maxGuests,
+        minAdvanceBooking: ratePlan.minAdvanceBooking,
+        maxAdvanceBooking: ratePlan.maxAdvanceBooking
+      },
+      isEligible,
+      ineligibilityReasons: reasons
+    };
+  }
+
+  /**
+   * Check if a rate plan is eligible for the booking criteria
+   */
+  private checkRatePlanEligibility(
+    ratePlan: any,
+    nights: number,
+    guestCount: number,
+    bookingDate: Date,
+    checkInDate: Date,
+    isHalfDay: boolean
+  ): { isEligible: boolean; reasons: string[] } {
+    const reasons: string[] = [];
+
+    // Check minimum stay (only for multi-night bookings)
+    if (!isHalfDay && ratePlan.minStay && nights < ratePlan.minStay) {
+      reasons.push(`Minimum ${ratePlan.minStay} night${ratePlan.minStay > 1 ? 's' : ''} required`);
+    }
+
+    // Check maximum stay (only for multi-night bookings)
+    if (!isHalfDay && ratePlan.maxStay && nights > ratePlan.maxStay) {
+      reasons.push(`Maximum ${ratePlan.maxStay} night${ratePlan.maxStay > 1 ? 's' : ''} allowed`);
+    }
+
+    // Check guest count
+    if (ratePlan.minGuests && guestCount < ratePlan.minGuests) {
+      reasons.push(`Minimum ${ratePlan.minGuests} guest${ratePlan.minGuests > 1 ? 's' : ''} required`);
+    }
+
+    if (ratePlan.maxGuests && guestCount > ratePlan.maxGuests) {
+      reasons.push(`Maximum ${ratePlan.maxGuests} guest${ratePlan.maxGuests > 1 ? 's' : ''} allowed`);
+    }
+
+    // Check advance booking requirements
+    const daysUntilCheckIn = Math.ceil((checkInDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (ratePlan.minAdvanceBooking && daysUntilCheckIn < ratePlan.minAdvanceBooking) {
+      reasons.push(`Must book at least ${ratePlan.minAdvanceBooking} day${ratePlan.minAdvanceBooking > 1 ? 's' : ''} in advance`);
+    }
+
+    if (ratePlan.maxAdvanceBooking && daysUntilCheckIn > ratePlan.maxAdvanceBooking) {
+      reasons.push(`Cannot book more than ${ratePlan.maxAdvanceBooking} day${ratePlan.maxAdvanceBooking > 1 ? 's' : ''} in advance`);
+    }
+
+    return {
+      isEligible: reasons.length === 0,
+      reasons
+    };
+  }
+
+  /**
+   * Generate date range between two dates
+   */
+  private getDateRange(startDate: Date, endDate: Date): Date[] {
+    const dates: Date[] = [];
+    const currentDate = new Date(startDate);
+    
+    while (currentDate < endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return dates;
+  }
+
+  /**
+   * Format cancellation policy description
+   */
+  private formatCancellationPolicy(policy: any): string {
+    if (!policy) {
+      return 'Fully flexible cancellation';
+    }
+
+    switch (policy.type) {
+      case CancellationType.NonRefundable:
+        return 'Non-refundable - no refunds allowed';
+      
+      case CancellationType.Moderate:
+        if (policy.freeCancellationDays && policy.partialRefundDays) {
+          return `Free cancellation up to ${policy.freeCancellationDays} days before check-in, 50% refund up to ${policy.partialRefundDays} days before`;
+        }
+        return 'Moderate cancellation policy';
+      
+      case CancellationType.FullyFlexible:
+      default:
+        if (policy.freeCancellationDays) {
+          return `Free cancellation up to ${policy.freeCancellationDays} day${policy.freeCancellationDays > 1 ? 's' : ''} before check-in`;
+        }
+        return 'Fully flexible cancellation';
+    }
+  }
+
+  /**
+   * Format rate plan response with amenity details
+   */
+  private formatRatePlanResponse(ratePlan: any, propertyAmenities: any[]): any {
+    const includedAmenityIds = ratePlan.features?.includedAmenityIds || [];
+    
+    const includedAmenities = propertyAmenities.filter(amenity =>
+      includedAmenityIds.includes(amenity.id)
+    );
+    
+    const excludedAmenities = propertyAmenities.filter(amenity =>
+      !includedAmenityIds.includes(amenity.id)
+    );
+
+    return {
+      id: ratePlan.id,
+      name: ratePlan.name,
+      description: ratePlan.description,
+      priceModifierType: ratePlan.priceModifierType,
+      priceModifierValue: ratePlan.priceModifierValue,
+      minStay: ratePlan.minStay,
+      maxStay: ratePlan.maxStay,
+      minAdvanceBooking: ratePlan.minAdvanceBooking,
+      maxAdvanceBooking: ratePlan.maxAdvanceBooking,
+      minGuests: ratePlan.minGuests,
+      maxGuests: ratePlan.maxGuests,
+      isActive: ratePlan.isActive,
+      isDefault: ratePlan.isDefault,
+      priority: ratePlan.priority,
+      features: {
+        includedAmenityIds,
+        includedAmenities: includedAmenities.map(amenity => ({
+          id: amenity.id,
+          name: amenity.name,
+          category: amenity.category
+        })),
+        excludedAmenities: excludedAmenities.map(amenity => ({
+          id: amenity.id,
+          name: amenity.name,
+          category: amenity.category
+        }))
+      },
+      cancellationPolicy: ratePlan.cancellationPolicy ? {
+        type: ratePlan.cancellationPolicy.type,
+        freeCancellationDays: ratePlan.cancellationPolicy.freeCancellationDays,
+        partialRefundDays: ratePlan.cancellationPolicy.partialRefundDays,
+        description: this.formatCancellationPolicy(ratePlan.cancellationPolicy)
+      } : null,
+      stats: {
+        reservationCount: ratePlan._count?.reservations || 0
+      },
+      createdAt: ratePlan.createdAt,
+      updatedAt: ratePlan.updatedAt
+    };
+  }
+
+  /**
+   * Validate rate plan data
+   */
+  private validateRatePlanData(data: RatePlanCreateData): void {
+    // Validate required fields
+    if (!data.name || data.name.trim().length === 0) {
+      throw new Error('Rate plan name is required');
+    }
+
+    if (data.name.length > 100) {
+      throw new Error('Rate plan name cannot exceed 100 characters');
+    }
+
+    if (data.description && data.description.length > 500) {
+      throw new Error('Rate plan description cannot exceed 500 characters');
+    }
+
+    // Validate price modifier
+    if (data.priceModifierType === ModifierType.Percentage) {
+      if (data.priceModifierValue > 100) {
+        throw new Error('Percentage modifier cannot exceed 100%');
+      }
+      if (data.priceModifierValue < -100) {
+        throw new Error('Percentage modifier cannot be less than -100%');
+      }
+    }
+
+    if (data.priceModifierType === ModifierType.FixedAmount) {
+      if (data.priceModifierValue < -99999.99 || data.priceModifierValue > 99999.99) {
+        throw new Error('Fixed amount modifier must be between -99,999.99 and 99,999.99');
+      }
+    }
+
+    // Validate stay restrictions
+    if (data.minStay !== undefined && (data.minStay < 1 || data.minStay > 365)) {
+      throw new Error('Minimum stay must be between 1 and 365 nights');
+    }
+
+    if (data.maxStay !== undefined && (data.maxStay < 1 || data.maxStay > 365)) {
+      throw new Error('Maximum stay must be between 1 and 365 nights');
+    }
+
+    if (data.minStay && data.maxStay && data.minStay > data.maxStay) {
+      throw new Error('Minimum stay cannot exceed maximum stay');
+    }
+
+    // Validate guest restrictions
+    if (data.minGuests !== undefined && (data.minGuests < 1 || data.minGuests > 20)) {
+      throw new Error('Minimum guests must be between 1 and 20');
+    }
+
+    if (data.maxGuests !== undefined && (data.maxGuests < 1 || data.maxGuests > 20)) {
+      throw new Error('Maximum guests must be between 1 and 20');
+    }
+
+    if (data.minGuests && data.maxGuests && data.minGuests > data.maxGuests) {
+      throw new Error('Minimum guests cannot exceed maximum guests');
+    }
+
+    // Validate advance booking restrictions
+    if (data.minAdvanceBooking !== undefined && (data.minAdvanceBooking < 0 || data.minAdvanceBooking > 365)) {
+      throw new Error('Minimum advance booking must be between 0 and 365 days');
+    }
+
+    if (data.maxAdvanceBooking !== undefined && (data.maxAdvanceBooking < 0 || data.maxAdvanceBooking > 365)) {
+      throw new Error('Maximum advance booking must be between 0 and 365 days');
+    }
+
+    if (data.minAdvanceBooking && data.maxAdvanceBooking && data.minAdvanceBooking > data.maxAdvanceBooking) {
+      throw new Error('Minimum advance booking cannot exceed maximum advance booking');
+    }
+
+    // Validate priority
+    if (data.priority !== undefined && (data.priority < 1 || data.priority > 999)) {
+      throw new Error('Priority must be between 1 and 999');
+    }
+  }
+
+  /**
+   * Verify property ownership
+   */
+  private async verifyPropertyOwnership(propertyId: string, userId: string): Promise<any> {
+    const property = await prisma.property.findFirst({
+      where: {
+        propertyId,
+        ownerId: userId
+      }
+    });
+
+    if (!property) {
+      throw new Error('Property not found or you do not have permission to access it');
+    }
+
+    return property;
+  }
+
+  /**
+   * Verify rate plan ownership
+   */
+  private async verifyRatePlanOwnership(ratePlanId: string, userId: string): Promise<any> {
+    const ratePlan = await prisma.ratePlan.findFirst({
+      where: {
+        id: ratePlanId,
+        property: {
+          ownerId: userId
         }
       }
     });
 
-    if (!reservation) {
-      throw new Error('Reservation not found');
+    if (!ratePlan) {
+      throw new Error('Rate plan not found or you do not have permission to access it');
     }
 
-    const daysUntilCheckIn = Math.ceil(
-      (reservation.checkInDate.getTime() - cancellationDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    const cancellationPolicy = reservation.ratePlan.cancellationPolicy;
-    if (!cancellationPolicy || !cancellationPolicy.tiers.length) {
-      return {
-        refundAmount: 0,
-        refundPercentage: 0,
-        description: 'No refund policy defined'
-      };
-    }
-
-    // Find applicable tier (highest daysBeforeCheckIn that user qualifies for)
-    const applicableTier = cancellationPolicy.tiers
-      .filter(tier => daysUntilCheckIn >= tier.daysBeforeCheckIn)
-      .sort((a, b) => b.daysBeforeCheckIn - a.daysBeforeCheckIn)[0];
-
-    if (!applicableTier) {
-      // Default to the most restrictive tier
-      const mostRestrictive = cancellationPolicy.tiers
-        .sort((a, b) => a.daysBeforeCheckIn - b.daysBeforeCheckIn)[0];
-      
-      return {
-        refundAmount: (parseFloat(reservation.totalPrice.toString()) * mostRestrictive.refundPercentage) / 100,
-        refundPercentage: mostRestrictive.refundPercentage,
-        description: mostRestrictive.description || `${mostRestrictive.refundPercentage}% refund`
-      };
-    }
-
-    const refundAmount = (parseFloat(reservation.totalPrice.toString()) * applicableTier.refundPercentage) / 100;
-
-    return {
-      refundAmount,
-      refundPercentage: applicableTier.refundPercentage,
-      description: applicableTier.description || `${applicableTier.refundPercentage}% refund`
-    };
+    return ratePlan;
   }
 }
 

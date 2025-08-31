@@ -47,7 +47,6 @@ describe('Financial API Tests', () => {
         propertySizeSqMtr: 100,
       },
       services: {
-        serveBreakfast: false,
         parking: 'No',
         languages: ['English'],
       },
@@ -84,27 +83,16 @@ describe('Financial API Tests', () => {
       data: {
         propertyId,
         name: 'Financial Test Rate',
-        type: 'FullyFlexible',
         description: 'Test rate plan',
-        adjustmentType: 'FixedPrice',
-        adjustmentValue: 1000,
+        priceModifierType: 'FixedAmount',
+        priceModifierValue: 1000,
         cancellationPolicy: {
           create: {
-            tiers: {
-              create: [
-                {
-                  daysBeforeCheckIn: 1,
-                  refundPercentage: 100,
-                },
-                {
-                  daysBeforeCheckIn: 0,
-                  refundPercentage: 0,
-                },
-              ],
-            },
+            type: 'Moderate',
+            freeCancellationDays: 7,
+            partialRefundDays: 3,
           },
         },
-        includesBreakfast: true,
       },
     });
 

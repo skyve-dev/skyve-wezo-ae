@@ -50,7 +50,6 @@ export class PropertyService {
       allowChildren: layout.allowChildren,
       offerCribs: layout.offerCribs,
       propertySizeSqMtr: layout.propertySizeSqMtr,
-      serveBreakfast: services?.serveBreakfast || false,
       parking: services?.parking || 'No',
       languages: services?.languages || [],
       smokingAllowed: rules?.smokingAllowed || false,
@@ -460,7 +459,6 @@ export class PropertyService {
     const property = await prisma.property.update({
       where: { propertyId },
       data: {
-        serveBreakfast: services.serveBreakfast,
         parking: services.parking,
         languages: services.languages,
       },
@@ -636,38 +634,24 @@ export class PropertyService {
       where: { propertyId },
     });
 
-    // Delete prices first (they reference rate plans)
-    await prisma.price.deleteMany({
+    // Delete property pricing first
+    await prisma.propertyPricing.deleteMany({
+      where: { propertyId },
+    });
+
+    // Delete date price overrides for this property
+    await prisma.datePriceOverride.deleteMany({
+      where: { propertyId },
+    });
+
+    // Delete rate plan features for the property's rate plans
+    await prisma.ratePlanFeatures.deleteMany({
       where: { 
         ratePlan: {
           propertyId
         }
       },
     });
-
-    // Delete rate plans (with their restrictions and cancellation policies)
-    const ratePlans = await prisma.ratePlan.findMany({
-      where: { propertyId },
-      include: { cancellationPolicy: true },
-    });
-
-    for (const ratePlan of ratePlans) {
-      // Delete cancellation tiers first
-      if (ratePlan.cancellationPolicy) {
-        await prisma.cancellationTier.deleteMany({
-          where: { cancellationPolicyId: ratePlan.cancellationPolicy.id },
-        });
-        // Delete cancellation policy
-        await prisma.cancellationPolicy.delete({
-          where: { id: ratePlan.cancellationPolicy.id },
-        });
-      }
-
-      // Delete rate plan restrictions
-      await prisma.ratePlanRestriction.deleteMany({
-        where: { ratePlanId: ratePlan.id },
-      });
-    }
 
     // Delete rate plans
     await prisma.ratePlan.deleteMany({

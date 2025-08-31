@@ -158,10 +158,9 @@ export const validateAmenitiesUpdate = (req: Request, res: Response, next: NextF
 };
 
 export const validateServicesUpdate = (req: Request, res: Response, next: NextFunction): void => {
-  const { serveBreakfast, parking, languages } = req.body;
+  const { parking, languages } = req.body;
 
   const validations = [
-    () => typeof serveBreakfast !== 'boolean' ? 'serveBreakfast: Must be true or false' : null,
     () => {
       if (parking) {
         const validParkingTypes = ['YesFree', 'YesPaid', 'No'];
