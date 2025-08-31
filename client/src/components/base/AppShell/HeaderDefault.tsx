@@ -8,9 +8,9 @@ import { filterRoutesByRole } from './roleUtils'
 import RoleToggleButton from '../RoleToggleButton'
 import RoleSlidingDrawer from '../RoleSlidingDrawer'
 import wezoAe from "../../../assets/wezo-optimized.svg"
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '../../../store'
-import { switchUserRole } from '../../../store/slices/authSlice'
+import { switchUserRole, selectAvailableRoles } from '../../../store/slices/authSlice'
 
 interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
@@ -47,6 +47,9 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
     // State for role switching drawer
     const [isRoleDrawerOpen, setIsRoleDrawerOpen] = useState(false)
     const dispatch = useDispatch<AppDispatch>()
+    
+    // Get available roles from Redux
+    const availableRoles = useSelector(selectAvailableRoles)
 
     // Handle role switching
     const handleRoleSelect = async (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
@@ -120,8 +123,8 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
 
             {/* Right: Role Toggle + Menu Button */}
             <Box display="flex" alignItems="center" gap="0.5rem">
-                {/* Role Toggle Button - only show for authenticated users */}
-                {isAuthenticated && currentRole && (
+                {/* Role Toggle Button - only show for authenticated users with multiple roles */}
+                {isAuthenticated && currentRole && availableRoles.length > 1 && (
                     <RoleToggleButton
                         currentRole={currentRole}
                         onClick={() => setIsRoleDrawerOpen(true)}
@@ -158,7 +161,7 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                     email: 'admin@wezo.ae',
                     role: currentRole || 'Tenant'
                 }}
-                availableRoles={['Tenant', 'HomeOwner', 'Manager']}
+                availableRoles={availableRoles}
                 onRoleSelect={handleRoleSelect}
             />
         </Box>

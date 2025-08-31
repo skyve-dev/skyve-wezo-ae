@@ -107,6 +107,30 @@ export const switchUserRole = createAsyncThunk(
   }
 )
 
+// Auto-promote Tenant to HomeOwner after first property creation
+export const promoteToHomeOwner = createAsyncThunk(
+  'auth/promoteToHomeOwner',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as any
+      const currentRole = state.auth.currentRoleMode
+      
+      // Only promote if current role is Tenant
+      if (currentRole !== 'Tenant') {
+        return null // No promotion needed
+      }
+      
+      const response = await apiClient.updateUserRole('HomeOwner')
+      apiClient.setToken(response.token)
+      localStorage.setItem('authToken', response.token)
+      localStorage.setItem('user_role_preference', 'HomeOwner')
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Unable to promote to HomeOwner role.')
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -261,6 +285,27 @@ const authSlice = createSlice({
       .addCase(switchUserRole.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload as string || 'Unable to switch role. Please try again.'
+      })
+      
+    // Auto-promotion to HomeOwner
+    builder
+      .addCase(promoteToHomeOwner.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(promoteToHomeOwner.fulfilled, (state, action) => {
+        state.isLoading = false
+        if (action.payload) {
+          state.user = action.payload.user
+          state.token = action.payload.token
+          state.error = null
+          // Reinitialize role mode after promotion to update available roles
+          authSlice.caseReducers.initializeRoleMode(state)
+        }
+      })
+      .addCase(promoteToHomeOwner.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string || 'Unable to promote to HomeOwner role.'
       })
   },
 })

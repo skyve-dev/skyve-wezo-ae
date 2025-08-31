@@ -72,7 +72,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     
     // Show user-friendly error dialog
     await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center">
+      <Box padding="2rem" textAlign="center" background={'white'}>
         <Box 
           fontSize="1.25rem" 
           fontWeight="bold" 
@@ -111,7 +111,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     
     // Show error dialog
     await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center">
+      <Box padding="2rem" textAlign="center" background={'white'}>
         <Box 
           fontSize="1.25rem" 
           fontWeight="bold" 
@@ -146,7 +146,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
   
   const showSuccess = useCallback(async (message: string) => {
     await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center">
+      <Box padding="2rem" textAlign="center" background={'white'}>
         <Box 
           fontSize="1.25rem" 
           fontWeight="bold" 

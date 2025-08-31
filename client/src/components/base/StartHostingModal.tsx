@@ -127,7 +127,6 @@ const StartHostingModal: React.FC<StartHostingModalProps> = ({
             backgroundColor="white"
             boxShadow="0 25px 60px rgba(0, 0, 0, 0.15)"
             minWidth="600px"
-            maxWidth="700px"
             maxHeight="90vh"
             overflow="hidden"
             position="relative"

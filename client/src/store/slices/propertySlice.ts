@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Property, PropertyState, WizardFormData, Photo } from '../../types/property'
 import { api } from '../../utils/api'
 import { BookingType, PaymentType, ParkingType, PetPolicy } from '../../constants/propertyEnums'
+import { promoteToHomeOwner } from './authSlice'
 
 // New enums to match Prisma schema
 export enum PropertyStatus {
@@ -344,6 +345,36 @@ export const createPropertyAsync = createAsyncThunk(
       const transformedData = transformPropertyDataForServer(data as WizardFormData)
       const response = await api.post<{ property: any }>('/api/properties', transformedData)
       return transformServerPropertyData(response.property)
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to create property'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+// Enhanced property creation that includes auto-promotion logic
+export const createPropertyWithPromotion = createAsyncThunk(
+  'property/createPropertyWithPromotion',
+  async (data: Partial<Property>, { dispatch, getState, rejectWithValue }) => {
+    try {
+      // First create the property
+      const propertyResult = await dispatch(createPropertyAsync(data))
+      
+      if (createPropertyAsync.fulfilled.match(propertyResult)) {
+        // Check if user is Tenant and should be promoted
+        const state = getState() as any
+        const currentRole = state.auth.currentRoleMode
+        
+        if (currentRole === 'Tenant') {
+          // Auto-promote to HomeOwner
+          await dispatch(promoteToHomeOwner())
+        }
+        
+        return propertyResult.payload
+      } else {
+        return rejectWithValue(propertyResult.payload)
+      }
     } catch (error: any) {
       const errorMessage = error.getUserMessage ? error.getUserMessage() : 
                           error.serverMessage || error.message || 'Failed to create property'
@@ -768,6 +799,27 @@ const propertySlice = createSlice({
         state.error = null
       })
       .addCase(createPropertyAsync.rejected, (state, action) => {
+        state.isSaving = false
+        state.error = action.payload as string
+      })
+      
+      // Create property with promotion
+      .addCase(createPropertyWithPromotion.pending, (state) => {
+        state.isSaving = true
+        state.error = null
+        state.formValidationErrors = {}
+      })
+      .addCase(createPropertyWithPromotion.fulfilled, (state, action) => {
+        state.isSaving = false
+        state.properties.push(action.payload)
+        state.currentProperty = action.payload
+        state.currentForm = action.payload
+        state.originalForm = { ...action.payload }
+        state.hasUnsavedChanges = false
+        state.formValidationErrors = {}
+        state.error = null
+      })
+      .addCase(createPropertyWithPromotion.rejected, (state, action) => {
         state.isSaving = false
         state.error = action.payload as string
       })

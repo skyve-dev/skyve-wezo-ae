@@ -8,6 +8,7 @@ import {DynamicContentProvider, useDynamicContent} from './DynamicContentProvide
 import HeaderDefault from './HeaderDefault'
 import SideNavDefault from './SideNavDefault'
 import FooterDefault from './FooterDefault'
+import StartHostingModal from '../StartHostingModal'
 import { useSelector } from 'react-redux'
 import { selectCurrentRoleMode, selectIsAuthenticated } from '@/store/slices/authSlice'
 import {
@@ -94,6 +95,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
     // UI state
     const [isSideNavOpen, setSideNavOpen] = useState(false)
     const [isLoading, setLoading] = useState(false)
+    const [isStartHostingOpen, setIsStartHostingOpen] = useState(false)
 
     // Navigation guards state
     const navigationGuards = useRef<Set<NavigationGuardFunction>>(new Set())
@@ -339,6 +341,33 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
 
     // Check if we can navigate back
     const canNavigateBack = window.history.length > 1 || navigationHistory.length > 1
+
+    // Start Hosting handler - shows sliding drawer and handles progression to property creation
+    const handleStartHosting = useCallback(() => {
+        setIsStartHostingOpen(true)
+    }, [])
+
+    // Handle when user clicks "Get Started" in the StartHostingModal
+    const handleGetStartedHosting = useCallback(() => {
+        setIsStartHostingOpen(false)
+        
+        // Navigate to property creation
+        navigateTo('property-create' as keyof T, {} as any)
+        
+        // Show a toast notification about the hosting journey
+        addToast(
+            'Welcome to Hosting! Create your first property to start earning. You\'ll be automatically upgraded to HomeOwner status.',
+            { 
+                type: 'success',
+                duration: 8000 
+            }
+        )
+    }, [navigateTo, addToast])
+
+    // Handle when user clicks "Maybe Later" in the StartHostingModal
+    const handleMaybeLaterHosting = useCallback(() => {
+        setIsStartHostingOpen(false)
+    }, [])
 
     // Configuration with defaults (moved up for theme access)
     const {
@@ -591,6 +620,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 setSideNavOpen={setSideNavOpen}
                                 currentRole={currentRole}
                                 isAuthenticated={isAuthenticated}
+                                onStartHosting={handleStartHosting}
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',
@@ -644,6 +674,30 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                             </Box>
                         </Box>
                     )}
+                    
+                    {/* Start Hosting Drawer - Bottom sliding drawer for Tenant users */}
+                    <SlidingDrawer
+                        isOpen={isStartHostingOpen}
+                        onClose={() => setIsStartHostingOpen(false)}
+                        side="bottom"
+                        width="100%"
+                        height="auto"
+                        backgroundColor="transparent"
+                    >
+                        <Box 
+                            maxHeight="90vh" 
+                            overflow="auto"
+                            backgroundColor="white"
+                            borderRadius="16px 16px 0 0"
+                            boxShadow="0 -10px 40px rgba(0, 0, 0, 0.15)"
+                        >
+                            <StartHostingModal
+                                onGetStarted={handleGetStartedHosting}
+                                onMaybeLater={handleMaybeLaterHosting}
+                                userName={undefined}
+                            />
+                        </Box>
+                    </SlidingDrawer>
                 </>
 
                 {/* CSS Animations and Luxury Theme Styles */}

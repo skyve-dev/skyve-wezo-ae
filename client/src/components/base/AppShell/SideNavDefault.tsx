@@ -1,7 +1,9 @@
 import {Box} from '../Box'
 import Tab, {TabItem} from '../Tab'
+import {Button} from '../Button'
 import {BaseRoute} from './types'
 import { filterRoutesByRole } from './roleUtils'
+import { FaHome, FaDollarSign } from 'react-icons/fa'
 import wezoAe from "@/assets/wezo-optimized.svg";
 
 interface SideNavDefaultProps<T extends Record<string, BaseRoute>> {
@@ -11,6 +13,7 @@ interface SideNavDefaultProps<T extends Record<string, BaseRoute>> {
     setSideNavOpen: (open: boolean) => void
     currentRole: 'Tenant' | 'HomeOwner' | 'Manager' | null
     isAuthenticated: boolean
+    onStartHosting?: () => void
     theme: {
         primaryColor: string
         backgroundColor: string
@@ -25,6 +28,7 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
     setSideNavOpen,
     currentRole,
     isAuthenticated,
+    onStartHosting,
     theme
 }: SideNavDefaultProps<T>) => {
     // Filter routes based on current user role
@@ -93,6 +97,45 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
                     paddingRight : '1.5rem'
                 }}
             />
+            
+            {/* Start Hosting CTA - Only show for Tenant users */}
+            {isAuthenticated && currentRole === 'Tenant' && onStartHosting && (
+                <Box 
+                    padding="1rem 1.5rem"
+                    marginTop="2rem"
+                >
+                    <Button
+                        label="Start Hosting"
+                        icon={<FaHome />}
+                        onClick={onStartHosting}
+                        variant="promoted"
+                        size="medium"
+                        fullWidth
+                        style={{
+                            background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                            border: 'none',
+                            fontWeight: '600',
+                            fontSize: '0.9375rem',
+                            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)'
+                        }}
+                    />
+                    
+                    {/* Earning potential teaser */}
+                    <Box 
+                        marginTop="0.75rem"
+                        textAlign="center"
+                        fontSize="0.75rem"
+                        color="rgba(0,0,0,0.6)"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        gap="0.25rem"
+                    >
+                        <FaDollarSign style={{ fontSize: '0.6875rem' }} />
+                        Earn up to AED 15,000+ per month
+                    </Box>
+                </Box>
+            )}
         </Box>
     )
 }

@@ -177,13 +177,12 @@ const DialogOverlay: React.FC<DialogOverlayProps> = ({
             }}
         >
             <Box
-                backgroundColor="white"
+                backgroundColor="transparent"
                 borderRadius="8px"
                 boxShadow="0 10px 25px rgba(0, 0, 0, 0.2)"
                 maxHeight="90vh"
                 overflow="auto"
-                width={'100%'}
-                maxWidth={'500px'}
+                maxWidth={'90vw'}
                 style={{
                     animation: isVisible ? 'dialogFadeIn 0.2s ease-out' : 'dialogFadeOut 0.2s ease-out'
                 }}

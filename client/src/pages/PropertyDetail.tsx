@@ -345,11 +345,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
               <Box marginBottom="1rem">
                 <SelectionPicker
                   data={pricingCalculation.availableRateOptions}
-                  idAccessor={(option) => option.ratePlanId}
+                  idAccessor={(option: any) => option.ratePlanId}
                   value={selectedRatePlanId}
-                  onChange={setSelectedRatePlanId}
+                  onChange={(value) => setSelectedRatePlanId(value as string)}
                   isMultiSelect={false}
-                  renderItem={(ratePlan, isSelected) => (
+                  renderItem={(ratePlan: any, isSelected) => (
                     <Box
                       display="flex"
                       alignItems="center"
