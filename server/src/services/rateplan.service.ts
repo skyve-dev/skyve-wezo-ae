@@ -777,8 +777,10 @@ export class RatePlanService {
 
       case PriceAdjustmentType.Percentage:
         const baseAmount = await this.getBaseRateForDate(ratePlan.baseRatePlan, date);
-        const discount = baseAmount * (ratePlan.adjustmentValue / 100);
-        return Math.max(0, baseAmount - discount);
+        // Apply percentage: positive values = surcharge, negative values = discount
+        // Formula: finalPrice = basePrice * (1 + adjustmentValue/100)
+        // Examples: +50% = 1.5x base, -20% = 0.8x base
+        return Math.max(0, baseAmount * (1 + ratePlan.adjustmentValue / 100));
 
       default:
         throw new Error(`Unknown adjustment type: ${ratePlan.adjustmentType}`);
