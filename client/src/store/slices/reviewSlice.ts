@@ -116,16 +116,16 @@ const calculateStats = (reviews: Review[]): ReviewStats => {
     return initialState.stats
   }
 
-  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
+  const totalRating = reviews.reduce((sum, review) => sum + (review.rating || 0), 0)
   const averageRating = totalRating / reviews.length
 
   const categoryAverages = {
-    cleanliness: reviews.reduce((sum, r) => sum + r.categories.cleanliness, 0) / reviews.length,
-    accuracy: reviews.reduce((sum, r) => sum + r.categories.accuracy, 0) / reviews.length,
-    communication: reviews.reduce((sum, r) => sum + r.categories.communication, 0) / reviews.length,
-    location: reviews.reduce((sum, r) => sum + r.categories.location, 0) / reviews.length,
-    checkIn: reviews.reduce((sum, r) => sum + r.categories.checkIn, 0) / reviews.length,
-    value: reviews.reduce((sum, r) => sum + r.categories.value, 0) / reviews.length
+    cleanliness: reviews.reduce((sum, r) => sum + (r.categories?.cleanliness || 0), 0) / reviews.length,
+    accuracy: reviews.reduce((sum, r) => sum + (r.categories?.accuracy || 0), 0) / reviews.length,
+    communication: reviews.reduce((sum, r) => sum + (r.categories?.communication || 0), 0) / reviews.length,
+    location: reviews.reduce((sum, r) => sum + (r.categories?.location || 0), 0) / reviews.length,
+    checkIn: reviews.reduce((sum, r) => sum + (r.categories?.checkIn || 0), 0) / reviews.length,
+    value: reviews.reduce((sum, r) => sum + (r.categories?.value || 0), 0) / reviews.length
   }
 
   const ratingDistribution = {
@@ -296,7 +296,12 @@ const reviewSlice = createSlice({
       .addCase(fetchReviews.fulfilled, (state, action) => {
         state.loading = false
         state.reviews = action.payload
-        state.stats = calculateStats(action.payload)
+        try {
+          state.stats = calculateStats(action.payload)
+        } catch (error) {
+          // If calculateStats fails with malformed data, use initial stats
+          state.stats = initialState.stats
+        }
       })
       .addCase(fetchReviews.rejected, (state, action) => {
         state.loading = false
@@ -340,18 +345,12 @@ const reviewSlice = createSlice({
       })
       
       // Update review response
-      .addCase(updateReviewResponse.fulfilled, (state, action) => {
-        const index = state.reviews.findIndex(r => r.id === action.payload.id)
-        if (index !== -1) {
-          state.reviews[index] = action.payload
-        }
-        if (state.currentReview?.id === action.payload.id) {
-          state.currentReview = action.payload
-        }
+      .addCase(updateReviewResponse.pending, (state) => {
+        state.loading = true
+        state.error = null
       })
-      
-      // Delete review response
-      .addCase(deleteReviewResponse.fulfilled, (state, action) => {
+      .addCase(updateReviewResponse.fulfilled, (state, action) => {
+        state.loading = false
         const index = state.reviews.findIndex(r => r.id === action.payload.id)
         if (index !== -1) {
           state.reviews[index] = action.payload
@@ -361,6 +360,46 @@ const reviewSlice = createSlice({
         }
         // Recalculate stats
         state.stats = calculateStats(state.reviews)
+      })
+      .addCase(updateReviewResponse.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Delete review response
+      .addCase(deleteReviewResponse.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteReviewResponse.fulfilled, (state, action) => {
+        state.loading = false
+        const index = state.reviews.findIndex(r => r.id === action.payload.id)
+        if (index !== -1) {
+          state.reviews[index] = action.payload
+        }
+        if (state.currentReview?.id === action.payload.id) {
+          state.currentReview = action.payload
+        }
+        // Recalculate stats
+        state.stats = calculateStats(state.reviews)
+      })
+      .addCase(deleteReviewResponse.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Report review
+      .addCase(reportReview.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(reportReview.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(reportReview.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
   }
 })

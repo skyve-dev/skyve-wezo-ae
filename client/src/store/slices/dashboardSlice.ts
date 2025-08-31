@@ -437,17 +437,40 @@ const dashboardSlice = createSlice({
       })
       
       // Fetch quick actions
+      .addCase(fetchQuickActions.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
       .addCase(fetchQuickActions.fulfilled, (state, action) => {
+        state.loading = false
         state.quickActions = action.payload
+      })
+      .addCase(fetchQuickActions.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
       
       // Fetch notifications
+      .addCase(fetchNotifications.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
+        state.loading = false
         state.notifications = action.payload
+      })
+      .addCase(fetchNotifications.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
       
       // Mark notification as read
+      .addCase(markNotificationAsRead.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
       .addCase(markNotificationAsRead.fulfilled, (state, action) => {
+        state.loading = false
         action.payload.forEach((notificationId: string) => {
           const notification = state.notifications.find(n => n.id === notificationId)
           if (notification) {
@@ -455,10 +478,23 @@ const dashboardSlice = createSlice({
           }
         })
       })
+      .addCase(markNotificationAsRead.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
       
       // Dismiss quick action
+      .addCase(dismissQuickAction.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
       .addCase(dismissQuickAction.fulfilled, (state, action) => {
+        state.loading = false
         state.quickActions = state.quickActions.filter(qa => qa.id !== action.payload)
+      })
+      .addCase(dismissQuickAction.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
       
       // Update widget layout

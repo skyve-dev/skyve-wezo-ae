@@ -1,4 +1,5 @@
 import { BedType, ParkingType, PetPolicy, BookingType, PaymentType, Currency } from '../constants/propertyEnums'
+import {PropertyStatus} from "@/store/slices/propertySlice.ts";
 
 export interface Address {
   apartmentOrFloorNumber?: string
@@ -95,6 +96,7 @@ export interface Cancellation {
 }
 
 export interface Property {
+  status: PropertyStatus;
   propertyId?: string
   name: string
   address: Address
@@ -124,6 +126,10 @@ export interface Property {
   bookingType: BookingType
   paymentType: PaymentType
   // NOTE: pricing and cancellation are now managed through RatePlan model
+  
+  // New relationships from updated schema
+  ratePlans?: any[] // Associated rate plans
+  propertyGroupId?: string // Optional property group
   // @deprecated These fields are kept for backward compatibility but are not used by backend
   pricing?: Pricing
   cancellation?: Cancellation
@@ -136,6 +142,7 @@ export interface Property {
 }
 
 export interface WizardFormData extends Property {
+
   currentStep: number
   isComplete: boolean
   lastSaved?: string

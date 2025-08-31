@@ -3,6 +3,13 @@ import { Property, PropertyState, WizardFormData, Photo } from '../../types/prop
 import { api } from '../../utils/api'
 import { BookingType, PaymentType, ParkingType, PetPolicy } from '../../constants/propertyEnums'
 
+// New enums to match Prisma schema
+export enum PropertyStatus {
+  Draft = 'Draft',    // Initial state - not yet live
+  Live = 'Live',      // Active, visible for bookings
+  Closed = 'Closed'   // Temporarily/permanently unavailable
+}
+
 const WIZARD_STORAGE_KEY = 'property-wizard-data'
 
 // Debug utility to help identify data structure mismatches
@@ -122,8 +129,10 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     checkOutUntil: '12:00'
   }
 
-  // NOTE: Pricing and cancellation are now managed through RatePlan model, not directly on Property
+  // IMPORTANT: Pricing and cancellation are now managed through RatePlan model, not directly on Property
   // These fields have been removed from the backend Property schema
+  // PropertyStatus controls visibility and bookability
+  transformedData.status = data.status || PropertyStatus.Draft
 
   if (data.firstDateGuestCanCheckIn) {
     transformedData.firstDateGuestCanCheckIn = data.firstDateGuestCanCheckIn
@@ -142,6 +151,8 @@ const transformServerPropertyData = (serverData: any): Property => {
     propertyId: serverData.propertyId,
     name: serverData.name,
     address: serverData.address,
+    // New PropertyStatus field from schema
+    status: serverData.status || PropertyStatus.Draft,
     
     // Flatten layout fields - handle both nested and flat server structures
     maximumGuest: serverData.layout?.maximumGuest ?? serverData.maximumGuest ?? 0,
@@ -170,6 +181,9 @@ const transformServerPropertyData = (serverData: any): Property => {
     // NOTE: pricing and cancellation are now managed through RatePlan model
     // pricing: serverData.pricing, // REMOVED - no longer exists on backend
     // cancellation: serverData.cancellation, // REMOVED - no longer exists on backend
+    // New relationships from schema
+    ratePlans: serverData.ratePlans || [],  // Associated rate plans
+    propertyGroupId: serverData.propertyGroupId, // Optional property group
     aboutTheProperty: serverData.aboutTheProperty,
     aboutTheNeighborhood: serverData.aboutTheNeighborhood,
     firstDateGuestCanCheckIn: serverData.firstDateGuestCanCheckIn,
@@ -231,13 +245,16 @@ export const createProperty = createAsyncThunk(
       const serverProperty = transformServerPropertyData(response.property)
       return serverProperty
     } catch (error: any) {
-      // Enhance ApiError with validation context for property creation
+      // Handle validation errors specially
       if (error.errors && Object.keys(error.errors).length > 0) {
-        error.validationContext = {
+        return rejectWithValue({
           type: 'validation',
-          message: 'Please fix the following validation errors:'
-        }
+          errors: error.errors,
+          message: error.getUserMessage ? error.getUserMessage() : 'Please fix the following validation errors:'
+        })
       }
+      
+      // Handle other errors
       const errorMessage = error.getUserMessage ? error.getUserMessage() : 
                           error.serverMessage || error.message || 'Failed to create property'
       return rejectWithValue(errorMessage)
@@ -370,6 +387,7 @@ const propertySlice = createSlice({
     },
     initializeWizard: (state, action: PayloadAction<Partial<WizardFormData>>) => {
       const defaultWizardData: WizardFormData = {
+        status: PropertyStatus.Draft,
         name: '',
         address: {
           countryOrRegion: 'UAE',
@@ -409,6 +427,7 @@ const propertySlice = createSlice({
       
       // Convert Property to WizardFormData format
       const wizardData: WizardFormData = {
+        status: property.status,
         propertyId: property.propertyId,
         name: property.name || '',
         address: property.address || {
@@ -489,6 +508,7 @@ const propertySlice = createSlice({
     // Form management actions (following RatePlanManager pattern)
     initializeFormForCreate: (state) => {
       state.currentForm = {
+        status: PropertyStatus.Draft,
         name: '',
         address: {
           countryOrRegion: 'UAE',

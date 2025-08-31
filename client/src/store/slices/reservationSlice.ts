@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { api } from '../../utils/api'
 
 // Types
+// Updated to match new Prisma schema ReservationStatus enum
 export interface Reservation {
   id: string
   propertyId: string
@@ -12,12 +13,17 @@ export interface Reservation {
   checkIn: string
   checkOut: string
   numberOfGuests: number
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show'
+  status: 'Confirmed' | 'Pending' | 'Modified' | 'Cancelled' | 'NoShow' | 'Completed'
   totalAmount: number
   currency: string
   specialRequests?: string
   paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed'
   bookingReference: string
+  // New fields from updated schema
+  ratePlanId?: string  // Reference to rate plan used
+  modificationHistory?: ReservationModification[]  // Track changes
+  noShowReportedAt?: string  // When no-show was reported
+  cancellationReason?: string  // Reason for cancellation
   createdAt: string
   updatedAt: string
 }
@@ -40,8 +46,10 @@ export interface ReservationState {
     total: number
     confirmed: number
     pending: number
+    modified: number  // New status from schema
     completed: number
     cancelled: number
+    noShow: number    // Track no-show reservations
   }
   filters: {
     status: string
@@ -62,8 +70,10 @@ const initialState: ReservationState = {
     total: 0,
     confirmed: 0,
     pending: 0,
+    modified: 0,
     completed: 0,
-    cancelled: 0
+    cancelled: 0,
+    noShow: 0
   },
   filters: {
     status: 'all',
@@ -204,10 +214,12 @@ const reservationSlice = createSlice({
         state.reservations = action.payload.reservations
         state.stats = {
           total: action.payload.reservations.length,
-          confirmed: action.payload.reservations.filter(r => r.status === 'confirmed').length,
-          pending: action.payload.reservations.filter(r => r.status === 'pending').length,
-          completed: action.payload.reservations.filter(r => r.status === 'completed').length,
-          cancelled: action.payload.reservations.filter(r => r.status === 'cancelled').length
+          confirmed: action.payload.reservations.filter(r => r.status === 'Confirmed').length,
+          pending: action.payload.reservations.filter(r => r.status === 'Pending').length,
+          modified: action.payload.reservations.filter(r => r.status === 'Modified').length,
+          completed: action.payload.reservations.filter(r => r.status === 'Completed').length,
+          cancelled: action.payload.reservations.filter(r => r.status === 'Cancelled').length,
+          noShow: action.payload.reservations.filter(r => r.status === 'NoShow').length
         }
       })
       .addCase(fetchReservations.rejected, (state, action) => {
