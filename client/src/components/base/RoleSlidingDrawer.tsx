@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaHome, FaBuilding, FaCog } from 'react-icons/fa'
+import { IoIosHome, IoIosBuild, IoIosCog } from 'react-icons/io'
 import { Box } from './Box'
 import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
@@ -94,19 +94,19 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
             id: 'Tenant',
             displayName: 'Guest',
             description: 'Browse and book properties',
-            icon: <FaHome style={{ fontSize: '1.5rem', color: '#2563eb' }} />
+            icon: <IoIosHome style={{ fontSize: '1.5rem', color: '#2563eb' }} />
         },
         {
             id: 'HomeOwner', 
             displayName: 'Host',
             description: 'Manage your listings',
-            icon: <FaBuilding style={{ fontSize: '1.5rem', color: '#059669' }} />
+            icon: <IoIosBuild style={{ fontSize: '1.5rem', color: '#059669' }} />
         },
         {
             id: 'Manager',
             displayName: 'Manager',
             description: 'Manage all properties', 
-            icon: <FaCog style={{ fontSize: '1.5rem', color: '#dc2626' }} />
+            icon: <IoIosCog style={{ fontSize: '1.5rem', color: '#dc2626' }} />
         }
     ]
 

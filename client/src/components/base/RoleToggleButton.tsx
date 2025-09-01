@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaUserCircle } from 'react-icons/fa'
+import { IoIosContact } from 'react-icons/io'
 import { Box } from './Box'
 import { Button } from './Button'
 
@@ -33,7 +33,7 @@ interface RoleToggleButtonProps {
  * 
  * Features:
  * - Role-specific colors (Blue=Guest, Green=Host, Red=Manager)
- * - FaUserCircle icon with role text
+ * - IoIosContact icon with role text
  * - Tooltip showing current role
  * - Responsive design
  * 
@@ -115,7 +115,7 @@ const RoleToggleButton: React.FC<RoleToggleButtonProps> = ({
             }}
         >
             {/* Role Icon */}
-            <FaUserCircle 
+            <IoIosContact 
                 style={{ 
                     fontSize: '1.25rem',
                     color: config.color

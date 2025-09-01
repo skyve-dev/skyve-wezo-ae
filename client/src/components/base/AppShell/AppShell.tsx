@@ -681,14 +681,14 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                         onClose={() => setIsStartHostingOpen(false)}
                         side="bottom"
                         width="100%"
-                        height="auto"
+                        height="100%"
                         backgroundColor="transparent"
                     >
                         <Box 
-                            maxHeight="90vh" 
+                            height="100%"
                             overflow="auto"
                             backgroundColor="white"
-                            borderRadius="16px 16px 0 0"
+                            borderRadius="0 0 0 0"
                             boxShadow="0 -10px 40px rgba(0, 0, 0, 0.15)"
                         >
                             <StartHostingModal

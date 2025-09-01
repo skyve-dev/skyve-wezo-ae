@@ -3,7 +3,7 @@ import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
 import {Box} from './Box'
 import useDrawerManager from '../../hooks/useDrawerManager'
-import {FaCheck, FaClock} from 'react-icons/fa'
+import {IoIosCheckmark, IoIosTime} from 'react-icons/io'
 
 interface TimePickerProps {
     /**
@@ -930,7 +930,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
                     {currentTime ? formatDisplayTime(currentTime) : placeholder}
                 </Box>
                 <Box color="#6b7280" fontSize="1.25rem">
-                    <FaClock/>
+                    <IoIosTime/>
                 </Box>
             </Box>
 
@@ -1141,7 +1141,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
                             gap="0.5rem"
                             whileHover={{backgroundColor: '#2563eb'}}
                         >
-                            <FaCheck/>
+                            <IoIosCheckmark/>
                             Confirm
                         </Box>
                     </Box>

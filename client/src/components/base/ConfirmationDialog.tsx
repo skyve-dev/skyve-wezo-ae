@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box } from './Box'
 import Button from './Button'
-import { FaExclamationTriangle, FaQuestionCircle, FaInfoCircle, FaCheckCircle } from 'react-icons/fa'
+import { IoIosWarning, IoIosHelpCircle, IoIosInformationCircle, IoIosCheckmarkCircle } from 'react-icons/io'
 
 interface ConfirmationDialogProps {
     /**
@@ -66,7 +66,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         switch (variant) {
             case 'destructive':
                 return {
-                    icon: <FaExclamationTriangle />,
+                    icon: <IoIosWarning />,
                     iconColor: '#dc2626',
                     confirmVariant: 'promoted' as const,
                     confirmLabel: confirmLabel || 'Delete',
@@ -74,7 +74,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                 }
             case 'warning':
                 return {
-                    icon: <FaExclamationTriangle />,
+                    icon: <IoIosWarning />,
                     iconColor: '#d97706',
                     confirmVariant: 'promoted' as const,
                     confirmLabel: confirmLabel || 'Continue',
@@ -82,7 +82,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                 }
             case 'info':
                 return {
-                    icon: <FaInfoCircle />,
+                    icon: <IoIosInformationCircle />,
                     iconColor: '#2563eb',
                     confirmVariant: 'promoted' as const,
                     confirmLabel: confirmLabel || 'OK',
@@ -90,7 +90,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                 }
             case 'success':
                 return {
-                    icon: <FaCheckCircle />,
+                    icon: <IoIosCheckmarkCircle />,
                     iconColor: '#059669',
                     confirmVariant: 'promoted' as const,
                     confirmLabel: confirmLabel || 'Continue',
@@ -98,7 +98,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                 }
             default: // question
                 return {
-                    icon: <FaQuestionCircle />,
+                    icon: <IoIosHelpCircle />,
                     iconColor: '#6b7280',
                     confirmVariant: 'promoted' as const,
                     confirmLabel: confirmLabel || 'Yes',

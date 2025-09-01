@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import Tab, {TabItem} from '../Tab'
-import {FaBars} from 'react-icons/fa'
+import {IoIosMenu} from 'react-icons/io'
 import {BaseRoute} from './types'
 import { filterRoutesByRole } from './roleUtils'
 import RoleToggleButton from '../RoleToggleButton'
@@ -50,18 +50,10 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
     
     // Get available roles from Redux
     const availableRoles = useSelector(selectAvailableRoles)
-
-    // Handle role switching
-    const handleRoleSelect = async (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
-        try {
-            await dispatch(switchUserRole(role)).unwrap()
-            setIsRoleDrawerOpen(false)
-        } catch (error: any) {
-            console.error('Role switch failed:', error)
-            // Show error message to user
-            const errorMessage = error.message || error || 'Failed to switch role'
-            alert(`Role switch failed: ${errorMessage}`)
-        }
+    // Handle role switching (client-side only)
+    const handleRoleSelect = (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
+        dispatch(switchUserRole(role))
+        setIsRoleDrawerOpen(false)
     }
 
     // Filter routes based on current user role
@@ -133,7 +125,7 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
 
                 <Button
                     label=""
-                    icon={<FaBars fontSize={'1.2rem'}/>}
+                    icon={<IoIosMenu fontSize={'1.2rem'}/>}
                     onClick={() => setSideNavOpen(true)}
                     variant="plain"
                     size="small"

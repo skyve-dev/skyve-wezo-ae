@@ -9,16 +9,28 @@ import { Button } from '@/components/base/Button'
 import DatePicker from '@/components/base/DatePicker'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SelectionPicker from '@/components/base/SelectionPicker'
+import SlidingDrawer from '@/components/base/SlidingDrawer'
 import { 
-  FaArrowLeft, 
-  FaMapMarkerAlt, 
-  FaBath, 
-  FaUsers,
-  FaCalendarAlt,
-  FaWifi,
-  FaShare
-} from 'react-icons/fa'
+  IoIosArrowBack, 
+  IoIosPin, 
+  IoIosWater, 
+  IoIosPeople,
+  IoIosCalendar,
+  IoIosShare,
+  IoIosBed,
+  IoIosHome,
+  IoIosCar,
+  IoIosCloseCircle,
+  IoIosTime,
+  IoIosGlobe,
+  IoIosResize,
+  IoIosHappy,
+  IoIosCheckmarkCircle,
+  IoIosClose
+} from 'react-icons/io'
 import { resolvePhotoUrl } from '@/utils/api'
+import { findAmenityById } from '@/constants/amenities'
+import { ParkingTypeLabels, PetPolicyLabels } from '@/constants/propertyEnums'
 
 interface PropertyDetailProps {
   propertyId: string
@@ -49,6 +61,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   const [numGuests, setNumGuests] = useState(1)
   const [pricingCalculation, setPricingCalculation] = useState<any>(null)
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<string>('')
+  
+  // Mobile booking form state
+  const [showMobileBookingForm, setShowMobileBookingForm] = useState(false)
 
   // Get selected rate plan pricing
   const selectedRatePlan = pricingCalculation?.availableRateOptions?.find(
@@ -158,7 +173,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
         </Box>
         <Button
           label="Back to Properties"
-          icon={<FaArrowLeft />}
+          icon={<IoIosArrowBack />}
           onClick={handleBack}
           variant="normal"
         />
@@ -184,7 +199,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
       >
         <Button
           label=""
-          icon={<FaArrowLeft />}
+          icon={<IoIosArrowBack />}
           onClick={handleBack}
           variant="normal"
           size="small"
@@ -197,7 +212,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
         </Box>
         <Button
           label=""
-          icon={<FaShare />}
+          icon={<IoIosShare />}
           onClick={() => navigator.share?.({ 
             title: property.name, 
             url: window.location.href 
@@ -295,7 +310,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             justifyContent="center"
             color="#9ca3af"
           >
-            <FaMapMarkerAlt size={48} />
+            <IoIosPin size={48} />
           </Box>
         )}
       </Box>
@@ -311,24 +326,31 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             </h1>
             
             <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem" color="#666">
-              <FaMapMarkerAlt />
+              <IoIosPin />
               <span>
                 {property.address?.city ? `${property.address.city}, ` : ''}
                 {property.address?.countryOrRegion || 'Location not set'}
               </span>
             </Box>
 
-            <Box display="flex" gap="1.5rem" marginBottom="1rem" color="#666" fontSize="0.875rem">
-              <Box display="flex" alignItems="center" gap="0.25rem">
-                <FaUsers />
+            <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(150px, 1fr))" gap="1rem" marginBottom="2rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" color="#666">
+                <IoIosPeople style={{color: '#059669'}} />
                 <span>Up to {property.maximumGuest} guests</span>
               </Box>
-              <Box display="flex" alignItems="center" gap="0.25rem">
-                <FaBath />
+              <Box display="flex" alignItems="center" gap="0.5rem" color="#666">
+                <IoIosWater style={{color: '#059669'}} />
                 <span>{property.bathrooms} bathrooms</span>
               </Box>
+              {property.rooms && property.rooms.length > 0 && (
+                <Box display="flex" alignItems="center" gap="0.5rem" color="#666">
+                  <IoIosBed style={{color: '#059669'}} />
+                  <span>{property.rooms.length} rooms</span>
+                </Box>
+              )}
               {property.propertySizeSqMtr && (
-                <Box display="flex" alignItems="center" gap="0.25rem">
+                <Box display="flex" alignItems="center" gap="0.5rem" color="#666">
+                  <IoIosResize style={{color: '#059669'}} />
                   <span>{property.propertySizeSqMtr} m²</span>
                 </Box>
               )}
@@ -448,25 +470,205 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             </Box>
           )}
 
-          {/* Amenities Preview */}
+          {/* Comprehensive Amenities Section */}
           {property.amenities && property.amenities.length > 0 && (
             <Box marginBottom="2rem">
               <h3 style={{ fontSize: '1.25rem', fontWeight: '600', margin: '0 0 1rem 0' }}>
-                Amenities
+                What this place offers
               </h3>
-              <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap="0.5rem">
-                {property.amenities.slice(0, 6).map((amenity, index) => (
-                  <Box key={amenity.id || index} display="flex" alignItems="center" gap="0.5rem" color="#666">
-                    <FaWifi size={16} />
-                    <span>{amenity.name}</span>
+              
+              {/* Group amenities by category */}
+              {(() => {
+                const amenitiesByCategory: Record<string, any[]> = {}
+                property.amenities?.forEach(amenity => {
+                  if (!amenitiesByCategory[amenity.category]) {
+                    amenitiesByCategory[amenity.category] = []
+                  }
+                  amenitiesByCategory[amenity.category].push(amenity)
+                })
+                
+                return Object.entries(amenitiesByCategory).slice(0, 4).map(([category, amenities]) => (
+                  <Box key={category} marginBottom="1.5rem">
+                    <Box fontSize="1rem" fontWeight="600" color="#374151" marginBottom="0.75rem">
+                      {category}
+                    </Box>
+                    <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap="0.75rem">
+                      {amenities.map((amenity, index) => {
+                        const amenityDef = findAmenityById(amenity.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))
+                        const icon = amenityDef?.icon || <IoIosHome size={18} />
+                        
+                        return (
+                          <Box key={amenity.id || index} display="flex" alignItems="center" gap="0.75rem" padding="0.5rem">
+                            <Box color="#059669" fontSize="18px">
+                              {icon}
+                            </Box>
+                            <span style={{color: '#374151', fontSize: '0.875rem'}}>{amenity.name}</span>
+                          </Box>
+                        )
+                      })}
+                    </Box>
+                  </Box>
+                ))
+              })()}
+              
+              {property.amenities.length > 16 && (
+                <Box 
+                  padding="0.75rem 1rem" 
+                  border="1px solid #d1d5db" 
+                  borderRadius="8px" 
+                  textAlign="center" 
+                  color="#059669" 
+                  fontWeight="500"
+                  cursor="pointer"
+                >
+                  Show all {property.amenities.length} amenities
+                </Box>
+              )}
+            </Box>
+          )}
+          
+          {/* Room Details */}
+          {property.rooms && property.rooms.length > 0 && (
+            <Box marginBottom="2rem">
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', margin: '0 0 1rem 0' }}>
+                Sleeping arrangements
+              </h3>
+              <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap="1rem">
+                {property.rooms.map((room, index) => (
+                  <Box 
+                    key={index} 
+                    padding="1rem" 
+                    border="1px solid #e5e7eb" 
+                    borderRadius="8px"
+                    backgroundColor="#fafafa"
+                  >
+                    <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.75rem">
+                      <IoIosBed style={{color: '#059669'}} />
+                      <Box fontWeight="600" color="#374151">{room.spaceName}</Box>
+                    </Box>
+                    {room.beds && room.beds.length > 0 && (
+                      <Box>
+                        {room.beds.map((bed, bedIndex) => (
+                          <Box key={bedIndex} fontSize="0.875rem" color="#666" marginBottom="0.25rem">
+                            {bed.numberOfBed} × {bed.typeOfBed.replace(/([A-Z])/g, ' $1').trim()}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
                   </Box>
                 ))}
-                {property.amenities.length > 6 && (
-                  <Box color="#059669" fontSize="0.875rem">
-                    +{property.amenities.length - 6} more amenities
-                  </Box>
-                )}
               </Box>
+            </Box>
+          )}
+          
+          {/* House Rules */}
+          <Box marginBottom="2rem">
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '600', margin: '0 0 1rem 0' }}>
+              House rules
+            </h3>
+            <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap="1rem">
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                {property.smokingAllowed ? (
+                  <IoIosCheckmarkCircle style={{color: '#059669'}} />
+                ) : (
+                  <IoIosCloseCircle style={{color: '#dc2626'}} />
+                )}
+                <span style={{color: '#374151', fontSize: '0.875rem'}}>
+                  {property.smokingAllowed ? 'Smoking allowed' : 'No smoking'}
+                </span>
+              </Box>
+              
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                {property.partiesOrEventsAllowed ? (
+                  <IoIosCheckmarkCircle style={{color: '#059669'}} />
+                ) : (
+                  <IoIosClose style={{color: '#dc2626'}} />
+                )}
+                <span style={{color: '#374151', fontSize: '0.875rem'}}>
+                  {property.partiesOrEventsAllowed ? 'Events allowed' : 'No parties or events'}
+                </span>
+              </Box>
+              
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                {property.petsAllowed !== 'No' ? (
+                  <IoIosCheckmarkCircle style={{color: '#059669'}} />
+                ) : (
+                  <IoIosClose style={{color: '#dc2626'}} />
+                )}
+                <span style={{color: '#374151', fontSize: '0.875rem'}}>
+                  {PetPolicyLabels[property.petsAllowed]}
+                </span>
+              </Box>
+              
+              {property.allowChildren && (
+                <Box display="flex" alignItems="center" gap="0.5rem">
+                  <IoIosCheckmarkCircle style={{color: '#059669'}} />
+                  <span style={{color: '#374151', fontSize: '0.875rem'}}>
+                    Children welcome
+                  </span>
+                </Box>
+              )}
+              
+              {property.checkInCheckout && (
+                <Box>
+                  <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.25rem">
+                    <IoIosTime style={{color: '#059669'}} />
+                    <span style={{color: '#374151', fontSize: '0.875rem', fontWeight: '600'}}>Check-in/out</span>
+                  </Box>
+                  <Box fontSize="0.75rem" color="#666" marginLeft="1.5rem">
+                    Check-in: {property.checkInCheckout.checkInFrom} - {property.checkInCheckout.checkInUntil}
+                  </Box>
+                  <Box fontSize="0.75rem" color="#666" marginLeft="1.5rem">
+                    Check-out: {property.checkInCheckout.checkOutFrom} - {property.checkInCheckout.checkOutUntil}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Box>
+          
+          {/* Additional Services */}
+          <Box marginBottom="2rem">
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '600', margin: '0 0 1rem 0' }}>
+              Services & Facilities
+            </h3>
+            <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap="1rem">
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <IoIosCar style={{color: '#059669'}} />
+                <span style={{color: '#374151', fontSize: '0.875rem'}}>
+                  {ParkingTypeLabels[property.parking]}
+                </span>
+              </Box>
+              
+              {property.languages && property.languages.length > 0 && (
+                <Box>
+                  <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.25rem">
+                    <IoIosGlobe style={{color: '#059669'}} />
+                    <span style={{color: '#374151', fontSize: '0.875rem', fontWeight: '600'}}>Languages spoken</span>
+                  </Box>
+                  <Box fontSize="0.75rem" color="#666" marginLeft="1.5rem">
+                    {property.languages.join(', ')}
+                  </Box>
+                </Box>
+              )}
+              
+              {property.offerCribs && (
+                <Box display="flex" alignItems="center" gap="0.5rem">
+                  <IoIosHappy style={{color: '#059669'}} />
+                  <span style={{color: '#374151', fontSize: '0.875rem'}}>Cribs available</span>
+                </Box>
+              )}
+            </Box>
+          </Box>
+          
+          {/* About the neighborhood */}
+          {property.aboutTheNeighborhood && (
+            <Box marginBottom="2rem">
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', margin: '0 0 1rem 0' }}>
+                About the neighborhood
+              </h3>
+              <p style={{ color: '#666', lineHeight: 1.6, margin: 0 }}>
+                {property.aboutTheNeighborhood}
+              </p>
             </Box>
           )}
         </Box>
@@ -542,7 +744,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
             <Button
               label="Check Availability"
-              icon={<FaCalendarAlt />}
+              icon={<IoIosCalendar />}
               onClick={handleBookNow}
               variant="promoted"
               size="large"
@@ -590,7 +792,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             </Box>
             <Button
               label="Book Now"
-              onClick={handleBookNow}
+              onClick={() => setShowMobileBookingForm(true)}
               variant="promoted"
               size="medium"
             />
@@ -600,6 +802,167 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
       {/* Bottom padding for mobile sticky bar */}
       <Box height="100px" display="block" displayMd="none" />
+      
+      {/* Mobile Booking Form Drawer */}
+      <SlidingDrawer
+        isOpen={showMobileBookingForm}
+        onClose={() => setShowMobileBookingForm(false)}
+        side="bottom"
+        height="80%"
+        showCloseButton={true}
+      >
+        <Box padding="1.5rem" display="flex" flexDirection="column" height="100%" overflow="auto">
+          {/* Header */}
+          <Box marginBottom="1.5rem">
+            <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" textAlign="center">
+              Book your stay
+            </Box>
+            <Box fontSize="0.875rem" color="#666" textAlign="center">
+              {property.name}
+            </Box>
+          </Box>
+
+          {/* Date Selection */}
+          <Box marginBottom="1rem">
+            <DatePicker
+              label="Check-in"
+              value={checkInDate}
+              onChange={setCheckInDate}
+              placeholder="Select check-in date"
+              minDate={new Date().toISOString()}
+              required
+            />
+          </Box>
+
+          <Box marginBottom="1rem">
+            <DatePicker
+              label="Check-out"
+              value={checkOutDate}
+              onChange={setCheckOutDate}
+              placeholder="Select check-out date"
+              minDate={checkInDate || new Date().toISOString()}
+              required
+            />
+          </Box>
+
+          <Box marginBottom="1.5rem">
+            <NumberStepperInput
+              label="Guests"
+              value={numGuests}
+              onChange={setNumGuests}
+              step={1}
+              min={1}
+              max={property.maximumGuest}
+              format="integer"
+              required
+            />
+          </Box>
+
+          {/* Rate Plan Selection */}
+          {pricingCalculation?.availableRateOptions?.length > 0 && (
+            <Box marginBottom="1.5rem">
+              <Box fontSize="1rem" fontWeight="600" marginBottom="0.75rem">
+                Choose Your Rate Plan
+              </Box>
+              
+              <SelectionPicker
+                data={pricingCalculation.availableRateOptions}
+                idAccessor={(option: any) => option.ratePlanId}
+                value={selectedRatePlanId}
+                onChange={(value) => setSelectedRatePlanId(value as string)}
+                isMultiSelect={false}
+                renderItem={(ratePlan: any, isSelected) => (
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap="0.75rem"
+                    padding="0.75rem"
+                    backgroundColor={isSelected ? "#f0f9ff" : "white"}
+                    borderRadius="6px"
+                    border={isSelected ? "2px solid #0369a1" : "1px solid #e5e7eb"}
+                    cursor="pointer"
+                  >
+                    <Box flex="1">
+                      <Box fontWeight="600" fontSize="0.875rem" marginBottom="0.25rem">
+                        {ratePlan.name}
+                      </Box>
+                      <Box fontSize="0.75rem" color="#666" marginBottom="0.5rem">
+                        {ratePlan.type} • {ratePlan.includesBreakfast ? 'Includes Breakfast' : 'Room Only'}
+                      </Box>
+                      <Box display="flex" alignItems="center" gap="1rem">
+                        <Box>
+                          <Box fontSize="0.75rem" color="#666">Per Night</Box>
+                          <Box fontWeight="600" fontSize="0.875rem">
+                            AED {Math.round(ratePlan.pricePerNight || 0)}
+                          </Box>
+                        </Box>
+                        <Box>
+                          <Box fontSize="0.75rem" color="#666">Total</Box>
+                          <Box fontWeight="600" fontSize="1rem" color="#059669">
+                            AED {Math.round(ratePlan.totalPrice || 0)}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                    
+                    {isSelected && (
+                      <Box
+                        width="16px"
+                        height="16px"
+                        borderRadius="50%"
+                        backgroundColor="#0369a1"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Box fontSize="0.75rem" color="white">✓</Box>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                containerStyles={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Price Summary */}
+          {pricingCalculation && (
+            <Box 
+              marginBottom="1.5rem" 
+              padding="1rem" 
+              backgroundColor="#f8f9fa" 
+              borderRadius="8px"
+            >
+              <Box fontSize="1.125rem" fontWeight="bold" color="#059669" marginBottom="0.25rem">
+                AED {Math.round(selectedTotalPrice)}
+              </Box>
+              <Box fontSize="0.875rem" color="#666">
+                for {pricingCalculation.stayDuration || 1} night{(pricingCalculation.stayDuration || 1) > 1 ? 's' : ''}
+              </Box>
+            </Box>
+          )}
+
+          {/* Action Buttons */}
+          <Box marginTop="auto" paddingTop="1rem">
+            <Button
+              label="Check Availability"
+              icon={<IoIosCalendar />}
+              onClick={handleBookNow}
+              variant="promoted"
+              size="large"
+              style={{ width: '100%', marginBottom: '0.5rem' }}
+            />
+            
+            <Box fontSize="0.75rem" color="#666" textAlign="center">
+              You won't be charged yet
+            </Box>
+          </Box>
+        </Box>
+      </SlidingDrawer>
     </Box>
   )
 }

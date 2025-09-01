@@ -3,7 +3,7 @@ import { DialogState, DialogContentFunction, PromiseDialogFunction, DialogCloseF
 import { Box } from '../Box';
 import { Button } from '../Button';
 import { disableScroller, enableScroller } from '../../../utils/scrollUtils';
-import { FaTimes, FaInfoCircle, FaCheckCircle, FaExclamationTriangle, FaExclamationCircle } from 'react-icons/fa';
+import { IoIosClose, IoIosInformationCircle, IoIosCheckmarkCircle, IoIosWarning, IoIosAlert } from 'react-icons/io';
 
 interface PromiseDialogContextType {
     openDialog: PromiseDialogFunction;
@@ -177,7 +177,7 @@ const DialogOverlay: React.FC<DialogOverlayProps> = ({
             }}
         >
             <Box
-                backgroundColor="transparent"
+                backgroundColor="white"
                 borderRadius="8px"
                 boxShadow="0 10px 25px rgba(0, 0, 0, 0.2)"
                 maxHeight="90vh"
@@ -263,7 +263,7 @@ const ToastComponent: React.FC<ToastComponentProps> = ({ toast, onClose }) => {
         switch (toast.options.type) {
             case 'success':
                 return {
-                    icon: <FaCheckCircle />,
+                    icon: <IoIosCheckmarkCircle />,
                     backgroundColor: '#d1fae5',
                     borderColor: '#059669',
                     iconColor: '#059669',
@@ -271,7 +271,7 @@ const ToastComponent: React.FC<ToastComponentProps> = ({ toast, onClose }) => {
                 };
             case 'warning':
                 return {
-                    icon: <FaExclamationTriangle />,
+                    icon: <IoIosWarning />,
                     backgroundColor: '#fef3c7',
                     borderColor: '#d97706',
                     iconColor: '#d97706',
@@ -279,7 +279,7 @@ const ToastComponent: React.FC<ToastComponentProps> = ({ toast, onClose }) => {
                 };
             case 'error':
                 return {
-                    icon: <FaExclamationCircle />,
+                    icon: <IoIosAlert />,
                     backgroundColor: '#fee2e2',
                     borderColor: '#dc2626',
                     iconColor: '#dc2626',
@@ -287,7 +287,7 @@ const ToastComponent: React.FC<ToastComponentProps> = ({ toast, onClose }) => {
                 };
             default: // info
                 return {
-                    icon: <FaInfoCircle />,
+                    icon: <IoIosInformationCircle />,
                     backgroundColor: '#dbeafe',
                     borderColor: '#2563eb',
                     iconColor: '#2563eb',
@@ -330,7 +330,7 @@ const ToastComponent: React.FC<ToastComponentProps> = ({ toast, onClose }) => {
             {toast.options.showCloseButton && (
                 <Button
                     label=""
-                    icon={<FaTimes />}
+                    icon={<IoIosClose />}
                     onClick={onClose}
                     variant="normal"
                     size="small"

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { FaHome, FaSearch, FaHeart, FaStar } from 'react-icons/fa'
+import { IoIosHome, IoIosSearch, IoIosHeart, IoIosStar } from 'react-icons/io'
 import { Box } from './Box'
 import { Button } from './Button'
 
@@ -87,22 +87,22 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({
     // Feature highlights
     const features = [
         {
-            icon: <FaSearch style={{ color: '#3b82f6' }} />,
+            icon: <IoIosSearch style={{ color: '#3b82f6' }} />,
             title: "Discover Properties",
             description: "Browse amazing villas and properties across the UAE"
         },
         {
-            icon: <FaHeart style={{ color: '#ef4444' }} />,
+            icon: <IoIosHeart style={{ color: '#ef4444' }} />,
             title: "Save Favorites",
             description: "Bookmark properties you love for quick access later"
         },
         {
-            icon: <FaStar style={{ color: '#f59e0b' }} />,
+            icon: <IoIosStar style={{ color: '#f59e0b' }} />,
             title: "Read Reviews",
             description: "See what other guests say about their experiences"
         },
         {
-            icon: <FaHome style={{ color: '#059669' }} />,
+            icon: <IoIosHome style={{ color: '#059669' }} />,
             title: "Book Instantly",
             description: "Secure your perfect stay with just a few clicks"
         }
@@ -219,7 +219,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({
                     >
                         <Button
                             label="Start Browsing"
-                            icon={<FaSearch />}
+                            icon={<IoIosSearch />}
                             onClick={onStartBrowsing}
                             variant="promoted"
                             size="medium"

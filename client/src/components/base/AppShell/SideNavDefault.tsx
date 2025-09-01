@@ -3,7 +3,7 @@ import Tab, {TabItem} from '../Tab'
 import {Button} from '../Button'
 import {BaseRoute} from './types'
 import { filterRoutesByRole } from './roleUtils'
-import { FaHome, FaDollarSign } from 'react-icons/fa'
+import { IoIosHome, IoIosCash } from 'react-icons/io'
 import wezoAe from "@/assets/wezo-optimized.svg";
 
 interface SideNavDefaultProps<T extends Record<string, BaseRoute>> {
@@ -106,7 +106,7 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
                 >
                     <Button
                         label="Start Hosting"
-                        icon={<FaHome />}
+                        icon={<IoIosHome />}
                         onClick={onStartHosting}
                         variant="promoted"
                         size="medium"
@@ -131,7 +131,7 @@ export const SideNavDefault = <T extends Record<string, BaseRoute>>({
                         justifyContent="center"
                         gap="0.25rem"
                     >
-                        <FaDollarSign style={{ fontSize: '0.6875rem' }} />
+                        <IoIosCash style={{ fontSize: '0.6875rem' }} />
                         Earn up to AED 15,000+ per month
                     </Box>
                 </Box>

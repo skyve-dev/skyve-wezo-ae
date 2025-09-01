@@ -86,7 +86,6 @@ describe('propertySlice', () => {
       { id: 'pool', name: 'Pool', category: 'Recreation' },
       { id: 'kitchen', name: 'Kitchen', category: 'Cooking' }
     ],
-    serveBreakfast: false,
     parking: ParkingType.YesFree,
     languages: ['English', 'Arabic'],
     smokingAllowed: false,
@@ -332,7 +331,6 @@ describe('propertySlice', () => {
         offerCribs: false,
         rooms: [],
         amenities: [],
-        serveBreakfast: false,
         parking: ParkingType.No,
         languages: [],
         smokingAllowed: false,

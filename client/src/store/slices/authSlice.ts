@@ -91,21 +91,10 @@ export const requestPasswordReset = createAsyncThunk(
   }
 )
 
-// Role management async thunks
-export const switchUserRole = createAsyncThunk(
-  'auth/switchRole',
-  async (role: 'Tenant' | 'HomeOwner' | 'Manager', { rejectWithValue }) => {
-    try {
-      const response = await apiClient.updateUserRole(role)
-      apiClient.setToken(response.token)
-      localStorage.setItem('authToken', response.token)
-      localStorage.setItem('user_role_preference', role)
-      return response
-    } catch (error: any) {
-      return rejectWithValue(error.getUserMessage ? error.getUserMessage() : 'Unable to switch role. Please try again.')
-    }
-  }
-)
+// Client-side role switching (UI mode only, no API call)
+export const switchUserRole = (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
+  return setCurrentRoleMode(role)
+}
 
 // Auto-promote Tenant to HomeOwner after first property creation
 export const promoteToHomeOwner = createAsyncThunk(
@@ -158,9 +147,11 @@ const authSlice = createSlice({
     },
     initializeRoleMode: (state) => {
       if (state.user) {
-        // Determine available roles based on user
+        // Determine available roles based on user's highest capability (not current role)
+        // This ensures availableRoles don't get lost when switching modes
         const availableRoles: ('Tenant' | 'HomeOwner' | 'Manager')[] = ['Tenant']
         
+        // Use user's actual role capability to determine what they can switch to
         if (state.user.role === 'HomeOwner' || state.user.role === 'Manager') {
           availableRoles.push('HomeOwner')
         }
@@ -169,17 +160,20 @@ const authSlice = createSlice({
           availableRoles.push('Manager')
         }
         
-        state.availableRoles = availableRoles
+        // Only update availableRoles if not already set (preserve existing ones)
+        if (state.availableRoles.length === 0) {
+          state.availableRoles = availableRoles
+        }
         
         // Set current role mode based on preference or user role
         const preference = localStorage.getItem('user_role_preference') as 'Tenant' | 'HomeOwner' | 'Manager' | null
-        if (preference && availableRoles.includes(preference)) {
+        if (preference && state.availableRoles.includes(preference)) {
           state.currentRoleMode = preference
-        } else {
-          // Default to highest available role
-          if (state.user.role === 'Manager') {
+        } else if (!state.currentRoleMode) {
+          // Only set default if no current role mode exists
+          if (state.availableRoles.includes('Manager')) {
             state.currentRoleMode = 'Manager'
-          } else if (state.user.role === 'HomeOwner') {
+          } else if (state.availableRoles.includes('HomeOwner')) {
             state.currentRoleMode = 'HomeOwner'
           } else {
             state.currentRoleMode = 'Tenant'
@@ -268,24 +262,7 @@ const authSlice = createSlice({
         state.error = action.payload as string || 'Unable to process password reset request. Please try again.'
       })
     
-    // Role Switching
-    builder
-      .addCase(switchUserRole.pending, (state) => {
-        state.isLoading = true
-        state.error = null
-      })
-      .addCase(switchUserRole.fulfilled, (state, action) => {
-        state.isLoading = false
-        state.user = action.payload.user
-        state.token = action.payload.token
-        state.error = null
-        // Reinitialize role mode after role switch to update available roles
-        authSlice.caseReducers.initializeRoleMode(state)
-      })
-      .addCase(switchUserRole.rejected, (state, action) => {
-        state.isLoading = false
-        state.error = action.payload as string || 'Unable to switch role. Please try again.'
-      })
+    // Role Switching is now handled by setCurrentRoleMode reducer (client-side only)
       
     // Auto-promotion to HomeOwner
     builder
@@ -299,8 +276,13 @@ const authSlice = createSlice({
           state.user = action.payload.user
           state.token = action.payload.token
           state.error = null
-          // Reinitialize role mode after promotion to update available roles
-          authSlice.caseReducers.initializeRoleMode(state)
+          // Update available roles after promotion (user can now switch between Tenant and HomeOwner)
+          if (!state.availableRoles.includes('HomeOwner')) {
+            state.availableRoles.push('HomeOwner')
+          }
+          // Switch to HomeOwner mode after promotion
+          state.currentRoleMode = 'HomeOwner'
+          localStorage.setItem('user_role_preference', 'HomeOwner')
         }
       })
       .addCase(promoteToHomeOwner.rejected, (state, action) => {

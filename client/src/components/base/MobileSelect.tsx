@@ -3,7 +3,7 @@ import {Box} from '@/components'
 import SlidingDrawer from '@/components/base/SlidingDrawer.tsx'
 import SelectionPicker from '@/components/base/SelectionPicker.tsx'
 import Button from '@/components/base/Button.tsx'
-import {FaCheck, FaChevronDown} from 'react-icons/fa'
+import {IoIosCheckmark, IoIosArrowDown} from 'react-icons/io'
 
 interface SelectOption<T = string> {
     value: T
@@ -89,7 +89,7 @@ function MobileSelect<T = string>({
                     <span>
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
-                    <FaChevronDown 
+                    <IoIosArrowDown 
                         style={{
                             fontSize: '0.75rem',
                             color: disabled ? '#9ca3af' : '#6b7280',
@@ -147,7 +147,7 @@ function MobileSelect<T = string>({
                                         {option.label}
                                     </span>
                                     {isSelected && (
-                                        <FaCheck style={{ color: '#3b82f6', fontSize: '0.875rem' }} />
+                                        <IoIosCheckmark style={{ color: '#3b82f6', fontSize: '0.875rem' }} />
                                     )}
                                 </Box>
                             )}

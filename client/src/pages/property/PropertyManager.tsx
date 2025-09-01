@@ -11,7 +11,7 @@ import SlidingDrawer from '@/components/base/SlidingDrawer'
 import { useAppShell } from '@/components/base/AppShell'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { 
-  createPropertyAsync,
+  createPropertyWithPromotion,
   updatePropertyAsync,
   initializeFormForCreate,
   initializeFormForEdit,
@@ -23,9 +23,9 @@ import { ApiError } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
 import PropertyManagerHeader from './PropertyManagerHeader'
 import PropertyManagerFooter from './PropertyManagerFooter'
-import { Address, Bed, Room } from '@/types/property'
+import { Address, Bed, Room, PropertyPricing } from '@/types/property'
 import { BookingType, PaymentType, ParkingType, PetPolicy, BedType, BookingTypeLabels, PaymentTypeLabels, ParkingTypeLabels, PetPolicyLabels, BedTypeLabels } from '@/constants/propertyEnums'
-import { AVAILABLE_AMENITIES, getAmenitiesByCategory } from '@/constants/amenities'
+import { AVAILABLE_AMENITIES, getAmenitiesByCategory } from '@/constants/amenities.tsx'
 import { api, resolvePhotoUrl } from '@/utils/api'
 import useDrawerManager from '@/hooks/useDrawerManager'
 import MobileSelect from '@/components/base/MobileSelect'
@@ -33,12 +33,13 @@ import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
-  FaHome, FaFileAlt, FaMapMarkerAlt, FaBolt, FaClock, FaCreditCard, FaHandshake,
-  FaBed, FaUsers, FaBath, FaPlus, FaTrash, FaStar, FaCheck, FaCheckCircle, FaTimes,
-  FaCamera, FaSpinner, FaUpload, FaGavel, FaSmokingBan, FaCocktail, FaConciergeBell,
-  FaCoffee, FaCar, FaGlobe, FaBuilding, FaLocationArrow, FaSearchLocation, FaMapPin,
-  FaWifi, FaUtensils, FaSwimmer, FaShieldAlt, FaBaby, FaTree, FaTshirt, FaPhone
-} from 'react-icons/fa'
+  IoIosHome, IoIosDocument, IoIosPin, IoIosFlash, IoIosTime, IoIosCard, IoIosHand,
+  IoIosBed, IoIosPeople, IoIosWater, IoIosAdd, IoIosTrash, IoIosStar, IoIosCheckmark, IoIosCheckmarkCircle, IoIosClose,
+  IoIosCamera, IoIosRefresh, IoIosCloudUpload, IoIosCloseCircle, IoIosWine, IoIosBusiness,
+  IoIosCar, IoIosGlobe, IoIosBuild, IoIosLocate, IoIosSearch, IoIosPin as IoIosMapPin,
+  IoIosWifi, IoIosRestaurant, IoIosWater as IoIosSwimmer, IoIosHelp, IoIosHappy, IoIosLeaf, IoIosShirt, IoIosCall,
+  IoIosCash, IoIosCalendar
+} from 'react-icons/io'
 
 // Fix Leaflet markers
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -165,7 +166,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     
     try {
       if (isCreateMode) {
-        await dispatch(createPropertyAsync(currentForm)).unwrap()
+        // Use createPropertyWithPromotion to auto-promote Tenant to HomeOwner
+        await dispatch(createPropertyWithPromotion(currentForm)).unwrap()
       } else if (isEditMode && params.propertyId) {
         await dispatch(updatePropertyAsync({ 
           propertyId: params.propertyId, 
@@ -330,16 +332,16 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   // Category icon mapping
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'Technology': return <FaWifi style={{color: '#3b82f6', fontSize: '1rem'}} />
-      case 'Kitchen & Dining': return <FaUtensils style={{color: '#10b981', fontSize: '1rem'}} />
-      case 'Recreation': return <FaSwimmer style={{color: '#06b6d4', fontSize: '1rem'}} />
-      case 'Safety & Security': return <FaShieldAlt style={{color: '#ef4444', fontSize: '1rem'}} />
-      case 'Family & Child-Friendly': return <FaBaby style={{color: '#f59e0b', fontSize: '1rem'}} />
-      case 'Outdoor & Garden': return <FaTree style={{color: '#22c55e', fontSize: '1rem'}} />
-      case 'Laundry & Cleaning': return <FaTshirt style={{color: '#8b5cf6', fontSize: '1rem'}} />
-      case 'Transportation & Access': return <FaCar style={{color: '#6b7280', fontSize: '1rem'}} />
-      case 'Services & Amenities': return <FaPhone style={{color: '#ec4899', fontSize: '1rem'}} />
-      default: return <FaStar style={{color: '#6b7280', fontSize: '1rem'}} />
+      case 'Technology': return <IoIosWifi style={{color: '#3b82f6', fontSize: '1rem'}} />
+      case 'Kitchen & Dining': return <IoIosRestaurant style={{color: '#10b981', fontSize: '1rem'}} />
+      case 'Recreation': return <IoIosSwimmer style={{color: '#06b6d4', fontSize: '1rem'}} />
+      case 'Safety & Security': return <IoIosHelp style={{color: '#ef4444', fontSize: '1rem'}} />
+      case 'Family & Child-Friendly': return <IoIosHappy style={{color: '#f59e0b', fontSize: '1rem'}} />
+      case 'Outdoor & Garden': return <IoIosLeaf style={{color: '#22c55e', fontSize: '1rem'}} />
+      case 'Laundry & Cleaning': return <IoIosShirt style={{color: '#8b5cf6', fontSize: '1rem'}} />
+      case 'Transportation & Access': return <IoIosCar style={{color: '#6b7280', fontSize: '1rem'}} />
+      case 'Services & Amenities': return <IoIosCall style={{color: '#ec4899', fontSize: '1rem'}} />
+      default: return <IoIosStar style={{color: '#6b7280', fontSize: '1rem'}} />
     }
   }
 
@@ -434,7 +436,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
-    if (!files || files.length === 0 || !currentForm?.propertyId) return
+    if (!files || files.length === 0) return
 
     setIsUploading(true)
     setUploadError('')
@@ -458,17 +460,31 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     }
 
     try {
-      await api.post(
-        `/api/properties/${currentForm.propertyId}/photos`,
-        formData,
-        {}
-      )
+      // Use independent photo upload API
+      const response = await api.post('/api/photos/upload', formData, {})
+      const uploadedPhotos = (response as any).data?.photos || []
+      
+      // Store photo IDs in the form
+      const currentPhotoIds = currentForm?.photoIds || []
+      const newPhotoIds = uploadedPhotos.map((photo: any) => photo.id)
+      const updatedPhotoIds = [...currentPhotoIds, ...newPhotoIds]
+      
+      handleFieldChange('photoIds', updatedPhotoIds)
+      
+      // Also update the photos array for immediate display
+      const currentPhotos = currentForm?.photos || []
+      const newPhotos = uploadedPhotos.map((photo: any) => ({
+        id: photo.id,
+        url: photo.url,
+        altText: photo.altText,
+        description: photo.description,
+        tags: photo.tags
+      }))
+      const updatedPhotos = [...currentPhotos, ...newPhotos]
+      
+      handleFieldChange('photos', updatedPhotos)
 
       setUploadSuccess(`Successfully uploaded ${files.length} photo(s)`)
-      
-      if (currentForm.propertyId) {
-        dispatch(fetchPropertyById(currentForm.propertyId))
-      }
       
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -481,8 +497,6 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   }
 
   const handleDeletePhoto = async (photoId: string) => {
-    if (!currentForm?.propertyId) return
-    
     const confirmed = await openDialog<boolean>((close) => (
       <Box padding="2rem" textAlign="center">
         <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
@@ -505,13 +519,20 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     setUploadSuccess('')
 
     try {
-      await api.delete(`/api/properties/${currentForm.propertyId}/photos/${photoId}`)
+      // Use independent photo delete API
+      await api.delete(`/api/photos/${photoId}`)
+      
+      // Remove photo ID from photoIds array
+      const currentPhotoIds = currentForm?.photoIds || []
+      const updatedPhotoIds = currentPhotoIds.filter(id => id !== photoId)
+      handleFieldChange('photoIds', updatedPhotoIds)
+      
+      // Remove photo from photos array for immediate UI update
+      const currentPhotos = currentForm?.photos || []
+      const updatedPhotos = currentPhotos.filter(photo => photo.id !== photoId)
+      handleFieldChange('photos', updatedPhotos)
       
       setUploadSuccess('Photo deleted successfully')
-      
-      if (currentForm.propertyId) {
-        dispatch(fetchPropertyById(currentForm.propertyId))
-      }
     } catch (err: any) {
       setUploadError(err.message || 'Failed to delete photo')
     } finally {
@@ -653,6 +674,45 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     })
   }
 
+  // Pricing management
+  const updatePricing = (field: keyof PropertyPricing, value: number) => {
+    const currentPricing = currentForm?.pricing || {
+      priceMonday: 150,
+      priceTuesday: 150,
+      priceWednesday: 150,
+      priceThursday: 150,
+      priceFriday: 200,
+      priceSaturday: 250,
+      priceSunday: 200,
+      halfDayPriceMonday: 100,
+      halfDayPriceTuesday: 100,
+      halfDayPriceWednesday: 100,
+      halfDayPriceThursday: 100,
+      halfDayPriceFriday: 130,
+      halfDayPriceSaturday: 160,
+      halfDayPriceSunday: 130,
+      currency: 'AED' as any
+    }
+    
+    handleFieldChange('pricing', {
+      ...currentPricing,
+      [field]: value
+    })
+  }
+
+  const getDayName = (day: string) => {
+    const dayNames = {
+      Monday: 'Mon',
+      Tuesday: 'Tue', 
+      Wednesday: 'Wed',
+      Thursday: 'Thu',
+      Friday: 'Fri',
+      Saturday: 'Sat',
+      Sunday: 'Sun'
+    }
+    return dayNames[day as keyof typeof dayNames] || day
+  }
+
   // Auto-detect location for new properties
   useEffect(() => {
     if (isCreateMode && !hasValidCoordinates && !locationDetected) {
@@ -688,7 +748,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           {/* Basic Information Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaHome style={{color: '#374151', fontSize: '1.25rem'}} />
+              <IoIosHome style={{color: '#374151', fontSize: '1.25rem'}} />
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 Basic Property Information
               </h3>
@@ -696,7 +756,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             <Box display="grid" gap="2rem">
               <Input
                 label="Property Name"
-                icon={FaHome}
+                icon={IoIosHome}
                 value={currentForm?.name || ''}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
                 placeholder="Enter a descriptive name for your property"
@@ -705,7 +765,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                  <FaFileAlt style={{color: '#374151', fontSize: '0.875rem'}} />
+                  <IoIosDocument style={{color: '#374151', fontSize: '0.875rem'}} />
                   <label style={{fontWeight: '500'}}>
                     About Your Property
                   </label>
@@ -729,7 +789,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                  <FaMapMarkerAlt style={{color: '#374151', fontSize: '0.875rem'}} />
+                  <IoIosPin style={{color: '#374151', fontSize: '0.875rem'}} />
                   <label style={{fontWeight: '500'}}>
                     About the Neighborhood
                   </label>
@@ -755,7 +815,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 {/* Booking Type */}
                 <Box>
                   <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.75rem">
-                    <FaBolt style={{color: '#374151', fontSize: '0.875rem'}} />
+                    <IoIosFlash style={{color: '#374151', fontSize: '0.875rem'}} />
                     <label style={{fontWeight: '500', fontSize: '0.875rem'}}>
                       Booking Type
                     </label>
@@ -775,8 +835,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                       <>
                         <Box as="span">
                           {item.type === BookingType.BookInstantly ? 
-                            <FaBolt style={{ color: '#f59e0b', fontSize: '1rem' }} /> : 
-                            <FaClock style={{ color: '#6b7280', fontSize: '1rem' }} />
+                            <IoIosFlash style={{ color: '#f59e0b', fontSize: '1rem' }} /> : 
+                            <IoIosTime style={{ color: '#6b7280', fontSize: '1rem' }} />
                           }
                         </Box>
                         <Box as="span" flex="1">
@@ -790,7 +850,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 {/* Payment Type */}
                 <Box>
                   <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.75rem">
-                    <FaCreditCard style={{color: '#374151', fontSize: '0.875rem'}} />
+                    <IoIosCard style={{color: '#374151', fontSize: '0.875rem'}} />
                     <label style={{fontWeight: '500', fontSize: '0.875rem'}}>
                       Payment Type
                     </label>
@@ -811,8 +871,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                       <>
                         <Box as="span">
                           {item.type === PaymentType.Online ? 
-                            <FaCreditCard style={{ color: '#10b981', fontSize: '1rem' }} /> : 
-                            <FaHandshake style={{ color: '#8b5cf6', fontSize: '1rem' }} />
+                            <IoIosCard style={{ color: '#10b981', fontSize: '1rem' }} /> : 
+                            <IoIosHand style={{ color: '#8b5cf6', fontSize: '1rem' }} />
                           }
                         </Box>
                         <Box as="span" flex="1">
@@ -837,7 +897,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           {/* Location Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaMapMarkerAlt style={{color: '#374151', fontSize: '1.25rem'}} />
+              <IoIosPin style={{color: '#374151', fontSize: '1.25rem'}} />
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 Property Location
               </h3>
@@ -847,7 +907,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                   <Box display="flex" alignItems="center" gap="0.5rem">
-                    <FaSearchLocation style={{color: '#374151', fontSize: '0.875rem'}} />
+                    <IoIosSearch style={{color: '#374151', fontSize: '0.875rem'}} />
                     Search Address
                   </Box>
                 </label>
@@ -867,7 +927,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                   />
                   <Button
                     label=""
-                    icon={<FaSearchLocation />}
+                    icon={<IoIosSearch />}
                     onClick={handleSearchAddress}
                     variant="promoted"
                     disabled={!searchAddress.trim() || isSearching}
@@ -877,7 +937,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 <Box marginTop="0.5rem">
                   <Button
                     label={isDetectingLocation ? "Detecting Location..." : "Use My Current Location"}
-                    icon={<FaLocationArrow />}
+                    icon={<IoIosLocate />}
                     onClick={() => detectCurrentLocation(true)}
                     variant="normal"
                     size="small"
@@ -892,7 +952,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                   <Box display="flex" alignItems="center" gap="0.5rem">
-                    <FaMapPin style={{color: '#374151', fontSize: '0.875rem'}} />
+                    <IoIosMapPin style={{color: '#374151', fontSize: '0.875rem'}} />
                     Property Location on Map
                   </Box>
                 </label>
@@ -928,7 +988,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
               <Input
                 label="Country/Region"
-                icon={FaGlobe}
+                icon={IoIosGlobe}
                 value={currentForm?.address?.countryOrRegion || 'UAE'}
                 onChange={(e) => handleAddressChange('countryOrRegion', e.target.value)}
                 placeholder="Enter country or region"
@@ -937,7 +997,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
               <Input
                 label="City"
-                icon={FaBuilding}
+                icon={IoIosBuild}
                 value={currentForm?.address?.city || ''}
                 onChange={(e) => handleAddressChange('city', e.target.value)}
                 placeholder="Enter city name"
@@ -946,7 +1006,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
               <Input
                 label="Apartment/Floor Number (Optional)"
-                icon={FaBuilding}
+                icon={IoIosBuild}
                 value={currentForm?.address?.apartmentOrFloorNumber || ''}
                 onChange={(e) => handleAddressChange('apartmentOrFloorNumber', e.target.value)}
                 placeholder="e.g., Apt 5B, Floor 12"
@@ -957,7 +1017,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 label="Zip Code"
                 type={'number'}
                 inputMode={'numeric'}
-                icon={FaMapPin}
+                icon={IoIosMapPin}
                 value={currentForm?.address?.zipCode}
                 onChange={(event) => handleAddressChange('zipCode', parseInt(event.target.value))}
                 placeholder="Enter zip code"
@@ -970,7 +1030,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           {/* Layout & Capacity Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaBed style={{color: '#374151', fontSize: '1.25rem'}}/>
+              <IoIosBed style={{color: '#374151', fontSize: '1.25rem'}}/>
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 Layout & Capacity
               </h3>
@@ -979,7 +1039,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
                 <NumberStepperInput
                   label="Maximum Guests"
-                  icon={FaUsers}
+                  icon={IoIosPeople}
                   value={currentForm?.maximumGuest || 1}
                   onChange={(value) => handleFieldChange('maximumGuest', value)}
                   min={1}
@@ -992,7 +1052,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
 
                 <NumberStepperInput
                   label="Bathrooms"
-                  icon={FaBath}
+                  icon={IoIosWater}
                   value={currentForm?.bathrooms || 1}
                   onChange={(value) => handleFieldChange('bathrooms', value)}
                   min={1}
@@ -1109,7 +1169,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                   </h4>
                   <Button
                     label="Add Room"
-                    icon={<FaPlus/>}
+                    icon={<IoIosAdd/>}
                     onClick={() => setShowAddRoom(true)}
                     variant="promoted"
                     size="small"
@@ -1168,7 +1228,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                       >
                         <Box display="flex" alignItems="center" justifyContent="space-between" marginBottom="1rem">
                           <Box display="flex" alignItems="center" gap="0.5rem">
-                            <FaBed color="#6b7280"/>
+                            <IoIosBed color="#6b7280"/>
                             <h5 style={{margin: 0, fontSize: '1rem', fontWeight: '500'}}>
                               {room.spaceName}
                             </h5>
@@ -1188,14 +1248,14 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                           <Box display="flex" gap="0.5rem">
                             <Button
                               label=""
-                              icon={<FaPlus/>}
+                              icon={<IoIosAdd/>}
                               onClick={() => addBedToRoom(roomIndex)}
                               variant="normal"
                               size="small"
                             />
                             <Button
                               label=""
-                              icon={<FaTrash/>}
+                              icon={<IoIosTrash/>}
                               onClick={() => removeRoom(roomIndex)}
                               variant="normal"
                               size="small"
@@ -1242,7 +1302,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                                 />
                                 <Button
                                   label=""
-                                  icon={<FaTrash/>}
+                                  icon={<IoIosTrash/>}
                                   onClick={() => removeBedFromRoom(roomIndex, bedIndex)}
                                   variant="normal"
                                   size="small"
@@ -1265,7 +1325,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                     borderRadius="8px"
                     color="#666"
                   >
-                    <FaBed size={'5rem'} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
+                    <IoIosBed size={'5rem'} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
                     <p style={{margin: 0, fontSize: '0.875rem'}}>
                       No rooms added yet. Click "Add Room" to start defining your property layout.
                     </p>
@@ -1275,10 +1335,123 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             </Box>
           </Box>
 
+          {/* Pricing Setup Section */}
+          <Box>
+            <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
+              <IoIosCash style={{color: '#374151', fontSize: '1.25rem'}} />
+              <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
+                Pricing Setup
+              </h3>
+            </Box>
+            <p style={{color: '#666', marginBottom: '2rem'}}>
+              Set your base pricing for each day of the week. You can offer both full-day and half-day rates.
+            </p>
+            
+            <Box display="grid" gap="2rem">
+              {/* Full Day Pricing */}
+              <Box>
+                <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
+                  <IoIosCalendar style={{color: '#059669', fontSize: '1rem'}} />
+                  <h4 style={{margin: 0, fontSize: '1.125rem', fontWeight: '500'}}>
+                    Full Day Pricing (AED per night)
+                  </h4>
+                </Box>
+                <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(140px, 1fr))" gap="1rem">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                    const priceField = `price${day}` as keyof PropertyPricing
+                    const currentPrice = Number(currentForm?.pricing?.[priceField]) || 150
+                    
+                    return (
+                      <Box 
+                        key={day}
+                        backgroundColor={day === 'Friday' || day === 'Saturday' ? '#fef7ff' : 
+                                       day === 'Sunday' ? '#f0f9ff' : 'white'}
+                        borderRadius="8px"
+                        padding="0.5rem"
+                      >
+                        <NumberStepperInput
+                          label={getDayName(day)}
+                          value={currentPrice}
+                          onChange={(value) => updatePricing(priceField, value)}
+                          min={10}
+                          max={5000}
+                          step={10}
+                          format="integer"
+                          size="small"
+                          width="100%"
+                        />
+                        <Box fontSize="0.75rem" color="#666" textAlign="center" marginTop="0.25rem">
+                          {day === 'Friday' || day === 'Saturday' ? '🔥 Weekend' : 
+                           day === 'Sunday' ? '🌅 Premium' : '📅 Weekday'}
+                        </Box>
+                      </Box>
+                    )
+                  })}
+                </Box>
+              </Box>
+
+              {/* Half Day Pricing */}
+              <Box>
+                <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
+                  <IoIosTime style={{color: '#f59e0b', fontSize: '1rem'}} />
+                  <h4 style={{margin: 0, fontSize: '1.125rem', fontWeight: '500'}}>
+                    Half Day Pricing (AED for 4-6 hours)
+                  </h4>
+                </Box>
+                <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(140px, 1fr))" gap="1rem">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                    const priceField = `halfDayPrice${day}` as keyof PropertyPricing
+                    const currentPrice = Number(currentForm?.pricing?.[priceField]) || 100
+                    
+                    return (
+                      <Box 
+                        key={day}
+                        backgroundColor={day === 'Friday' || day === 'Saturday' ? '#fef7ff' : 
+                                       day === 'Sunday' ? '#f0f9ff' : 'white'}
+                        borderRadius="8px"
+                        padding="0.5rem"
+                      >
+                        <NumberStepperInput
+                          label={getDayName(day)}
+                          value={currentPrice}
+                          onChange={(value) => updatePricing(priceField, value)}
+                          min={5}
+                          max={2500}
+                          step={5}
+                          format="integer"
+                          size="small"
+                          width="100%"
+                        />
+                      </Box>
+                    )
+                  })}
+                </Box>
+              </Box>
+
+              {/* Pricing Tips */}
+              <Box
+                padding="1rem"
+                backgroundColor="#f0f9ff"
+                border="1px solid #bfdbfe"
+                borderRadius="8px"
+              >
+                <Box fontSize="0.875rem" color="#1e40af" lineHeight="1.5">
+                  <Box fontWeight="600" marginBottom="0.5rem">💡 Pricing Tips:</Box>
+                  <ul style={{margin: 0, paddingLeft: '1.25rem'}}>
+                    <li>Weekend rates (Fri-Sat) are typically 30-50% higher than weekdays</li>
+                    <li>Half-day rates are usually 60-70% of full-day rates</li>
+                    <li>Consider local events and seasonality when setting base prices</li>
+                    <li>You can create rate plans later to offer discounts or premium packages</li>
+                  </ul>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+
           {/* Amenities Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaStar style={{color: '#374151', fontSize: '1.25rem'}} />
+              <IoIosStar style={{color: '#374151', fontSize: '1.25rem'}} />
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 Property Amenities
               </h3>
@@ -1294,7 +1467,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 </label>
                 <Button
                   label="Add Amenities"
-                  icon={<FaPlus />}
+                  icon={<IoIosAdd />}
                   onClick={handleAddAmenities}
                   variant="promoted"
                   size="small"
@@ -1340,7 +1513,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                           minHeight: '1.2rem'
                         }}
                       >
-                        <FaTimes />
+                        <IoIosClose />
                       </Box>
                     </Box>
                   ))}
@@ -1368,7 +1541,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           {/* Photos Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaCamera style={{color: '#374151', fontSize: '1.25rem'}} />
+              <IoIosCamera style={{color: '#374151', fontSize: '1.25rem'}} />
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 Property Photos
               </h3>
@@ -1415,22 +1588,16 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 style={{ display: 'none' }}
               />
               <Button
-                label={
-                  !currentForm?.propertyId 
-                    ? "Save Property First" 
-                    : isUploading 
-                      ? "Uploading..." 
-                      : "Upload Photos"
-                }
-                icon={isUploading ? <FaSpinner className="spin" /> : <FaUpload />}
-                onClick={currentForm?.propertyId ? () => fileInputRef.current?.click() : undefined}
-                variant={currentForm?.propertyId ? "promoted" : "normal"}
-                disabled={!currentForm?.propertyId || isUploading}
+                label={isUploading ? "Uploading..." : "Upload Photos"}
+                icon={isUploading ? <IoIosRefresh className="spin" /> : <IoIosCloudUpload />}
+                onClick={() => fileInputRef.current?.click()}
+                variant="promoted"
+                disabled={isUploading}
                 fullWidth
               />
             </Box>
 
-            {currentForm?.propertyId && currentForm?.photos && currentForm.photos.length > 0 ? (
+            {currentForm?.photos && currentForm.photos.length > 0 ? (
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
                   <label style={{fontWeight: '500'}}>
@@ -1502,9 +1669,9 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                         title="Delete photo"
                       >
                         {isDeletingPhoto === photo.id ? (
-                          <FaSpinner className="spin" size={12} />
+                          <IoIosRefresh className="spin" size={12} />
                         ) : (
-                          <FaTrash size={12} />
+                          <IoIosTrash size={12} />
                         )}
                       </Box>
                       
@@ -1541,12 +1708,10 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 color="#666"
                 marginBottom="2rem"
               >
-                <FaCamera size={48} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
+                <IoIosCamera size={48} style={{marginBottom: '1rem', color: '#9ca3af'}}/>
                 <h4 style={{margin: '0 0 0.5rem 0', color: '#4b5563'}}>No photos uploaded</h4>
                 <p style={{margin: 0, textAlign: 'center'}}>
-                  {currentForm?.propertyId 
-                    ? 'Click the upload button above to add photos'
-                    : 'Save the property first to enable photo upload'}
+                  Click the upload button above to add photos to your property
                 </p>
               </Box>
             )}
@@ -1555,55 +1720,18 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           {/* Services Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaConciergeBell style={{color: '#374151', fontSize: '1.25rem'}} />
+              <IoIosBusiness style={{color: '#374151', fontSize: '1.25rem'}} />
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 Services & Amenities
               </h3>
             </Box>
             
             <Box display="grid" gap="2rem">
-              {/* Breakfast Service */}
-              <Box>
-                <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                  <FaCoffee style={{color: '#374151', fontSize: '0.875rem'}} />
-                  <label style={{fontWeight: '500'}}>
-                    Breakfast Service
-                  </label>
-                </Box>
-                <Box display="flex" gap="1rem">
-                  <Box
-                    as="button"
-                    onClick={() => handleFieldChange('serveBreakfast', true)}
-                    padding="0.75rem 1.5rem"
-                    border={currentForm?.serveBreakfast ? '2px solid #3b82f6' : '1px solid #d1d5db'}
-                    backgroundColor={currentForm?.serveBreakfast ? '#eff6ff' : 'white'}
-                    borderRadius="0.5rem"
-                    cursor="pointer"
-                    fontWeight={currentForm?.serveBreakfast ? '600' : '400'}
-                    color={currentForm?.serveBreakfast ? '#1d4ed8' : '#374151'}
-                  >
-                    Yes, we serve breakfast
-                  </Box>
-                  <Box
-                    as="button"
-                    onClick={() => handleFieldChange('serveBreakfast', false)}
-                    padding="0.75rem 1.5rem"
-                    border={!currentForm?.serveBreakfast ? '2px solid #3b82f6' : '1px solid #d1d5db'}
-                    backgroundColor={!currentForm?.serveBreakfast ? '#eff6ff' : 'white'}
-                    borderRadius="0.5rem"
-                    cursor="pointer"
-                    fontWeight={!currentForm?.serveBreakfast ? '600' : '400'}
-                    color={!currentForm?.serveBreakfast ? '#1d4ed8' : '#374151'}
-                  >
-                    No breakfast service
-                  </Box>
-                </Box>
-              </Box>
 
               {/* Parking */}
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                  <FaCar style={{color: '#374151', fontSize: '0.875rem'}} />
+                  <IoIosCar style={{color: '#374151', fontSize: '0.875rem'}} />
                   <label style={{fontWeight: '500'}}>
                     Parking Availability
                   </label>
@@ -1624,7 +1752,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
               {/* Languages */}
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-                  <FaGlobe style={{color: '#374151', fontSize: '0.875rem'}} />
+                  <IoIosGlobe style={{color: '#374151', fontSize: '0.875rem'}} />
                   <label style={{fontWeight: '500'}}>
                     Languages Spoken ({currentForm?.languages?.length || 0})
                   </label>
@@ -1662,7 +1790,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                           fontSize="0.75rem"
                           onClick={() => removeLanguage(language)}
                         >
-                          <FaTrash size={10} />
+                          <IoIosTrash size={10} />
                         </Box>
                       </Box>
                     ))}
@@ -1673,7 +1801,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 <Box display="flex" gap="0.5rem" alignItems="flex-end">
                   <Input
                     label="Add Language"
-                    icon={FaGlobe}
+                    icon={IoIosGlobe}
                     value={newLanguage}
                     onChange={(e) => setNewLanguage(e.target.value)}
                     placeholder="e.g., English, Arabic, Hindi"
@@ -1687,7 +1815,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                   />
                   <Button
                     label=""
-                    icon={<FaPlus />}
+                    icon={<IoIosAdd />}
                     onClick={addLanguage}
                     variant="promoted"
                     disabled={!newLanguage.trim()}
@@ -1701,7 +1829,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           {/* House Rules Section */}
           <Box>
             <Box display="flex" alignItems="center" gap="0.75rem" marginBottom="1.5rem">
-              <FaGavel style={{color: '#374151', fontSize: '1.25rem'}} />
+              <IoIosDocument style={{color: '#374151', fontSize: '1.25rem'}} />
               <h3 style={{margin: 0, fontSize: '1.5rem', fontWeight: '600'}}>
                 House Rules & Policies
               </h3>
@@ -1718,7 +1846,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                   <Box>
                     <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                       <Box display="flex" alignItems="center" gap="0.5rem">
-                        <FaSmokingBan style={{color: '#374151', fontSize: '0.875rem'}} />
+                        <IoIosCloseCircle style={{color: '#374151', fontSize: '0.875rem'}} />
                         Smoking Policy
                       </Box>
                     </label>
@@ -1758,7 +1886,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                   <Box>
                     <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                       <Box display="flex" alignItems="center" gap="0.5rem">
-                        <FaCocktail style={{color: '#374151', fontSize: '0.875rem'}} />
+                        <IoIosWine style={{color: '#374151', fontSize: '0.875rem'}} />
                         Parties & Events
                       </Box>
                     </label>
@@ -1812,7 +1940,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
               {/* Check-in/Check-out Times */}
               <Box>
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
-                  <FaClock style={{color: '#374151', fontSize: '0.875rem'}} />
+                  <IoIosTime style={{color: '#374151', fontSize: '0.875rem'}} />
                   <h4 style={{margin: 0, fontSize: '1.125rem', fontWeight: '500'}}>
                     Check-in & Check-out Times
                   </h4>
@@ -1939,7 +2067,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                       transition="all 0.2s"
                     >
                       {isSelected && (
-                        <FaCheckCircle style={{color: 'white', fontSize: '0.75rem'}} />
+                        <IoIosCheckmarkCircle style={{color: 'white', fontSize: '0.75rem'}} />
                       )}
                     </Box>
                     <Box fontSize="1.5rem">{amenity.icon}</Box>
@@ -1965,7 +2093,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             />
             <Button
               label={`Save (${tempSelectedAmenities.length} selected)`}
-              icon={<FaCheck />}
+              icon={<IoIosCheckmark />}
               variant="promoted"
               onClick={handleSaveAmenities}
               style={{ flex: 1 }}

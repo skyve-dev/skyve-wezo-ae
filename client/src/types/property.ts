@@ -38,7 +38,6 @@ export interface Amenity {
 }
 
 export interface Services {
-  serveBreakfast: boolean
   parking: ParkingType
   languages: string[]
 }
@@ -95,6 +94,34 @@ export interface Cancellation {
   waiveCancellationFeeAccidentalBookings: boolean
 }
 
+// New PropertyPricing interface matching Prisma schema
+export interface PropertyPricing {
+  id?: string
+  propertyId?: string
+  
+  // Full day base prices for each day of the week
+  priceMonday: number
+  priceTuesday: number
+  priceWednesday: number
+  priceThursday: number
+  priceFriday: number
+  priceSaturday: number
+  priceSunday: number
+  
+  // Half day base prices for each day of the week (4-6 hours)
+  halfDayPriceMonday: number
+  halfDayPriceTuesday: number
+  halfDayPriceWednesday: number
+  halfDayPriceThursday: number
+  halfDayPriceFriday: number
+  halfDayPriceSaturday: number
+  halfDayPriceSunday: number
+  
+  currency: Currency
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface Property {
   status: PropertyStatus;
   propertyId?: string
@@ -112,7 +139,6 @@ export interface Property {
   amenities?: Amenity[]
   
   // Services fields (flattened)
-  serveBreakfast: boolean
   parking: ParkingType
   languages?: string[]
   
@@ -125,13 +151,19 @@ export interface Property {
   photos?: Photo[]
   bookingType: BookingType
   paymentType: PaymentType
-  // NOTE: pricing and cancellation are now managed through RatePlan model
+  
+  // New PropertyPricing relationship
+  pricing?: PropertyPricing // Weekly pricing setup
+  
+  // Photo IDs for independent photo upload
+  photoIds?: string[] // Store uploaded photo IDs before property creation
   
   // New relationships from updated schema
   ratePlans?: any[] // Associated rate plans
   propertyGroupId?: string // Optional property group
+  
   // @deprecated These fields are kept for backward compatibility but are not used by backend
-  pricing?: Pricing
+  legacyPricing?: Pricing // Renamed to avoid confusion with new pricing
   cancellation?: Cancellation
   aboutTheProperty?: string
   aboutTheNeighborhood?: string

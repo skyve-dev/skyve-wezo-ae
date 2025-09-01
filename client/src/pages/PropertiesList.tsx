@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {FaBath, FaBed, FaCalendarAlt, FaEdit, FaEye, FaMapMarkerAlt, FaPlus, FaTrash} from 'react-icons/fa'
+import {IoIosWater, IoIosBed, IoIosCalendar, IoIosCreate, IoIosEye, IoIosPin, IoIosAdd, IoIosTrash} from 'react-icons/io'
 import {useAppShell} from '@/components/base/AppShell'
 import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box, Input} from '@/components'
@@ -174,7 +174,7 @@ const PropertiesList: React.FC = () => {
                     justifyContent="center"
                     color="#9ca3af"
                 >
-                    <FaMapMarkerAlt size={48}/>
+                    <IoIosPin size={48}/>
                 </Box>
             )}
 
@@ -185,17 +185,17 @@ const PropertiesList: React.FC = () => {
                 </h3>
 
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem" color="#666">
-                    <FaMapMarkerAlt/>
+                    <IoIosPin/>
                     <span>{property.address?.city ? `${property.address.city}, ` : ''}{property.address?.countryOrRegion || 'Location not set'}</span>
                 </Box>
 
                 <Box display="flex" gap="1rem" marginBottom="1rem" color="#666" fontSize="0.875rem">
                     <Box display="flex" alignItems="center" gap="0.25rem">
-                        <FaBed/>
+                        <IoIosBed/>
                         <span>Max {property.maximumGuest} guests</span>
                     </Box>
                     <Box display="flex" alignItems="center" gap="0.25rem">
-                        <FaBath/>
+                        <IoIosWater/>
                         <span>{property.bathrooms} bathrooms</span>
                     </Box>
                 </Box>
@@ -204,10 +204,18 @@ const PropertiesList: React.FC = () => {
                 {property.pricing && (
                     <Box marginBottom="1rem">
             <span style={{fontSize: '1.125rem', fontWeight: '600', color: '#059669'}}>
-              {property.pricing.currency} {property.pricing.ratePerNight}
+              {property.pricing.currency} {Math.min(
+                property.pricing.priceMonday,
+                property.pricing.priceTuesday,
+                property.pricing.priceWednesday,
+                property.pricing.priceThursday,
+                property.pricing.priceFriday,
+                property.pricing.priceSaturday,
+                property.pricing.priceSunday
+              )}
             </span>
                         <span style={{fontSize: '0.875rem', color: '#666', marginLeft: '0.25rem'}}>
-              per night
+              from per night
             </span>
                     </Box>
                 )}
@@ -217,7 +225,7 @@ const PropertiesList: React.FC = () => {
             <Box display="flex" gap="0.5rem" flexWrap={'wrap'}>
                 <Button
                     label="View"
-                    icon={<FaEye/>}
+                    icon={<IoIosEye/>}
                     onClick={() => handleViewProperty(property)}
                     variant="normal"
                     size="small"
@@ -226,14 +234,14 @@ const PropertiesList: React.FC = () => {
                     <>
                         <Button
                             label="Edit"
-                            icon={<FaEdit/>}
+                            icon={<IoIosCreate/>}
                             onClick={() => handleEditProperty(property)}
                             variant="normal"
                             size="small"
                         />
                         <Button
                             label="Edit Photos"
-                            icon={<FaEdit/>}
+                            icon={<IoIosCreate/>}
                             onClick={() => handleEditProperty(property, 'photos')}
                             variant="normal"
                             size="small"
@@ -241,14 +249,14 @@ const PropertiesList: React.FC = () => {
                         />
                         <Button
                             label="Calendar"
-                            icon={<FaCalendarAlt/>}
+                            icon={<IoIosCalendar/>}
                             onClick={() => handleManageAvailability(property)}
                             variant="normal"
                             size="small"
                         />
                         <Button
                             label=""
-                            icon={<FaTrash/>}
+                            icon={<IoIosTrash/>}
                             onClick={() => handleDeleteProperty(property)}
                             variant="normal"
                             size="small"
@@ -291,7 +299,7 @@ const PropertiesList: React.FC = () => {
                     {canManageProperties && (
                         <Button
                             label="Add New Property"
-                            icon={<FaPlus/>}
+                            icon={<IoIosAdd/>}
                             onClick={() => {
                                 navigateTo('property-create', {})
                             }}
@@ -355,7 +363,7 @@ const PropertiesList: React.FC = () => {
                         alignItems={'center'}
                     >
                         <Box color="#9ca3af" marginBottom="1rem">
-                            <FaMapMarkerAlt size={48}/>
+                            <IoIosPin size={48}/>
                         </Box>
                         <h3 style={{margin: '0 0 1rem 0', color: '#4b5563'}}>
                             {properties.length === 0 ? 'No properties available' : 'No properties match your search'}
@@ -371,7 +379,7 @@ const PropertiesList: React.FC = () => {
                         {properties.length === 0 && canManageProperties && (
                             <Button
                                 label="Add Your First Property"
-                                icon={<FaPlus/>}
+                                icon={<IoIosAdd/>}
                                 onClick={() => {
                                     navigateTo('property-create', {})
                                 }}

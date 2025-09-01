@@ -83,7 +83,6 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     },
     amenities: data.amenities || [],
     services: {
-      serveBreakfast: data.serveBreakfast || false,
       parking: data.parking || 'No',
       languages: data.languages || [],
     },
@@ -139,6 +138,16 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     transformedData.firstDateGuestCanCheckIn = data.firstDateGuestCanCheckIn
   }
 
+  // Handle PropertyPricing data (for new PropertyManager pattern)
+  if (data.pricing) {
+    transformedData.pricing = data.pricing
+  }
+
+  // Handle photoIds for independent photo upload
+  if (data.photoIds && data.photoIds.length > 0) {
+    transformedData.photoIds = data.photoIds
+  }
+
   return transformedData
 }
 
@@ -166,7 +175,6 @@ const transformServerPropertyData = (serverData: any): Property => {
     amenities: serverData.amenities,
     
     // Flatten services fields - handle both nested and flat server structures
-    serveBreakfast: serverData.services?.serveBreakfast ?? serverData.serveBreakfast ?? false,
     parking: serverData.services?.parking ?? serverData.parking,
     languages: serverData.services?.languages ?? serverData.languages,
     
@@ -179,9 +187,10 @@ const transformServerPropertyData = (serverData: any): Property => {
     photos: serverData.photos,
     bookingType: serverData.bookingType,
     paymentType: serverData.paymentType,
-    // NOTE: pricing and cancellation are now managed through RatePlan model
-    // pricing: serverData.pricing, // REMOVED - no longer exists on backend
-    // cancellation: serverData.cancellation, // REMOVED - no longer exists on backend
+    // PropertyPricing data (new weekly pricing setup)
+    pricing: serverData.pricing,
+    // Photo IDs for independent photo upload
+    photoIds: serverData.photoIds || [],
     // New relationships from schema
     ratePlans: serverData.ratePlans || [],  // Associated rate plans
     propertyGroupId: serverData.propertyGroupId, // Optional property group
@@ -432,7 +441,6 @@ const propertySlice = createSlice({
         offerCribs: false,
         rooms: [],
         // Services fields (flattened)
-        serveBreakfast: false,
         parking: ParkingType.No,
         languages: [],
         // Rules fields (flattened)
@@ -474,7 +482,6 @@ const propertySlice = createSlice({
         propertySizeSqMtr: property.propertySizeSqMtr,
         rooms: property.rooms || [],
         // Services fields (flattened)
-        serveBreakfast: property.serveBreakfast || false,
         parking: property.parking || ParkingType.No,
         languages: property.languages || [],
         // Rules fields (flattened)
@@ -553,7 +560,6 @@ const propertySlice = createSlice({
         offerCribs: false,
         rooms: [],
         // Services fields (flattened)
-        serveBreakfast: false,
         parking: ParkingType.No,
         languages: [],
         // Rules fields (flattened)
@@ -563,7 +569,27 @@ const propertySlice = createSlice({
         amenities: [],
         photos: [],
         bookingType: BookingType.NeedToRequestBook,
-        paymentType: PaymentType.Online
+        paymentType: PaymentType.Online,
+        // New PropertyPricing with default weekly pricing
+        pricing: {
+          priceMonday: 150,
+          priceTuesday: 150,
+          priceWednesday: 150,
+          priceThursday: 150,
+          priceFriday: 200,
+          priceSaturday: 250,
+          priceSunday: 200,
+          halfDayPriceMonday: 100,
+          halfDayPriceTuesday: 100,
+          halfDayPriceWednesday: 100,
+          halfDayPriceThursday: 100,
+          halfDayPriceFriday: 130,
+          halfDayPriceSaturday: 160,
+          halfDayPriceSunday: 130,
+          currency: 'AED' as any
+        },
+        // Photo IDs for independent photo upload
+        photoIds: []
       } as Property
       state.originalForm = { ...state.currentForm }
       state.hasUnsavedChanges = false
@@ -571,8 +597,33 @@ const propertySlice = createSlice({
     },
     
     initializeFormForEdit: (state, action: PayloadAction<Property>) => {
-      state.currentForm = { ...action.payload }
-      state.originalForm = { ...action.payload }
+      const property = action.payload
+      
+      // Ensure pricing defaults exist
+      const defaultPricing = {
+        priceMonday: 150,
+        priceTuesday: 150,
+        priceWednesday: 150,
+        priceThursday: 150,
+        priceFriday: 200,
+        priceSaturday: 250,
+        priceSunday: 200,
+        halfDayPriceMonday: 100,
+        halfDayPriceTuesday: 100,
+        halfDayPriceWednesday: 100,
+        halfDayPriceThursday: 100,
+        halfDayPriceFriday: 130,
+        halfDayPriceSaturday: 160,
+        halfDayPriceSunday: 130,
+        currency: 'AED' as any
+      }
+      
+      state.currentForm = {
+        ...property,
+        pricing: property.pricing || defaultPricing,
+        photoIds: property.photoIds || []
+      }
+      state.originalForm = { ...state.currentForm }
       state.hasUnsavedChanges = false
       state.formValidationErrors = {}
     },

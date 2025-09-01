@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaEdit } from 'react-icons/fa'
+import { IoIosCreate } from 'react-icons/io'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
 import { Box } from '@/components'
 import Button from '@/components/base/Button.tsx'
@@ -64,7 +64,7 @@ const Finance: React.FC = () => {
                         </Box>
                     </Box>
                     <Box marginTop="1.5rem">
-                        <Button label="Update Bank Details" icon={<FaEdit />} variant="normal" />
+                        <Button label="Update Bank Details" icon={<IoIosCreate />} variant="normal" />
                     </Box>
                 </Box>
 

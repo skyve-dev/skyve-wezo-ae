@@ -3,7 +3,7 @@ import SlidingDrawer from './SlidingDrawer'
 import SelectionPicker from './SelectionPicker'
 import {Box} from './Box'
 import useDrawerManager from '../../hooks/useDrawerManager'
-import {FaCalendarAlt, FaCheck, FaChevronLeft, FaChevronRight} from 'react-icons/fa'
+import {IoIosCalendar, IoIosCheckmark, IoIosArrowBack, IoIosArrowForward} from 'react-icons/io'
 
 interface DatePickerProps {
     /**
@@ -524,7 +524,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     {selectedDate ? formatDisplayDate(selectedDate) : placeholder}
                 </Box>
                 <Box color="#6b7280" fontSize="1.25rem">
-                    <FaCalendarAlt/>
+                    <IoIosCalendar/>
                 </Box>
             </Box>
 
@@ -573,7 +573,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                             color="#6b7280"
                             whileHover={{backgroundColor: '#f3f4f6', color: '#374151'}}
                         >
-                            <FaChevronLeft/>
+                            <IoIosArrowBack/>
                         </Box>
 
                         <Box display="flex" alignItems="center" gap="1rem">
@@ -618,7 +618,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                             color="#6b7280"
                             whileHover={{backgroundColor: '#f3f4f6', color: '#374151'}}
                         >
-                            <FaChevronRight/>
+                            <IoIosArrowForward/>
                         </Box>
                     </Box>
 
@@ -715,7 +715,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                             whileHover={selectedDate ? {backgroundColor: '#2563eb'} : {}}
                             disabled={!selectedDate}
                         >
-                            <FaCheck/>
+                            <IoIosCheckmark/>
                             Confirm
                         </Box>
                     </Box>
