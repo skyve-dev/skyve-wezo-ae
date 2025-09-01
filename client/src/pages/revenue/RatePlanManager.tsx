@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { 
-  FaInfoCircle, FaBuilding, FaTags, FaCalculator, FaLayerGroup, 
-  FaTag, FaDollarSign, FaSortNumericUp, FaUndo, FaBan, FaPercent
-} from 'react-icons/fa'
+  IoIosBuild, IoIosPricetags, IoIosCalculator, 
+  IoIosArrowUp, IoIosCash, IoIosPeople,
+  IoIosCalendar, IoIosTime
+} from 'react-icons/io'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Input from '@/components/base/Input'
@@ -27,7 +28,9 @@ import useErrorHandler from '@/hooks/useErrorHandler'
 import RatePlanManagerHeader from './RatePlanManagerHeader'
 import RatePlanManagerFooter from './RatePlanManagerFooter'
 import CancellationPolicyBuilder from '@/components/CancellationPolicyBuilder'
-import RatePlanRestrictionsBuilder from '@/components/RatePlanRestrictionsBuilder'
+import RatePlanAmenitySelector from '@/components/RatePlanAmenitySelector'
+import RatePlanPricingPreview from '@/components/RatePlanPricingPreview'
+import PropertySelector from '@/components/PropertySelector'
 
 interface RatePlanManagerProps {
   ratePlanId?: string  // 'new' for create mode, actual ID for edit mode
@@ -54,11 +57,11 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     error
   } = useAppSelector((state) => state.ratePlan)
   
-  // Get property context
+  // Get property context - prefer propertyId from params, fallback to currentProperty
   const { currentProperty, properties } = useAppSelector((state) => state.property)
-  const propertyId = currentProperty?.propertyId
+  const propertyId = params.propertyId || currentProperty?.propertyId
   
-  const { openDialog, navigateTo, mountHeader, mountFooter } = useAppShell()
+  const { openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard } = useAppShell()
   const [isLoading, setIsLoading] = useState(true)
   
   // Load user's properties for selection
@@ -72,7 +75,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   useEffect(() => {
     const initialize = async () => {
       if (!propertyId) {
-        console.error('No current property found - rate plans require property context')
+        // No property selected - will be handled by PropertySelector UI
         setIsLoading(false)
         return
       }
@@ -135,18 +138,77 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     }
   }, [hasUnsavedChanges, isSaving, formValidationErrors, currentForm, isCreateMode])
   
+  // Navigation guard for unsaved changes
+  const [guardCleanup, setGuardCleanup] = useState<(() => void) | null>(null)
+  
+  useEffect(() => {
+    if (!hasUnsavedChanges) {
+      // Clean up guard when no unsaved changes
+      if (guardCleanup) {
+        guardCleanup()
+        setGuardCleanup(null)
+      }
+      return
+    }
+    
+    const cleanup = registerNavigationGuard(async () => {
+      const shouldLeave = await openDialog<boolean>((close) => (
+        <Box padding="2rem" textAlign="center">
+          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
+            Unsaved Changes
+          </Box>
+          <Box marginBottom="2rem" color="#374151">
+            You have unsaved changes. Are you sure you want to leave?
+          </Box>
+          <Box display="flex" gap="1rem" justifyContent="center">
+            <Box>
+              <button 
+                onClick={() => close(false)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: 'white',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Stay
+              </button>
+            </Box>
+            <Box>
+              <button 
+                onClick={() => close(true)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Yes, Leave
+              </button>
+            </Box>
+          </Box>
+        </Box>
+      ))
+      return shouldLeave
+    })
+    
+    setGuardCleanup(() => cleanup)
+    
+    return cleanup
+  }, [hasUnsavedChanges, registerNavigationGuard, openDialog])
   
   // Form validation
   const isFormValid = () => {
     if (!currentForm) return false
     if (!propertyId) return false // Must have property selected
     
-    // Check required fields
+    // Check required fields: name and priceModifierType
     if (!currentForm.name) return false
-    
-    // Check cancellation policy has at least one tier
-    const policy = currentForm.cancellationPolicy as CancellationPolicy | null
-    if (!policy || !policy.tiers || policy.tiers.length === 0) return false
+    if (!currentForm.priceModifierType) return false
     
     return true
   }
@@ -170,13 +232,17 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
       }
       
       // IMPORTANT: Wait a brief moment for Redux state to update (hasUnsavedChanges = false)
-      // This ensures the navigation guard cleanup happens before navigation
       await new Promise(resolve => setTimeout(resolve, 100))
+      
+      // Explicitly clean up navigation guard before showing success dialog
+      if (guardCleanup) {
+        guardCleanup()
+        setGuardCleanup(null)
+      }
       
       // Show success dialog
       await showSuccess(`Rate plan "${currentForm.name}" has been ${isCreateMode ? 'created' : 'updated'} successfully.`)
       
-      // Navigation guard should now be automatically removed since hasUnsavedChanges = false
       navigateTo('rate-plans', {})
     } catch (error) {
       // Handle different types of errors
@@ -242,6 +308,12 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
         await handleSave()
         return
       }
+    }
+    
+    // Clean up navigation guard before leaving
+    if (guardCleanup) {
+      guardCleanup()
+      setGuardCleanup(null)
     }
     
     dispatch(clearForm())
@@ -315,10 +387,19 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     }
   }
   
-  const ratePlanTypes = [
-    { value: 'FullyFlexible', label: 'Fully Flexible', description: 'Guests can cancel anytime with full refund' },
-    { value: 'NonRefundable', label: 'Non-Refundable', description: 'No refunds, but offer lower pricing' },
-    { value: 'Custom', label: 'Custom Policy', description: 'Define your own cancellation terms' }
+  const modifierTypeOptions = [
+    { 
+      value: 'Percentage', 
+      label: 'Percentage Modifier', 
+      description: 'Adjust base prices by percentage (+10% or -15%)',
+      icon: <IoIosCalculator style={{ color: '#3b82f6' }} />
+    },
+    { 
+      value: 'FixedAmount', 
+      label: 'Fixed Amount Modifier', 
+      description: 'Add or subtract fixed amount (+100 AED or -50 AED)',
+      icon: <IoIosCash style={{ color: '#059669' }} />
+    }
   ]
   
   if (isLoading || loading) {
@@ -339,29 +420,42 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   if (!propertyId) {
     return (
       <SecuredPage>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-          <Box textAlign="center">
-            <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-              No Property Selected
+        <Box padding="2rem" maxWidth="600px" margin="0 auto">
+          <Box textAlign="center" marginBottom="3rem">
+            <Box fontSize="2rem" fontWeight="bold" marginBottom="0.5rem">
+              Select Property
             </Box>
-            <Box marginBottom="2rem" color="#374151">
-              Rate plans must be linked to a property. Please select a property first.
+            <Box color="#6b7280">
+              Rate plans require a property context. Please select a property to continue.
             </Box>
-            <Box>
-              <button
-                onClick={() => navigateTo('properties', {})}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Select Property
-              </button>
-            </Box>
+          </Box>
+          
+          <PropertySelector
+            onPropertyChange={(property) => {
+              if (property) {
+                dispatch(setCurrentProperty(property))
+              }
+            }}
+            label="Choose Property for Rate Plan"
+            placeholder="Select a property to manage rate plans"
+            showDetails={true}
+            buttonVariant="promoted"
+          />
+          
+          <Box textAlign="center" marginTop="2rem">
+            <button 
+              onClick={() => navigateTo('dashboard', {})}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: 'white',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                color: '#6b7280'
+              }}
+            >
+              Back to Dashboard
+            </button>
           </Box>
         </Box>
       </SecuredPage>
@@ -407,7 +501,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   // Render unified form (same for both create/edit)
   return (
     <SecuredPage>
-      <Box padding="1rem" paddingMd="2rem" maxWidth="800px" margin="0 auto">
+      <Box padding="1rem" paddingMd="2rem" maxWidth="1000px" margin="0 auto">
         {/* Error Display */}
         {error && (
           <Box
@@ -437,7 +531,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                   <Box display="flex" alignItems="center" gap="0.5rem">
-                    <FaBuilding style={{color: '#374151', fontSize: '0.875rem'}} />
+                    <IoIosBuild style={{color: '#374151', fontSize: '0.875rem'}} />
                     Property *
                   </Box>
                 </label>
@@ -449,7 +543,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                   disabled={!!isEditMode} // Can't change property in edit mode
                   renderItem={(property, _isSelected) => (
                     <Box display="flex" alignItems="center" gap="0.75rem">
-                      <FaBuilding style={{color: '#6b7280', fontSize: '1rem'}} />
+                      <IoIosBuild style={{color: '#6b7280', fontSize: '1rem'}} />
                       <Box>
                         <Box fontWeight="500">{property.name}</Box>
                         <Box fontSize="0.875rem" color="#6b7280">
@@ -470,41 +564,13 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
 
               <Input
                 label="Rate Plan Name *"
-                icon={FaTag}
+                icon={IoIosPricetags}
                 value={currentForm.name}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
-                placeholder="e.g., Flexible Cancellation, Early Bird Special"
+                placeholder="e.g., Early Bird Special, Last Minute Deal, Premium Package"
                 required
                 helperText="Choose a clear name that guests will understand"
               />
-
-              <Box>
-                <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                  <Box display="flex" alignItems="center" gap="0.5rem">
-                    <FaTags style={{color: '#374151', fontSize: '0.875rem'}} />
-                    Rate Plan Type *
-                  </Box>
-                </label>
-                <SelectionPicker
-                  data={ratePlanTypes}
-                  idAccessor={(item) => item.value}
-                  value={currentForm.type}
-                  onChange={(value) => handleFieldChange('type', value)}
-                  renderItem={(item, _isSelected) => (
-                    <Box display="flex" alignItems="center" gap="0.75rem">
-                      {item.value === 'Flexible' ? (
-                        <FaUndo style={{color: '#10b981', fontSize: '1rem'}} />
-                      ) : (
-                        <FaBan style={{color: '#ef4444', fontSize: '1rem'}} />
-                      )}
-                      <Box>
-                        <Box fontWeight="500">{item.label}</Box>
-                        <Box fontSize="0.875rem" color="#6b7280">{item.description}</Box>
-                      </Box>
-                    </Box>
-                  )}
-                />
-              </Box>
 
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
@@ -538,42 +604,24 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
             </h2>
             
             <Box display="flex" flexDirection="column" gap="1.5rem">
-              {/* Adjustment Type Selection */}
+              {/* Price Modifier Type Selection */}
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                   <Box display="flex" alignItems="center" gap="0.5rem">
-                    <FaCalculator style={{color: '#374151', fontSize: '0.875rem'}} />
-                    Pricing Type *
+                    <IoIosCalculator style={{color: '#374151', fontSize: '0.875rem'}} />
+                    Price Modifier Type *
                   </Box>
                 </label>
                 <SelectionPicker
-                  data={[
-                    { value: 'FixedPrice', label: 'Fixed Price', description: 'Set a specific price amount' },
-                    { value: 'Percentage', label: 'Percentage Adjustment', description: 'Percentage increase/decrease from base rate plan' },
-                    { value: 'FixedDiscount', label: 'Fixed Discount', description: 'Fixed amount discount from base rate plan' }
-                  ]}
+                  data={modifierTypeOptions}
                   idAccessor={(item) => item.value}
-                  value={currentForm.adjustmentType}
-                  onChange={(value) => {
-                    // When adjustment type changes, reset adjustmentValue to appropriate default
-                    const newDefaults = {
-                      'FixedPrice': 500,     // AED 500 default base price
-                      'Percentage': 0,       // 0% default (neutral)
-                      'FixedDiscount': 100   // AED 100 default discount
-                    }
-                    
-                    handleFieldChange('adjustmentType', value)
-                    handleFieldChange('adjustmentValue', newDefaults[value as keyof typeof newDefaults] || 0)
-                  }}
+                  value={currentForm.priceModifierType}
+                  onChange={(value) => handleFieldChange('priceModifierType', value)}
                   renderItem={(item, _isSelected) => (
                     <Box display="flex" alignItems="center" gap="0.75rem">
-                      {item.value === 'FixedPrice' ? (
-                        <FaDollarSign style={{color: '#10b981', fontSize: '1rem'}} />
-                      ) : item.value === 'Percentage' ? (
-                        <FaPercent style={{color: '#3b82f6', fontSize: '1rem'}} />
-                      ) : (
-                        <FaTag style={{color: '#f59e0b', fontSize: '1rem'}} />
-                      )}
+                      <Box fontSize="1.25rem" flexShrink={0}>
+                        {item.icon}
+                      </Box>
                       <Box>
                         <Box fontWeight="500">{item.label}</Box>
                         <Box fontSize="0.875rem" color="#6b7280">{item.description}</Box>
@@ -583,83 +631,201 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                 />
               </Box>
               
-              {/* Base Rate Plan Selection (only for Percentage and FixedDiscount) */}
-              {(currentForm.adjustmentType === 'Percentage' || currentForm.adjustmentType === 'FixedDiscount') && (
-                <Box>
-                  <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                    <Box display="flex" alignItems="center" gap="0.5rem">
-                      <FaLayerGroup style={{color: '#374151', fontSize: '0.875rem'}} />
-                      Base Rate Plan *
-                    </Box>
-                  </label>
-                  <SelectionPicker
-                    data={ratePlans.filter(rp => rp.adjustmentType === 'FixedPrice' && rp.id !== currentForm.id)}
-                    idAccessor={(rp) => rp.id}
-                    value={currentForm.baseRatePlanId || ''}
-                    onChange={(value) => handleFieldChange('baseRatePlanId', value)}
-                    renderItem={(ratePlan, _isSelected) => (
-                      <Box display="flex" alignItems="center" gap="0.75rem">
-                        <FaLayerGroup style={{color: '#6b7280', fontSize: '1rem'}} />
-                        <Box>
-                          <Box fontWeight="500">{ratePlan.name}</Box>
-                          <Box fontSize="0.875rem" color="#6b7280">Priority: {ratePlan.priority}</Box>
-                        </Box>
-                      </Box>
-                    )}
-                  />
-                  {ratePlans.filter(rp => rp.adjustmentType === 'FixedPrice').length === 0 && (
-                    <Box padding="0.75rem" backgroundColor="#fef3c7" borderRadius="6px" marginTop="0.5rem">
-                      <Box fontSize="0.875rem" color="#92400e">
-                        ⚠️ You need to create a Fixed Price rate plan first before creating percentage-based plans.
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-              )}
-              
-              {/* Adjustment Value */}
+              {/* Price Modifier Value */}
               <NumberStepperInput
-                label={currentForm.adjustmentType === 'FixedPrice' ? 'Price per Night (AED)' : 
-                       currentForm.adjustmentType === 'Percentage' ? 'Percentage Adjustment (%)' : 
-                       'Discount Amount (AED)'}
-                icon={currentForm.adjustmentType === 'FixedPrice' ? FaDollarSign :
-                      currentForm.adjustmentType === 'Percentage' ? FaPercent : FaTag}
-                value={currentForm.adjustmentValue}
-                onChange={(value) => handleFieldChange('adjustmentValue', value)}
-                min={currentForm.adjustmentType === 'Percentage' ? -100 : 0}
-                max={currentForm.adjustmentType === 'FixedPrice' ? 50000 : 
-                     currentForm.adjustmentType === 'Percentage' ? 100 : 10000}
-                step={currentForm.adjustmentType === 'FixedPrice' ? 100 : 
-                      currentForm.adjustmentType === 'Percentage' ? 5 : 100}
-                format={currentForm.adjustmentType === 'Percentage' ? 'integer' : 'currency'}
-                currency={currentForm.adjustmentType === 'Percentage' ? undefined : 'AED'}
-                currencyPosition={currentForm.adjustmentType === 'Percentage' ? undefined : 'prefix'}
+                label={currentForm.priceModifierType === 'Percentage' ? 'Percentage Modifier (%)' : 'Fixed Amount Modifier (AED)'}
+                icon={currentForm.priceModifierType === 'Percentage' ? IoIosCalculator : IoIosCash}
+                value={currentForm.priceModifierValue}
+                onChange={(value) => handleFieldChange('priceModifierValue', value)}
+                min={currentForm.priceModifierType === 'Percentage' ? -100 : -10000}
+                max={currentForm.priceModifierType === 'Percentage' ? 100 : 10000}
+                step={currentForm.priceModifierType === 'Percentage' ? 5 : 50}
+                format={currentForm.priceModifierType === 'Percentage' ? 'integer' : 'currency'}
+                currency={currentForm.priceModifierType === 'Percentage' ? undefined : 'AED'}
+                currencyPosition={currentForm.priceModifierType === 'Percentage' ? undefined : 'prefix'}
                 helperText={
-                  currentForm.adjustmentType === 'FixedPrice' ? 'Base price per night for this rate plan' :
-                  currentForm.adjustmentType === 'Percentage' ? 'Positive % increases price, negative % decreases price' :
-                  'Fixed amount to discount from the base rate plan'
+                  currentForm.priceModifierType === 'Percentage' 
+                    ? 'Positive % increases base prices, negative % decreases base prices' 
+                    : 'Positive amount adds to base prices, negative amount subtracts from base prices'
                 }
                 width="250px"
               />
+            </Box>
+          </Box>
 
-              <Box display="flex" alignItems="center" gap="1rem">
-                <input
-                  type="checkbox"
-                  id="includesBreakfast"
-                  checked={currentForm.includesBreakfast}
-                  onChange={(e) => handleFieldChange('includesBreakfast', e.target.checked)}
-                  style={{ transform: 'scale(1.2)' }}
-                />
-                <label htmlFor="includesBreakfast" style={{ cursor: 'pointer', fontWeight: '500' }}>
-                  Include breakfast with this rate plan
-                </label>
+          {/* Pricing Preview */}
+          <Box>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
+              Pricing Preview
+            </h2>
+            
+            <RatePlanPricingPreview
+              ratePlan={currentForm}
+              property={currentProperty}
+            />
+          </Box>
+
+          {/* Booking Conditions */}
+          <Box>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
+              Booking Conditions
+            </h2>
+            
+            <Box display="flex" flexDirection="column" gap="1.5rem">
+              {/* Stay Length Restrictions */}
+              <Box
+                padding="1.5rem"
+                backgroundColor="#f9fafb"
+                borderRadius="12px"
+                border="1px solid #e5e7eb"
+              >
+                <Box
+                  fontSize="0.9375rem"
+                  fontWeight="600"
+                  color="#374151"
+                  marginBottom="1rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="0.5rem"
+                >
+                  <IoIosTime style={{ fontSize: '1rem', color: '#059669' }} />
+                  Stay Length Requirements
+                </Box>
+                
+                <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
+                  <NumberStepperInput
+                    label="Minimum Stay (nights)"
+                    value={currentForm.minStay || 1}
+                    onChange={(value) => handleFieldChange('minStay', value > 0 ? value : undefined)}
+                    min={1}
+                    max={30}
+                    step={1}
+                    format="integer"
+                    helperText="Minimum nights guests must book"
+                    width="100%"
+                  />
+                  
+                  <NumberStepperInput
+                    label="Maximum Stay (nights)"
+                    value={currentForm.maxStay || 30}
+                    onChange={(value) => handleFieldChange('maxStay', value > 0 ? value : undefined)}
+                    min={1}
+                    max={365}
+                    step={1}
+                    format="integer"
+                    helperText="Maximum nights guests can book"
+                    width="100%"
+                  />
+                </Box>
               </Box>
-              
-              {/* Priority and Concurrency Settings */}
+
+              {/* Advance Booking Restrictions */}
+              <Box
+                padding="1.5rem"
+                backgroundColor="#f9fafb"
+                borderRadius="12px"
+                border="1px solid #e5e7eb"
+              >
+                <Box
+                  fontSize="0.9375rem"
+                  fontWeight="600"
+                  color="#374151"
+                  marginBottom="1rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="0.5rem"
+                >
+                  <IoIosCalendar style={{ fontSize: '1rem', color: '#3b82f6' }} />
+                  Advance Booking Requirements
+                </Box>
+                
+                <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
+                  <NumberStepperInput
+                    label="Minimum Advance Booking (days)"
+                    value={currentForm.minAdvanceBooking || 0}
+                    onChange={(value) => handleFieldChange('minAdvanceBooking', value > 0 ? value : undefined)}
+                    min={0}
+                    max={365}
+                    step={1}
+                    format="integer"
+                    helperText="Days before arrival guests must book"
+                    width="100%"
+                  />
+                  
+                  <NumberStepperInput
+                    label="Maximum Advance Booking (days)"
+                    value={currentForm.maxAdvanceBooking || 365}
+                    onChange={(value) => handleFieldChange('maxAdvanceBooking', value > 0 ? value : undefined)}
+                    min={1}
+                    max={730}
+                    step={7}
+                    format="integer"
+                    helperText="Maximum days in advance guests can book"
+                    width="100%"
+                  />
+                </Box>
+              </Box>
+
+              {/* Guest Count Restrictions */}
+              <Box
+                padding="1.5rem"
+                backgroundColor="#f9fafb"
+                borderRadius="12px"
+                border="1px solid #e5e7eb"
+              >
+                <Box
+                  fontSize="0.9375rem"
+                  fontWeight="600"
+                  color="#374151"
+                  marginBottom="1rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="0.5rem"
+                >
+                  <IoIosPeople style={{ fontSize: '1rem', color: '#f59e0b' }} />
+                  Guest Count Requirements
+                </Box>
+                
+                <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
+                  <NumberStepperInput
+                    label="Minimum Guests"
+                    value={currentForm.minGuests || 1}
+                    onChange={(value) => handleFieldChange('minGuests', (value >= 1 && value <= 20) ? value : 1)}
+                    min={1}
+                    max={Math.min(currentProperty?.maximumGuest || 20, 20)}
+                    step={1}
+                    format="integer"
+                    helperText="Minimum number of guests required (1-20)"
+                    width="100%"
+                  />
+                  
+                  <NumberStepperInput
+                    label="Maximum Guests"
+                    value={currentForm.maxGuests || Math.min(currentProperty?.maximumGuest || 8, 20)}
+                    onChange={(value) => handleFieldChange('maxGuests', (value >= 1 && value <= 20) ? value : Math.min(currentProperty?.maximumGuest || 8, 20))}
+                    min={Math.max(currentForm.minGuests || 1, 1)}
+                    max={Math.min(currentProperty?.maximumGuest || 20, 20)}
+                    step={1}
+                    format="integer"
+                    helperText="Maximum number of guests allowed (1-20)"
+                    width="100%"
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Rate Plan Settings */}
+          <Box>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
+              Rate Plan Settings
+            </h2>
+            
+            <Box display="flex" flexDirection="column" gap="1.5rem">
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap="1rem">
                 <NumberStepperInput
                   label="Priority"
-                  icon={FaSortNumericUp}
+                  icon={IoIosArrowUp}
                   value={currentForm.priority}
                   onChange={(value) => handleFieldChange('priority', value)}
                   min={1}
@@ -672,74 +838,55 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
                 
                 <Box>
                   <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
-                    Rate Plan Availability
+                    Status Settings
                   </label>
-                  <Box display="flex" alignItems="center" gap="1rem">
-                    <input
-                      type="checkbox"
-                      id="allowConcurrentRates"
-                      checked={currentForm.allowConcurrentRates}
-                      onChange={(e) => handleFieldChange('allowConcurrentRates', e.target.checked)}
-                      style={{ transform: 'scale(1.2)' }}
-                    />
-                    <label htmlFor="allowConcurrentRates" style={{ cursor: 'pointer', fontWeight: '400' }}>
-                      Allow with other rate plans
-                    </label>
+                  <Box display="flex" flexDirection="column" gap="0.75rem">
+                    <Box display="flex" alignItems="center" gap="1rem">
+                      <input
+                        type="checkbox"
+                        id="isActive"
+                        checked={currentForm.isActive}
+                        onChange={(e) => handleFieldChange('isActive', e.target.checked)}
+                        style={{ transform: 'scale(1.2)' }}
+                      />
+                      <label htmlFor="isActive" style={{ cursor: 'pointer', fontWeight: '500' }}>
+                        Active (available for booking)
+                      </label>
+                    </Box>
+                    
+                    <Box display="flex" alignItems="center" gap="1rem">
+                      <input
+                        type="checkbox"
+                        id="isDefault"
+                        checked={currentForm.isDefault}
+                        onChange={(e) => handleFieldChange('isDefault', e.target.checked)}
+                        style={{ transform: 'scale(1.2)' }}
+                      />
+                      <label htmlFor="isDefault" style={{ cursor: 'pointer', fontWeight: '500' }}>
+                        Default rate plan (auto-selected)
+                      </label>
+                    </Box>
                   </Box>
-                  <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                    When unchecked, this rate plan will override all others
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                    Default rate plan will be pre-selected for guests
                   </p>
                 </Box>
               </Box>
-              
-              {/* Active Days Selection */}
-              <Box>
-                <label style={{display: 'block', marginBottom: '0.75rem', fontWeight: '500'}}>
-                  Active Days *
-                </label>
-                <Box display="grid" gridTemplateColumns="repeat(7, 1fr)" gap="0.5rem" maxWidth="400px">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                    <Box key={day} textAlign="center">
-                      <label style={{ cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}>
-                        <input
-                          type="checkbox"
-                          checked={currentForm.activeDays.includes(index)}
-                          onChange={(e) => {
-                            const newActiveDays = e.target.checked
-                              ? [...currentForm.activeDays, index]
-                              : currentForm.activeDays.filter(d => d !== index)
-                            handleFieldChange('activeDays', newActiveDays.sort())
-                          }}
-                          style={{ marginBottom: '0.25rem', transform: 'scale(1.1)' }}
-                        />
-                        <br />
-                        {day}
-                      </label>
-                    </Box>
-                  ))}
-                </Box>
-                <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
-                  Select the days when this rate plan is available for booking
-                </p>
-              </Box>
-
-              {currentForm.type === 'NonRefundable' && (
-                <Box padding="1rem" backgroundColor="#fef3c7" borderRadius="8px">
-                  <Box display="flex" alignItems="start" gap="0.5rem">
-                    <FaInfoCircle color="#f59e0b" style={{ marginTop: '2px', flexShrink: 0 }} />
-                    <Box>
-                      <Box fontWeight="500" color="#92400e" marginBottom="0.25rem">
-                        Non-Refundable Rate Plan
-                      </Box>
-                      <Box fontSize="0.875rem" color="#92400e">
-                        This rate plan will automatically apply the pricing adjustment to encourage bookings, 
-                        but guests won't be able to cancel for a refund after booking.
-                      </Box>
-                    </Box>
-                  </Box>
-                </Box>
-              )}
             </Box>
+          </Box>
+
+          {/* Included Amenities */}
+          <Box>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
+              Included Amenities
+            </h2>
+            
+            <RatePlanAmenitySelector
+              property={currentProperty}
+              features={currentForm.features}
+              ratePlanId={currentForm.id || 'new'}
+              onChange={(features) => handleFieldChange('features', features)}
+            />
           </Box>
 
           {/* Cancellation Policy */}
@@ -751,19 +898,6 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
             <CancellationPolicyBuilder
               policy={currentForm.cancellationPolicy as CancellationPolicy | null}
               onChange={(policy) => handleFieldChange('cancellationPolicy', policy)}
-              ratePlanId={currentForm.id || 'new'}
-            />
-          </Box>
-
-          {/* Rate Plan Restrictions */}
-          <Box>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
-              Booking Restrictions
-            </h2>
-            
-            <RatePlanRestrictionsBuilder
-              restrictions={currentForm.ratePlanRestrictions || []}
-              onChange={(restrictions) => handleFieldChange('ratePlanRestrictions', restrictions)}
               ratePlanId={currentForm.id || 'new'}
             />
           </Box>

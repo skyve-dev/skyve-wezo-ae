@@ -6,7 +6,7 @@ import { Box } from '@/components'
 import Button from '@/components/base/Button'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
-import { fetchRatePlans, setPrices } from '@/store/slices/ratePlanSlice'
+import { fetchRatePlans } from '@/store/slices/ratePlanSlice'
 
 const PricingCalendar: React.FC = () => {
   const dispatch = useDispatch()
@@ -100,7 +100,8 @@ const PricingCalendar: React.FC = () => {
       amount
     }))
     
-    dispatch(setPrices({ ratePlanId: selectedRatePlan, prices: priceArray }))
+    // TODO: Update to use new pricing system
+    // dispatch(setPrices({ ratePlanId: selectedRatePlan, prices: priceArray }))
     
     // In real implementation, this would be an API call:
     // await api.put(`/api/rate-plans/${selectedRatePlan}/prices`, priceArray)

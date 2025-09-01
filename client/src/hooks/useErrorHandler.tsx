@@ -49,8 +49,14 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
   const currentError = useSelector(selectCurrentError)
   
   const showApiError = useCallback(async (error: ApiError, context?: string) => {
-    // Store error in global state for debugging/logging
-    dispatch(setApiError({ error, context }))
+    // Store serializable error data in global state for debugging/logging
+    const errorData = {
+      message: error.message,
+      serverMessage: error.getUserMessage(),
+      status: error.status,
+      endpoint: error.endpoint
+    }
+    dispatch(setApiError({ error: errorData, context }))
     
     // Determine dialog styling based on error type
     const getErrorColor = () => {

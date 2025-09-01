@@ -98,8 +98,27 @@ describe('propertySlice', () => {
       checkOutUntil: '12:00'
     },
     photos: [],
+    photoIds: [], // New field
     bookingType: BookingType.BookInstantly,
     paymentType: PaymentType.Online,
+    // New PropertyPricing field
+    pricing: {
+      currency: 'AED' as const,
+      priceMonday: 150,
+      priceTuesday: 150,
+      priceWednesday: 150,
+      priceThursday: 150,
+      priceFriday: 200,
+      priceSaturday: 250,
+      priceSunday: 200,
+      halfDayPriceMonday: 100,
+      halfDayPriceTuesday: 100,
+      halfDayPriceWednesday: 100,
+      halfDayPriceThursday: 100,
+      halfDayPriceFriday: 130,
+      halfDayPriceSaturday: 160,
+      halfDayPriceSunday: 130
+    },
     aboutTheProperty: 'Beautiful villa with stunning views',
     aboutTheNeighborhood: 'Quiet residential area',
     firstDateGuestCanCheckIn: '2024-03-01',
@@ -337,8 +356,10 @@ describe('propertySlice', () => {
         partiesOrEventsAllowed: false,
         petsAllowed: PetPolicy.No,
         photos: [],
+        photoIds: [], // New field
         bookingType: BookingType.NeedToRequestBook,
         paymentType: PaymentType.Online,
+        pricing: undefined, // New field - undefined for create mode
         currentStep: 1,
         isComplete: false
       }

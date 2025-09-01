@@ -36,17 +36,18 @@ const errorSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * Set an error from an ApiError instance
+     * Set an error from serializable error data
      */
-    setApiError: (state, action: PayloadAction<{ error: ApiError; context?: string }>) => {
+    setApiError: (state, action: PayloadAction<{ error: { message: string; serverMessage?: string; status?: number; endpoint?: string } | ApiError; context?: string }>) => {
       const { error, context } = action.payload
       
+      // Handle both serialized error data and ApiError objects
       const errorInfo: ErrorInfo = {
-        message: error.message,
-        serverMessage: error.getUserMessage(),
-        status: error.status,
+        message: typeof error === 'object' && 'getUserMessage' in error ? error.message : error.message,
+        serverMessage: typeof error === 'object' && 'getUserMessage' in error ? error.getUserMessage() : error.serverMessage,
+        status: typeof error === 'object' && 'status' in error ? error.status : error.status,
         context,
-        endpoint: error.endpoint,
+        endpoint: typeof error === 'object' && 'endpoint' in error ? error.endpoint : error.endpoint,
         timestamp: Date.now()
       }
       
