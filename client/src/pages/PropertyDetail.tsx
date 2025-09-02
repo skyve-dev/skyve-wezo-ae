@@ -673,19 +673,21 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
           )}
         </Box>
 
-        {/* Right Sidebar: Booking Widget (Desktop) */}
+        {/* Right Sidebar: Booking Widget (Mobile & Desktop) */}
         <Box
           width="100%"
           widthMd="350px"
-          display="none"
-          displayMd="block"
+          display="block"
+          marginBottom="2rem"
+          marginBottomMd="0"
         >
           <Box
             backgroundColor="white"
             borderRadius="12px"
             boxShadow="0 4px 6px rgba(0,0,0,0.1)"
             padding="1.5rem"
-            position="sticky"
+            position="static"
+            positionMd="sticky"
             top="6rem"
           >
             <Box marginBottom="1.5rem">
@@ -758,50 +760,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
         </Box>
       </Box>
 
-      {/* Mobile Sticky Booking Bar */}
-      {isGuestMode && (
-        <Box
-          display="block"
-          displayMd="none"
-          position="fixed"
-          bottom="0"
-          left="0"
-          right="0"
-          backgroundColor="white"
-          borderTop="1px solid #e5e7eb"
-          padding="1rem"
-          zIndex="20"
-        >
-          <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Box>
-              <Box fontSize="1.125rem" fontWeight="bold" color="#059669">
-                {pricingCalculation ? (
-                  `AED ${Math.round(selectedTotalPrice)}`
-                ) : ratePlans.length > 0 ? (
-                  `From AED ${Math.round((ratePlans[0] as any).adjustmentValue || 0)}`
-                ) : (
-                  'Price on request'
-                )}
-              </Box>
-              <Box fontSize="0.75rem" color="#666">
-                {pricingCalculation ? 
-                  `for ${pricingCalculation.stayDuration || 1} night${(pricingCalculation.stayDuration || 1) > 1 ? 's' : ''}` : 
-                  'per night'
-                }
-              </Box>
-            </Box>
-            <Button
-              label="Book Now"
-              onClick={() => setShowMobileBookingForm(true)}
-              variant="promoted"
-              size="medium"
-            />
-          </Box>
-        </Box>
-      )}
-
-      {/* Bottom padding for mobile sticky bar */}
-      <Box height="100px" display="block" displayMd="none" />
+      {/* Mobile Sticky Booking Bar - Hidden since booking widget is now visible on mobile */}
+      {/* Removed to prevent duplication with the now-visible booking widget */}
       
       {/* Mobile Booking Form Drawer */}
       <SlidingDrawer

@@ -429,11 +429,65 @@ export const calculateRatePricing = createAsyncThunk(
   }
 )
 
+// Helper function to clean rate plan data before sending to API
+// Converts null values to undefined for optional numeric fields and removes read-only fields
+const cleanRatePlanData = (data: Partial<RatePlan>): Partial<RatePlan> => {
+  const cleaned = { ...data }
+  
+  // Remove fields that should never be sent in create/update requests
+  const fieldsToRemove = [
+    'id',           // ID should only be in the URL/where clause, not in data
+    'propertyId',   // Property ID is in the URL
+    'stats',        // Read-only calculated field
+    'createdAt',    // Managed by database
+    'updatedAt',    // Managed by database
+  ] as const
+  
+  fieldsToRemove.forEach(field => {
+    delete cleaned[field]
+  })
+  
+  // Clean nested objects
+  if (cleaned.features) {
+    // Remove id and ratePlanId from features as they're set by the backend
+    const { id, ratePlanId, ...featuresWithoutIds } = cleaned.features as any
+    cleaned.features = featuresWithoutIds
+  }
+  
+  if (cleaned.cancellationPolicy) {
+    // Remove id and ratePlanId from cancellation policy
+    const { id, ratePlanId, ...policyWithoutIds } = cleaned.cancellationPolicy as any
+    cleaned.cancellationPolicy = policyWithoutIds
+  }
+  
+  // List of optional numeric fields that should not be null
+  const optionalNumericFields = [
+    'minStay',
+    'maxStay',
+    'minAdvanceBooking',
+    'maxAdvanceBooking',
+    'minGuests',
+    'maxGuests'
+  ] as const
+  
+  // Convert null to undefined for these fields
+  optionalNumericFields.forEach(field => {
+    if (cleaned[field] === null) {
+      cleaned[field] = undefined
+    }
+  })
+  
+  return cleaned
+}
+
 export const createRatePlanAsync = createAsyncThunk(
   'ratePlan/create',
   async (params: { propertyId: string; data: Partial<RatePlan> }, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ ratePlan?: RatePlan; rate_plan?: RatePlan }>(`/api/properties/${params.propertyId}/rate-plans`, params.data)
+      // Clean the data before sending to API
+      const cleanedData = cleanRatePlanData(params.data)
+      
+      const response = await api.post<{ ratePlan?: RatePlan; rate_plan?: RatePlan }>(`/api/properties/${params.propertyId}/rate-plans`, cleanedData)
       // Handle both camelCase and snake_case responses
       const ratePlan = response.ratePlan || response.rate_plan
       if (!ratePlan) {
@@ -452,7 +506,10 @@ export const updateRatePlanAsync = createAsyncThunk(
   'ratePlan/update',
   async (params: { propertyId: string; ratePlanId: string; data: Partial<RatePlan> }, { rejectWithValue }) => {
     try {
-      const response = await api.put<{ ratePlan?: RatePlan; rate_plan?: RatePlan }>(`/api/properties/${params.propertyId}/rate-plans/${params.ratePlanId}`, params.data)
+      // Clean the data before sending to API
+      const cleanedData = cleanRatePlanData(params.data)
+      
+      const response = await api.put<{ ratePlan?: RatePlan; rate_plan?: RatePlan }>(`/api/properties/${params.propertyId}/rate-plans/${params.ratePlanId}`, cleanedData)
       // Handle both camelCase and snake_case responses
       const ratePlan = response.ratePlan || response.rate_plan
       if (!ratePlan) {

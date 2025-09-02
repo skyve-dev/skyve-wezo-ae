@@ -231,18 +231,14 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
         })).unwrap()
       }
       
-      // IMPORTANT: Wait a brief moment for Redux state to update (hasUnsavedChanges = false)
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      // Explicitly clean up navigation guard before showing success dialog
-      if (guardCleanup) {
-        guardCleanup()
-        setGuardCleanup(null)
-      }
+      // Clear the form immediately after successful save
+      // This will trigger the useEffect to clean up the navigation guard
+      dispatch(clearForm())
       
       // Show success dialog
       await showSuccess(`Rate plan "${currentForm.name}" has been ${isCreateMode ? 'created' : 'updated'} successfully.`)
       
+      // Navigate away
       navigateTo('rate-plans', {})
     } catch (error) {
       // Handle different types of errors
@@ -310,12 +306,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
       }
     }
     
-    // Clean up navigation guard before leaving
-    if (guardCleanup) {
-      guardCleanup()
-      setGuardCleanup(null)
-    }
-    
+    // Clear form which will trigger navigation guard cleanup via useEffect
     dispatch(clearForm())
     navigateTo('rate-plans', {})
   }

@@ -40,6 +40,15 @@ export interface RatePlanUpdateData {
   isActive?: boolean;
   isDefault?: boolean;
   priority?: number;
+  features?: {
+    includedAmenityIds?: string[];
+  };
+  cancellationPolicy?: {
+    type?: CancellationType;
+    freeCancellationDays?: number;
+    partialRefundDays?: number;
+    description?: string;
+  };
 }
 
 export interface BookingSearchCriteria {
@@ -206,9 +215,47 @@ export class RatePlanService {
       }
     }
 
+    // Prepare the update data for Prisma
+    const { features, cancellationPolicy, ...ratePlanData } = updateData;
+    
+    // Build the Prisma update query with proper nested updates
+    const prismaUpdateData: any = { ...ratePlanData };
+    
+    // Handle features update (upsert: create if doesn't exist, update if exists)
+    if (features) {
+      prismaUpdateData.features = {
+        upsert: {
+          create: {
+            includedAmenityIds: features.includedAmenityIds || []
+          },
+          update: {
+            includedAmenityIds: features.includedAmenityIds || []
+          }
+        }
+      };
+    }
+    
+    // Handle cancellation policy update (upsert: create if doesn't exist, update if exists)
+    if (cancellationPolicy) {
+      prismaUpdateData.cancellationPolicy = {
+        upsert: {
+          create: {
+            type: cancellationPolicy.type,
+            freeCancellationDays: cancellationPolicy.freeCancellationDays || null,
+            partialRefundDays: cancellationPolicy.partialRefundDays || null
+          },
+          update: {
+            type: cancellationPolicy.type,
+            freeCancellationDays: cancellationPolicy.freeCancellationDays || null,
+            partialRefundDays: cancellationPolicy.partialRefundDays || null
+          }
+        }
+      };
+    }
+
     await prisma.ratePlan.update({
       where: { id: ratePlanId },
-      data: updateData
+      data: prismaUpdateData
     });
 
     return await this.getRatePlanById(ratePlanId, userId);
@@ -705,21 +752,14 @@ export class RatePlanService {
   }
 
   /**
-   * Format rate plan response with amenity details
+   * Format rate plan response
    */
-  private formatRatePlanResponse(ratePlan: any, propertyAmenities: any[]): any {
+  private formatRatePlanResponse(ratePlan: any, _propertyAmenities?: any[]): any {
     const includedAmenityIds = ratePlan.features?.includedAmenityIds || [];
-    
-    const includedAmenities = propertyAmenities.filter(amenity =>
-      includedAmenityIds.includes(amenity.id)
-    );
-    
-    const excludedAmenities = propertyAmenities.filter(amenity =>
-      !includedAmenityIds.includes(amenity.id)
-    );
 
     return {
       id: ratePlan.id,
+      propertyId: ratePlan.propertyId,
       name: ratePlan.name,
       description: ratePlan.description,
       priceModifierType: ratePlan.priceModifierType,
@@ -733,19 +773,11 @@ export class RatePlanService {
       isActive: ratePlan.isActive,
       isDefault: ratePlan.isDefault,
       priority: ratePlan.priority,
-      features: {
-        includedAmenityIds,
-        includedAmenities: includedAmenities.map(amenity => ({
-          id: amenity.id,
-          name: amenity.name,
-          category: amenity.category
-        })),
-        excludedAmenities: excludedAmenities.map(amenity => ({
-          id: amenity.id,
-          name: amenity.name,
-          category: amenity.category
-        }))
-      },
+      features: ratePlan.features ? {
+        id: ratePlan.features.id,
+        ratePlanId: ratePlan.features.ratePlanId,
+        includedAmenityIds
+      } : null,
       cancellationPolicy: ratePlan.cancellationPolicy ? {
         type: ratePlan.cancellationPolicy.type,
         freeCancellationDays: ratePlan.cancellationPolicy.freeCancellationDays,
