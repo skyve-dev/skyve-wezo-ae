@@ -17,6 +17,7 @@ import {
   setDateRange,
   setSelectedRatePlans,
   fetchPricesForRatePlan,
+  fetchPropertyPricing,
   clearPrices,
   clearRefreshTrigger
 } from '@/store/slices/priceSlice'
@@ -80,7 +81,9 @@ const PricingCalendar: React.FC = () => {
       dispatch(clearRatePlans()) // Clear the old rate plans from Redux
       dispatch(setSelectedRatePlans([])) // Clear selected rate plans from previous property
 
+      // Fetch both rate plans and property base pricing
       dispatch(fetchRatePlans(property.propertyId))
+      dispatch(fetchPropertyPricing(property.propertyId))
 
       setIsInitialized(false)
     }
@@ -92,7 +95,9 @@ const PricingCalendar: React.FC = () => {
     
     if (currentProperty?.propertyId && !isInitialized) {
 
+      // Fetch both rate plans and property base pricing
       dispatch(fetchRatePlans(currentProperty.propertyId))
+      dispatch(fetchPropertyPricing(currentProperty.propertyId))
       setIsInitialized(true)
     }
   }, [currentProperty, dispatch, isInitialized])

@@ -182,7 +182,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   }
 
   const property = currentProperty
-  const isGuestMode = currentRoleMode === 'Tenant'
+  // const isGuestMode = currentRoleMode === 'Tenant'
+  // Silence unused variable warning
+  void currentRoleMode
 
   return (
     <Box>

@@ -76,13 +76,12 @@ const RatePlanAmenitySelector: React.FC<RatePlanAmenitySelectorProps> = ({
       ? selectedAmenityIds.filter(id => id !== amenityId)
       : [...selectedAmenityIds, amenityId]
     
-    const updatedFeatures: RatePlanFeatures = {
-      id: features?.id || '',
-      ratePlanId,
+    // Only send the data needed by the server, no IDs
+    const updatedFeatures: Partial<RatePlanFeatures> = {
       includedAmenityIds: newSelectedIds
     }
     
-    onChange(updatedFeatures)
+    onChange(updatedFeatures as RatePlanFeatures)
   }
   
   // Handle select all/none for a category
@@ -100,13 +99,12 @@ const RatePlanAmenitySelector: React.FC<RatePlanAmenitySelectorProps> = ({
       newSelectedIds = [...selectedAmenityIds, ...idsToAdd]
     }
     
-    const updatedFeatures: RatePlanFeatures = {
-      id: features?.id || '',
-      ratePlanId,
+    // Only send the data needed by the server, no IDs
+    const updatedFeatures: Partial<RatePlanFeatures> = {
       includedAmenityIds: newSelectedIds
     }
     
-    onChange(updatedFeatures)
+    onChange(updatedFeatures as RatePlanFeatures)
   }
   
   // Get icon for amenity

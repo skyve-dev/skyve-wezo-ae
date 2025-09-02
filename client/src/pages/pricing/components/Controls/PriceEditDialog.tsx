@@ -108,7 +108,7 @@ const PriceEditDialog: React.FC = () => {
   
   // Calculate derived price if this is a percentage-based rate plan
   const calculateDerivedPrice = () => {
-    if (!selectedRatePlan || selectedRatePlan.adjustmentType === 'FixedPrice') {
+    if (!selectedRatePlan || selectedRatePlan.priceModifierType === 'FixedAmount') {
       return null
     }
     
@@ -116,9 +116,9 @@ const PriceEditDialog: React.FC = () => {
     // For now, we'll show a placeholder
     return {
       baseAmount: 1000, // Placeholder
-      adjustedAmount: selectedRatePlan.adjustmentType === 'Percentage' 
-        ? 1000 * (1 + selectedRatePlan.adjustmentValue / 100)
-        : 1000 - selectedRatePlan.adjustmentValue
+      adjustedAmount: selectedRatePlan.priceModifierType === 'Percentage' 
+        ? 1000 * (1 + selectedRatePlan.priceModifierValue / 100)
+        : selectedRatePlan.priceModifierValue
     }
   }
   
@@ -205,11 +205,10 @@ const PriceEditDialog: React.FC = () => {
                   {selectedRatePlan.name}
                 </Box>
                 <Box fontSize="0.75rem" color="#6b7280">
-                  {selectedRatePlan.type} • {selectedRatePlan.adjustmentType}
-                  {selectedRatePlan.adjustmentType !== 'FixedPrice' && (
+                  Rate Plan • {selectedRatePlan.priceModifierType}
+                  {selectedRatePlan.priceModifierType === 'Percentage' && (
                     <span>
-                      {' '}({selectedRatePlan.adjustmentValue}
-                      {selectedRatePlan.adjustmentType === 'Percentage' ? '%' : ''})
+                      {' '}({selectedRatePlan.priceModifierValue}%)
                     </span>
                   )}
                 </Box>
@@ -262,7 +261,7 @@ const PriceEditDialog: React.FC = () => {
                 
                 <Box textAlign="center">
                   <Box color="#6b7280" marginBottom="0.25rem">
-                    {selectedRatePlan?.adjustmentType} Applied
+                    {selectedRatePlan?.priceModifierType} Applied
                   </Box>
                   <Box fontWeight="600" color="#3b82f6">
                     AED {derivedPrice.adjustedAmount.toLocaleString()}

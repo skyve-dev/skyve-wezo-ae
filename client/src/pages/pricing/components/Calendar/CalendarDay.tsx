@@ -15,10 +15,22 @@ interface CalendarDayData {
 
 interface RatePlanWithColor {
   id: string
+  propertyId: string
   name: string
-  type: string
-  adjustmentType: 'FixedPrice' | 'Percentage' | 'FixedDiscount'
-  adjustmentValue: number
+  description?: string
+  priceModifierType: 'Percentage' | 'FixedAmount'
+  priceModifierValue: number
+  minStay?: number
+  maxStay?: number
+  minAdvanceBooking?: number
+  maxAdvanceBooking?: number
+  minGuests?: number
+  maxGuests?: number
+  isActive: boolean
+  isDefault: boolean
+  priority: number
+  createdAt: string
+  updatedAt: string
   color: string
   lightColor: string
 }

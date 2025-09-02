@@ -99,29 +99,12 @@ const CalendarControls: React.FC = () => {
 
   // Filter rate plans based on seasonal restrictions for the current month
   const getFilteredRatePlansForMonth = () => {
-    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-    
     return ratePlans.filter(rp => {
       if (!rp.isActive) return false
       
-      // Check if rate plan has seasonal date range restrictions
-      const seasonalRestriction = rp.ratePlanRestrictions?.find(
-        r => r.type === 'SeasonalDateRange'
-      )
-      
-      if (seasonalRestriction) {
-        // Use startDate and endDate directly from the restriction object
-        if (seasonalRestriction.startDate && seasonalRestriction.endDate) {
-          const seasonStart = new Date(seasonalRestriction.startDate)
-          const seasonEnd = new Date(seasonalRestriction.endDate)
-          
-          // Check if current month overlaps with seasonal period
-          return !(monthEnd < seasonStart || monthStart > seasonEnd)
-        }
-      }
-      
-      // If no seasonal restriction, show the rate plan
+      // Note: Seasonal restrictions feature not yet implemented in current schema
+      // This will be added in future versions
+      // For now, show all active rate plans
       return true
     })
   }
@@ -296,9 +279,12 @@ const CalendarControls: React.FC = () => {
                       {ratePlan.name}
                     </Box>
                     <Box fontSize="0.75rem" color="#6b7280">
-                      {ratePlan.type} • {ratePlan.adjustmentType}
-                      {ratePlan.adjustmentType !== 'FixedPrice' && (
-                        <span> ({ratePlan.adjustmentValue}{ratePlan.adjustmentType === 'Percentage' ? '%' : ''})</span>
+                      Rate Plan • {ratePlan.priceModifierType}
+                      {ratePlan.priceModifierType === 'Percentage' && (
+                        <span> ({ratePlan.priceModifierValue}%)</span>
+                      )}
+                      {ratePlan.priceModifierType === 'FixedAmount' && (
+                        <span> (${ratePlan.priceModifierValue})</span>
                       )}
                     </Box>
                   </Box>

@@ -94,13 +94,12 @@ const PricingCalendar: React.FC = () => {
   }
   
   const handleSave = async () => {
-    const priceArray = Object.entries(prices).map(([date, amount]) => ({
-      id: `price_${date}`,
-      date,
-      amount
-    }))
-    
     // TODO: Update to use new pricing system
+    // const priceArray = Object.entries(prices).map(([date, amount]) => ({
+    //   id: `price_${date}`,
+    //   date,
+    //   amount
+    // }))
     // dispatch(setPrices({ ratePlanId: selectedRatePlan, prices: priceArray }))
     
     // In real implementation, this would be an API call:

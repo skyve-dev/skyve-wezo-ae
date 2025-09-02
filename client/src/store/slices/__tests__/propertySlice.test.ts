@@ -103,7 +103,7 @@ describe('propertySlice', () => {
     paymentType: PaymentType.Online,
     // New PropertyPricing field
     pricing: {
-      currency: 'AED' as const,
+      currency: 'AED' as any,
       priceMonday: 150,
       priceTuesday: 150,
       priceWednesday: 150,

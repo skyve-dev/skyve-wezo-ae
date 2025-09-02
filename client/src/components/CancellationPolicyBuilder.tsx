@@ -124,25 +124,23 @@ const CancellationPolicyBuilder: React.FC<CancellationPolicyBuilderProps> = ({
 
     // For NonRefundable, we don't need any days
     if (finalType === 'NonRefundable') {
-      const newPolicy: CancellationPolicy = {
-        id: policy?.id || `policy_${Date.now()}`,
-        ratePlanId,
+      // Only send the data needed by the server, no IDs
+      const newPolicy: Partial<CancellationPolicy> = {
         type: finalType
       }
-      onChange(newPolicy)
+      onChange(newPolicy as CancellationPolicy)
       return
     }
 
     // For FullyFlexible and Moderate
-    const newPolicy: CancellationPolicy = {
-      id: policy?.id || `policy_${Date.now()}`,
-      ratePlanId,
+    // Only send the data needed by the server, no IDs
+    const newPolicy: Partial<CancellationPolicy> = {
       type: finalType,
       freeCancellationDays: finalFreeDays,
       ...(finalType === 'Moderate' && { partialRefundDays: finalPartialDays })
     }
     
-    onChange(newPolicy)
+    onChange(newPolicy as CancellationPolicy)
   }
 
   // Handle policy type change

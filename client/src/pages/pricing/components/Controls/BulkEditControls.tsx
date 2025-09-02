@@ -316,7 +316,7 @@ const BulkEditControls: React.FC = () => {
         
         {selectedRatePlanData && (
           <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
-            Target: {selectedRatePlanData.name} ({selectedRatePlanData.type})
+            Target: {selectedRatePlanData.name} (Rate Plan)
           </Box>
         )}
       </Box>

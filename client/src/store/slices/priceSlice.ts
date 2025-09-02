@@ -35,9 +35,36 @@ interface BulkPriceUpdate {
   amount: number
 }
 
+interface PropertyPricing {
+  id: string
+  propertyId: string
+  // Full day prices for each day of the week
+  priceMonday: number
+  priceTuesday: number
+  priceWednesday: number
+  priceThursday: number
+  priceFriday: number
+  priceSaturday: number
+  priceSunday: number
+  // Half day prices
+  halfDayPriceMonday: number
+  halfDayPriceTuesday: number
+  halfDayPriceWednesday: number
+  halfDayPriceThursday: number
+  halfDayPriceFriday: number
+  halfDayPriceSaturday: number
+  halfDayPriceSunday: number
+  currency: string
+  createdAt: string
+  updatedAt: string
+}
+
 interface PriceState {
   // Price data organized by rate plan ID
   pricesByRatePlan: Record<string, Price[]>
+  
+  // Property base pricing (weekly rates)
+  propertyPricing: PropertyPricing | null
   
   // Selected price for editing
   selectedPrice: Price | null
@@ -94,6 +121,7 @@ interface PriceState {
 
 const initialState: PriceState = {
   pricesByRatePlan: {},
+  propertyPricing: null,
   selectedPrice: null,
   
   // UI state
@@ -345,8 +373,27 @@ const priceSlice = createSlice({
   },
   
   extraReducers: (builder) => {
-    // Fetch Prices
+    // Fetch PropertyPricing
     builder
+      .addCase(fetchPropertyPricing.pending, (state) => {
+        console.log('🔷 priceSlice - fetchPropertyPricing.pending')
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPropertyPricing.fulfilled, (state, action) => {
+        state.loading = false
+        state.propertyPricing = action.payload
+        state.error = null
+      })
+      .addCase(fetchPropertyPricing.rejected, (state, action) => {
+        console.log('🔷 priceSlice - fetchPropertyPricing.rejected:', action.payload)
+        state.loading = false
+        state.propertyPricing = null
+        state.error = action.payload as string
+      })
+      
+    // Fetch Prices
+      
       .addCase(fetchPricesForRatePlan.pending, (state, action) => {
         console.log('🔷 priceSlice - fetchPricesForRatePlan.pending:', {
           ratePlanId: action.meta.arg.ratePlanId,
@@ -528,6 +575,23 @@ export const {
 } = priceSlice.actions
 
 // Async Thunks with API Integration
+
+// Fetch PropertyPricing base weekly rates for a property
+export const fetchPropertyPricing = createAsyncThunk(
+  'price/fetchPropertyPricing',
+  async (propertyId: string, { rejectWithValue }) => {
+    console.log('🔷 fetchPropertyPricing THUNK called for propertyId:', propertyId)
+    try {
+      const response = await api.get<{ pricing: PropertyPricing }>(`/api/properties/${propertyId}/pricing/weekly`)
+      return response.pricing
+    } catch (error: any) {
+      console.log('🔷 fetchPropertyPricing ERROR:', error)
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch property pricing'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
 
 // Fetch prices for a rate plan
 export const fetchPricesForRatePlan = createAsyncThunk(

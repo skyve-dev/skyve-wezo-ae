@@ -431,33 +431,61 @@ export const calculateRatePricing = createAsyncThunk(
 
 // Helper function to clean rate plan data before sending to API
 // Converts null values to undefined for optional numeric fields and removes read-only fields
-const cleanRatePlanData = (data: Partial<RatePlan>): Partial<RatePlan> => {
-  const cleaned = { ...data }
+const cleanRatePlanData = (data: Partial<RatePlan>): any => {
+  const cleaned: any = { ...data }
   
   // Remove fields that should never be sent in create/update requests
   const fieldsToRemove = [
     'id',           // ID should only be in the URL/where clause, not in data
     'propertyId',   // Property ID is in the URL
-    'stats',        // Read-only calculated field
     'createdAt',    // Managed by database
     'updatedAt',    // Managed by database
+    'stats',        // Read-only statistics from server
   ] as const
   
   fieldsToRemove.forEach(field => {
     delete cleaned[field]
   })
   
-  // Clean nested objects
+  // Clean nested objects - only send if they have meaningful data
   if (cleaned.features) {
-    // Remove id and ratePlanId from features as they're set by the backend
-    const { id, ratePlanId, ...featuresWithoutIds } = cleaned.features as any
-    cleaned.features = featuresWithoutIds
+    // Check if features has actual amenity data
+    if (cleaned.features.includedAmenityIds && Array.isArray(cleaned.features.includedAmenityIds)) {
+      // Only send the includedAmenityIds array, nothing else
+      cleaned.features = {
+        includedAmenityIds: cleaned.features.includedAmenityIds
+      }
+    } else {
+      // Remove features entirely if it doesn't have valid data
+      delete cleaned.features
+    }
   }
   
   if (cleaned.cancellationPolicy) {
-    // Remove id and ratePlanId from cancellation policy
-    const { id, ratePlanId, ...policyWithoutIds } = cleaned.cancellationPolicy as any
-    cleaned.cancellationPolicy = policyWithoutIds
+    // Check if cancellation policy has actual data
+    if (cleaned.cancellationPolicy.type) {
+      // Build a clean cancellation policy object with only the necessary fields
+      // Explicitly exclude: id, ratePlanId, description (server-generated display field)
+      const cleanPolicy: any = {
+        type: cleaned.cancellationPolicy.type
+      }
+      
+      // Add optional fields only if they have valid values
+      if (cleaned.cancellationPolicy.freeCancellationDays !== undefined && 
+          cleaned.cancellationPolicy.freeCancellationDays !== null) {
+        cleanPolicy.freeCancellationDays = cleaned.cancellationPolicy.freeCancellationDays
+      }
+      
+      if (cleaned.cancellationPolicy.partialRefundDays !== undefined && 
+          cleaned.cancellationPolicy.partialRefundDays !== null) {
+        cleanPolicy.partialRefundDays = cleaned.cancellationPolicy.partialRefundDays
+      }
+      
+      cleaned.cancellationPolicy = cleanPolicy
+    } else {
+      // Remove cancellation policy entirely if it doesn't have a type
+      delete cleaned.cancellationPolicy
+    }
   }
   
   // List of optional numeric fields that should not be null
@@ -470,10 +498,10 @@ const cleanRatePlanData = (data: Partial<RatePlan>): Partial<RatePlan> => {
     'maxGuests'
   ] as const
   
-  // Convert null to undefined for these fields
+  // Convert null to undefined for these fields (remove them from payload)
   optionalNumericFields.forEach(field => {
-    if (cleaned[field] === null) {
-      cleaned[field] = undefined
+    if (cleaned[field] === null || cleaned[field] === undefined) {
+      delete cleaned[field]
     }
   })
   
@@ -486,6 +514,9 @@ export const createRatePlanAsync = createAsyncThunk(
     try {
       // Clean the data before sending to API
       const cleanedData = cleanRatePlanData(params.data)
+      
+      // Debug log to verify cleaned payload structure
+      console.log('🔍 CREATE Rate Plan - Cleaned Payload:', JSON.stringify(cleanedData, null, 2))
       
       const response = await api.post<{ ratePlan?: RatePlan; rate_plan?: RatePlan }>(`/api/properties/${params.propertyId}/rate-plans`, cleanedData)
       // Handle both camelCase and snake_case responses
@@ -508,6 +539,9 @@ export const updateRatePlanAsync = createAsyncThunk(
     try {
       // Clean the data before sending to API
       const cleanedData = cleanRatePlanData(params.data)
+      
+      // Debug log to verify cleaned payload structure
+      console.log('🔍 UPDATE Rate Plan - Cleaned Payload:', JSON.stringify(cleanedData, null, 2))
       
       const response = await api.put<{ ratePlan?: RatePlan; rate_plan?: RatePlan }>(`/api/properties/${params.propertyId}/rate-plans/${params.ratePlanId}`, cleanedData)
       // Handle both camelCase and snake_case responses

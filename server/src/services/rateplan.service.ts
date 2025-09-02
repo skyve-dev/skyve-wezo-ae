@@ -356,7 +356,7 @@ export class RatePlanService {
     // Verify rate plan ownership
     const ratePlan = await this.verifyRatePlanOwnership(ratePlanId, userId);
 
-    // Check for active reservations
+    // Check for active reservations - important business constraint
     const reservationCount = await prisma.reservation.count({
       where: { 
         ratePlanId,
@@ -372,29 +372,12 @@ export class RatePlanService {
       };
     }
 
-    // Check if it's the only rate plan for the property
-    const propertyRatePlansCount = await prisma.ratePlan.count({
-      where: { 
-        propertyId: ratePlan.propertyId,
-        id: { not: ratePlanId }
-      }
-    });
+    // NOTE: Properties can have zero rate plans - they'll use base PropertyPricing only
+    // No need to enforce "at least one rate plan" constraint
 
-    if (propertyRatePlansCount === 0) {
-      return {
-        type: 'blocked',
-        message: 'Cannot delete the last rate plan for a property',
-        details: { reason: 'At least one rate plan must exist per property' }
-      };
-    }
-
-    // Perform cascading deletion
+    // Perform deletion (Prisma cascade will handle RatePlanFeatures and CancellationPolicy)
     await prisma.$transaction(async (tx) => {
-      // Delete related records (CASCADE should handle this, but being explicit)
-      await tx.ratePlanFeatures.deleteMany({ where: { ratePlanId } });
-      await tx.cancellationPolicy.deleteMany({ where: { ratePlanId } });
-      
-      // Delete the rate plan
+      // Delete the rate plan (cascade deletion handles related records automatically)
       await tx.ratePlan.delete({ where: { id: ratePlanId } });
     });
 

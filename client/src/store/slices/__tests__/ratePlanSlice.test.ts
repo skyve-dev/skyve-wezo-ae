@@ -654,7 +654,11 @@ describe('ratePlanSlice', () => {
       const mockError = {
         status: 409,
         getUserMessage: () => 'Cannot delete rate plan with active bookings',
-        errors: { activeBookings: 5 }
+        errors: { activeBookings: 5 },
+        businessContext: {
+          type: 'blocked',
+          details: { activeBookings: 5 }
+        }
       }
       
       mockApi.delete.mockRejectedValue(mockError)

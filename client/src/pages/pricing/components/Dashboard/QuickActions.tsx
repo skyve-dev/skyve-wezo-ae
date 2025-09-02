@@ -3,12 +3,7 @@ import {FaCalendarPlus, FaChartLine, FaCopy, FaDownload, FaEdit, FaPlus, FaUploa
 import {Box} from '@/components'
 import Button from '@/components/base/Button'
 import {useAppShell} from '@/components/base/AppShell'
-
-interface RatePlan {
-  id: string
-  name: string
-  type: string
-}
+import {RatePlan} from '@/store/slices/ratePlanSlice'
 
 interface QuickActionsProps {
   ratePlans: RatePlan[]

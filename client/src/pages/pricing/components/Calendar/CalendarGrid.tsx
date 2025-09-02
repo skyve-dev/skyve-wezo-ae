@@ -12,10 +12,22 @@ interface CalendarDayData {
 
 interface RatePlanWithColor {
   id: string
+  propertyId: string
   name: string
-  type: string
-  adjustmentType: 'FixedPrice' | 'Percentage' | 'FixedDiscount'
-  adjustmentValue: number
+  description?: string
+  priceModifierType: 'Percentage' | 'FixedAmount'
+  priceModifierValue: number
+  minStay?: number
+  maxStay?: number
+  minAdvanceBooking?: number
+  maxAdvanceBooking?: number
+  minGuests?: number
+  maxGuests?: number
+  isActive: boolean
+  isDefault: boolean
+  priority: number
+  createdAt: string
+  updatedAt: string
   color: string
   lightColor: string
 }
@@ -136,9 +148,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     {ratePlan.name}
                   </Box>
                   <Box fontSize="0.75rem" color="#6b7280">
-                    {ratePlan.adjustmentType === 'FixedPrice' && 'Fixed Price'}
-                    {ratePlan.adjustmentType === 'Percentage' && `${ratePlan.adjustmentValue}% adjustment`}
-                    {ratePlan.adjustmentType === 'FixedDiscount' && `AED ${ratePlan.adjustmentValue} discount`}
+                    {ratePlan.priceModifierType === 'FixedAmount' && `Fixed AED ${ratePlan.priceModifierValue}`}
+                    {ratePlan.priceModifierType === 'Percentage' && `${ratePlan.priceModifierValue}% adjustment`}
                   </Box>
                 </Box>
               </Box>

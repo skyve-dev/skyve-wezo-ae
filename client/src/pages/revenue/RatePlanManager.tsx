@@ -59,7 +59,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   
   // Get property context - prefer propertyId from params, fallback to currentProperty
   const { currentProperty, properties } = useAppSelector((state) => state.property)
-  const propertyId = params.propertyId || currentProperty?.propertyId
+  const propertyId = currentProperty?.propertyId
   
   const { openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard } = useAppShell()
   const [isLoading, setIsLoading] = useState(true)

@@ -2,14 +2,7 @@ import React from 'react'
 import {FaArrowDown, FaArrowUp, FaChartLine, FaExclamationTriangle, FaLightbulb} from 'react-icons/fa'
 import {Box} from '@/components'
 import {PriceStatistics} from '@/store/slices/priceSlice'
-
-interface RatePlan {
-  id: string
-  name: string
-  type: string
-  adjustmentType: 'FixedPrice' | 'Percentage' | 'FixedDiscount'
-  adjustmentValue: number
-}
+import {RatePlan} from '@/store/slices/ratePlanSlice'
 
 interface PricingInsightsProps {
   ratePlans: RatePlan[]

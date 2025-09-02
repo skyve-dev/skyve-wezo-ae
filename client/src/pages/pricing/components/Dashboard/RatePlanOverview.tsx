@@ -4,16 +4,7 @@ import {Box} from '@/components'
 import Button from '@/components/base/Button'
 import {useAppShell} from '@/components/base/AppShell'
 import {PriceStatistics} from '@/store/slices/priceSlice'
-
-interface RatePlan {
-  id: string
-  name: string
-  type: string
-  adjustmentType: 'FixedPrice' | 'Percentage' | 'FixedDiscount'
-  adjustmentValue: number
-  isActive: boolean
-  description?: string
-}
+import {RatePlan} from '@/store/slices/ratePlanSlice'
 
 interface RatePlanOverviewProps {
   ratePlans: RatePlan[]
@@ -31,13 +22,11 @@ const RatePlanOverview: React.FC<RatePlanOverviewProps> = ({
   }
   
   const getAdjustmentDescription = (ratePlan: RatePlan) => {
-    switch (ratePlan.adjustmentType) {
-      case 'FixedPrice':
-        return `Fixed price of ${formatPrice(ratePlan.adjustmentValue)}`
+    switch (ratePlan.priceModifierType) {
+      case 'FixedAmount':
+        return `Fixed price of ${formatPrice(ratePlan.priceModifierValue)}`
       case 'Percentage':
-        return `${ratePlan.adjustmentValue}% adjustment from base rate`
-      case 'FixedDiscount':
-        return `${formatPrice(ratePlan.adjustmentValue)} discount from base rate`
+        return `${ratePlan.priceModifierValue}% adjustment from base rate`
       default:
         return 'Unknown pricing model'
     }
@@ -93,7 +82,7 @@ const RatePlanOverview: React.FC<RatePlanOverviewProps> = ({
                       fontSize="0.75rem"
                       fontWeight="500"
                     >
-                      {ratePlan.type}
+                      Rate Plan
                     </Box>
                   </Box>
                   
