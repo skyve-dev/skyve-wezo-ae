@@ -54,6 +54,15 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
     }
 
     const { propertyId } = req.params;
+    
+    // Debug logging to track the request
+    console.log('🔷 PropertyController - updateProperty called');
+    console.log('🔷 PropertyController - propertyId:', propertyId);
+    console.log('🔷 PropertyController - userId:', req.user.id);
+    console.log('🔷 PropertyController - Request body keys:', Object.keys(req.body));
+    console.log('🔷 PropertyController - Request body pricing field exists:', !!req.body.pricing);
+    console.log('🔷 PropertyController - Request body pricing:', req.body.pricing);
+    
     const property = await propertyService.updateProperty(propertyId, req.body, req.user.id);
 
     res.json({

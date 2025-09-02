@@ -33,16 +33,17 @@ interface RatePlanWithColor {
 }
 
 interface PriceData {
-  ratePlan: RatePlanWithColor
+  ratePlan?: RatePlanWithColor  // Optional for base pricing
   price: {
     id: string
-    ratePlanId: string
+    ratePlanId?: string  // Optional for base pricing
     date: string
     amount: number
     createdAt: string
     updatedAt: string
   }
   hasCustomPrice: boolean
+  isBasePricing?: boolean  // NEW: Flag for base PropertyPricing
 }
 
 interface CalendarGridProps {

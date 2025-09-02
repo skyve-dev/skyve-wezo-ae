@@ -12,6 +12,15 @@ const CalendarView: React.FC = () => {
     propertyPricing
   } = useSelector((state: RootState) => state.price)
   
+  // Debug logging for component state
+  console.log('🔍 CalendarView render state:', {
+    dateRange,
+    selectedRatePlanIds,
+    selectedRatePlanIdsLength: selectedRatePlanIds.length,
+    propertyPricing,
+    pricesByRatePlan
+  })
+  
   const { ratePlans } = useSelector((state: RootState) => state.ratePlan)
   
   // Helper function to format date without timezone issues
@@ -118,7 +127,17 @@ const CalendarView: React.FC = () => {
   
   // Helper function to get base price from PropertyPricing for a specific day
   const getBasePriceFromPropertyPricing = (dayOfWeek: number): number | null => {
-    if (!propertyPricing) return null
+    console.log('🔍 getBasePriceFromPropertyPricing called:', {
+      dayOfWeek,
+      propertyPricing: propertyPricing,
+      propertyPricingKeys: propertyPricing ? Object.keys(propertyPricing) : 'null',
+      propertyPricingValues: propertyPricing ? Object.values(propertyPricing) : 'null'
+    })
+    
+    if (!propertyPricing) {
+      console.log('❌ No propertyPricing data available')
+      return null
+    }
     
     // Map day of week to PropertyPricing field names
     const dayFieldMap = {
@@ -132,120 +151,169 @@ const CalendarView: React.FC = () => {
     }
     
     const fieldName = dayFieldMap[dayOfWeek as keyof typeof dayFieldMap]
-    if (!fieldName) return null
+    console.log('🔍 Day field mapping:', { dayOfWeek, fieldName })
+    
+    if (!fieldName) {
+      console.log('❌ No field name found for dayOfWeek:', dayOfWeek)
+      return null
+    }
     
     const basePrice = propertyPricing[fieldName as keyof typeof propertyPricing] as number
-    return basePrice > 0 ? basePrice : null
+    console.log('🔍 Base price lookup:', { fieldName, basePrice })
+    
+    const result = basePrice > 0 ? basePrice : null
+    console.log('🔍 Final result:', result)
+    
+    return result
   }
   
   // Get pricing data for display
   const getPricesForDate = (dateString: string) => {
+    console.log('🔍 getPricesForDate called for date:', dateString)
     const prices = []
     
     // Get day of week for the date (0=Sunday, 1=Monday, ..., 6=Saturday)
     const date = new Date(dateString)
     const dayOfWeek = date.getDay()
     
-    for (const ratePlan of selectedRatePlans) {
-      // Note: activeDays feature not yet implemented in current schema
-      // This will be added in future versions to support day-specific rate plans
-      
-      const ratePlanPrices = pricesByRatePlan[ratePlan.id] || []
-      // Fix: Normalize both stored date and search date for comparison
-      const priceForDate = ratePlanPrices.find(p => normalizeDate(p.date) === dateString)
-      
-      if (priceForDate) {
-        // Show custom price if available
-        prices.push({
-          ratePlan,
-          price: priceForDate,
-          hasCustomPrice: true
-        })
-      } else if (ratePlan.priceModifierType === 'FixedAmount' && ratePlan.priceModifierValue > 0) {
-        // Show base price for fixed price rate plans
-        prices.push({
-          ratePlan,
-          price: {
-            id: `base-${ratePlan.id}-${dateString}`,
-            ratePlanId: ratePlan.id,
-            date: dateString,
-            amount: ratePlan.priceModifierValue,
-            createdAt: '',
-            updatedAt: ''
-          },
-          hasCustomPrice: false
-        })
-      } else if (ratePlan.priceModifierType === 'Percentage') {
-        // Show percentage rate plans
-        // Note: baseRatePlanId feature not yet implemented in current schema
-        // For now, we'll apply percentage to PropertyPricing base rates
-        const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
+    console.log('🔍 Date info:', { dateString, date, dayOfWeek })
+    console.log('🔍 Selected rate plans count:', selectedRatePlans.length)
+    
+    // If rate plans are selected, process them
+    if (selectedRatePlans.length > 0) {
+      for (const ratePlan of selectedRatePlans) {
+        // Note: activeDays feature not yet implemented in current schema
+        // This will be added in future versions to support day-specific rate plans
         
-        if (basePrice !== null && basePrice > 0) {
+        const ratePlanPrices = pricesByRatePlan[ratePlan.id] || []
+        // Fix: Normalize both stored date and search date for comparison
+        const priceForDate = ratePlanPrices.find(p => normalizeDate(p.date) === dateString)
+        
+        if (priceForDate) {
+          // Show custom price if available
+          prices.push({
+            ratePlan,
+            price: priceForDate,
+            hasCustomPrice: true,
+            isBasePricing: false
+          })
+        } else if (ratePlan.priceModifierType === 'FixedAmount' && ratePlan.priceModifierValue > 0) {
+          // Show base price for fixed price rate plans
+          prices.push({
+            ratePlan,
+            price: {
+              id: `base-${ratePlan.id}-${dateString}`,
+              ratePlanId: ratePlan.id,
+              date: dateString,
+              amount: ratePlan.priceModifierValue,
+              createdAt: '',
+              updatedAt: ''
+            },
+            hasCustomPrice: false,
+            isBasePricing: false
+          })
+        } else if (ratePlan.priceModifierType === 'Percentage') {
+          // Show percentage rate plans
+          // Note: baseRatePlanId feature not yet implemented in current schema
+          // For now, we'll apply percentage to PropertyPricing base rates
+          const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
           
-
-          let calculatedAmount = basePrice
-          
-          if (ratePlan.priceModifierType === 'Percentage') {
-            // Apply percentage adjustment 
-            // Positive values: +10% = 110% of base price (basePrice * 1.10)
-            // Negative values: -15% = 85% of base price (basePrice * 0.85)
-            calculatedAmount = basePrice * (1 + ratePlan.priceModifierValue / 100)
-          }
+          if (basePrice !== null && basePrice > 0) {
             
-          if (calculatedAmount > 0) {
-            prices.push({
-              ratePlan,
-              price: {
-                id: `calculated-${ratePlan.id}-${dateString}`,
-                ratePlanId: ratePlan.id,
-                date: dateString,
-                amount: calculatedAmount,
-                createdAt: '',
-                updatedAt: ''
-              },
-              hasCustomPrice: false
-            })
+
+            let calculatedAmount = basePrice
+            
+            if (ratePlan.priceModifierType === 'Percentage') {
+              // Apply percentage adjustment 
+              // Positive values: +10% = 110% of base price (basePrice * 1.10)
+              // Negative values: -15% = 85% of base price (basePrice * 0.85)
+              calculatedAmount = basePrice * (1 + ratePlan.priceModifierValue / 100)
+            }
+              
+            if (calculatedAmount > 0) {
+              prices.push({
+                ratePlan,
+                price: {
+                  id: `calculated-${ratePlan.id}-${dateString}`,
+                  ratePlanId: ratePlan.id,
+                  date: dateString,
+                  amount: calculatedAmount,
+                  createdAt: '',
+                  updatedAt: ''
+                },
+                hasCustomPrice: false,
+                isBasePricing: false
+              })
+            }
           }
-        }
-      } else {
-        // Fallback to PropertyPricing base rates when no custom price exists
-        // and rate plan doesn't have fixed adjustments
-        const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
-        
-        if (basePrice !== null && basePrice > 0) {
-          let calculatedAmount = basePrice
+        } else {
+          // Fallback to PropertyPricing base rates when no custom price exists
+          // and rate plan doesn't have fixed adjustments
+          const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
           
-          // Apply rate plan modifiers to base price
-          if ((ratePlan.priceModifierType as string) === 'Percentage') {
-            calculatedAmount = basePrice * (1 + ratePlan.priceModifierValue / 100)
-          } else {
-            // FixedAmount type - use the fixed value directly
-            calculatedAmount = ratePlan.priceModifierValue
-          }
-          
-          if (calculatedAmount > 0) {
-            prices.push({
-              ratePlan,
-              price: {
-                id: `property-base-${ratePlan.id}-${dateString}`,
-                ratePlanId: ratePlan.id,
-                date: dateString,
-                amount: calculatedAmount,
-                createdAt: '',
-                updatedAt: ''
-              },
-              hasCustomPrice: false
-            })
+          if (basePrice !== null && basePrice > 0) {
+            let calculatedAmount = basePrice
+            
+            // Apply rate plan modifiers to base price
+            if ((ratePlan.priceModifierType as string) === 'Percentage') {
+              calculatedAmount = basePrice * (1 + ratePlan.priceModifierValue / 100)
+            } else {
+              // FixedAmount type - use the fixed value directly
+              calculatedAmount = ratePlan.priceModifierValue
+            }
+            
+            if (calculatedAmount > 0) {
+              prices.push({
+                ratePlan,
+                price: {
+                  id: `property-base-${ratePlan.id}-${dateString}`,
+                  ratePlanId: ratePlan.id,
+                  date: dateString,
+                  amount: calculatedAmount,
+                  createdAt: '',
+                  updatedAt: ''
+                },
+                hasCustomPrice: false,
+                isBasePricing: false
+              })
+            }
           }
         }
       }
+    } else {
+      // NEW: Fallback to base PropertyPricing when no rate plans are selected
+      console.log('🟡 FALLBACK MODE: No rate plans selected, trying base PropertyPricing for date:', dateString)
+      console.log('🟡 Day of week for fallback:', dayOfWeek)
+      
+      const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
+      
+      console.log('🟡 Base price retrieved:', basePrice)
+      
+      if (basePrice !== null && basePrice > 0) {
+        console.log('✅ Adding base pricing entry for date:', dateString, 'amount:', basePrice)
+        prices.push({
+          ratePlan: undefined, // No rate plan for base pricing
+          price: {
+            id: `base-pricing-${dateString}`,
+            ratePlanId: undefined,
+            date: dateString,
+            amount: basePrice,
+            createdAt: '',
+            updatedAt: ''
+          },
+          hasCustomPrice: false,
+          isBasePricing: true // NEW: Flag to indicate this is base pricing
+        })
+      } else {
+        console.log('❌ No valid base price found for date:', dateString, 'dayOfWeek:', dayOfWeek)
+      }
     }
     
+    console.log('🔍 Final prices array for date:', dateString, 'count:', prices.length, 'prices:', prices)
     return prices
   }
   
-  if (!dateRange.startDate || selectedRatePlanIds.length === 0) {
+  if (!dateRange.startDate) {
     return (
       <Box 
         textAlign="center" 
@@ -254,17 +322,32 @@ const CalendarView: React.FC = () => {
         borderRadius="8px"
       >
         <p style={{ color: '#6b7280', fontSize: '1rem' }}>
-          {!dateRange.startDate 
-            ? 'Select a date range to view the calendar'
-            : 'Select rate plans to view pricing'
-          }
+          Select a date range to view the calendar
         </p>
       </Box>
     )
   }
   
+  // Show pricing mode indicator
+  const pricingModeMessage = selectedRatePlanIds.length === 0 
+    ? 'Showing base property pricing (no rate plans selected)'
+    : `Showing pricing for ${selectedRatePlanIds.length} selected rate plan${selectedRatePlanIds.length > 1 ? 's' : ''}`
+  
   return (
     <Box>
+      {/* Pricing mode indicator */}
+      <Box 
+        marginBottom="1rem" 
+        padding="0.75rem" 
+        backgroundColor={selectedRatePlanIds.length === 0 ? "#fef3c7" : "#e0f2fe"}
+        borderRadius="8px"
+        fontSize="0.875rem"
+        color={selectedRatePlanIds.length === 0 ? "#92400e" : "#0c4a6e"}
+        fontWeight="500"
+      >
+        {pricingModeMessage}
+      </Box>
+      
       <CalendarGrid
         calendarDays={calendarDays}
         selectedRatePlans={selectedRatePlans}

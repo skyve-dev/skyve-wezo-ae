@@ -95,6 +95,11 @@ export class PropertyPricingService {
     userId: string,
     prices: WeeklyPricingData
   ): Promise<any> {
+    console.log('🔷 PropertyPricingService - setWeeklyPricing called');
+    console.log('🔷 PropertyPricingService - propertyId:', propertyId);
+    console.log('🔷 PropertyPricingService - userId:', userId);
+    console.log('🔷 PropertyPricingService - prices:', prices);
+    
     // Verify property ownership
     await this.verifyPropertyOwnership(propertyId, userId);
 
@@ -115,11 +120,18 @@ export class PropertyPricingService {
       [prices.sunday, prices.halfDaySunday]
     ];
 
+    console.log('🔷 PropertyPricingService - Validating half-day vs full-day prices');
     for (const [fullDay, halfDay] of dayPairs) {
-      if (halfDay > fullDay) {
+      const fullDayNum = Number(fullDay);
+      const halfDayNum = Number(halfDay);
+      console.log('🔷 PropertyPricingService - Comparing:', { fullDay, halfDay, fullDayNum, halfDayNum });
+      
+      if (halfDayNum > fullDayNum) {
+        console.log('❌ PropertyPricingService - Validation failed: halfDayNum', halfDayNum, '> fullDayNum', fullDayNum);
         throw new Error('Half-day prices should not exceed full-day prices');
       }
     }
+    console.log('✅ PropertyPricingService - Validation passed');
 
     const result = await prisma.propertyPricing.upsert({
       where: { propertyId },

@@ -381,6 +381,14 @@ const priceSlice = createSlice({
         state.error = null
       })
       .addCase(fetchPropertyPricing.fulfilled, (state, action) => {
+        console.log('🔷 priceSlice - fetchPropertyPricing.fulfilled with payload:', action.payload)
+        console.log('🔷 Payload structure:', {
+          keys: Object.keys(action.payload || {}),
+          values: Object.values(action.payload || {}),
+          priceMonday: action.payload?.priceMonday,
+          priceTuesday: action.payload?.priceTuesday,
+          priceSunday: action.payload?.priceSunday
+        })
         state.loading = false
         state.propertyPricing = action.payload
         state.error = null
@@ -582,8 +590,51 @@ export const fetchPropertyPricing = createAsyncThunk(
   async (propertyId: string, { rejectWithValue }) => {
     console.log('🔷 fetchPropertyPricing THUNK called for propertyId:', propertyId)
     try {
-      const response = await api.get<{ pricing: PropertyPricing }>(`/api/properties/${propertyId}/pricing/weekly`)
-      return response.pricing
+      const response = await api.get<{ pricing: any }>(`/api/properties/${propertyId}/pricing/weekly`)
+      console.log('🔷 fetchPropertyPricing API RESPONSE:', response)
+      console.log('🔷 fetchPropertyPricing response.pricing:', response.pricing)
+      console.log('🔷 fetchPropertyPricing response.pricing fields:', {
+        keys: Object.keys(response.pricing || {}),
+        fullDay: response.pricing?.fullDay,
+        halfDay: response.pricing?.halfDay
+      })
+      
+      // Transform server format to client format
+      const serverPricing = response.pricing
+      if (!serverPricing || !serverPricing.fullDay) {
+        throw new Error('Invalid pricing data structure from server')
+      }
+      
+      const transformedPricing: PropertyPricing = {
+        id: serverPricing.id,
+        propertyId: serverPricing.propertyId,
+        priceMonday: serverPricing.fullDay.monday,
+        priceTuesday: serverPricing.fullDay.tuesday,
+        priceWednesday: serverPricing.fullDay.wednesday,
+        priceThursday: serverPricing.fullDay.thursday,
+        priceFriday: serverPricing.fullDay.friday,
+        priceSaturday: serverPricing.fullDay.saturday,
+        priceSunday: serverPricing.fullDay.sunday,
+        halfDayPriceMonday: serverPricing.halfDay?.monday || 0,
+        halfDayPriceTuesday: serverPricing.halfDay?.tuesday || 0,
+        halfDayPriceWednesday: serverPricing.halfDay?.wednesday || 0,
+        halfDayPriceThursday: serverPricing.halfDay?.thursday || 0,
+        halfDayPriceFriday: serverPricing.halfDay?.friday || 0,
+        halfDayPriceSaturday: serverPricing.halfDay?.saturday || 0,
+        halfDayPriceSunday: serverPricing.halfDay?.sunday || 0,
+        currency: serverPricing.currency || 'AED',
+        createdAt: serverPricing.createdAt || '',
+        updatedAt: serverPricing.updatedAt || ''
+      }
+      
+      console.log('🔷 fetchPropertyPricing TRANSFORMED pricing:', transformedPricing)
+      console.log('🔷 fetchPropertyPricing TRANSFORMED price fields:', {
+        priceMonday: transformedPricing.priceMonday,
+        priceTuesday: transformedPricing.priceTuesday,
+        priceSunday: transformedPricing.priceSunday
+      })
+      
+      return transformedPricing
     } catch (error: any) {
       console.log('🔷 fetchPropertyPricing ERROR:', error)
       const errorMessage = error.getUserMessage ? error.getUserMessage() : 

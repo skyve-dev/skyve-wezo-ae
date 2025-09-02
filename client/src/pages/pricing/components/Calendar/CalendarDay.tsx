@@ -36,16 +36,17 @@ interface RatePlanWithColor {
 }
 
 interface PriceData {
-  ratePlan: RatePlanWithColor
+  ratePlan?: RatePlanWithColor  // Optional for base pricing
   price: {
     id: string
-    ratePlanId: string
+    ratePlanId?: string  // Optional for base pricing
     date: string
     amount: number
     createdAt: string
     updatedAt: string
   }
   hasCustomPrice: boolean
+  isBasePricing?: boolean  // NEW: Flag for base PropertyPricing
 }
 
 interface CalendarDayProps {
@@ -93,7 +94,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
       // If only one rate plan is selected, open edit form directly
       if (selectedRatePlanIds.length === 1) {
         const ratePlanId = selectedRatePlanIds[0]
-        const existingPrice = prices.find(p => p.ratePlan.id === ratePlanId)
+        const existingPrice = prices.find(p => p.ratePlan?.id === ratePlanId)
         
         dispatch(openPriceEditForm({
           date: day.dateString,
@@ -105,13 +106,16 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         // For now, open edit form for first rate plan
         if (selectedRatePlanIds.length > 0) {
           const ratePlanId = selectedRatePlanIds[0]
-          const existingPrice = prices.find(p => p.ratePlan.id === ratePlanId)
+          const existingPrice = prices.find(p => p.ratePlan?.id === ratePlanId)
           
           dispatch(openPriceEditForm({
             date: day.dateString,
             ratePlanId,
             amount: existingPrice?.price.amount || 0
           }))
+        } else {
+          // When no rate plans selected (base pricing mode), could show property pricing editor
+          // For now, do nothing since base pricing is managed in PropertyPricing
         }
       }
     }
@@ -124,11 +128,15 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     if (isDisabled) return // Prevent editing past dates
     
     if (!bulkEditMode) {
-      dispatch(openPriceEditForm({
-        date: day.dateString,
-        ratePlanId: priceData.ratePlan.id,
-        amount: priceData.price.amount
-      }))
+      // Only allow editing rate plan prices, not base pricing
+      if (!priceData.isBasePricing && priceData.ratePlan) {
+        dispatch(openPriceEditForm({
+          date: day.dateString,
+          ratePlanId: priceData.ratePlan.id,
+          amount: priceData.price.amount
+        }))
+      }
+      // Base pricing is read-only in this context (edited via PropertyPricing)
     }
   }
   
@@ -254,50 +262,60 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
             </Box>
           )}
           
-          {prices.slice(0, isMobile ? 2 : 4).map((priceData, index) => (
-            <Box
-              key={`${priceData.ratePlan.id}-${index}`}
-              padding="0.25rem 0.5rem"
-              backgroundColor={priceData.hasCustomPrice ? '#f0fdf4' : '#f8fafc'}
-              border={`1px solid ${priceData.hasCustomPrice ? '#bbf7d0' : '#e2e8f0'}`}
-              borderRadius="4px"
-              fontSize={isMobile ? '0.625rem' : '0.75rem'}
-              cursor="pointer"
-              onClick={(e) => handlePriceClick(e, priceData)}
-              transition="all 0.2s"
-              whileHover={{ backgroundColor: priceData.hasCustomPrice ? '#ecfdf5' : '#f1f5f9' }}
-            >
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box display="flex" alignItems="center" gap="0.25rem">
-                  <Box
-                    width="6px"
-                    height="6px"
-                    borderRadius="50%"
-                    backgroundColor={priceData.ratePlan.color}
-                  />
-                  <span 
-                    style={{ 
-                      color: priceData.hasCustomPrice ? '#166534' : '#475569',
-                      fontWeight: priceData.hasCustomPrice ? '500' : '400',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      maxWidth: isMobile ? '40px' : '60px'
-                    }}
+          {prices.slice(0, isMobile ? 2 : 4).map((priceData, index) => {
+            const isBasePricing = priceData.isBasePricing
+            const backgroundColor = isBasePricing ? '#fef3c7' : (priceData.hasCustomPrice ? '#f0fdf4' : '#f8fafc')
+            const borderColor = isBasePricing ? '#f59e0b' : (priceData.hasCustomPrice ? '#bbf7d0' : '#e2e8f0')
+            const textColor = isBasePricing ? '#92400e' : (priceData.hasCustomPrice ? '#166534' : '#475569')
+            const ratePlanName = isBasePricing ? 'Base' : (priceData.ratePlan?.name || 'Unknown')
+            const ratePlanColor = isBasePricing ? '#f59e0b' : (priceData.ratePlan?.color || '#6b7280')
+            
+            return (
+              <Box
+                key={isBasePricing ? `base-pricing-${index}` : `${priceData.ratePlan?.id || 'unknown'}-${index}`}
+                padding="0.25rem 0.5rem"
+                backgroundColor={backgroundColor}
+                border={`1px solid ${borderColor}`}
+                borderRadius="4px"
+                fontSize={isMobile ? '0.625rem' : '0.75rem'}
+                cursor={isBasePricing ? 'default' : 'pointer'}  // Base pricing is read-only
+                onClick={(e) => handlePriceClick(e, priceData)}
+                transition="all 0.2s"
+                opacity={isBasePricing ? 0.9 : 1}  // Slightly dimmed for base pricing
+                whileHover={!isBasePricing ? { backgroundColor: priceData.hasCustomPrice ? '#ecfdf5' : '#f1f5f9' } : {}}
+              >
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box display="flex" alignItems="center" gap="0.25rem">
+                    <Box
+                      width="6px"
+                      height="6px"
+                      borderRadius="50%"
+                      backgroundColor={ratePlanColor}
+                    />
+                    <span 
+                      style={{ 
+                        color: textColor,
+                        fontWeight: priceData.hasCustomPrice || isBasePricing ? '500' : '400',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        maxWidth: isMobile ? '40px' : '60px'
+                      }}
+                    >
+                      {isMobile ? ratePlanName.substring(0, 4) : ratePlanName}
+                    </span>
+                  </Box>
+                  
+                  <Box 
+                    fontWeight="500" 
+                    color={textColor}
                   >
-                    {isMobile ? priceData.ratePlan.name.substring(0, 4) : priceData.ratePlan.name}
-                  </span>
-                </Box>
-                
-                <Box 
-                  fontWeight="500" 
-                  color={priceData.hasCustomPrice ? '#166534' : '#475569'}
-                >
-                  {formatPrice(priceData.price.amount)}
+                    {formatPrice(priceData.price.amount)}
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          ))}
+            )
+          })}
           
           {/* Show count if more prices exist */}
           {prices.length > (isMobile ? 2 : 4) && (

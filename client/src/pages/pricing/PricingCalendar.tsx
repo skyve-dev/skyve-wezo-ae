@@ -247,34 +247,41 @@ const PricingCalendar: React.FC = () => {
           </Box>
         )}
         
-        {/* No Rate Plans State */}
-        {!ratePlansLoading && ratePlans.length === 0 && (
-          <Box 
-            textAlign="center" 
-            padding="3rem" 
-            backgroundColor="#f9fafb" 
-            borderRadius="8px"
-            marginBottom="2rem"
-          >
-            <FaChartLine size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
-            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-              No Rate Plans Found
-            </h3>
-            <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
-              Create rate plans first to start managing pricing
-            </p>
-            <Button
-              label="Create Rate Plan"
-              icon={<FaChartLine />}
-              variant="promoted"
-              onClick={() => window.location.href = '/rate-plan-create'}
-            />
-          </Box>
-        )}
-        
-        {/* Main Content */}
-        {!ratePlansLoading && ratePlans.length > 0 && (
+        {/* Main Content - Always show when not loading */}
+        {!ratePlansLoading && (
           <>
+            {/* Rate Plan Creation Banner - Only when zero rate plans */}
+            {ratePlans.length === 0 && (
+              <Box 
+                padding="1rem" 
+                backgroundColor="#fef3c7" 
+                border="1px solid #f59e0b"
+                borderRadius="8px"
+                marginBottom="2rem"
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                flexWrap="wrap"
+                gap="1rem"
+              >
+                <Box>
+                  <Box fontSize="0.875rem" fontWeight="600" color="#92400e" marginBottom="0.25rem">
+                    No Rate Plans Active
+                  </Box>
+                  <Box fontSize="0.75rem" color="#a16207">
+                    Calendar showing base property pricing only. Create rate plans for advanced pricing strategies.
+                  </Box>
+                </Box>
+                <Button
+                  label="Create Rate Plan"
+                  icon={<FaChartLine />}
+                  variant="promoted"
+                  size="small"
+                  onClick={() => window.location.href = '/rate-plan-create'}
+                />
+              </Box>
+            )}
+            
             {/* Controls */}
             <Box marginBottom="2rem">
               {calendarMode === 'calendar' ? (
@@ -288,8 +295,8 @@ const PricingCalendar: React.FC = () => {
               )}
             </Box>
             
-            {/* Bulk Edit Controls - Only show in calendar mode */}
-            {calendarMode === 'calendar' && bulkEditMode && (
+            {/* Bulk Edit Controls - Only show in calendar mode and when rate plans exist */}
+            {calendarMode === 'calendar' && bulkEditMode && ratePlans.length > 0 && (
               <Box marginBottom="2rem">
                 <BulkEditControls />
               </Box>
@@ -300,7 +307,24 @@ const PricingCalendar: React.FC = () => {
               {calendarMode === 'calendar' ? (
                 <CalendarView />
               ) : (
-                <DashboardView />
+                ratePlans.length > 0 ? (
+                  <DashboardView />
+                ) : (
+                  <Box 
+                    textAlign="center" 
+                    padding="3rem" 
+                    backgroundColor="#f9fafb" 
+                    borderRadius="8px"
+                  >
+                    <FaChartLine size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                      Dashboard Available with Rate Plans
+                    </h3>
+                    <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+                      Create rate plans to view dashboard analytics and insights
+                    </p>
+                  </Box>
+                )
               )}
             </Box>
           </>

@@ -1,5 +1,6 @@
 import prisma from '../config/database';
 import { Prisma } from '@prisma/client';
+import propertyPricingService, { WeeklyPricingData } from './property-pricing.service';
 
 export class PropertyService {
   async createProperty(data: any, ownerId: string): Promise<any> {
@@ -173,7 +174,7 @@ export class PropertyService {
       rules,
       bookingType,
       paymentType,
-      // pricing removed - now managed through rate plans
+      pricing, // Re-added pricing support for unified property management
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
@@ -188,6 +189,13 @@ export class PropertyService {
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
     };
+
+    // Debug log to ensure pricing variable is being used (prevents TS error)
+    console.log('🔷 PropertyService - updateProperty called');
+    console.log('🔷 PropertyService - Full data received:', JSON.stringify(data, null, 2));
+    console.log('🔷 PropertyService - pricing extracted:', pricing);
+    console.log('🔷 PropertyService - pricing exists:', !!pricing);
+    console.log('🔷 PropertyService - pricing keys:', pricing ? Object.keys(pricing) : 'no pricing');
 
     // Update address if provided
     if (address) {
@@ -343,6 +351,44 @@ export class PropertyService {
         },
       },
     });
+
+    // Handle PropertyPricing update if provided
+    if (pricing) {
+      console.log('🔷 PropertyService - updating pricing for propertyId:', propertyId);
+      console.log('🔷 PropertyService - pricing data received:', pricing);
+      
+      // Transform client pricing format to service format
+      const weeklyPricingData: WeeklyPricingData = {
+        // Full day prices (ensure numbers)
+        monday: Number(pricing.priceMonday) || 0,
+        tuesday: Number(pricing.priceTuesday) || 0,
+        wednesday: Number(pricing.priceWednesday) || 0,
+        thursday: Number(pricing.priceThursday) || 0,
+        friday: Number(pricing.priceFriday) || 0,
+        saturday: Number(pricing.priceSaturday) || 0,
+        sunday: Number(pricing.priceSunday) || 0,
+        
+        // Half day prices (ensure numbers, default to 70% of full day if not provided)
+        halfDayMonday: Number(pricing.halfDayPriceMonday) || Math.round(Number(pricing.priceMonday || 0) * 0.7),
+        halfDayTuesday: Number(pricing.halfDayPriceTuesday) || Math.round(Number(pricing.priceTuesday || 0) * 0.7),
+        halfDayWednesday: Number(pricing.halfDayPriceWednesday) || Math.round(Number(pricing.priceWednesday || 0) * 0.7),
+        halfDayThursday: Number(pricing.halfDayPriceThursday) || Math.round(Number(pricing.priceThursday || 0) * 0.7),
+        halfDayFriday: Number(pricing.halfDayPriceFriday) || Math.round(Number(pricing.priceFriday || 0) * 0.7),
+        halfDaySaturday: Number(pricing.halfDayPriceSaturday) || Math.round(Number(pricing.priceSaturday || 0) * 0.7),
+        halfDaySunday: Number(pricing.halfDayPriceSunday) || Math.round(Number(pricing.priceSunday || 0) * 0.7)
+      };
+      
+      console.log('🔷 PropertyService - transformed pricing data:', weeklyPricingData);
+      
+      try {
+        await propertyPricingService.setWeeklyPricing(propertyId, ownerId, weeklyPricingData);
+        console.log('🔷 PropertyService - pricing updated successfully');
+      } catch (pricingError) {
+        console.error('🔷 PropertyService - pricing update failed:', pricingError);
+        // Don't throw error here to avoid breaking property update
+        // Pricing update failure should be logged but not block property update
+      }
+    }
 
     return property;
   }
@@ -531,7 +577,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        // pricing include removed - now managed through rate plans
+        pricing: true, // Re-added pricing support for unified property management
         // cancellation: removed - now handled by rate plans
         owner: {
           select: {
@@ -548,6 +594,8 @@ export class PropertyService {
   }
 
   async getPropertiesByOwner(ownerId: string) {
+    console.log('🔷 PropertyService - getPropertiesByOwner called for userId:', ownerId);
+    
     const properties = await prisma.property.findMany({
       where: { ownerId },
       include: {
@@ -564,10 +612,16 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        // pricing include removed - now managed through rate plans
+        pricing: true, // Re-added pricing support for unified property management
         // cancellation: removed - now handled by rate plans
       },
     });
+
+    console.log('🔷 PropertyService - getPropertiesByOwner found', properties.length, 'properties');
+    if (properties.length > 0) {
+      console.log('🔷 PropertyService - First property pricing:', properties[0].pricing);
+      console.log('🔷 PropertyService - First property keys:', Object.keys(properties[0]));
+    }
 
     return properties;
   }
