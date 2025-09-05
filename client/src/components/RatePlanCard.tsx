@@ -1,23 +1,13 @@
 import React from 'react'
 import { 
   IoIosCheckmarkCircle,
-  IoIosTrendingUp,
   IoIosGift,
-  IoIosStar,
-  IoIosFlash
+  IoIosStar
 } from 'react-icons/io'
 import { Box } from './base/Box'
 import { type RatePlan } from '@/store/slices/ratePlanSlice'
 import { type BookingCriteria } from './RatePlanSelector'
 
-interface RequirementCheck {
-  type: 'stay' | 'guests' | 'advance'
-  label: string
-  currentValue: number
-  requiredValue: number
-  met: boolean
-  actionText?: string
-}
 
 interface RatePlanCardProps {
   ratePlan: RatePlan
@@ -32,7 +22,7 @@ const RatePlanCard: React.FC<RatePlanCardProps> = ({
   ratePlan,
   isSelected,
   onSelect,
-  bookingCriteria,
+  bookingCriteria: _bookingCriteria,
   basePrice,
   nights
 }) => {

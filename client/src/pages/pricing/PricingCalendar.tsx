@@ -8,7 +8,6 @@ import Button from '@/components/base/Button'
 import PropertySelector from '@/components/PropertySelector'
 import CalendarView from './components/Calendar/CalendarView'
 import DashboardView from './components/Dashboard/DashboardView'
-import PriceEditDialog from './components/Controls/PriceEditDialog'
 import ModeToggle from './components/Controls/ModeToggle'
 import BulkEditControls from './components/Controls/BulkEditControls'
 import CalendarControls from './components/Controls/CalendarControls'
@@ -16,10 +15,8 @@ import {
   setCalendarMode,
   setDateRange,
   setSelectedRatePlans,
-  fetchPricesForRatePlan,
   fetchPropertyPricing,
-  clearPrices,
-  clearRefreshTrigger
+  clearPrices
 } from '@/store/slices/priceSlice'
 import { fetchRatePlans, clearRatePlans } from '@/store/slices/ratePlanSlice'
 import { RootState } from '@/store'
@@ -33,11 +30,9 @@ const PricingCalendar: React.FC = () => {
     calendarMode,
     selectedRatePlanIds,
     dateRange,
-    priceEditForm,
     bulkEditMode,
     loading,
     error,
-    needsRefresh
   } = useSelector((state: RootState) => state.price)
   
   const { ratePlans, loading: ratePlansLoading } = useSelector((state: RootState) => state.ratePlan)
@@ -116,36 +111,9 @@ const PricingCalendar: React.FC = () => {
     }
   }, [ratePlans, selectedRatePlanIds.length, dispatch])
   
-  // Load prices when rate plans and date range are selected
-  useEffect(() => {
-
-    
-    if (selectedRatePlanIds.length > 0 && dateRange.startDate && dateRange.endDate) {
-
-      selectedRatePlanIds.forEach(ratePlanId => {
-        dispatch(fetchPricesForRatePlan({
-          ratePlanId,
-          startDate: dateRange.startDate!,
-          endDate: dateRange.endDate!
-        }))
-      })
-    }
-  }, [selectedRatePlanIds, dateRange, dispatch])
+  // Note: Rate plans no longer have date-specific pricing.
+  // They are only modifiers applied to property base pricing.
   
-  // Refresh prices when server data changes after save
-  useEffect(() => {
-    if (needsRefresh && dateRange.startDate && dateRange.endDate) {
-      // Re-fetch prices for the updated rate plan
-      dispatch(fetchPricesForRatePlan({
-        ratePlanId: needsRefresh.ratePlanId,
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate
-      }))
-      
-      // Clear the refresh trigger
-      dispatch(clearRefreshTrigger())
-    }
-  }, [needsRefresh, dateRange, dispatch])
   
   // Handle mode change
   const handleModeChange = (mode: 'calendar' | 'dashboard') => {
@@ -330,10 +298,6 @@ const PricingCalendar: React.FC = () => {
           </>
         )}
         
-        {/* Price Edit Dialog */}
-        {priceEditForm.isOpen && (
-          <PriceEditDialog />
-        )}
       </Box>
     </SecuredPage>
   )

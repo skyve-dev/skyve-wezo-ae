@@ -123,7 +123,7 @@ describe('Redux Store Integration', () => {
       expect(state.ratePlan).toBeDefined()
 
       // Price slice
-      expect(state.price.pricesByRatePlan).toEqual({})
+      // Note: pricesByRatePlan removed - rate plans no longer have date-specific pricing
       expect(state.price.selectedRatePlanIds).toEqual([])
 
       // Error slice

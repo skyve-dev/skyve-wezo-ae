@@ -4,7 +4,7 @@ import {RootState, useAppDispatch} from '@/store'
 import {FaEdit, FaPlus} from 'react-icons/fa'
 import {IoIosCheckmark} from 'react-icons/io'
 import {Box} from '@/components'
-import {openPriceEditForm, setSelectedDate, toggleDateSelection, openDateOverrideForm} from '@/store/slices/priceSlice'
+import {setSelectedDate, toggleDateSelection, openDateOverrideForm} from '@/store/slices/priceSlice'
 
 interface CalendarDayData {
   date: Date
@@ -66,8 +66,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   const dispatch = useAppDispatch()
   const { 
     bulkEditMode, 
-    selectedDates, 
-    selectedRatePlanIds 
+    selectedDates
   } = useSelector((state: RootState) => state.price)
   
   const isMobile = window.innerWidth < 768
@@ -94,46 +93,21 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     } else {
       dispatch(setSelectedDate(day.dateString))
       
-      // If only one rate plan is selected, open edit form directly
-      if (selectedRatePlanIds.length === 1) {
-        const ratePlanId = selectedRatePlanIds[0]
-        const existingPrice = prices.find(p => p.ratePlan?.id === ratePlanId)
-        
-        dispatch(openPriceEditForm({
-          date: day.dateString,
-          ratePlanId,
-          amount: existingPrice?.price.amount || 0
-        }))
-      } else {
-        // Show date details or price selection modal
-        // For now, open edit form for first rate plan
-        if (selectedRatePlanIds.length > 0) {
-          const ratePlanId = selectedRatePlanIds[0]
-          const existingPrice = prices.find(p => p.ratePlan?.id === ratePlanId)
-          
-          dispatch(openPriceEditForm({
-            date: day.dateString,
-            ratePlanId,
-            amount: existingPrice?.price.amount || 0
-          }))
-        } else {
-          // When no rate plans selected (base pricing mode), open date override dialog
-          const existingOverride = prices.find(p => p.isBasePricing && p.hasCustomPrice)
-          dispatch(openDateOverrideForm({
-            date: day.dateString,
-            existingOverride: existingOverride?.price ? {
-              id: existingOverride.price.id,
-              propertyId: '', // Will be filled by the reducer
-              date: existingOverride.price.date,
-              price: existingOverride.price.amount,
-              halfDayPrice: existingOverride.halfDayPrice, // Get half-day price from PriceData
-              reason: existingOverride.reason, // Get reason from PriceData
-              createdAt: existingOverride.price.createdAt,
-              updatedAt: existingOverride.price.updatedAt
-            } : undefined
-          }))
-        }
-      }
+      // Always open date override dialog for property-level pricing
+      const existingOverride = prices.find(p => p.isBasePricing && p.hasCustomPrice)
+      dispatch(openDateOverrideForm({
+        date: day.dateString,
+        existingOverride: existingOverride?.price ? {
+          id: existingOverride.price.id,
+          propertyId: '', // Will be filled by the reducer
+          date: existingOverride.price.date,
+          price: existingOverride.price.amount,
+          halfDayPrice: existingOverride.halfDayPrice,
+          reason: existingOverride.reason,
+          createdAt: existingOverride.price.createdAt,
+          updatedAt: existingOverride.price.updatedAt
+        } : undefined
+      }))
     }
   }
   
@@ -162,11 +136,9 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
           existingOverride
         }))
       } else if (priceData.ratePlan) {
-        // Handle rate plan prices
-        dispatch(openPriceEditForm({
-          date: day.dateString,
-          ratePlanId: priceData.ratePlan.id,
-          amount: priceData.price.amount
+        // Rate plans are read-only modifiers - open property override instead
+        dispatch(openDateOverrideForm({
+          date: day.dateString
         }))
       }
     }
@@ -301,13 +273,10 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
               color="#6b7280"
               onClick={(e) => {
                 e.stopPropagation()
-                if (selectedRatePlanIds.length > 0) {
-                  dispatch(openPriceEditForm({
-                    date: day.dateString,
-                    ratePlanId: selectedRatePlanIds[0],
-                    amount: 0
-                  }))
-                }
+                // Open property pricing override dialog
+                dispatch(openDateOverrideForm({
+                  date: day.dateString
+                }))
               }}
             >
               <FaPlus size={10} style={{ marginBottom: '0.25rem' }} />
