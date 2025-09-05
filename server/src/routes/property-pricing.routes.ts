@@ -45,4 +45,10 @@ router.get(
   propertyPricingController.getBasePrice
 );
 
+// Get public pricing calendar for a property (public endpoint)
+router.get(
+  '/properties/:propertyId/pricing/public-calendar',
+  propertyPricingController.getPublicPricingCalendar
+);
+
 export default router;

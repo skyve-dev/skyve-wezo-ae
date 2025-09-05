@@ -92,6 +92,17 @@ interface PriceState {
   // Pricing calendar data (combined weekly + overrides)
   pricingCalendar: PricingCalendarDay[]
   
+  // Public pricing calendar data for display (date string as key)
+  publicPricingCalendar: Record<string, {
+    fullDayPrice: number
+    halfDayPrice: number
+    currency: string
+    isOverride?: boolean
+    hasDiscount?: boolean
+    originalPrice?: number
+    isAvailable?: boolean
+  }>
+  
   // Selected price for editing
   selectedPrice: Price | null
   
@@ -162,6 +173,7 @@ const initialState: PriceState = {
   propertyPricing: null,
   dateOverrides: [],
   pricingCalendar: [],
+  publicPricingCalendar: {},
   selectedPrice: null,
   
   // Date override form
@@ -744,6 +756,21 @@ const priceSlice = createSlice({
         state.loading = false
         state.error = action.payload as string
       })
+      
+      // Fetch Public Pricing Calendar
+      .addCase(fetchPublicPricingCalendar.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPublicPricingCalendar.fulfilled, (state, action) => {
+        state.publicPricingCalendar = action.payload
+        state.loading = false
+      })
+      .addCase(fetchPublicPricingCalendar.rejected, (state, action) => {
+        state.loading = false
+        state.publicPricingCalendar = {}
+        state.error = action.payload as string
+      })
   }
 })
 
@@ -1064,6 +1091,40 @@ export const deleteDateOverrides = createAsyncThunk(
     } catch (error: any) {
       const errorMessage = error.getUserMessage ? error.getUserMessage() : 
                           error.serverMessage || error.message || 'Failed to delete date overrides'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+// Fetch public pricing calendar (no authentication required)
+export const fetchPublicPricingCalendar = createAsyncThunk(
+  'price/fetchPublicPricingCalendar',
+  async (params: { propertyId: string; startDate: string; endDate: string }, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams({
+        startDate: params.startDate,
+        endDate: params.endDate
+      })
+      
+      const response = await api.get<{ 
+        calendar: Record<string, {
+          fullDayPrice: number
+          halfDayPrice: number
+          currency: string
+          isOverride?: boolean
+          hasDiscount?: boolean
+          originalPrice?: number
+          isAvailable?: boolean
+        }>
+      }>(
+        `/api/properties/${params.propertyId}/pricing/public-calendar?${queryParams}`
+      )
+      
+      // Transform the calendar object to match our PriceInfo interface
+      return response.calendar || {}
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch public pricing calendar'
       return rejectWithValue(errorMessage)
     }
   }

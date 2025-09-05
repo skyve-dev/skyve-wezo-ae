@@ -4,6 +4,7 @@ export { default as DatePicker } from './base/DatePicker';
 export { default as DateRangePicker } from './base/DateRangePicker';
 export { default as Input } from './base/Input';
 export { default as NumberStepperInput } from './base/NumberStepperInput';
+export { default as PricingCalendar } from './base/PricingCalendar';
 export { default as SelectionPicker } from './base/SelectionPicker';
 export { default as SlidingDrawer } from './base/SlidingDrawer';
 export { default as Tab } from './base/Tab';

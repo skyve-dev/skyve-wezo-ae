@@ -4,9 +4,10 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { fetchPropertyById } from '@/store/slices/propertySlice'
 import { fetchPublicRatePlans, calculateRatePricing } from '@/store/slices/ratePlanSlice'
 import { checkBookingAvailability } from '@/store/slices/availabilitySlice'
+import { fetchPublicPricingCalendar } from '@/store/slices/priceSlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
-import { DateRangePicker, DatePicker, ToggleButton } from '@/components'
+import { ToggleButton, PricingCalendar } from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
@@ -54,12 +55,14 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   const { currentProperty, loading, error } = useAppSelector((state) => state.property)
   const { currentRoleMode } = useAppSelector((state) => state.auth)
   const { ratePlans } = useAppSelector((state) => state.ratePlan)
+  const { publicPricingCalendar, loading: pricingLoading } = useAppSelector((state) => state.price)
   
   // Local state for booking widget
   const [bookingType, setBookingType] = useState<'half-day' | 'full-stay'>('full-stay')
   const [dateRange, setDateRange] = useState<{startDate: Date | null, endDate: Date | null}>({ startDate: null, endDate: null })
   const [singleDate, setSingleDate] = useState<Date | null>(null)
   const [numGuests, setNumGuests] = useState(1)
+  const [calendarLoaded, setCalendarLoaded] = useState(false)
   const [pricingCalculation, setPricingCalculation] = useState<any>(null)
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<string>('')
   
@@ -95,6 +98,19 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
     return { checkInDate: '', checkOutDate: '' }
   }
 
+  // Handle pricing calendar selection
+  const handleCalendarSelection = (range: { startDate: Date | null, endDate: Date | null }) => {
+    if (bookingType === 'half-day') {
+      // For half-day, only use the start date
+      setSingleDate(range.startDate)
+      setDateRange({ startDate: null, endDate: null })
+    } else {
+      // For full-stay, use the full range
+      setDateRange(range)
+      setSingleDate(null)
+    }
+  }
+
   // Fetch property data on mount
   useEffect(() => {
     if (actualPropertyId && actualPropertyId !== 'new') {
@@ -103,6 +119,23 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
       dispatch(fetchPublicRatePlans(actualPropertyId))
     }
   }, [actualPropertyId, dispatch])
+
+  // Fetch pricing calendar data for next 90 days
+  useEffect(() => {
+    if (actualPropertyId && actualPropertyId !== 'new' && !calendarLoaded) {
+      const startDate = new Date()
+      const endDate = new Date()
+      endDate.setDate(startDate.getDate() + 90) // Next 90 days
+      
+      dispatch(fetchPublicPricingCalendar({
+        propertyId: actualPropertyId,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
+      })).then(() => {
+        setCalendarLoaded(true)
+      })
+    }
+  }, [actualPropertyId, calendarLoaded, dispatch])
 
   // Calculate pricing when dates or guest count changes
   useEffect(() => {
@@ -707,7 +740,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
         {/* Right Sidebar: Booking Widget (Mobile & Desktop) */}
         <Box
           width="100%"
-          widthMd="350px"
+          widthMd="500px"
           display="block"
           marginBottom="2rem"
           marginBottomMd="0"
@@ -764,30 +797,21 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
               />
             </Box>
 
-            {/* Date Selection */}
+            {/* Pricing Calendar */}
             <Box marginBottom="1rem">
-              {bookingType === 'half-day' ? (
-                <DatePicker
-                  label="Booking Date"
-                  value={singleDate ? singleDate.toISOString() : ''}
-                  onChange={(value) => setSingleDate(value ? new Date(value) : null)}
-                  placeholder="Select your booking date"
-                  minDate={new Date().toISOString()}
-                  helperText="Select the date for your half-day booking"
-                  required
-                />
-              ) : (
-                <DateRangePicker
-                  label="Booking Dates"
-                  value={dateRange}
-                  onChange={setDateRange}
-                  placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
-                  minDate={new Date()}
-                  minNights={1}
-                  clearable
-                  helperText="Select your stay dates"
-                />
-              )}
+              <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
+                Select Your Dates & View Prices
+              </Box>
+              <PricingCalendar
+                value={bookingType === 'half-day' ? { startDate: singleDate, endDate: singleDate } : dateRange}
+                onChange={handleCalendarSelection}
+                priceData={publicPricingCalendar}
+                defaultPriceMode={bookingType === 'half-day' ? 'half-day' : 'full-day'}
+                minDate={new Date()}
+                minNights={bookingType === 'half-day' ? 0 : 1}
+                maxNights={30}
+                loading={pricingLoading}
+              />
             </Box>
 
             <Box marginBottom="1.5rem">
@@ -866,30 +890,21 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             />
           </Box>
 
-          {/* Date Selection */}
+          {/* Pricing Calendar */}
           <Box marginBottom="1rem">
-            {bookingType === 'half-day' ? (
-              <DatePicker
-                label="Booking Date"
-                value={singleDate ? singleDate.toISOString() : ''}
-                onChange={(value) => setSingleDate(value ? new Date(value) : null)}
-                placeholder="Select your booking date"
-                minDate={new Date().toISOString()}
-                helperText="Select the date for your half-day booking"
-                required
-              />
-            ) : (
-              <DateRangePicker
-                label="Booking Dates"
-                value={dateRange}
-                onChange={setDateRange}
-                placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
-                minDate={new Date()}
-                minNights={1}
-                clearable
-                helperText="Select your stay dates"
-              />
-            )}
+            <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
+              Select Your Dates & View Prices
+            </Box>
+            <PricingCalendar
+              value={bookingType === 'half-day' ? { startDate: singleDate, endDate: singleDate } : dateRange}
+              onChange={handleCalendarSelection}
+              priceData={publicPricingCalendar}
+              defaultPriceMode={bookingType === 'half-day' ? 'half-day' : 'full-day'}
+              minDate={new Date()}
+              minNights={bookingType === 'half-day' ? 0 : 1}
+              maxNights={30}
+              loading={pricingLoading}
+            />
           </Box>
 
           <Box marginBottom="1.5rem">

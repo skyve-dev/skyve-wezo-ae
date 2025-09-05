@@ -379,3 +379,89 @@ export const getBasePrice = async (req: Request, res: Response): Promise<void> =
     }
   }
 };
+
+/**
+ * Get public pricing calendar for a property (no authentication required)
+ * GET /api/properties/:propertyId/pricing/public-calendar
+ */
+export const getPublicPricingCalendar = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { propertyId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    // Validate required parameters
+    if (!startDate || !endDate) {
+      res.status(400).json({ 
+        error: 'Missing required query parameters: startDate and endDate' 
+      });
+      return;
+    }
+
+    // Parse and validate dates
+    const parsedStartDate = new Date(startDate as string);
+    const parsedEndDate = new Date(endDate as string);
+    
+    if (isNaN(parsedStartDate.getTime()) || isNaN(parsedEndDate.getTime())) {
+      res.status(400).json({ 
+        error: 'Invalid date format. Use YYYY-MM-DD format for both startDate and endDate' 
+      });
+      return;
+    }
+
+    if (parsedStartDate >= parsedEndDate) {
+      res.status(400).json({ 
+        error: 'startDate must be before endDate' 
+      });
+      return;
+    }
+
+    // Limit the date range to prevent abuse (max 90 days)
+    const diffTime = parsedEndDate.getTime() - parsedStartDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays > 90) {
+      res.status(400).json({ 
+        error: 'Date range cannot exceed 90 days' 
+      });
+      return;
+    }
+
+    // Get pricing calendar from service
+    const calendar = await propertyPricingService.getPricingCalendar(propertyId, parsedStartDate, parsedEndDate);
+
+    // Transform calendar data to include both full-day and half-day prices
+    const transformedCalendar: Record<string, any> = {};
+    
+    calendar.forEach(dayData => {
+      const dateString = dayData.date.toISOString().split('T')[0];
+      transformedCalendar[dateString] = {
+        fullDayPrice: dayData.fullDayPrice,
+        halfDayPrice: dayData.halfDayPrice,
+        currency: 'AED',
+        isOverride: dayData.isOverride,
+        hasDiscount: false, // This would need additional logic to determine discounts
+        originalPrice: undefined, // Not available in current interface
+        isAvailable: true // Assume available for now, can be enhanced later
+      };
+    });
+
+    res.json({
+      message: 'Public pricing calendar retrieved successfully',
+      calendar: transformedCalendar,
+      dateRange: {
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
+        totalDays: calendar.length
+      }
+    });
+  } catch (error: any) {
+    console.error('Get public pricing calendar error:', error);
+    
+    if (error.message.includes('not found') || error.message.includes('No base pricing configured')) {
+      res.status(404).json({ 
+        error: 'Property pricing not available. Please contact the property owner to set up pricing.' 
+      });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
