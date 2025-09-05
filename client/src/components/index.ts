@@ -1,6 +1,7 @@
 // Base components
 export { Box } from './base/Box';
 export { default as DatePicker } from './base/DatePicker';
+export { default as DateRangePicker } from './base/DateRangePicker';
 export { default as Input } from './base/Input';
 export { default as NumberStepperInput } from './base/NumberStepperInput';
 export { default as SelectionPicker } from './base/SelectionPicker';

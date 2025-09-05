@@ -6,7 +6,7 @@ import { fetchPublicRatePlans, calculateRatePricing } from '@/store/slices/rateP
 import { checkBookingAvailability } from '@/store/slices/availabilitySlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
-import DatePicker from '@/components/base/DatePicker'
+import { DateRangePicker } from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
@@ -56,8 +56,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   const { ratePlans } = useAppSelector((state) => state.ratePlan)
   
   // Local state for booking widget
-  const [checkInDate, setCheckInDate] = useState('')
-  const [checkOutDate, setCheckOutDate] = useState('')
+  const [dateRange, setDateRange] = useState<{startDate: Date | null, endDate: Date | null}>({ startDate: null, endDate: null })
   const [numGuests, setNumGuests] = useState(1)
   const [pricingCalculation, setPricingCalculation] = useState<any>(null)
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<string>('')
@@ -72,6 +71,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   const selectedTotalPrice = selectedRatePlan?.totalPrice || pricingCalculation?.totalPrice || 0
   const selectedPricePerNight = selectedRatePlan?.pricePerNight || pricingCalculation?.pricePerNight || 0
 
+  // Helper function to format dates for API
+  const formatDateForAPI = (date: Date | null): string => {
+    return date ? date.toISOString().split('T')[0] : ''
+  }
+
   // Fetch property data on mount
   useEffect(() => {
     if (actualPropertyId && actualPropertyId !== 'new') {
@@ -83,6 +87,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
   // Calculate pricing when dates or guest count changes
   useEffect(() => {
+    const checkInDate = formatDateForAPI(dateRange.startDate)
+    const checkOutDate = formatDateForAPI(dateRange.endDate)
+    
     if (actualPropertyId && checkInDate && checkOutDate && numGuests) {
       dispatch(calculateRatePricing({
         propertyId: actualPropertyId,
@@ -99,7 +106,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
         }
       })
     }
-  }, [actualPropertyId, checkInDate, checkOutDate, numGuests, dispatch])
+  }, [actualPropertyId, dateRange.startDate, dateRange.endDate, numGuests, dispatch])
 
   // Smart back navigation
   const handleBack = () => {
@@ -117,7 +124,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
       return
     }
     
-    if (!checkInDate || !checkOutDate || !numGuests) {
+    if (!dateRange.startDate || !dateRange.endDate || !numGuests) {
       alert('Please select check-in date, check-out date, and number of guests')
       return
     }
@@ -129,6 +136,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
     
     // Check availability first
     try {
+      const checkInDate = formatDateForAPI(dateRange.startDate)
+      const checkOutDate = formatDateForAPI(dateRange.endDate)
+      
       const availabilityResult = await dispatch(checkBookingAvailability({
         propertyId: actualPropertyId,
         checkInDate,
@@ -712,24 +722,15 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
             {/* Date Selection */}
             <Box marginBottom="1rem">
-              <DatePicker
-                label="Check-in"
-                value={checkInDate}
-                onChange={setCheckInDate}
-                placeholder="Select check-in date"
-                minDate={new Date().toISOString()}
-                required
-              />
-            </Box>
-
-            <Box marginBottom="1rem">
-              <DatePicker
-                label="Check-out"
-                value={checkOutDate}
-                onChange={setCheckOutDate}
-                placeholder="Select check-out date"
-                minDate={checkInDate || new Date().toISOString()}
-                required
+              <DateRangePicker
+                label="Booking Dates"
+                value={dateRange}
+                onChange={setDateRange}
+                placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
+                minDate={new Date()}
+                minNights={1}
+                clearable
+                helperText="Select your stay dates"
               />
             </Box>
 
@@ -786,24 +787,15 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
           {/* Date Selection */}
           <Box marginBottom="1rem">
-            <DatePicker
-              label="Check-in"
-              value={checkInDate}
-              onChange={setCheckInDate}
-              placeholder="Select check-in date"
-              minDate={new Date().toISOString()}
-              required
-            />
-          </Box>
-
-          <Box marginBottom="1rem">
-            <DatePicker
-              label="Check-out"
-              value={checkOutDate}
-              onChange={setCheckOutDate}
-              placeholder="Select check-out date"
-              minDate={checkInDate || new Date().toISOString()}
-              required
+            <DateRangePicker
+              label="Booking Dates"
+              value={dateRange}
+              onChange={setDateRange}
+              placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
+              minDate={new Date()}
+              minNights={1}
+              clearable
+              helperText="Select your stay dates"
             />
           </Box>
 
