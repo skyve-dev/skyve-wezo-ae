@@ -11,7 +11,8 @@ import {
     clearDateSelections,
     setBulkEditAmount,
     startCopyOperation,
-    toggleBulkEditMode
+    toggleBulkEditMode,
+    openDateOverrideForm
 } from '@/store/slices/priceSlice'
 import {ApiError} from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
@@ -34,6 +35,9 @@ const BulkEditControls: React.FC = () => {
   const [operation, setOperation] = useState<'set' | 'copy' | 'clear'>('set')
   
   const selectedRatePlanData = ratePlans.find(rp => rp.id === selectedRatePlan)
+  
+  // Check if we're in base pricing mode (no rate plans selected)
+  const isBasePricingMode = selectedRatePlanIds.length === 0
   
   const handleApplyBulkEdit = async () => {
     if (selectedDates.length === 0 || !selectedRatePlan) return
@@ -114,6 +118,21 @@ const BulkEditControls: React.FC = () => {
     dispatch(clearDateSelections())
   }
   
+  const handleEditSelectedDates = () => {
+    if (selectedDates.length === 0) return
+    
+    // For base pricing mode, open the DateOverrideDialog in bulk mode
+    // Use the first selected date as the primary date
+    const primaryDate = selectedDates[0]
+    
+    dispatch(openDateOverrideForm({
+      date: primaryDate,
+      existingOverride: undefined, // Will be handled in the dialog
+      bulkMode: true,
+      selectedDates: selectedDates
+    }))
+  }
+  
   const canApply = () => {
     if (selectedDates.length === 0 || !selectedRatePlan) return false
     
@@ -183,6 +202,23 @@ const BulkEditControls: React.FC = () => {
       
       {/* Controls */}
       <Box display="flex" gap="1rem" alignItems="flex-end" flexWrap="wrap" marginBottom="1rem">
+      
+        {isBasePricingMode ? (
+          /* Base Pricing Mode - Show Edit Selected Dates button */
+          <Button
+            label="Edit Selected Dates"
+            icon={<FaEdit />}
+            onClick={handleEditSelectedDates}
+            variant="promoted"
+            disabled={selectedDates.length === 0}
+            style={{
+              backgroundColor: '#3182ce',
+              borderColor: '#3182ce'
+            }}
+          />
+        ) : (
+          /* Rate Plan Mode - Show existing controls */
+          <>
         {/* Operation Type */}
         <Box>
           <label style={{ 
@@ -288,8 +324,10 @@ const BulkEditControls: React.FC = () => {
             borderColor: '#059669'
           }}
         />
+        </>
+        )}
         
-        {/* Clear Selection */}
+        {/* Clear Selection - Available for both modes */}
         {selectedDates.length > 0 && (
           <Button
             label="Clear Selection"
@@ -311,14 +349,20 @@ const BulkEditControls: React.FC = () => {
         border="1px solid #fbbf24"
       >
         <Box fontSize="0.875rem" color="#374151">
-          <strong>Action:</strong> {getOperationDescription()}
+          <strong>Action:</strong> {isBasePricingMode 
+            ? `Edit base pricing for ${selectedDates.length} selected date${selectedDates.length > 1 ? 's' : ''}`
+            : getOperationDescription()
+          }
         </Box>
         
-        {selectedRatePlanData && (
-          <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
-            Target: {selectedRatePlanData.name} (Rate Plan)
-          </Box>
-        )}
+        <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+          Target: {isBasePricingMode 
+            ? 'Base Property Pricing (Date Overrides)'
+            : selectedRatePlanData 
+              ? `${selectedRatePlanData.name} (Rate Plan)`
+              : 'No rate plan selected'
+          }
+        </Box>
       </Box>
       
       {/* Instructions */}

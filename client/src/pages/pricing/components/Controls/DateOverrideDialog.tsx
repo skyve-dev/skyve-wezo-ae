@@ -94,19 +94,28 @@ const DateOverrideDialog: React.FC = () => {
   const handleSave = async () => {
     if (!dateOverrideForm.date || !currentProperty?.propertyId || localPrice < 0) return
     
-    // Check if the date is in the past
-    const selectedDate = new Date(dateOverrideForm.date)
+    // For bulk mode, use selected dates; otherwise use single date
+    const targetDates = dateOverrideForm.bulkMode && dateOverrideForm.selectedDates.length > 0
+      ? dateOverrideForm.selectedDates 
+      : [dateOverrideForm.date]
+    
+    // Check if any dates are in the past
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    selectedDate.setHours(0, 0, 0, 0)
     
-    if (selectedDate < today) {
+    const pastDates = targetDates.filter(dateStr => {
+      const date = new Date(dateStr)
+      date.setHours(0, 0, 0, 0)
+      return date < today
+    })
+    
+    if (pastDates.length > 0) {
       await showApiError(
         new ApiError(
           'Cannot modify past dates', 
           400, 
           undefined, 
-          'You cannot set price overrides for dates that have already passed. Please select a future date.'
+          `You cannot set price overrides for ${pastDates.length} past date${pastDates.length > 1 ? 's' : ''}. Please select only future dates.`
         )
       )
       return
@@ -126,18 +135,38 @@ const DateOverrideDialog: React.FC = () => {
     }
     
     try {
-      await dispatch(saveDateOverride({
-        propertyId: currentProperty.propertyId,
-        override: {
-          date: dateOverrideForm.date,
+      // For bulk mode, save multiple overrides
+      if (dateOverrideForm.bulkMode && targetDates.length > 1) {
+        const overrides = targetDates.map(date => ({
+          date,
           price: localPrice,
           halfDayPrice: localHalfDayPrice,
           reason: localReason
+        }))
+        
+        // Save each override (we could enhance the backend to support bulk saves later)
+        for (const override of overrides) {
+          await dispatch(saveDateOverride({
+            propertyId: currentProperty.propertyId,
+            override
+          })).unwrap()
         }
-      })).unwrap()
-      
-      // Show success message
-      await showSuccess('Date override has been saved successfully.')
+        
+        await showSuccess(`Successfully saved price overrides for ${targetDates.length} dates.`)
+      } else {
+        // Single date override
+        await dispatch(saveDateOverride({
+          propertyId: currentProperty.propertyId,
+          override: {
+            date: dateOverrideForm.date,
+            price: localPrice,
+            halfDayPrice: localHalfDayPrice,
+            reason: localReason
+          }
+        })).unwrap()
+        
+        await showSuccess('Date override has been saved successfully.')
+      }
       
       // Refresh pricing calendar if date range is set
       if (dateRange.startDate && dateRange.endDate) {
@@ -281,24 +310,46 @@ const DateOverrideDialog: React.FC = () => {
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box>
               <h3 style={{ fontSize: '1.125rem', fontWeight: '600', margin: 0, marginBottom: '0.5rem' }}>
-                {isExistingOverride ? 'Edit Price Override' : 'Set Price Override'}
+                {dateOverrideForm.bulkMode 
+                  ? `Bulk Edit Price Overrides (${dateOverrideForm.selectedDates.length} dates)`
+                  : (isExistingOverride ? 'Edit Price Override' : 'Set Price Override')
+                }
               </h3>
-              {dateOverrideForm.date && (
+              
+              {dateOverrideForm.bulkMode ? (
                 <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" opacity="0.9">
                   <IoIosCalendar size={12} />
-                  <span>{formatDate(dateOverrideForm.date)}</span>
-                  {isWeekend(dateOverrideForm.date) && (
-                    <Box
-                      padding="0.125rem 0.5rem"
-                      backgroundColor="#f59e0b"
-                      borderRadius="12px"
-                      fontSize="0.625rem"
-                      fontWeight="600"
-                    >
-                      WEEKEND
-                    </Box>
-                  )}
+                  <span>
+                    Applying to {dateOverrideForm.selectedDates.length} selected date{dateOverrideForm.selectedDates.length > 1 ? 's' : ''}
+                  </span>
+                  <Box
+                    padding="0.125rem 0.5rem"
+                    backgroundColor="#3182ce"
+                    borderRadius="12px"
+                    fontSize="0.625rem"
+                    fontWeight="600"
+                  >
+                    BULK MODE
+                  </Box>
                 </Box>
+              ) : (
+                dateOverrideForm.date && (
+                  <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" opacity="0.9">
+                    <IoIosCalendar size={12} />
+                    <span>{formatDate(dateOverrideForm.date)}</span>
+                    {isWeekend(dateOverrideForm.date) && (
+                      <Box
+                        padding="0.125rem 0.5rem"
+                        backgroundColor="#f59e0b"
+                        borderRadius="12px"
+                        fontSize="0.625rem"
+                        fontWeight="600"
+                      >
+                        WEEKEND
+                      </Box>
+                    )}
+                  </Box>
+                )
               )}
             </Box>
             
@@ -528,9 +579,9 @@ const DateOverrideDialog: React.FC = () => {
           borderTop="1px solid #e5e7eb"
         >
           <Box display="flex" gap="1rem" justifyContent="space-between">
-            {/* Delete button on the left for existing overrides */}
+            {/* Delete button on the left for existing overrides (not in bulk mode) */}
             <Box>
-              {isExistingOverride && (
+              {isExistingOverride && !dateOverrideForm.bulkMode && (
                 <Button
                   label="Delete Override"
                   icon={<IoIosTrash />}
@@ -552,7 +603,12 @@ const DateOverrideDialog: React.FC = () => {
               />
               
               <Button
-                label={loading ? 'Saving...' : (isExistingOverride ? 'Update Override' : 'Save Override')}
+                label={loading 
+                  ? 'Saving...' 
+                  : dateOverrideForm.bulkMode 
+                    ? `Save for ${dateOverrideForm.selectedDates.length} Dates`
+                    : (isExistingOverride ? 'Update Override' : 'Save Override')
+                }
                 icon={<IoIosSave />}
                 onClick={handleSave}
                 variant="promoted"
@@ -568,7 +624,10 @@ const DateOverrideDialog: React.FC = () => {
               color="#6b7280" 
               textAlign="right"
             >
-              Changes will override the weekly default for {dateOverrideForm.date}
+              {dateOverrideForm.bulkMode 
+                ? `Changes will override the weekly defaults for ${dateOverrideForm.selectedDates.length} selected dates`
+                : `Changes will override the weekly default for ${dateOverrideForm.date}`
+              }
             </Box>
           )}
         </Box>

@@ -295,8 +295,8 @@ const PricingCalendar: React.FC = () => {
               )}
             </Box>
             
-            {/* Bulk Edit Controls - Only show in calendar mode and when rate plans exist */}
-            {calendarMode === 'calendar' && bulkEditMode && ratePlans.length > 0 && (
+            {/* Bulk Edit Controls - Show in calendar mode for both rate plans and base pricing */}
+            {calendarMode === 'calendar' && bulkEditMode && (
               <Box marginBottom="2rem">
                 <BulkEditControls />
               </Box>

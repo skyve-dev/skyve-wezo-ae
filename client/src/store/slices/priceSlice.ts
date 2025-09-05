@@ -103,6 +103,8 @@ interface PriceState {
     halfDayPrice: number
     reason: string
     originalOverride: DatePriceOverride | null
+    bulkMode: boolean
+    selectedDates: string[]
   }
   
   // UI state for Calendar mode
@@ -169,7 +171,9 @@ const initialState: PriceState = {
     price: 0,
     halfDayPrice: 0,
     reason: '',
-    originalOverride: null
+    originalOverride: null,
+    bulkMode: false,
+    selectedDates: []
   },
   
   // UI state
@@ -422,8 +426,13 @@ const priceSlice = createSlice({
     },
     
     // Date Override Management
-    openDateOverrideForm: (state, action: PayloadAction<{ date: string; existingOverride?: DatePriceOverride }>) => {
-      const { date, existingOverride } = action.payload
+    openDateOverrideForm: (state, action: PayloadAction<{ 
+      date: string; 
+      existingOverride?: DatePriceOverride; 
+      bulkMode?: boolean;
+      selectedDates?: string[];
+    }>) => {
+      const { date, existingOverride, bulkMode = false, selectedDates = [] } = action.payload
       
       if (existingOverride) {
         // Edit existing override
@@ -433,7 +442,9 @@ const priceSlice = createSlice({
           price: existingOverride.price,
           halfDayPrice: existingOverride.halfDayPrice || 0,
           reason: existingOverride.reason || '',
-          originalOverride: existingOverride
+          originalOverride: existingOverride,
+          bulkMode,
+          selectedDates
         }
       } else {
         // Create new override - use weekly pricing as default
@@ -463,7 +474,9 @@ const priceSlice = createSlice({
           price: defaultPrice,
           halfDayPrice: defaultHalfDayPrice,
           reason: '',
-          originalOverride: null
+          originalOverride: null,
+          bulkMode,
+          selectedDates
         }
       }
     },
@@ -475,7 +488,9 @@ const priceSlice = createSlice({
         price: 0,
         halfDayPrice: 0,
         reason: '',
-        originalOverride: null
+        originalOverride: null,
+        bulkMode: false,
+        selectedDates: []
       }
     },
     

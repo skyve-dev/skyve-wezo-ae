@@ -2,6 +2,7 @@ import React from 'react'
 import {useSelector} from 'react-redux'
 import {RootState, useAppDispatch} from '@/store'
 import {FaEdit, FaPlus} from 'react-icons/fa'
+import {IoIosCheckmark} from 'react-icons/io'
 import {Box} from '@/components'
 import {openPriceEditForm, setSelectedDate, toggleDateSelection, openDateOverrideForm} from '@/store/slices/priceSlice'
 
@@ -229,17 +230,17 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         {/* Bulk Edit Selection Indicator */}
         {bulkEditMode && day.isCurrentMonth && !isDisabled && (
           <Box
-            width="16px"
-            height="16px"
-            borderRadius="50%"
-            backgroundColor={isSelected ? '#1d4ed8' : 'transparent'}
-            border={`2px solid ${isSelected ? '#1d4ed8' : '#d1d5db'}`}
+            width="20px"
+            height="20px"
+            borderRadius="4px"
+            backgroundColor={isSelected ? '#22c55e' : 'transparent'}
+            border={`2px solid ${isSelected ? '#22c55e' : '#d1d5db'}`}
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
             {isSelected && (
-              <Box width="8px" height="8px" backgroundColor="white" borderRadius="50%" />
+              <IoIosCheckmark size={16} color="white" />
             )}
           </Box>
         )}
@@ -352,11 +353,18 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 border={`1px solid ${borderColor}`}
                 borderRadius="4px"
                 fontSize={isMobile ? '0.625rem' : '0.75rem'}
-                cursor="pointer"
-                onClick={(e) => handlePriceClick(e, priceData)}
+                cursor={bulkEditMode ? "default" : "pointer"}
+                onClick={(e) => {
+                  if (!bulkEditMode) {
+                    handlePriceClick(e, priceData)
+                  }
+                  // In bulk mode, let the click propagate to the parent cell
+                }}
                 transition="all 0.2s"
                 title={tooltipText}
-                whileHover={{ backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9') }}
+                pointerEvents={bulkEditMode ? "none" : "auto"}
+                opacity={bulkEditMode ? 0.7 : 1}
+                whileHover={!bulkEditMode ? { backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9') } : {}}
               >
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap="0.25rem">
