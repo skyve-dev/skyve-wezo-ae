@@ -1,15 +1,19 @@
 import React, {useEffect, useMemo} from 'react'
 import {useSelector} from 'react-redux'
 import CalendarGrid from './CalendarGrid'
-import {RootState} from '@/store'
+import DateOverrideDialog from '../Controls/DateOverrideDialog'
+import {RootState, useAppDispatch} from '@/store'
 import {Box} from '@/components'
+import { fetchPricingCalendar } from '@/store/slices/priceSlice'
 
 const CalendarView: React.FC = () => {
+  const dispatch = useAppDispatch()
   const {
     dateRange,
     selectedRatePlanIds,
     pricesByRatePlan,
-    propertyPricing
+    propertyPricing,
+    pricingCalendar
   } = useSelector((state: RootState) => state.price)
   
   // Debug logging for component state
@@ -22,6 +26,24 @@ const CalendarView: React.FC = () => {
   })
   
   const { ratePlans } = useSelector((state: RootState) => state.ratePlan)
+  const { currentProperty } = useSelector((state: RootState) => state.property)
+  
+  // Fetch pricing calendar when date range changes and no rate plans are selected (base pricing mode)
+  useEffect(() => {
+    if (
+      dateRange.startDate && 
+      dateRange.endDate && 
+      selectedRatePlanIds.length === 0 && 
+      currentProperty?.propertyId
+    ) {
+      console.log('🔄 Fetching pricing calendar for base pricing mode')
+      dispatch(fetchPricingCalendar({
+        propertyId: currentProperty.propertyId,
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate
+      }))
+    }
+  }, [dateRange.startDate, dateRange.endDate, selectedRatePlanIds.length, currentProperty?.propertyId, dispatch])
   
   // Helper function to format date without timezone issues
   const formatDateLocal = (date: Date): string => {
@@ -281,31 +303,53 @@ const CalendarView: React.FC = () => {
         }
       }
     } else {
-      // NEW: Fallback to base PropertyPricing when no rate plans are selected
-      console.log('🟡 FALLBACK MODE: No rate plans selected, trying base PropertyPricing for date:', dateString)
-      console.log('🟡 Day of week for fallback:', dayOfWeek)
+      // Base pricing mode - use pricing calendar if available, otherwise fallback to PropertyPricing
+      console.log('🟡 BASE PRICING MODE: No rate plans selected for date:', dateString)
       
-      const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
+      // First, check if we have pricing calendar data
+      const calendarDay = pricingCalendar.find(day => normalizeDate(day.date) === dateString)
       
-      console.log('🟡 Base price retrieved:', basePrice)
-      
-      if (basePrice !== null && basePrice > 0) {
-        console.log('✅ Adding base pricing entry for date:', dateString, 'amount:', basePrice)
+      if (calendarDay) {
+        console.log('✅ Using pricing calendar data for date:', dateString, 'price:', calendarDay.fullDayPrice, 'halfDay:', calendarDay.halfDayPrice, 'isOverride:', calendarDay.isOverride)
         prices.push({
           ratePlan: undefined, // No rate plan for base pricing
           price: {
-            id: `base-pricing-${dateString}`,
+            id: calendarDay.isOverride ? `override-${dateString}` : `base-pricing-${dateString}`,
             ratePlanId: undefined,
             date: dateString,
-            amount: basePrice,
+            amount: calendarDay.fullDayPrice,
             createdAt: '',
             updatedAt: ''
           },
-          hasCustomPrice: false,
-          isBasePricing: true // NEW: Flag to indicate this is base pricing
+          hasCustomPrice: calendarDay.isOverride,
+          isBasePricing: true,
+          reason: calendarDay.reason, // Add reason for overrides
+          halfDayPrice: calendarDay.halfDayPrice // Add half-day price from calendar data
         })
       } else {
-        console.log('❌ No valid base price found for date:', dateString, 'dayOfWeek:', dayOfWeek)
+        // Fallback to PropertyPricing when no calendar data available
+        console.log('🟡 FALLBACK: Using PropertyPricing for date:', dateString, 'dayOfWeek:', dayOfWeek)
+        
+        const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
+        
+        if (basePrice !== null && basePrice > 0) {
+          console.log('✅ Adding base pricing entry for date:', dateString, 'amount:', basePrice)
+          prices.push({
+            ratePlan: undefined, // No rate plan for base pricing
+            price: {
+              id: `base-pricing-${dateString}`,
+              ratePlanId: undefined,
+              date: dateString,
+              amount: basePrice,
+              createdAt: '',
+              updatedAt: ''
+            },
+            hasCustomPrice: false,
+            isBasePricing: true
+          })
+        } else {
+          console.log('❌ No valid base price found for date:', dateString, 'dayOfWeek:', dayOfWeek)
+        }
       }
     }
     
@@ -353,6 +397,9 @@ const CalendarView: React.FC = () => {
         selectedRatePlans={selectedRatePlans}
         getPricesForDate={getPricesForDate}
       />
+      
+      {/* Date Override Dialog */}
+      <DateOverrideDialog />
     </Box>
   )
 }

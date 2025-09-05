@@ -264,7 +264,11 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
         showCloseButton={true}
         backgroundColor="white"
         contentStyles={{
-          borderRadius: '1rem 1rem 0 0',
+          maxWidth: 600,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          borderTopLeftRadius: '1rem',
+          borderTopRightRadius: '1rem',
           overflow: 'hidden'
         }}
       >

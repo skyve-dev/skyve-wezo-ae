@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux'
 import {RootState, useAppDispatch} from '@/store'
 import {FaEdit, FaPlus} from 'react-icons/fa'
 import {Box} from '@/components'
-import {openPriceEditForm, setSelectedDate, toggleDateSelection} from '@/store/slices/priceSlice'
+import {openPriceEditForm, setSelectedDate, toggleDateSelection, openDateOverrideForm} from '@/store/slices/priceSlice'
 
 interface CalendarDayData {
   date: Date
@@ -47,6 +47,8 @@ interface PriceData {
   }
   hasCustomPrice: boolean
   isBasePricing?: boolean  // NEW: Flag for base PropertyPricing
+  reason?: string  // Optional reason for overrides
+  halfDayPrice?: number  // Optional half-day price for overrides
 }
 
 interface CalendarDayProps {
@@ -114,8 +116,21 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
             amount: existingPrice?.price.amount || 0
           }))
         } else {
-          // When no rate plans selected (base pricing mode), could show property pricing editor
-          // For now, do nothing since base pricing is managed in PropertyPricing
+          // When no rate plans selected (base pricing mode), open date override dialog
+          const existingOverride = prices.find(p => p.isBasePricing && p.hasCustomPrice)
+          dispatch(openDateOverrideForm({
+            date: day.dateString,
+            existingOverride: existingOverride?.price ? {
+              id: existingOverride.price.id,
+              propertyId: '', // Will be filled by the reducer
+              date: existingOverride.price.date,
+              price: existingOverride.price.amount,
+              halfDayPrice: existingOverride.halfDayPrice, // Get half-day price from PriceData
+              reason: existingOverride.reason, // Get reason from PriceData
+              createdAt: existingOverride.price.createdAt,
+              updatedAt: existingOverride.price.updatedAt
+            } : undefined
+          }))
         }
       }
     }
@@ -128,15 +143,31 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     if (isDisabled) return // Prevent editing past dates
     
     if (!bulkEditMode) {
-      // Only allow editing rate plan prices, not base pricing
-      if (!priceData.isBasePricing && priceData.ratePlan) {
+      if (priceData.isBasePricing) {
+        // Handle base pricing - open date override dialog
+        const existingOverride = priceData.hasCustomPrice ? {
+          id: priceData.price.id,
+          propertyId: '', // Will be filled by the reducer
+          date: priceData.price.date,
+          price: priceData.price.amount,
+          halfDayPrice: priceData.halfDayPrice, // Get half-day price from PriceData
+          reason: priceData.reason, // Get reason from PriceData
+          createdAt: priceData.price.createdAt,
+          updatedAt: priceData.price.updatedAt
+        } : undefined
+        
+        dispatch(openDateOverrideForm({
+          date: day.dateString,
+          existingOverride
+        }))
+      } else if (priceData.ratePlan) {
+        // Handle rate plan prices
         dispatch(openPriceEditForm({
           date: day.dateString,
           ratePlanId: priceData.ratePlan.id,
           amount: priceData.price.amount
         }))
       }
-      // Base pricing is read-only in this context (edited via PropertyPricing)
     }
   }
   
@@ -213,8 +244,29 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
           </Box>
         )}
         
+        {/* Override Indicator */}
+        {day.isCurrentMonth && prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
+          <Box
+            width="16px"
+            height="16px"
+            borderRadius="4px"
+            backgroundColor="#3182ce"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            title={`Price Override: ${prices.find(p => p.isBasePricing && p.hasCustomPrice)?.reason || 'Custom pricing'}`}
+          >
+            <Box 
+              width="8px" 
+              height="8px" 
+              backgroundColor="white" 
+              borderRadius="2px"
+            />
+          </Box>
+        )}
+        
         {/* Weekend Label */}
-        {day.isWeekend && day.isCurrentMonth && !isMobile && (
+        {day.isWeekend && day.isCurrentMonth && !isMobile && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
           <span style={{ fontSize: '0.625rem', color: '#92400e', fontWeight: '500' }}>
             WE
           </span>
@@ -264,11 +316,33 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
           
           {prices.slice(0, isMobile ? 2 : 4).map((priceData, index) => {
             const isBasePricing = priceData.isBasePricing
-            const backgroundColor = isBasePricing ? '#fef3c7' : (priceData.hasCustomPrice ? '#f0fdf4' : '#f8fafc')
-            const borderColor = isBasePricing ? '#f59e0b' : (priceData.hasCustomPrice ? '#bbf7d0' : '#e2e8f0')
-            const textColor = isBasePricing ? '#92400e' : (priceData.hasCustomPrice ? '#166534' : '#475569')
-            const ratePlanName = isBasePricing ? 'Base' : (priceData.ratePlan?.name || 'Unknown')
-            const ratePlanColor = isBasePricing ? '#f59e0b' : (priceData.ratePlan?.color || '#6b7280')
+            const isOverride = isBasePricing && priceData.hasCustomPrice
+            
+            // Enhanced styling for overrides
+            let backgroundColor, borderColor, textColor
+            if (isOverride) {
+              backgroundColor = '#eff6ff'  // Blue background for overrides
+              borderColor = '#3182ce'     // Blue border for overrides
+              textColor = '#1e40af'       // Blue text for overrides
+            } else if (isBasePricing) {
+              backgroundColor = '#fef3c7'  // Yellow background for base pricing
+              borderColor = '#f59e0b'     // Yellow border for base pricing
+              textColor = '#92400e'       // Brown text for base pricing
+            } else {
+              backgroundColor = priceData.hasCustomPrice ? '#f0fdf4' : '#f8fafc'
+              borderColor = priceData.hasCustomPrice ? '#bbf7d0' : '#e2e8f0'
+              textColor = priceData.hasCustomPrice ? '#166534' : '#475569'
+            }
+            
+            const ratePlanName = isBasePricing ? (isOverride ? 'Override' : 'Base') : (priceData.ratePlan?.name || 'Unknown')
+            const ratePlanColor = isBasePricing ? (isOverride ? '#3182ce' : '#f59e0b') : (priceData.ratePlan?.color || '#6b7280')
+            
+            // Create tooltip text for overrides
+            const tooltipText = isOverride && priceData.reason 
+              ? `Price Override: ${priceData.reason}`
+              : isBasePricing 
+                ? 'Base property pricing'
+                : `${ratePlanName} pricing`
             
             return (
               <Box
@@ -278,11 +352,11 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 border={`1px solid ${borderColor}`}
                 borderRadius="4px"
                 fontSize={isMobile ? '0.625rem' : '0.75rem'}
-                cursor={isBasePricing ? 'default' : 'pointer'}  // Base pricing is read-only
+                cursor="pointer"
                 onClick={(e) => handlePriceClick(e, priceData)}
                 transition="all 0.2s"
-                opacity={isBasePricing ? 0.9 : 1}  // Slightly dimmed for base pricing
-                whileHover={!isBasePricing ? { backgroundColor: priceData.hasCustomPrice ? '#ecfdf5' : '#f1f5f9' } : {}}
+                title={tooltipText}
+                whileHover={{ backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9') }}
               >
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap="0.25rem">

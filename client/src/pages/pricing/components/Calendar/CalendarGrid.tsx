@@ -44,6 +44,8 @@ interface PriceData {
   }
   hasCustomPrice: boolean
   isBasePricing?: boolean  // NEW: Flag for base PropertyPricing
+  reason?: string  // Optional reason for overrides
+  halfDayPrice?: number  // Optional half-day price for overrides
 }
 
 interface CalendarGridProps {

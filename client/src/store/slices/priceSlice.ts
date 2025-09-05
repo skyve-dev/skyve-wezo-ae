@@ -59,6 +59,26 @@ interface PropertyPricing {
   updatedAt: string
 }
 
+interface DatePriceOverride {
+  id: string
+  propertyId: string
+  date: string  // ISO date string
+  price: number
+  halfDayPrice?: number
+  reason?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface PricingCalendarDay {
+  date: string
+  fullDayPrice: number
+  halfDayPrice: number
+  isOverride: boolean
+  reason?: string
+  dayOfWeek: string
+}
+
 interface PriceState {
   // Price data organized by rate plan ID
   pricesByRatePlan: Record<string, Price[]>
@@ -66,8 +86,24 @@ interface PriceState {
   // Property base pricing (weekly rates)
   propertyPricing: PropertyPricing | null
   
+  // Date-specific overrides for base pricing
+  dateOverrides: DatePriceOverride[]
+  
+  // Pricing calendar data (combined weekly + overrides)
+  pricingCalendar: PricingCalendarDay[]
+  
   // Selected price for editing
   selectedPrice: Price | null
+  
+  // Date override editing form
+  dateOverrideForm: {
+    isOpen: boolean
+    date: string | null
+    price: number
+    halfDayPrice: number
+    reason: string
+    originalOverride: DatePriceOverride | null
+  }
   
   // UI state for Calendar mode
   calendarMode: 'calendar' | 'dashboard'
@@ -122,7 +158,19 @@ interface PriceState {
 const initialState: PriceState = {
   pricesByRatePlan: {},
   propertyPricing: null,
+  dateOverrides: [],
+  pricingCalendar: [],
   selectedPrice: null,
+  
+  // Date override form
+  dateOverrideForm: {
+    isOpen: false,
+    date: null,
+    price: 0,
+    halfDayPrice: 0,
+    reason: '',
+    originalOverride: null
+  },
   
   // UI state
   calendarMode: 'calendar',
@@ -361,6 +409,8 @@ const priceSlice = createSlice({
     clearPrices: (state) => {
 
       state.pricesByRatePlan = {}
+      state.dateOverrides = []
+      state.pricingCalendar = []
       state.statistics = {}
       state.priceGaps = {}
       state.error = null
@@ -369,6 +419,79 @@ const priceSlice = createSlice({
     // Clear refresh trigger
     clearRefreshTrigger: (state) => {
       state.needsRefresh = null
+    },
+    
+    // Date Override Management
+    openDateOverrideForm: (state, action: PayloadAction<{ date: string; existingOverride?: DatePriceOverride }>) => {
+      const { date, existingOverride } = action.payload
+      
+      if (existingOverride) {
+        // Edit existing override
+        state.dateOverrideForm = {
+          isOpen: true,
+          date,
+          price: existingOverride.price,
+          halfDayPrice: existingOverride.halfDayPrice || 0,
+          reason: existingOverride.reason || '',
+          originalOverride: existingOverride
+        }
+      } else {
+        // Create new override - use weekly pricing as default
+        const dayOfWeek = new Date(date).getDay()
+        const dayMap = {
+          0: 'Sunday',
+          1: 'Monday', 
+          2: 'Tuesday',
+          3: 'Wednesday',
+          4: 'Thursday',
+          5: 'Friday',
+          6: 'Saturday'
+        }
+        
+        let defaultPrice = 0
+        let defaultHalfDayPrice = 0
+        
+        if (state.propertyPricing) {
+          const dayName = dayMap[dayOfWeek as keyof typeof dayMap]
+          defaultPrice = state.propertyPricing[`price${dayName}` as keyof PropertyPricing] as number || 0
+          defaultHalfDayPrice = state.propertyPricing[`halfDayPrice${dayName}` as keyof PropertyPricing] as number || 0
+        }
+        
+        state.dateOverrideForm = {
+          isOpen: true,
+          date,
+          price: defaultPrice,
+          halfDayPrice: defaultHalfDayPrice,
+          reason: '',
+          originalOverride: null
+        }
+      }
+    },
+    
+    closeDateOverrideForm: (state) => {
+      state.dateOverrideForm = {
+        isOpen: false,
+        date: null,
+        price: 0,
+        halfDayPrice: 0,
+        reason: '',
+        originalOverride: null
+      }
+    },
+    
+    updateDateOverrideForm: (state, action: PayloadAction<Partial<{ price: number; halfDayPrice: number; reason: string }>>) => {
+      state.dateOverrideForm = {
+        ...state.dateOverrideForm,
+        ...action.payload
+      }
+    },
+    
+    setDateOverrides: (state, action: PayloadAction<DatePriceOverride[]>) => {
+      state.dateOverrides = action.payload
+    },
+    
+    setPricingCalendar: (state, action: PayloadAction<PricingCalendarDay[]>) => {
+      state.pricingCalendar = action.payload
     }
   },
   
@@ -546,6 +669,66 @@ const priceSlice = createSlice({
         state.bulkOperationLoading = false
         state.error = action.payload as string
       })
+      
+      // Fetch Pricing Calendar
+      .addCase(fetchPricingCalendar.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPricingCalendar.fulfilled, (state, action) => {
+        state.pricingCalendar = action.payload
+        state.loading = false
+      })
+      .addCase(fetchPricingCalendar.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Save Date Override
+      .addCase(saveDateOverride.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(saveDateOverride.fulfilled, (state, action) => {
+        // Update local overrides with the saved data
+        const savedOverrides = action.payload
+        if (savedOverrides.length > 0) {
+          const savedOverride = savedOverrides[0]
+          const existingIndex = state.dateOverrides.findIndex(o => o.date === savedOverride.date)
+          
+          if (existingIndex !== -1) {
+            state.dateOverrides[existingIndex] = savedOverride
+          } else {
+            state.dateOverrides.push(savedOverride)
+          }
+        }
+        
+        // Close the form
+        state.dateOverrideForm.isOpen = false
+        state.loading = false
+      })
+      .addCase(saveDateOverride.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Delete Date Overrides
+      .addCase(deleteDateOverrides.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(deleteDateOverrides.fulfilled, (state, action) => {
+        // Remove deleted dates from local overrides
+        const deletedDates = action.payload
+        state.dateOverrides = state.dateOverrides.filter(
+          override => !deletedDates.includes(override.date)
+        )
+        state.loading = false
+      })
+      .addCase(deleteDateOverrides.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
   }
 })
 
@@ -579,7 +762,12 @@ export const {
   setBulkOperationLoading,
   setError,
   clearPrices,
-  clearRefreshTrigger
+  clearRefreshTrigger,
+  openDateOverrideForm,
+  closeDateOverrideForm,
+  updateDateOverrideForm,
+  setDateOverrides,
+  setPricingCalendar
 } = priceSlice.actions
 
 // Async Thunks with API Integration
@@ -801,7 +989,72 @@ export const deletePriceAsync = createAsyncThunk(
   }
 )
 
+// Fetch pricing calendar with date overrides
+export const fetchPricingCalendar = createAsyncThunk(
+  'price/fetchPricingCalendar',
+  async (params: { propertyId: string; startDate: string; endDate: string }, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams({
+        startDate: params.startDate,
+        endDate: params.endDate
+      })
+      
+      const response = await api.get<{ calendar: PricingCalendarDay[] }>(
+        `/api/properties/${params.propertyId}/pricing/calendar?${queryParams}`
+      )
+      
+      return response.calendar || []
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch pricing calendar'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+// Create or update date override
+export const saveDateOverride = createAsyncThunk(
+  'price/saveDateOverride',
+  async (params: { propertyId: string; override: { date: string; price: number; halfDayPrice?: number; reason?: string } }, { rejectWithValue }) => {
+    try {
+      const response = await api.post<{ overrides: DatePriceOverride[] }>(
+        `/api/properties/${params.propertyId}/pricing/overrides`,
+        {
+          overrides: [{
+            date: params.override.date,
+            price: params.override.price,
+            halfDayPrice: params.override.halfDayPrice,
+            reason: params.override.reason
+          }]
+        }
+      )
+      
+      return response.overrides || []
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to save date override'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
+// Delete date overrides
+export const deleteDateOverrides = createAsyncThunk(
+  'price/deleteDateOverrides',
+  async (params: { propertyId: string; dates: string[] }, { rejectWithValue }) => {
+    try {
+      await api.delete(`/api/properties/${params.propertyId}/pricing/overrides`, { dates: params.dates })
+      
+      return params.dates
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to delete date overrides'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
 // Export types
-export type { Price, PriceStatistics, PriceGap, BulkPriceUpdate }
+export type { Price, PriceStatistics, PriceGap, BulkPriceUpdate, DatePriceOverride, PricingCalendarDay }
 
 export default priceSlice.reducer

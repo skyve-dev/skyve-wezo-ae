@@ -51,8 +51,7 @@ interface RatePlanAmenitySelectorProps {
 const RatePlanAmenitySelector: React.FC<RatePlanAmenitySelectorProps> = ({
   property,
   features,
-  onChange,
-  ratePlanId
+  onChange
 }) => {
   // Get selected amenity IDs
   const selectedAmenityIds = features?.includedAmenityIds || []

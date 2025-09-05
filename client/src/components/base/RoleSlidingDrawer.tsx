@@ -208,8 +208,12 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
             showCloseButton={true}
             backgroundColor="white"
             contentStyles={{
+                maxWidth: 600,
+                marginLeft: 'auto',
+                marginRight: 'auto',
                 maxHeight: '80vh',
-                borderRadius: '1rem 1rem 0 0',
+                borderTopLeftRadius: '1rem',
+                borderTopRightRadius: '1rem',
                 overflow: 'auto'
             }}
         >

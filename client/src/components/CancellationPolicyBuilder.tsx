@@ -79,8 +79,7 @@ const POLICY_TYPES: PolicyTypeOption[] = [
  */
 const CancellationPolicyBuilder: React.FC<CancellationPolicyBuilderProps> = ({
   policy,
-  onChange,
-  ratePlanId
+  onChange
 }) => {
   const [currentType, setCurrentType] = useState<PolicyType>('FullyFlexible')
   const [freeCancellationDays, setFreeCancellationDays] = useState<number>(1)

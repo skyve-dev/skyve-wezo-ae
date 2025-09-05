@@ -2008,8 +2008,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           maxWidth: 600,
           marginLeft: 'auto',
           marginRight: 'auto',
-          borderTopLeftRadius: '0rem',
-          borderTopRightRadius: '0rem'
+          borderTopLeftRadius: '1rem',
+          borderTopRightRadius: '1rem'
         }}
         showCloseButton
       >
