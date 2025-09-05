@@ -244,7 +244,11 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
   
   // Get price for a specific date
   const getPriceForDate = (date: Date): PriceInfo | null => {
-    const dateString = date.toISOString().split('T')[0]
+    // Use timezone-safe date formatting to match API key format
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const dateString = `${year}-${month}-${day}`
     return priceData[dateString] || null
   }
   

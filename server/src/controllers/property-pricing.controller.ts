@@ -432,7 +432,12 @@ export const getPublicPricingCalendar = async (req: Request, res: Response): Pro
     const transformedCalendar: Record<string, any> = {};
     
     calendar.forEach(dayData => {
-      const dateString = dayData.date.toISOString().split('T')[0];
+      // Use timezone-safe date formatting to avoid UTC conversion issues
+      const year = dayData.date.getFullYear();
+      const month = String(dayData.date.getMonth() + 1).padStart(2, '0');
+      const day = String(dayData.date.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+      
       transformedCalendar[dateString] = {
         fullDayPrice: dayData.fullDayPrice,
         halfDayPrice: dayData.halfDayPrice,
