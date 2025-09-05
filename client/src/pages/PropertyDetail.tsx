@@ -6,7 +6,7 @@ import { fetchPublicRatePlans, calculateRatePricing } from '@/store/slices/rateP
 import { checkBookingAvailability } from '@/store/slices/availabilitySlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
-import { DateRangePicker } from '@/components'
+import { DateRangePicker, DatePicker, ToggleButton } from '@/components'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
@@ -56,7 +56,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   const { ratePlans } = useAppSelector((state) => state.ratePlan)
   
   // Local state for booking widget
+  const [bookingType, setBookingType] = useState<'half-day' | 'full-stay'>('full-stay')
   const [dateRange, setDateRange] = useState<{startDate: Date | null, endDate: Date | null}>({ startDate: null, endDate: null })
+  const [singleDate, setSingleDate] = useState<Date | null>(null)
   const [numGuests, setNumGuests] = useState(1)
   const [pricingCalculation, setPricingCalculation] = useState<any>(null)
   const [selectedRatePlanId, setSelectedRatePlanId] = useState<string>('')
@@ -75,6 +77,23 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
   const formatDateForAPI = (date: Date | null): string => {
     return date ? date.toISOString().split('T')[0] : ''
   }
+  
+  // Helper to get dates based on booking type
+  const getBookingDates = () => {
+    if (bookingType === 'half-day' && singleDate) {
+      const formattedDate = formatDateForAPI(singleDate)
+      return {
+        checkInDate: formattedDate,
+        checkOutDate: formattedDate // Same day for half-day
+      }
+    } else if (bookingType === 'full-stay' && dateRange.startDate && dateRange.endDate) {
+      return {
+        checkInDate: formatDateForAPI(dateRange.startDate),
+        checkOutDate: formatDateForAPI(dateRange.endDate)
+      }
+    }
+    return { checkInDate: '', checkOutDate: '' }
+  }
 
   // Fetch property data on mount
   useEffect(() => {
@@ -87,8 +106,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
   // Calculate pricing when dates or guest count changes
   useEffect(() => {
-    const checkInDate = formatDateForAPI(dateRange.startDate)
-    const checkOutDate = formatDateForAPI(dateRange.endDate)
+    const { checkInDate, checkOutDate } = getBookingDates()
     
     if (actualPropertyId && checkInDate && checkOutDate && numGuests) {
       dispatch(calculateRatePricing({
@@ -106,7 +124,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
         }
       })
     }
-  }, [actualPropertyId, dateRange.startDate, dateRange.endDate, numGuests, dispatch])
+  }, [actualPropertyId, dateRange.startDate, dateRange.endDate, singleDate, bookingType, numGuests, dispatch])
 
   // Smart back navigation
   const handleBack = () => {
@@ -124,8 +142,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
       return
     }
     
-    if (!dateRange.startDate || !dateRange.endDate || !numGuests) {
-      alert('Please select check-in date, check-out date, and number of guests')
+    const { checkInDate, checkOutDate } = getBookingDates()
+    
+    if (!checkInDate || !checkOutDate || !numGuests) {
+      const dateLabel = bookingType === 'half-day' ? 'booking date' : 'check-in and check-out dates'
+      alert(`Please select ${dateLabel} and number of guests`)
       return
     }
 
@@ -136,8 +157,6 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
     
     // Check availability first
     try {
-      const checkInDate = formatDateForAPI(dateRange.startDate)
-      const checkOutDate = formatDateForAPI(dateRange.endDate)
       
       const availabilityResult = await dispatch(checkBookingAvailability({
         propertyId: actualPropertyId,
@@ -720,18 +739,55 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
               </Box>
             </Box>
 
+            {/* Booking Type Toggle */}
+            <Box marginBottom="1rem">
+              <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
+                Booking Type
+              </Box>
+              <ToggleButton
+                options={[
+                  { 
+                    value: 'half-day', 
+                    label: 'Half Day', 
+                    icon: <IoIosTime /> 
+                  },
+                  { 
+                    value: 'full-stay', 
+                    label: 'Full Stay', 
+                    icon: <IoIosCalendar /> 
+                  }
+                ]}
+                value={bookingType}
+                onChange={setBookingType}
+                variant="segmented"
+                fullWidth
+              />
+            </Box>
+
             {/* Date Selection */}
             <Box marginBottom="1rem">
-              <DateRangePicker
-                label="Booking Dates"
-                value={dateRange}
-                onChange={setDateRange}
-                placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
-                minDate={new Date()}
-                minNights={1}
-                clearable
-                helperText="Select your stay dates"
-              />
+              {bookingType === 'half-day' ? (
+                <DatePicker
+                  label="Booking Date"
+                  value={singleDate ? singleDate.toISOString() : ''}
+                  onChange={(value) => setSingleDate(value ? new Date(value) : null)}
+                  placeholder="Select your booking date"
+                  minDate={new Date().toISOString()}
+                  helperText="Select the date for your half-day booking"
+                  required
+                />
+              ) : (
+                <DateRangePicker
+                  label="Booking Dates"
+                  value={dateRange}
+                  onChange={setDateRange}
+                  placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
+                  minDate={new Date()}
+                  minNights={1}
+                  clearable
+                  helperText="Select your stay dates"
+                />
+              )}
             </Box>
 
             <Box marginBottom="1.5rem">
@@ -785,18 +841,55 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             </Box>
           </Box>
 
+          {/* Booking Type Toggle */}
+          <Box marginBottom="1rem">
+            <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.5rem">
+              Booking Type
+            </Box>
+            <ToggleButton
+              options={[
+                { 
+                  value: 'half-day', 
+                  label: 'Half Day', 
+                  icon: <IoIosTime /> 
+                },
+                { 
+                  value: 'full-stay', 
+                  label: 'Full Stay', 
+                  icon: <IoIosCalendar /> 
+                }
+              ]}
+              value={bookingType}
+              onChange={setBookingType}
+              variant="segmented"
+              fullWidth
+            />
+          </Box>
+
           {/* Date Selection */}
           <Box marginBottom="1rem">
-            <DateRangePicker
-              label="Booking Dates"
-              value={dateRange}
-              onChange={setDateRange}
-              placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
-              minDate={new Date()}
-              minNights={1}
-              clearable
-              helperText="Select your stay dates"
-            />
+            {bookingType === 'half-day' ? (
+              <DatePicker
+                label="Booking Date"
+                value={singleDate ? singleDate.toISOString() : ''}
+                onChange={(value) => setSingleDate(value ? new Date(value) : null)}
+                placeholder="Select your booking date"
+                minDate={new Date().toISOString()}
+                helperText="Select the date for your half-day booking"
+                required
+              />
+            ) : (
+              <DateRangePicker
+                label="Booking Dates"
+                value={dateRange}
+                onChange={setDateRange}
+                placeholder={{ start: "Check-in Date", end: "Check-out Date" }}
+                minDate={new Date()}
+                minNights={1}
+                clearable
+                helperText="Select your stay dates"
+              />
+            )}
           </Box>
 
           <Box marginBottom="1.5rem">
