@@ -31,6 +31,9 @@ const initialState: PropertyState = {
   formValidationErrors: {},
   isSaving: false,
   
+  // Rate plan selection for PropertyDetail page
+  selectedRatePlan: null,
+  
   loading: false,
   error: null,
   validationErrors: null
@@ -424,6 +427,9 @@ const propertySlice = createSlice({
     },
     setCurrentProperty: (state, action: PayloadAction<Property | null>) => {
       state.currentProperty = action.payload
+    },
+    setSelectedRatePlan: (state, action: PayloadAction<any | null>) => {
+      state.selectedRatePlan = action.payload
     },
     initializeWizard: (state, action: PayloadAction<Partial<WizardFormData>>) => {
       const defaultWizardData: WizardFormData = {
@@ -906,6 +912,7 @@ export const {
   clearError,
   clearValidationErrors,
   setCurrentProperty,
+  setSelectedRatePlan,
   initializeWizard,
   initializeWizardForEdit,
   updateWizardData,

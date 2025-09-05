@@ -108,7 +108,7 @@ export const getPublicRatePlansForProperty = async (req: Request, res: Response)
   } catch (error: any) {
     console.error('Get public rate plans error:', error);
     
-    if (error.message.includes('not found') || error.message.includes('not available')) {
+    if (error.message.includes('not found')) {
       res.status(404).json({ error: 'Property not found or has no available rate plans' });
     } else {
       res.status(500).json({ error: 'Internal server error' });

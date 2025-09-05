@@ -7,6 +7,7 @@ import {
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Input from '@/components/base/Input'
+import Button from '@/components/base/Button'
 import SelectionPicker from '@/components/base/SelectionPicker'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import { useAppShell } from '@/components/base/AppShell'
@@ -161,35 +162,8 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
             You have unsaved changes. Are you sure you want to leave?
           </Box>
           <Box display="flex" gap="1rem" justifyContent="center">
-            <Box>
-              <button 
-                onClick={() => close(false)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Stay
-              </button>
-            </Box>
-            <Box>
-              <button 
-                onClick={() => close(true)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Yes, Leave
-              </button>
-            </Box>
+            <Button label="Stay" onClick={() => close(false)} />
+            <Button label="Yes, Leave" onClick={() => close(true)} variant="promoted" />
           </Box>
         </Box>
       ))
@@ -267,35 +241,8 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
             Do you want to save your changes before leaving?
           </Box>
           <Box display="flex" gap="1rem" justifyContent="center">
-            <Box>
-              <button 
-                onClick={() => close(false)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Leave Without Saving
-              </button>
-            </Box>
-            <Box>
-              <button 
-                onClick={() => close(true)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Save & Leave
-              </button>
-            </Box>
+            <Button label="Leave Without Saving" onClick={() => close(false)} />
+            <Button label="Save & Leave" onClick={() => close(true)} variant="promoted" />
           </Box>
         </Box>
       ))
@@ -322,35 +269,8 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
           Are you sure you want to discard all unsaved changes?
         </Box>
         <Box display="flex" gap="1rem" justifyContent="center">
-          <Box>
-            <button 
-              onClick={() => close(false)}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: 'white',
-                border: '1px solid #d1d5db',
-                borderRadius: '0.375rem',
-                cursor: 'pointer'
-              }}
-            >
-              Keep Editing
-            </button>
-          </Box>
-          <Box>
-            <button 
-              onClick={() => close(true)}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer'
-              }}
-            >
-              Discard
-            </button>
-          </Box>
+          <Button label="Keep Editing" onClick={() => close(false)} />
+          <Button label="Discard" onClick={() => close(true)} variant="promoted" />
         </Box>
       </Box>
     ))
@@ -434,19 +354,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
           />
           
           <Box textAlign="center" marginTop="2rem">
-            <button 
-              onClick={() => navigateTo('dashboard', {})}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: 'white',
-                border: '1px solid #d1d5db',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                color: '#6b7280'
-              }}
-            >
-              Back to Dashboard
-            </button>
+            <Button label="Back to Dashboard" onClick={() => navigateTo('dashboard', {})} />
           </Box>
         </Box>
       </SecuredPage>
@@ -464,21 +372,11 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
             <Box marginBottom="2rem" color="#374151">
               The rate plan you're looking for doesn't exist.
             </Box>
-            <Box>
-              <button
-                onClick={() => navigateTo('rate-plans', {})}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Back to Rate Plans
-              </button>
-            </Box>
+            <Button 
+              label="Back to Rate Plans" 
+              onClick={() => navigateTo('rate-plans', {})} 
+              variant="promoted" 
+            />
           </Box>
         </Box>
       </SecuredPage>

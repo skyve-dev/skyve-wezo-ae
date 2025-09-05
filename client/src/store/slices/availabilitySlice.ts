@@ -201,8 +201,19 @@ export const fetchAvailability = createAsyncThunk(
       const endDate = new Date(year, month - 1 + months, 0) // Get last day of the end month
       
       const params = new URLSearchParams()
-      params.append('startDate', startDate.toISOString().split('T')[0])
-      params.append('endDate', endDate.toISOString().split('T')[0])
+      // Use local date formatting to avoid timezone offset issues
+      const startYear = startDate.getFullYear()
+      const startMonth = String(startDate.getMonth() + 1).padStart(2, '0')
+      const startDay = String(startDate.getDate()).padStart(2, '0')
+      const startDateString = `${startYear}-${startMonth}-${startDay}`
+      
+      const endYear = endDate.getFullYear()
+      const endMonth = String(endDate.getMonth() + 1).padStart(2, '0')
+      const endDay = String(endDate.getDate()).padStart(2, '0')
+      const endDateString = `${endYear}-${endMonth}-${endDay}`
+      
+      params.append('startDate', startDateString)
+      params.append('endDate', endDateString)
       
       
       // API returns { propertyId, startDate, endDate, availability: Availability[] }
@@ -582,7 +593,12 @@ const availabilitySlice = createSlice({
       
       const currentDate = new Date(startDate)
       while (currentDate <= endDate) {
-        dates.push(currentDate.toISOString().split('T')[0])
+        // Use local date formatting to avoid timezone offset issues
+        const year = currentDate.getFullYear()
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+        const day = String(currentDate.getDate()).padStart(2, '0')
+        const dateString = `${year}-${month}-${day}`
+        dates.push(dateString)
         currentDate.setDate(currentDate.getDate() + 1)
       }
       

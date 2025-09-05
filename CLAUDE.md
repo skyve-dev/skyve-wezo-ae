@@ -137,6 +137,48 @@ When managing application state:
 
 This ensures predictable state management and centralized business logic.
 
+## Date and Timezone Handling Guidelines
+
+When working with dates, especially for pricing and calendar features:
+
+### Critical Issue: UTC/Timezone Offset Problem
+JavaScript's `Date.toISOString()` converts dates to UTC, which can cause date shifts when the local timezone differs from UTC. This is particularly problematic for pricing lookups where selecting "September 20" might fetch prices for "September 19" due to timezone conversion.
+
+### Best Practices:
+1. **NEVER use `toISOString()` for date-only strings**
+   ```typescript
+   // ❌ WRONG - Causes timezone shift
+   const dateString = date.toISOString().split('T')[0]
+   
+   // ✅ CORRECT - Preserves local date
+   const year = date.getFullYear()
+   const month = String(date.getMonth() + 1).padStart(2, '0')
+   const day = String(date.getDate()).padStart(2, '0')
+   const dateString = `${year}-${month}-${day}`
+   ```
+
+2. **Always use local date formatting for API keys and calendar lookups**
+   - Calendar APIs expect dates as "YYYY-MM-DD" strings in local time
+   - Price lookups should match the user's selected dates, not UTC-shifted dates
+
+3. **Be consistent across the application**
+   - If one component uses local dates, all related components should too
+   - Document timezone assumptions in component comments
+
+4. **Common affected areas:**
+   - Pricing calendar lookups
+   - Rate plan date calculations
+   - Booking date selections
+   - Date range comparisons
+   - API date parameters
+
+5. **Testing considerations:**
+   - Test with users in different timezones
+   - Verify dates don't shift at midnight boundaries
+   - Ensure calendar displays match pricing calculations
+
+This prevents frustrating bugs where users see one date but get pricing for another date.
+
 ## Frontend Architecture & Navigation System
 
 ### AppShell Navigation System

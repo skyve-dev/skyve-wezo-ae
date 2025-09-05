@@ -70,6 +70,10 @@ export interface PricingCalendarProps {
    * Loading state
    */
   loading?: boolean
+  
+  /**
+   * Note: Calendar now shows base prices only - rate plan modifiers are applied in rate plan cards
+   */
 }
 
 /**
@@ -98,6 +102,9 @@ export interface PricingCalendarProps {
  *   maxNights={30}
  * />
  * ```
+ * 
+ * Note: Calendar displays base property prices only. Rate plan modifiers
+ * are applied and displayed in the rate plan cards separately for clarity.
  */
 const PricingCalendar: React.FC<PricingCalendarProps> = ({
   value,
@@ -242,13 +249,18 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
     }
   }
   
-  // Get price for a specific date
+  // Calendar always shows base prices - no rate plan modifiers applied
+  // Rate plan pricing effects are shown in the rate plan cards instead
+  
+  // Get price for a specific date (always returns base prices)
   const getPriceForDate = (date: Date): PriceInfo | null => {
     // Use timezone-safe date formatting to match API key format
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     const dateString = `${year}-${month}-${day}`
+    
+    // Return base price data without any rate plan modifiers
     return priceData[dateString] || null
   }
   
@@ -258,7 +270,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
     return `${price.currency} ${Math.round(displayPrice)}`
   }
   
-  // Calculate total price for selected range
+  // Calculate total price for selected range (using base prices only)
   const calculateTotalPrice = (): { total: number, nights: number, currency: string } => {
     if (!internalRange.startDate || !internalRange.endDate) {
       return { total: 0, nights: 0, currency: 'AED' }
@@ -270,7 +282,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
     let total = 0
     let currency = 'AED'
     
-    // Calculate price for each night
+    // Calculate base price for each night (no rate plan modifiers)
     const currentDate = new Date(internalRange.startDate)
     for (let i = 0; i < nights; i++) {
       const priceInfo = getPriceForDate(currentDate)
@@ -303,16 +315,12 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
         display="flex" 
         alignItems="center" 
         justifyContent="space-between" 
-        marginBottom="1.5rem"
-        padding="1rem"
-        paddingMd="1.25rem"
-        backgroundColor="#f9fafb"
-        borderRadius="12px"
+        marginBottom="1rem"
+        padding="0.5rem 0"
       >
         <Box
           cursor="pointer"
-          padding="0.5rem"
-          borderRadius="4px"
+          padding="0.375rem"
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -321,7 +329,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
             opacity: disabled ? 0.5 : 1
           }}
         >
-          <IoIosArrowBack size={20} color="#6b7280" />
+          <IoIosArrowBack size={18} color="#6b7280" />
         </Box>
         
         <Box fontSize="1rem" fontWeight="600" color="#374151">
@@ -333,8 +341,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
         
         <Box
           cursor="pointer"
-          padding="0.5rem"
-          borderRadius="4px"
+          padding="0.375rem"
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -343,7 +350,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
             opacity: disabled ? 0.5 : 1
           }}
         >
-          <IoIosArrowForward size={20} color="#6b7280" />
+          <IoIosArrowForward size={18} color="#6b7280" />
         </Box>
       </Box>
       
@@ -375,9 +382,9 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
         gridTemplateColumns="repeat(7, 1fr)" 
         gap="1px"
         backgroundColor="#e5e7eb"
-        borderRadius="12px"
+        borderRadius="8px"
         overflow="hidden"
-        marginBottom="1.5rem"
+        marginBottom="1rem"
       >
         {calendarDays.map((date, index) => {
           const isCurrentMonth = date.getMonth() === currentMonth
@@ -404,8 +411,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
               cursor={!isCurrentMonth || isDisabled ? 'not-allowed' : 'pointer'}
               opacity={!isCurrentMonth || isDisabled ? 0.5 : 1}
               onClick={() => isCurrentMonth && !isDisabled && handleDateSelect(date)}
-              padding="0.75rem"
-              paddingMd="1rem"
+              padding="0.5rem"
               display="flex"
               flexDirection="column"
               alignItems="center"
@@ -416,10 +422,10 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
             >
               {/* Date number */}
               <Box 
-                fontSize="1rem"
+                fontSize="0.875rem"
                 fontWeight={isSelected ? "600" : "500"}
                 color={isDisabled ? "#9ca3af" : (isSelected ? "white" : "#374151")}
-                marginBottom="0.5rem"
+                marginBottom="0.25rem"
               >
                 {date.getDate()}
               </Box>
@@ -468,13 +474,12 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
       {/* Selection Summary */}
       {(internalRange.startDate || internalRange.endDate) && (
         <Box 
-          padding="1rem" 
-          backgroundColor="#f0f9ff" 
-          border="1px solid #bfdbfe"
-          borderRadius="8px"
-          marginBottom="1rem"
+          padding="0.75rem" 
+          backgroundColor="#f8fafc" 
+          borderRadius="6px"
+          marginBottom="0.75rem"
         >
-          <Box fontSize="0.875rem" fontWeight="600" color="#1e40af" marginBottom="0.5rem">
+          <Box fontSize="0.75rem" fontWeight="600" color="#1e40af" marginBottom="0.25rem">
             Selection Summary
           </Box>
           <Box fontSize="0.875rem" color="#1e3a8a">

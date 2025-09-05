@@ -294,17 +294,18 @@ export class RatePlanService {
    * Get public rate plans for a property (no auth required)
    */
   async getPublicRatePlansForProperty(propertyId: string): Promise<any[]> {
-    // Verify property exists and is active
+    // Verify property exists (allow both Draft and Live for pricing simulation)
     const property = await prisma.property.findFirst({
       where: { 
-        propertyId,
-        status: 'Live' // Only show rate plans for live properties
+        propertyId
+        // Removed status restriction - allow rate plans for both Draft and Live properties
+        // Draft properties can show rate plans for pricing simulation purposes
       },
       include: { amenities: true }
     });
 
     if (!property) {
-      throw new Error('Property not found or not available for booking');
+      throw new Error('Property not found');
     }
 
     const ratePlans = await prisma.ratePlan.findMany({

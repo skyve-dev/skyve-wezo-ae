@@ -211,6 +211,9 @@ export interface PropertyState {
   formValidationErrors: Record<string, string>
   isSaving: boolean
   
+  // Rate plan selection for PropertyDetail page
+  selectedRatePlan: any | null // Import RatePlan type when available
+  
   loading: boolean
   error: string | null
   validationErrors: ValidationErrors | null
