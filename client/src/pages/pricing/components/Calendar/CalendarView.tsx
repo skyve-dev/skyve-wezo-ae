@@ -56,62 +56,105 @@ const CalendarView: React.FC = () => {
     // dateRange changed - component will re-render
   }, [dateRange])
   
-  // Generate calendar days for current month
+  // Enhanced breakpoint logic for responsive calendar
+  const getScreenSize = () => {
+    const width = window.innerWidth
+    return {
+      isTinyMobile: width < 400,  // Very small phones (340px+)
+      isMobile: width < 768,      // Regular mobile
+      isTablet: width < 1024      // Tablet
+    }
+  }
+  
+  const screenSize = getScreenSize()
+
+  // Generate calendar days - week view for tiny mobile, month view for larger screens
   const calendarDays = useMemo(() => {
     if (!dateRange.startDate || !dateRange.endDate) {
       return []
     }
     
     const startDate = new Date(dateRange.startDate)
-    const year = startDate.getFullYear()
-    const month = startDate.getMonth()
+    const today = new Date()
     
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    const days = []
-    
-    // Add padding days from previous month
-    const startPadding = firstDay.getDay()
-    for (let i = startPadding - 1; i >= 0; i--) {
-      const date = new Date(year, month, -i)
-      days.push({
-        date,
-        dateString: formatDateLocal(date),
-        isCurrentMonth: false,
-        isToday: false,
-        isWeekend: date.getDay() === 0 || date.getDay() === 6
-      })
+    if (screenSize.isTinyMobile) {
+      // Week view for tiny mobile screens
+      const days = []
+      const currentWeekStart = new Date(startDate)
+      
+      // Find the start of the current week (Sunday)
+      const dayOfWeek = currentWeekStart.getDay()
+      currentWeekStart.setDate(currentWeekStart.getDate() - dayOfWeek)
+      
+      // Add 7 days for current week
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentWeekStart)
+        date.setDate(currentWeekStart.getDate() + i)
+        const dateString = formatDateLocal(date)
+        const todayString = formatDateLocal(today)
+        
+        days.push({
+          date,
+          dateString,
+          isCurrentMonth: date.getMonth() === startDate.getMonth(),
+          isToday: dateString === todayString,
+          isWeekend: date.getDay() === 0 || date.getDay() === 6
+        })
+      }
+      
+      return days
+    } else {
+      // Full month view for larger screens
+      const year = startDate.getFullYear()
+      const month = startDate.getMonth()
+      
+      const firstDay = new Date(year, month, 1)
+      const lastDay = new Date(year, month + 1, 0)
+      const days = []
+      
+      // Add padding days from previous month
+      const startPadding = firstDay.getDay()
+      for (let i = startPadding - 1; i >= 0; i--) {
+        const date = new Date(year, month, -i)
+        days.push({
+          date,
+          dateString: formatDateLocal(date),
+          isCurrentMonth: false,
+          isToday: false,
+          isWeekend: date.getDay() === 0 || date.getDay() === 6
+        })
+      }
+      
+      // Add days of current month
+      const todayString = formatDateLocal(today)
+      for (let i = 1; i <= lastDay.getDate(); i++) {
+        const date = new Date(year, month, i)
+        const dateString = formatDateLocal(date)
+        days.push({
+          date,
+          dateString,
+          isCurrentMonth: true,
+          isToday: dateString === todayString,
+          isWeekend: date.getDay() === 0 || date.getDay() === 6
+        })
+      }
+      
+      // Add padding days from next month
+      const endPadding = 6 - lastDay.getDay()
+      for (let i = 1; i <= endPadding; i++) {
+        const date = new Date(year, month + 1, i)
+        days.push({
+          date,
+          dateString: formatDateLocal(date),
+          isCurrentMonth: false,
+          isToday: false,
+          isWeekend: date.getDay() === 0 || date.getDay() === 6
+        })
+      }
+      
+      return days
     }
-    
-    // Add days of current month
-    const today = formatDateLocal(new Date())
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      const date = new Date(year, month, i)
-      const dateString = formatDateLocal(date)
-      days.push({
-        date,
-        dateString,
-        isCurrentMonth: true,
-        isToday: dateString === today,
-        isWeekend: date.getDay() === 0 || date.getDay() === 6
-      })
-    }
-    
-    // Add padding days from next month
-    const endPadding = 6 - lastDay.getDay()
-    for (let i = 1; i <= endPadding; i++) {
-      const date = new Date(year, month + 1, i)
-      days.push({
-        date,
-        dateString: formatDateLocal(date),
-        isCurrentMonth: false,
-        isToday: false,
-        isWeekend: date.getDay() === 0 || date.getDay() === 6
-      })
-    }
-    
-    return days
-  }, [dateRange])
+  }, [dateRange, screenSize.isTinyMobile])
   
   // Get current month info for filtering (used by other components)
   // const currentDate = dateRange.startDate ? new Date(dateRange.startDate) : new Date()
@@ -302,10 +345,14 @@ const CalendarView: React.FC = () => {
     )
   }
   
-  // Show pricing mode indicator
+  // Show pricing mode and view mode indicators
   const pricingModeMessage = selectedRatePlanIds.length === 0 
     ? 'Showing base property pricing (no rate plans selected)'
     : `Showing pricing for ${selectedRatePlanIds.length} selected rate plan${selectedRatePlanIds.length > 1 ? 's' : ''}`
+    
+  const viewModeMessage = screenSize.isTinyMobile 
+    ? ' • Week View (Mobile Optimized)' 
+    : ' • Month View'
   
   return (
     <Box>
@@ -319,7 +366,7 @@ const CalendarView: React.FC = () => {
         color={selectedRatePlanIds.length === 0 ? "#92400e" : "#0c4a6e"}
         fontWeight="500"
       >
-        {pricingModeMessage}
+        {pricingModeMessage}{viewModeMessage}
       </Box>
       
       <CalendarGrid

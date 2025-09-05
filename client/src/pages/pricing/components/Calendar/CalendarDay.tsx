@@ -69,7 +69,17 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     selectedDates
   } = useSelector((state: RootState) => state.price)
   
-  const isMobile = window.innerWidth < 768
+  // Enhanced breakpoint logic for better mobile responsiveness
+  const getScreenSize = () => {
+    const width = window.innerWidth
+    return {
+      isTinyMobile: width < 400,  // Very small phones (340px+)
+      isMobile: width < 768,      // Regular mobile
+      isTablet: width < 1024      // Tablet
+    }
+  }
+  
+  const screenSize = getScreenSize()
   const isSelected = selectedDates.includes(day.dateString)
   
   // Check if the date is in the past
@@ -161,9 +171,15 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     return 'transparent'
   }
   
-  // Format currency
+  // Format currency with enhanced mobile formatting
   const formatPrice = (amount: number) => {
-    if (isMobile && amount >= 1000) {
+    if (screenSize.isTinyMobile) {
+      // Ultra-compact format for tiny screens
+      if (amount >= 1000) {
+        return `${(amount / 1000).toFixed(1)}k`
+      }
+      return `${Math.round(amount)}`
+    } else if (screenSize.isMobile && amount >= 1000) {
       return `AED ${(amount / 1000).toFixed(1)}k`
     }
     return `AED ${amount.toLocaleString()}`
@@ -171,13 +187,13 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
   
   return (
     <Box
-      minHeight={isMobile ? '80px' : '120px'}
+      minHeight={screenSize.isTinyMobile ? '60px' : (screenSize.isMobile ? '80px' : '120px')}
       backgroundColor={getBackgroundColor()}
       border={`2px solid ${getBorderColor()}`}
       cursor={day.isCurrentMonth && !isDisabled ? 'pointer' : 'not-allowed'}
       opacity={day.isCurrentMonth && !isDisabled ? 1 : 0.5}
       onClick={handleDayClick}
-      padding="0.5rem"
+      padding={screenSize.isTinyMobile ? '0.25rem' : '0.5rem'}
       position="relative"
       transition="all 0.2s"
       whileHover={day.isCurrentMonth ? { backgroundColor: '#f8fafc' } : {}}
@@ -192,7 +208,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         <span 
           style={{ 
             fontWeight: day.isToday ? '600' : '500',
-            fontSize: isMobile ? '0.875rem' : '1rem',
+            fontSize: screenSize.isTinyMobile ? '0.75rem' : (screenSize.isMobile ? '0.875rem' : '1rem'),
             color: isDisabled ? '#9ca3af' : (day.isToday ? '#1d4ed8' : (day.isCurrentMonth ? '#374151' : '#9ca3af'))
           }}
         >
@@ -238,8 +254,8 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
           </Box>
         )}
         
-        {/* Weekend Label */}
-        {day.isWeekend && day.isCurrentMonth && !isMobile && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
+        {/* Weekend Label - hidden on tiny mobile to save space */}
+        {day.isWeekend && day.isCurrentMonth && !screenSize.isMobile && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
           <span style={{ fontSize: '0.625rem', color: '#92400e', fontWeight: '500' }}>
             WE
           </span>
@@ -284,7 +300,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
             </Box>
           )}
           
-          {prices.slice(0, isMobile ? 2 : 4).map((priceData, index) => {
+          {prices.slice(0, screenSize.isTinyMobile ? 1 : (screenSize.isMobile ? 2 : 4)).map((priceData, index) => {
             const isBasePricing = priceData.isBasePricing
             const isOverride = isBasePricing && priceData.hasCustomPrice
             
@@ -317,11 +333,11 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
             return (
               <Box
                 key={isBasePricing ? `base-pricing-${index}` : `${priceData.ratePlan?.id || 'unknown'}-${index}`}
-                padding="0.25rem 0.5rem"
+                padding={screenSize.isTinyMobile ? "0.125rem 0.25rem" : "0.25rem 0.5rem"}
                 backgroundColor={backgroundColor}
                 border={`1px solid ${borderColor}`}
                 borderRadius="4px"
-                fontSize={isMobile ? '0.625rem' : '0.75rem'}
+                fontSize={screenSize.isTinyMobile ? '0.5rem' : (screenSize.isMobile ? '0.625rem' : '0.75rem')}
                 cursor={bulkEditMode ? "default" : "pointer"}
                 onClick={(e) => {
                   if (!bulkEditMode) {
@@ -335,50 +351,58 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 opacity={bulkEditMode ? 0.7 : 1}
                 whileHover={!bulkEditMode ? { backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9') } : {}}
               >
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Box display="flex" alignItems="center" gap="0.25rem">
-                    <Box
-                      width="6px"
-                      height="6px"
-                      borderRadius="50%"
-                      backgroundColor={ratePlanColor}
-                    />
-                    <span 
-                      style={{ 
-                        color: textColor,
-                        fontWeight: priceData.hasCustomPrice || isBasePricing ? '500' : '400',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        maxWidth: isMobile ? '40px' : '60px'
-                      }}
-                    >
-                      {isMobile ? ratePlanName.substring(0, 4) : ratePlanName}
-                    </span>
-                  </Box>
-                  
-                  <Box 
-                    fontWeight="500" 
-                    color={textColor}
-                  >
+                {screenSize.isTinyMobile ? (
+                  // Ultra-compact layout for tiny screens: price only
+                  <Box textAlign="center" fontWeight="500" color={textColor}>
                     {formatPrice(priceData.price.amount)}
                   </Box>
-                </Box>
+                ) : (
+                  // Regular layout for larger screens
+                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                    <Box display="flex" alignItems="center" gap="0.25rem">
+                      <Box
+                        width="6px"
+                        height="6px"
+                        borderRadius="50%"
+                        backgroundColor={ratePlanColor}
+                      />
+                      <span 
+                        style={{ 
+                          color: textColor,
+                          fontWeight: priceData.hasCustomPrice || isBasePricing ? '500' : '400',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: screenSize.isMobile ? '40px' : '60px'
+                        }}
+                      >
+                        {screenSize.isMobile ? ratePlanName.substring(0, 4) : ratePlanName}
+                      </span>
+                    </Box>
+                    
+                    <Box 
+                      fontWeight="500" 
+                      color={textColor}
+                    >
+                      {formatPrice(priceData.price.amount)}
+                    </Box>
+                  </Box>
+                )}
               </Box>
             )
           })}
           
           {/* Show count if more prices exist */}
-          {prices.length > (isMobile ? 2 : 4) && (
+          {prices.length > (screenSize.isTinyMobile ? 1 : (screenSize.isMobile ? 2 : 4)) && (
             <Box
               textAlign="center"
-              fontSize="0.625rem"
+              fontSize={screenSize.isTinyMobile ? '0.5rem' : '0.625rem'}
               color="#6b7280"
-              padding="0.25rem"
+              padding={screenSize.isTinyMobile ? '0.125rem' : '0.25rem'}
               backgroundColor="#f9fafb"
               borderRadius="4px"
             >
-              +{prices.length - (isMobile ? 2 : 4)} more
+              +{prices.length - (screenSize.isTinyMobile ? 1 : (screenSize.isMobile ? 2 : 4))} more
             </Box>
           )}
         </Box>

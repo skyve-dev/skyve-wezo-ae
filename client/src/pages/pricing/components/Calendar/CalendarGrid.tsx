@@ -59,7 +59,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   selectedRatePlans,
   getPricesForDate
 }) => {
-  const isMobile = window.innerWidth < 768
+  // Enhanced breakpoint logic for better mobile responsiveness
+  const getScreenSize = () => {
+    const width = window.innerWidth
+    return {
+      isTinyMobile: width < 400,  // Very small phones (340px+)
+      isMobile: width < 768,      // Regular mobile
+      isTablet: width < 1024      // Tablet
+    }
+  }
+  
+  const screenSize = getScreenSize()
   
   return (
     <Box>
@@ -75,12 +85,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             key={day}
             textAlign="center"
             fontWeight="600"
-            fontSize={isMobile ? '0.75rem' : '0.875rem'}
+            fontSize={screenSize.isTinyMobile ? '0.625rem' : (screenSize.isMobile ? '0.75rem' : '0.875rem')}
             color="#6b7280"
-            padding="0.75rem 0.5rem"
+            padding={screenSize.isTinyMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem'}
             backgroundColor="#f9fafb"
           >
-            {isMobile ? day.charAt(0) : day}
+            {screenSize.isTinyMobile ? day.charAt(0) : (screenSize.isMobile ? day.substring(0, 3) : day)}
           </Box>
         ))}
       </Box>
@@ -115,16 +125,16 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           
           <Box 
             display="grid" 
-            gridTemplateColumns={isMobile ? 'repeat(1, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))'} 
-            gap="0.75rem"
+            gridTemplateColumns={screenSize.isTinyMobile ? 'repeat(1, 1fr)' : (screenSize.isMobile ? 'repeat(1, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))')} 
+            gap={screenSize.isTinyMobile ? '0.5rem' : '0.75rem'}
           >
             {selectedRatePlans.map(ratePlan => (
               <Box
                 key={ratePlan.id}
                 display="flex"
                 alignItems="center"
-                gap="0.5rem"
-                padding="0.5rem 0.75rem"
+                gap={screenSize.isTinyMobile ? '0.25rem' : '0.5rem'}
+                padding={screenSize.isTinyMobile ? '0.25rem 0.5rem' : '0.5rem 0.75rem'}
                 backgroundColor={ratePlan.lightColor}
                 borderRadius="6px"
                 border={`1px solid ${ratePlan.color}40`}
@@ -139,7 +149,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 
                 <Box flex="1" minWidth="0">
                   <Box 
-                    fontSize="0.875rem" 
+                    fontSize={screenSize.isTinyMobile ? '0.75rem' : '0.875rem'}
                     fontWeight="500" 
                     color="#374151"
                     style={{
@@ -150,7 +160,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   >
                     {ratePlan.name}
                   </Box>
-                  <Box fontSize="0.75rem" color="#6b7280">
+                  <Box fontSize={screenSize.isTinyMobile ? '0.625rem' : '0.75rem'} color="#6b7280">
                     {ratePlan.priceModifierType === 'FixedAmount' && `Fixed AED ${ratePlan.priceModifierValue}`}
                     {ratePlan.priceModifierType === 'Percentage' && `${ratePlan.priceModifierValue}% adjustment`}
                   </Box>
@@ -169,7 +179,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         borderRadius="6px"
         border="1px solid #e5e7eb"
       >
-        <Box display="flex" gap="2rem" flexWrap="wrap" alignItems="center" fontSize="0.75rem" color="#6b7280">
+        <Box 
+          display="flex" 
+          gap={screenSize.isTinyMobile ? '1rem' : '2rem'} 
+          flexWrap="wrap" 
+          alignItems="center" 
+          fontSize={screenSize.isTinyMobile ? '0.625rem' : '0.75rem'} 
+          color="#6b7280"
+        >
           <Box display="flex" alignItems="center" gap="0.5rem">
             <Box width="16px" height="16px" backgroundColor="#fef3c7" border="1px solid #f59e0b" borderRadius="2px" />
             <span>Weekend</span>
