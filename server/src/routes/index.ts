@@ -10,6 +10,7 @@ import financialRoutes from './financial.routes';
 import notificationRoutes from './notification.routes';
 import reviewRoutes from './review.routes';
 import supportRoutes from './support.routes';
+import bookingRoutes from './bookingRoutes';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use('/', financialRoutes);
 router.use('/', notificationRoutes);
 router.use('/', reviewRoutes);
 router.use('/', supportRoutes);
+router.use('/booking', bookingRoutes);
 
 router.get('/health', (_req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });

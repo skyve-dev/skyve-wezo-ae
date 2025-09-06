@@ -378,7 +378,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
             if (availabilityResult.meta.requestStatus === 'fulfilled') {
                 const availability = availabilityResult.payload as any
                 if (availability.isAvailable) {
-                    navigateTo('booking-checkout', {
+                    navigateTo('booking-confirmation', {
                         propertyId: actualPropertyId,
                         checkInDate,
                         checkOutDate,
@@ -987,7 +987,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                         </Box>
 
                         <Button
-                            label="Check Availability"
+                            label="Book Now"
                             icon={<IoIosCalendar/>}
                             onClick={handleBookNow}
                             variant="promoted"
@@ -1117,7 +1117,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                     {/* Action Buttons */}
                     <Box marginTop="auto" paddingTop="1rem">
                         <Button
-                            label="Check Availability"
+                            label="Book Now"
                             icon={<IoIosCalendar/>}
                             onClick={handleBookNow}
                             variant="promoted"

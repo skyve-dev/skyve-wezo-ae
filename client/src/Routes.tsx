@@ -13,7 +13,10 @@ import {
     FaPlus,
     FaEdit,
     FaDollarSign,
-    FaTags
+    FaTags,
+    FaShoppingCart,
+    FaCreditCard,
+    FaHistory
 } from "react-icons/fa";
 
 // Import page components
@@ -33,6 +36,11 @@ import PropertyDetail from "@/pages/PropertyDetail";
 import RatePlans from "@/pages/revenue/RatePlans";
 import PricingCalendar from "@/pages/pricing/PricingCalendar";
 import RatePlanManager from "@/pages/revenue/RatePlanManager";
+
+// Booking pages
+import BookingConfirmation from "@/pages/booking/BookingConfirmation";
+import BookingPayment from "@/pages/booking/BookingPayment";
+import MyBookings from "@/pages/booking/MyBookings";
 
 export const routes = createRoutes({
     home: {
@@ -178,6 +186,33 @@ export const routes = createRoutes({
         showInHeader: false,
         showInFooter: false,
         roles: ['HomeOwner', 'Manager']  // Revenue management - Host/Manager only
+    },
+    'booking-confirmation': {
+        component: BookingConfirmation,
+        icon: <FaShoppingCart />,
+        label: 'Booking Confirmation',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can make bookings
+    },
+    'booking-payment': {
+        component: BookingPayment,
+        icon: <FaCreditCard />,
+        label: 'Payment',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can make bookings
+    },
+    'my-bookings': {
+        component: MyBookings,
+        icon: <FaHistory />,
+        label: 'My Bookings',
+        showInNav: true,
+        showInHeader: false,
+        showInFooter: true,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view their bookings
     }
 })
 
