@@ -3,9 +3,7 @@ import availabilityReducer, {
   type AvailabilitySlot,
   blockDates,
   type BulkAvailabilityUpdate,
-  type BulkPriceUpdate,
   bulkUpdateAvailability,
-  bulkUpdatePrices,
   checkBookingAvailability,
   clearDateSelection,
   clearError,
@@ -488,37 +486,6 @@ describe('availabilitySlice', () => {
     })
   })
 
-  describe('bulkUpdatePrices async thunk', () => {
-    it('should bulk update prices successfully', async () => {
-      const bulkUpdate: BulkPriceUpdate = {
-        propertyId: 'prop-1',
-        ratePlanId: 'rp-1',
-        dateRange: {
-          start: '2024-03-15',
-          end: '2024-03-17'
-        },
-        priceChange: {
-          type: 'percentage',
-          amount: -20 // 20% discount
-        }
-      }
-
-      const updatedSlots = [
-        { ...mockAvailabilitySlot, date: '2024-03-15' },
-        { ...mockAvailabilitySlot, date: '2024-03-16' },
-        { ...mockAvailabilitySlot, date: '2024-03-17' }
-      ]
-
-      mockApi.post.mockResolvedValue({ updatedSlots })
-
-      await store.dispatch(bulkUpdatePrices(bulkUpdate))
-
-      const state = store.getState().availability
-      expect(state.loading).toBe(false)
-      expect(state.bulkOperation.selectedDates).toEqual([]) // Should be cleared
-      expect(state.bulkOperation.isOpen).toBe(false)
-    })
-  })
 
   describe('bulkUpdateAvailability async thunk', () => {
     it('should bulk update availability successfully', async () => {

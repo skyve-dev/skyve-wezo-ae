@@ -54,21 +54,6 @@ export interface CalendarMonth {
   days: AvailabilitySlot[]
 }
 
-export interface BulkPriceUpdate {
-  propertyId?: string
-  ratePlanId?: string
-  dateRange: {
-    start: string
-    end: string
-  }
-  priceChange: {
-    type: 'fixed' | 'percentage' | 'increase' | 'decrease'
-    amount: number
-  }
-  applyToWeekends?: boolean
-  applyToWeekdays?: boolean
-  excludeDates?: string[]
-}
 
 export interface BulkAvailabilityUpdate {
   propertyId?: string
@@ -312,19 +297,6 @@ export const updateAvailability = createAsyncThunk(
   }
 )
 
-export const bulkUpdatePrices = createAsyncThunk(
-  'availability/bulkUpdatePrices',
-  async (bulkUpdate: BulkPriceUpdate, { rejectWithValue }) => {
-    try {
-      const response = await api.post<{ updatedSlots: AvailabilitySlot[] }>('/api/availability/bulk-update-prices', bulkUpdate)
-      return { propertyId: bulkUpdate.propertyId, updatedSlots: response.updatedSlots }
-    } catch (error: any) {
-      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
-                          error.serverMessage || error.message || 'Failed to bulk update prices'
-      return rejectWithValue(errorMessage)
-    }
-  }
-)
 
 export const bulkUpdateAvailability = createAsyncThunk(
   'availability/bulkUpdateAvailability',
@@ -709,26 +681,6 @@ const availabilitySlice = createSlice({
         if (state.calendar[propertyId]) {
           state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], [availability])
         }
-      })
-      
-      // Bulk update prices
-      .addCase(bulkUpdatePrices.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(bulkUpdatePrices.fulfilled, (state, action) => {
-        state.loading = false
-        const { propertyId, updatedSlots } = action.payload
-        if (propertyId && state.calendar[propertyId]) {
-          state.calendar[propertyId] = updateCalendarSlots(state.calendar[propertyId], updatedSlots)
-        }
-        // Clear selection after successful bulk operation
-        state.bulkOperation.selectedDates = []
-        state.bulkOperation.isOpen = false
-      })
-      .addCase(bulkUpdatePrices.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload as string
       })
       
       // Bulk update availability
