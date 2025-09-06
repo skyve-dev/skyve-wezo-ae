@@ -3,6 +3,7 @@ import SlidingDrawer from './SlidingDrawer'
 import { Box } from './Box'
 import useDrawerManager from '../../hooks/useDrawerManager'
 import { IoIosCalendar, IoIosCheckmark, IoIosArrowBack, IoIosArrowForward, IoIosClose } from 'react-icons/io'
+import { formatDateLocal } from '@/utils/dateUtils'
 
 interface DateRange {
   startDate: Date | null
@@ -376,7 +377,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   // Render default date cell
   const renderDefaultDate = (date: Date, context: DateRenderContext) => {
-    const dateString = date.toISOString().split('T')[0]
+    const dateString = formatDateLocal(date)
     const price = priceData?.[dateString]
     
     return (
@@ -656,7 +657,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   isDisabled,
                   isToday,
                   isWeekend,
-                  price: priceData?.[date.toISOString().split('T')[0]]
+                  price: priceData?.[formatDateLocal(date)]
                 }
                 
                 let backgroundColor = 'white'

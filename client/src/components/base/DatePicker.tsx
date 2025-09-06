@@ -4,6 +4,7 @@ import SelectionPicker from './SelectionPicker'
 import {Box} from './Box'
 import useDrawerManager from '../../hooks/useDrawerManager'
 import {IoIosCalendar, IoIosCheckmark, IoIosArrowBack, IoIosArrowForward} from 'react-icons/io'
+import {formatDateForDatePicker} from '@/utils/dateUtils'
 
 interface DatePickerProps {
     /**
@@ -409,7 +410,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     // Confirm date selection
     const handleConfirm = () => {
         if (selectedDate) {
-            onChange(selectedDate.toISOString())
+            onChange(formatDateForDatePicker(selectedDate))
         }
         drawerManager.closeDrawer(drawerId)
     }

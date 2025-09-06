@@ -45,7 +45,7 @@ export interface UseErrorHandlerReturn {
 
 export const useErrorHandler = (): UseErrorHandlerReturn => {
   const dispatch = useDispatch()
-  const { openDialog } = useAppShell()
+  const { openDialog, addToast } = useAppShell()
   const currentError = useSelector(selectCurrentError)
   
   const showApiError = useCallback(async (error: ApiError, context?: string) => {
@@ -58,147 +58,44 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     }
     dispatch(setApiError({ error: errorData, context }))
     
-    // Determine dialog styling based on error type
-    const getErrorColor = () => {
-      if (error.isValidationError()) return '#f59e0b' // amber
-      if (error.isAuthError()) return '#ef4444' // red
-      if (error.isPermissionError()) return '#f97316' // orange  
-      if (error.isServerError()) return '#dc2626' // dark red
-      return '#ef4444' // default red
-    }
     
-    const getErrorTitle = () => {
-      if (error.isValidationError()) return 'Validation Error'
-      if (error.isAuthError()) return 'Authentication Required'
-      if (error.isPermissionError()) return 'Permission Denied'
-      if (error.isNotFoundError()) return 'Not Found'
-      if (error.isServerError()) return 'Server Error'
-      return 'Error'
-    }
-    
-    // Show user-friendly error dialog
-    await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center" background={'white'}>
-        <Box 
-          fontSize="1.25rem" 
-          fontWeight="bold" 
-          marginBottom="1rem" 
-          color={getErrorColor()}
-        >
-          {getErrorTitle()}
-        </Box>
-        <Box marginBottom="2rem" color="#374151">
-          {error.getUserMessage()}
-        </Box>
-        {context && (
-          <Box 
-            fontSize="0.875rem" 
-            marginBottom="1rem" 
-            color="#6b7280"
-            fontStyle="italic"
-          >
-            Context: {context}
-          </Box>
-        )}
-        <Box display="flex" justifyContent="center">
-          <Button 
-            label="OK" 
-            onClick={() => close()} 
-            variant="promoted" 
-          />
-        </Box>
-      </Box>
-    ))
+    // Show user-friendly error toast
+    const contextMessage = context ? `${error.getUserMessage()} (Context: ${context})` : error.getUserMessage()
+    addToast(contextMessage, {
+      type: 'error',
+      autoHide: !error.isServerError(), // Don't auto-hide server errors
+      duration: error.isValidationError() ? 4000 : 6000
+    })
   }, [dispatch, openDialog])
   
   const showError = useCallback(async (message: string, context?: string) => {
     // Store error in global state
     dispatch(setError({ message, context }))
     
-    // Show error dialog
-    await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center" background={'white'}>
-        <Box 
-          fontSize="1.25rem" 
-          fontWeight="bold" 
-          marginBottom="1rem" 
-          color="#ef4444"
-        >
-          Error
-        </Box>
-        <Box marginBottom="2rem" color="#374151">
-          {message}
-        </Box>
-        {context && (
-          <Box 
-            fontSize="0.875rem" 
-            marginBottom="1rem" 
-            color="#6b7280"
-            fontStyle="italic"
-          >
-            Context: {context}
-          </Box>
-        )}
-        <Box display="flex" justifyContent="center">
-          <Button 
-            label="OK" 
-            onClick={() => close()} 
-            variant="promoted" 
-          />
-        </Box>
-      </Box>
-    ))
+    // Show error toast
+    const contextMessage = context ? `${message} (Context: ${context})` : message
+    addToast(contextMessage, {
+      type: 'error',
+      autoHide: true,
+      duration: 5000
+    })
   }, [dispatch, openDialog])
   
   const showSuccess = useCallback(async (message: string) => {
-    await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center" background={'white'}>
-        <Box 
-          fontSize="1.25rem" 
-          fontWeight="bold" 
-          marginBottom="1rem" 
-          color="#059669"
-        >
-          Success!
-        </Box>
-        <Box marginBottom="2rem" color="#374151">
-          {message}
-        </Box>
-        <Box display="flex" justifyContent="center">
-          <Button 
-            label="Continue" 
-            onClick={() => close()} 
-            variant="promoted" 
-          />
-        </Box>
-      </Box>
-    ))
-  }, [openDialog])
+    addToast(message, {
+      type: 'success',
+      autoHide: true,
+      duration: 4000
+    })
+  }, [addToast])
   
   const showWarning = useCallback(async (message: string) => {
-    await openDialog<void>((close) => (
-      <Box padding="2rem" textAlign="center">
-        <Box 
-          fontSize="1.25rem" 
-          fontWeight="bold" 
-          marginBottom="1rem" 
-          color="#f59e0b"
-        >
-          Warning
-        </Box>
-        <Box marginBottom="2rem" color="#374151">
-          {message}
-        </Box>
-        <Box display="flex" justifyContent="center">
-          <Button 
-            label="OK" 
-            onClick={() => close()} 
-            variant="promoted" 
-          />
-        </Box>
-      </Box>
-    ))
-  }, [openDialog])
+    addToast(message, {
+      type: 'warning',
+      autoHide: true,
+      duration: 5000
+    })
+  }, [addToast])
   
   const showConfirmation = useCallback(async (message: string, title = 'Confirm') => {
     return await openDialog<boolean>((close) => (

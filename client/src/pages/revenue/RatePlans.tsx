@@ -12,7 +12,7 @@ const RatePlans: React.FC = () => {
   const dispatch = useAppDispatch()
   const { ratePlans, loading, error } = useAppSelector((state) => state.ratePlan)
   const { currentProperty } = useAppSelector((state) => state.property)
-  const { openDialog, navigateTo } = useAppShell()
+  const { openDialog, navigateTo, addToast } = useAppShell()
   
   const propertyId = currentProperty?.propertyId
   
@@ -81,39 +81,19 @@ const RatePlans: React.FC = () => {
       if (!propertyId) return
       await dispatch(createRatePlan(propertyId, duplicatedPlan))
       
-      // Show success dialog
-      await openDialog<void>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
-            Rate Plan Duplicated!
-          </Box>
-          <Box marginBottom="2rem" color="#374151">
-            "{duplicatedPlan.name}" has been created successfully.
-          </Box>
-          <Button 
-            label="Continue"
-            onClick={() => close()}
-            variant="promoted"
-          />
-        </Box>
-      ))
+      // Show success toast
+      addToast(`Rate plan "${duplicatedPlan.name}" has been duplicated successfully!`, {
+        type: 'success',
+        autoHide: true,
+        duration: 4000
+      })
     } catch (error) {
       console.error('Failed to duplicate rate plan:', error)
-      await openDialog<void>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-            Error
-          </Box>
-          <Box marginBottom="2rem" color="#374151">
-            Failed to duplicate rate plan. Please try again.
-          </Box>
-          <Button 
-            label="Close"
-            onClick={() => close()}
-            variant="normal"
-          />
-        </Box>
-      ))
+      addToast('Failed to duplicate rate plan. Please try again.', {
+        type: 'error',
+        autoHide: true,
+        duration: 4000
+      })
     }
   }, [dispatch, propertyId, openDialog])
 
@@ -150,122 +130,46 @@ const RatePlans: React.FC = () => {
         if (deleteRatePlanAsync.fulfilled.match(result)) {
           const { type, message } = result.payload
           
-          // Show appropriate success dialog based on deletion type
-          const getDialogProps = () => {
-            switch (type) {
-              case 'hard':
-                return {
-                  title: '🗑️ Permanently Deleted',
-                  titleColor: '#059669',
-                  message: message,
-                  backgroundColor: '#f0fdf4',
-                  buttonColor: '#059669'
-                }
-              case 'soft':
-                return {
-                  title: '⚠️ Rate Plan Deactivated', 
-                  titleColor: '#f59e0b',
-                  message: message,
-                  backgroundColor: '#fefbf3',
-                  buttonColor: '#f59e0b'
-                }
-              default:
-                return {
-                  title: '✓ Success',
-                  titleColor: '#059669',
-                  message: message,
-                  backgroundColor: '#f0fdf4',
-                  buttonColor: '#059669'
-                }
-            }
-          }
           
-          const dialogProps = getDialogProps()
-          
-          await openDialog<void>((close) => (
-            <Box padding="2rem" textAlign="center" backgroundColor={dialogProps.backgroundColor} borderRadius="8px">
-              <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color={dialogProps.titleColor}>
-                {dialogProps.title}
-              </Box>
-              <Box marginBottom="2rem" color="#374151">
-                {dialogProps.message}
-              </Box>
-              <Button 
-                label="Continue"
-                onClick={() => close()}
-                variant="promoted"
-                style={{ backgroundColor: dialogProps.buttonColor, borderColor: dialogProps.buttonColor }}
-              />
-            </Box>
-          ))
+          // Show success toast based on deletion type
+          const toastType = type === 'soft' ? 'warning' : 'success'
+          addToast(message, {
+            type: toastType,
+            autoHide: true,
+            duration: 4000
+          })
         } else {
           // Handle rejection/error from async thunk
           const errorPayload = result.payload as any
           
           if (errorPayload?.type === 'blocked') {
-            // Blocked deletion - show error with specific details
-            await openDialog<void>((close) => (
-              <Box padding="2rem" textAlign="center" backgroundColor="#fef2f2" borderRadius="8px">
-                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-                  ❌ Cannot Delete
-                </Box>
-                <Box marginBottom="1rem" color="#374151">
-                  {errorPayload.error}
-                </Box>
-                {errorPayload.details?.derivedRatePlanNames?.length > 0 && (
-                  <Box marginBottom="2rem" padding="1rem" backgroundColor="#fee2e2" borderRadius="4px">
-                    <Box fontSize="0.875rem" fontWeight="600" marginBottom="0.5rem" color="#991b1b">
-                      Dependent Rate Plans:
-                    </Box>
-                    <Box fontSize="0.875rem" color="#991b1b">
-                      {errorPayload.details.derivedRatePlanNames.join(', ')}
-                    </Box>
-                  </Box>
-                )}
-                <Button 
-                  label="Understood"
-                  onClick={() => close()}
-                  variant="normal"
-                />
-              </Box>
-            ))
+            // Show error toast for blocked deletion
+            const blockMessage = errorPayload.details?.derivedRatePlanNames?.length > 0
+              ? `${errorPayload.error} Dependent rate plans: ${errorPayload.details.derivedRatePlanNames.join(', ')}`
+              : errorPayload.error
+            
+            addToast(blockMessage, {
+              type: 'error',
+              autoHide: false,  // Don't auto-hide important error messages
+              duration: 8000
+            })
           } else {
-            // General error
-            await openDialog<void>((close) => (
-              <Box padding="2rem" textAlign="center">
-                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-                  Error
-                </Box>
-                <Box marginBottom="2rem" color="#374151">
-                  {errorPayload?.error || 'Failed to delete rate plan. Please try again.'}
-                </Box>
-                <Button 
-                  label="Close"
-                  onClick={() => close()}
-                  variant="normal"
-                />
-              </Box>
-            ))
+            // Show general error toast
+            addToast(errorPayload?.error || 'Failed to delete rate plan. Please try again.', {
+              type: 'error',
+              autoHide: true,
+              duration: 5000
+            })
           }
         }
       } catch (error) {
         console.error('Failed to delete rate plan:', error)
         
-        await openDialog<void>((close) => (
-          <Box padding="2rem" textAlign="center">
-            <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-              Error
-            </Box>
-            <Box marginBottom="2rem" color="#374151">
-              Failed to delete rate plan. Please try again.
-            </Box>
-            <Button 
-              label="Close"
-              onClick={() => close()}
-              variant="normal"
-            />
-          </Box>
-        ))
+        addToast('Failed to delete rate plan. Please try again.', {
+          type: 'error',
+          autoHide: true,
+          duration: 4000
+        })
       }
     }
   }, [dispatch, propertyId, openDialog])

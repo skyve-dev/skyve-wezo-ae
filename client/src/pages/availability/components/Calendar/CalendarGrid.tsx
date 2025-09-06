@@ -2,6 +2,7 @@ import React from 'react'
 import { Box } from '@/components'
 import { CalendarMonth } from '@/store/slices/availabilitySlice'
 import { DateCell } from './DateCell'
+import { formatDateLocal } from '@/utils/dateUtils'
 
 interface CalendarGridProps {
   availability: CalendarMonth[]
@@ -54,7 +55,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   // Get availability data for a specific date
   const getAvailabilityForDate = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0]
+    const dateString = formatDateLocal(date)
     const foundAvailability = currentMonthData?.days.find(day => day.date === dateString)
     
     return foundAvailability

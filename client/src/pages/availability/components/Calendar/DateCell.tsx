@@ -3,6 +3,7 @@ import { Box } from '@/components'
 import { useAppDispatch } from '@/store'
 import { blockDates, unblockDates } from '@/store/slices/availabilitySlice'
 import { AvailabilitySlot } from '@/store/slices/availabilitySlice'
+import { formatDateLocal } from '@/utils/dateUtils'
 
 interface DateCellProps {
   date: Date
@@ -21,7 +22,7 @@ export const DateCell: React.FC<DateCellProps> = ({
 }) => {
   const dispatch = useAppDispatch()
   
-  const dateString = date.toISOString().split('T')[0]
+  const dateString = formatDateLocal(date)
   const dayNumber = date.getDate()
   const isToday = new Date().toDateString() === date.toDateString()
   const isWeekend = date.getDay() === 0 || date.getDay() === 6

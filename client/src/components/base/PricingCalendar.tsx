@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { Box } from './Box'
+import { useAppShell } from '@/components/base/AppShell'
+import { formatDateLocal } from '@/utils/dateUtils'
 import { 
   IoIosArrowBack, 
   IoIosArrowForward
@@ -118,6 +120,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
   disabled = false,
   loading = false
 }) => {
+  const { addToast } = useAppShell()
   
   // Internal state
   const [internalRange, setInternalRange] = useState<DateRange>(value || { startDate: null, endDate: null })
@@ -193,7 +196,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
     }
     
     // Check availability from price data
-    const dateString = date.toISOString().split('T')[0]
+    const dateString = formatDateLocal(date)
     const priceInfo = priceData[dateString]
     if (priceInfo && priceInfo.isAvailable === false) return true
     
@@ -214,7 +217,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
     
     const current = new Date(startDate)
     while (current <= endDate) {
-      const dateString = current.toISOString().split('T')[0]
+      const dateString = formatDateLocal(current)
       const priceInfo = priceData[dateString]
       
       if (priceInfo && priceInfo.isAvailable === false) {
@@ -256,7 +259,11 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
           // Complete the range selection - but first check for unavailable dates
           if (hasUnavailableDatesInRange(internalRange.startDate, date)) {
             // Show error and reset selection
-            alert('The selected date range contains unavailable dates. Please select a different range.')
+            addToast('The selected date range contains unavailable dates. Please select a different range.', {
+              type: 'error',
+              autoHide: true,
+              duration: 4000
+            })
             newRange.startDate = null
             newRange.endDate = null
             setSelectionStep('start')
@@ -281,11 +288,8 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
   
   // Get price for a specific date (always returns base prices)
   const getPriceForDate = (date: Date): PriceInfo | null => {
-    // Use timezone-safe date formatting to match API key format
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const dateString = `${year}-${month}-${day}`
+    // Use consistent local date formatting
+    const dateString = formatDateLocal(date)
     
     // Return base price data without any rate plan modifiers
     return priceData[dateString] || null

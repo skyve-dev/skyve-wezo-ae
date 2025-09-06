@@ -32,13 +32,14 @@ import {
 import {resolvePhotoUrl} from '@/utils/api'
 import {findAmenityById} from '@/constants/amenities'
 import {ParkingTypeLabels, PetPolicyLabels} from '@/constants/propertyEnums'
+import {formatDateLocal} from '@/utils/dateUtils'
 
 interface PropertyDetailProps {
     propertyId: string
 }
 
 const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
-    const {navigateBack, canNavigateBack, navigateTo, currentParams} = useAppShell()
+    const {navigateBack, canNavigateBack, navigateTo, currentParams, addToast} = useAppShell()
     const dispatch = useAppDispatch()
 
     // Get propertyId from props or route params (route uses 'id' parameter)
@@ -78,11 +79,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         if (!checkInDateObj) return { totalBasePrice: 0, nights: 0 }
         
         if (bookingType === 'half-day') {
-            // Use local date formatting to avoid timezone offset issues
-            const year = checkInDateObj.getFullYear()
-            const month = String(checkInDateObj.getMonth() + 1).padStart(2, '0')
-            const day = String(checkInDateObj.getDate()).padStart(2, '0')
-            const dateString = `${year}-${month}-${day}`
+            // Use consistent local date formatting
+            const dateString = formatDateLocal(checkInDateObj)
             
             const priceInfo = publicPricingCalendar?.[dateString]
             return {
@@ -99,11 +97,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         
         // Calculate day-by-day pricing from calendar
         while (currentDate < checkOutDateObj) {
-            // Use local date formatting to avoid timezone offset issues
-            const year = currentDate.getFullYear()
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-            const day = String(currentDate.getDate()).padStart(2, '0')
-            const dateString = `${year}-${month}-${day}`
+            // Use consistent local date formatting
+            const dateString = formatDateLocal(currentDate)
             
             const priceInfo = publicPricingCalendar?.[dateString]
             
@@ -148,7 +143,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
 
     // Helper function to format dates for API
     const formatDateForAPI = (date: Date | null): string => {
-        return date ? date.toISOString().split('T')[0] : ''
+        return date ? formatDateLocal(date) : ''
     }
 
     // Helper to get dates based on booking type
@@ -180,10 +175,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         // Check each date in the range
         const currentDate = new Date(startDate)
         while (currentDate <= checkEndDate) {
-            const year = currentDate.getFullYear()
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-            const day = String(currentDate.getDate()).padStart(2, '0')
-            const dateString = `${year}-${month}-${day}`
+            const dateString = formatDateLocal(currentDate)
             
             const priceInfo = publicPricingCalendar[dateString]
             
@@ -208,7 +200,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
             const validation = validateDateRangeAvailability(range.startDate, range.startDate)
             
             if (!validation.isValid) {
-                alert(`The selected date is not available for booking.`)
+                addToast('The selected date is not available for booking.', { 
+                    type: 'error', 
+                    autoHide: true, 
+                    duration: 4000 
+                })
                 return
             }
             
@@ -221,7 +217,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
             
             if (!validation.isValid) {
                 const formattedDates = validation.unavailableDates.join(', ')
-                alert(`The following dates in your selected range are not available: ${formattedDates}\n\nPlease select a different date range without unavailable dates.`)
+                addToast(`The following dates in your selected range are not available: ${formattedDates}. Please select a different date range without unavailable dates.`, { 
+                    type: 'error', 
+                    autoHide: true, 
+                    duration: 5000 
+                })
                 return
             }
             
@@ -254,8 +254,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
 
             dispatch(fetchPublicPricingCalendar({
                 propertyId: actualPropertyId,
-                startDate: startDate.toISOString().split('T')[0],
-                endDate: endDate.toISOString().split('T')[0]
+                startDate: formatDateLocal(startDate),
+                endDate: formatDateLocal(endDate)
             })).then(() => {
                 setCalendarLoaded(true)
             })
@@ -336,7 +336,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
     // Handle booking flow
     const handleBookNow = async () => {
         if (!actualPropertyId) {
-            alert('Property not found. Please try again.')
+            addToast('Property not found. Please try again.', { 
+                type: 'error', 
+                autoHide: true, 
+                duration: 4000 
+            })
             return
         }
 
@@ -344,12 +348,20 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
 
         if (!checkInDate || !checkOutDate || !numGuests) {
             const dateLabel = bookingType === 'half-day' ? 'booking date' : 'check-in and check-out dates'
-            alert(`Please select ${dateLabel} and number of guests`)
+            addToast(`Please select ${dateLabel} and number of guests`, { 
+                type: 'warning', 
+                autoHide: true, 
+                duration: 4000 
+            })
             return
         }
 
         if (!selectedRatePlan) {
-            alert('Please select a rate plan')
+            addToast('Please select a rate plan', { 
+                type: 'warning', 
+                autoHide: true, 
+                duration: 4000 
+            })
             return
         }
 
@@ -376,11 +388,19 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                         pricePerNight: selectedPricePerNight
                     })
                 } else {
-                    alert(availability.reason || 'Selected dates are not available')
+                    addToast(availability.reason || 'Selected dates are not available', { 
+                        type: 'error', 
+                        autoHide: true, 
+                        duration: 4000 
+                    })
                 }
             }
         } catch (error) {
-            alert('Error checking availability. Please try again.')
+            addToast('Error checking availability. Please try again.', { 
+                type: 'error', 
+                autoHide: true, 
+                duration: 4000 
+            })
         }
     }
 
