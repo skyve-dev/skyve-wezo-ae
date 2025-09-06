@@ -200,8 +200,8 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     >
       {/* Day Number */}
       <Box 
-        display="flex" 
-        justifyContent="space-between" 
+        display="flex"
+        justifyContent="space-between"
         alignItems="center" 
         marginBottom="0.25rem"
       >
