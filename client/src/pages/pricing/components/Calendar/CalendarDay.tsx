@@ -83,6 +83,70 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
 
     const isDisabled = isPastDate()
 
+    // Helper function to detect existing override for unified pricing
+    const getExistingOverride = () => {
+        // Check if any price data indicates there's a custom override
+        const overridePrice = prices.find(p => p.hasCustomPrice)
+        
+        if (!overridePrice) return undefined
+        
+        // For base pricing mode, the override data is directly available
+        if (overridePrice.isBasePricing) {
+            return {
+                id: overridePrice.price.id,
+                propertyId: '', // Will be filled by the reducer
+                date: overridePrice.price.date,
+                price: overridePrice.price.amount,
+                halfDayPrice: overridePrice.halfDayPrice || Math.round(overridePrice.price.amount * 0.6), // Use stored halfDayPrice or calculate 60%
+                reason: overridePrice.reason,
+                createdAt: overridePrice.price.createdAt,
+                updatedAt: overridePrice.price.updatedAt
+            }
+        }
+        
+        // For rate plan mode, we need to extract the base override data
+        // The rate plan price is calculated from the effective base price (which includes overrides)
+        if (overridePrice.ratePlan && overridePrice.hasCustomPrice) {
+            // Calculate the original override price from the rate plan price
+            let originalOverridePrice = overridePrice.price.amount
+            let originalHalfDayPrice = overridePrice.halfDayPrice
+            
+            if (overridePrice.ratePlan.priceModifierType === 'Percentage') {
+                // Reverse the percentage calculation: displayPrice / (1 + modifier/100) = originalPrice
+                const modifier = overridePrice.ratePlan.priceModifierValue / 100
+                originalOverridePrice = overridePrice.price.amount / (1 + modifier)
+                
+                // If we have halfDayPrice, reverse calculate it too, otherwise use 60% of full day
+                if (originalHalfDayPrice) {
+                    originalHalfDayPrice = originalHalfDayPrice / (1 + modifier)
+                } else {
+                    originalHalfDayPrice = originalOverridePrice * 0.6
+                }
+            } else if (overridePrice.ratePlan.priceModifierType === 'FixedAmount') {
+                // Reverse the fixed amount calculation: displayPrice - modifier = originalPrice
+                const modifier = overridePrice.ratePlan.priceModifierValue
+                originalOverridePrice = overridePrice.price.amount - modifier
+                
+                // For fixed amount, half day price is not affected by the modifier
+                // Use stored halfDayPrice or calculate 60% of the original price
+                originalHalfDayPrice = originalHalfDayPrice || (originalOverridePrice * 0.6)
+            }
+            
+            return {
+                id: `override-${day.dateString}`, // Generate ID for override
+                propertyId: '', // Will be filled by the reducer
+                date: day.dateString,
+                price: Math.round(originalOverridePrice), // Round to avoid floating point issues
+                halfDayPrice: originalHalfDayPrice ? Math.round(originalHalfDayPrice) : undefined, // Always provide a half day price
+                reason: overridePrice.reason,
+                createdAt: overridePrice.price.createdAt,
+                updatedAt: overridePrice.price.updatedAt
+            }
+        }
+        
+        return undefined
+    }
+
     // Handle day click
     const handleDayClick = () => {
         if (!day.isCurrentMonth) return
@@ -93,54 +157,29 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         } else {
             dispatch(setSelectedDate(day.dateString))
 
-            // Always open date override dialog for property-level pricing
-            const existingOverride = prices.find(p => p.isBasePricing && p.hasCustomPrice)
+            // Use unified override detection for both base pricing and rate plan modes
+            const existingOverride = getExistingOverride()
             dispatch(openDateOverrideForm({
                 date: day.dateString,
-                existingOverride: existingOverride?.price ? {
-                    id: existingOverride.price.id,
-                    propertyId: '', // Will be filled by the reducer
-                    date: existingOverride.price.date,
-                    price: existingOverride.price.amount,
-                    halfDayPrice: existingOverride.halfDayPrice,
-                    reason: existingOverride.reason,
-                    createdAt: existingOverride.price.createdAt,
-                    updatedAt: existingOverride.price.updatedAt
-                } : undefined
+                existingOverride
             }))
         }
     }
 
     // Handle price click
-    const handlePriceClick = (e: React.MouseEvent, priceData: PriceData) => {
+    const handlePriceClick = (e: React.MouseEvent) => {
         e.stopPropagation()
 
         if (isDisabled) return // Prevent editing past dates
 
         if (!bulkEditMode) {
-            if (priceData.isBasePricing) {
-                // Handle base pricing - open date override dialog
-                const existingOverride = priceData.hasCustomPrice ? {
-                    id: priceData.price.id,
-                    propertyId: '', // Will be filled by the reducer
-                    date: priceData.price.date,
-                    price: priceData.price.amount,
-                    halfDayPrice: priceData.halfDayPrice, // Get half-day price from PriceData
-                    reason: priceData.reason, // Get reason from PriceData
-                    createdAt: priceData.price.createdAt,
-                    updatedAt: priceData.price.updatedAt
-                } : undefined
-
-                dispatch(openDateOverrideForm({
-                    date: day.dateString,
-                    existingOverride
-                }))
-            } else if (priceData.ratePlan) {
-                // Rate plans are read-only modifiers - open property override instead
-                dispatch(openDateOverrideForm({
-                    date: day.dateString
-                }))
-            }
+            // Always open property override dialog with unified override detection
+            // Both base pricing and rate plans should allow editing the underlying property price
+            const existingOverride = getExistingOverride()
+            dispatch(openDateOverrideForm({
+                date: day.dateString,
+                existingOverride
+            }))
         }
     }
 
@@ -311,7 +350,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                 cursor={bulkEditMode ? "default" : "pointer"}
                                 onClick={(e) => {
                                     if (!bulkEditMode) {
-                                        handlePriceClick(e, priceData)
+                                        handlePriceClick(e)
                                     }
                                     // In bulk mode, let the click propagate to the parent cell
                                 }}
