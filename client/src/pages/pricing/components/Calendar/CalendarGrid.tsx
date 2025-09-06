@@ -60,8 +60,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   getPricesForDate
 }) => {
   // Simple responsive check for mobile
-  const isMobile = window.innerWidth < 768
-  
+
   return (
     <Box>
       {/* Weekday Headers */}
@@ -76,12 +75,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             key={day}
             textAlign="center"
             fontWeight="600"
-            fontSize={isMobile ? '0.625rem' : '0.875rem'}
+            fontSize={'0.625rem'}
             color="#6b7280"
-            padding={isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem'}
+            padding={'0.5rem 0.25rem'}
             backgroundColor="#f9fafb"
           >
-            {isMobile ? day.charAt(0) : day}
+            {day.charAt(0)}
           </Box>
         ))}
       </Box>
@@ -116,16 +115,16 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           
           <Box 
             display="grid" 
-            gridTemplateColumns={isMobile ? 'repeat(1, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))'} 
-            gap={isMobile ? '0.5rem' : '0.75rem'}
+            gridTemplateColumns={'repeat(1, 1fr)'}
+            gap={'0.5rem'}
           >
             {selectedRatePlans.map(ratePlan => (
               <Box
                 key={ratePlan.id}
                 display="flex"
                 alignItems="center"
-                gap={isMobile ? '0.25rem' : '0.5rem'}
-                padding={isMobile ? '0.25rem 0.5rem' : '0.5rem 0.75rem'}
+                gap={'0.25rem'}
+                padding={'0.25rem 0.5rem'}
                 backgroundColor={ratePlan.lightColor}
                 borderRadius="6px"
                 border={`1px solid ${ratePlan.color}40`}
@@ -140,7 +139,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 
                 <Box flex="1" minWidth="0">
                   <Box 
-                    fontSize={isMobile ? '0.75rem' : '0.875rem'}
+                    fontSize={'0.75rem'}
                     fontWeight="500" 
                     color="#374151"
                     style={{
@@ -151,7 +150,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   >
                     {ratePlan.name}
                   </Box>
-                  <Box fontSize={isMobile ? '0.625rem' : '0.75rem'} color="#6b7280">
+                  <Box fontSize={'0.625rem'} color="#6b7280">
                     {ratePlan.priceModifierType === 'FixedAmount' && `Fixed AED ${ratePlan.priceModifierValue}`}
                     {ratePlan.priceModifierType === 'Percentage' && `${ratePlan.priceModifierValue}% adjustment`}
                   </Box>
@@ -172,10 +171,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       >
         <Box 
           display="flex" 
-          gap={isMobile ? '1rem' : '2rem'} 
+          gap={'1rem'}
           flexWrap="wrap" 
           alignItems="center" 
-          fontSize={isMobile ? '0.625rem' : '0.75rem'} 
+          fontSize={'0.625rem'}
           color="#6b7280"
         >
           <Box display="flex" alignItems="center" gap="0.5rem">

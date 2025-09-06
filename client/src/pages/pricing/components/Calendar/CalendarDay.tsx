@@ -154,27 +154,18 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         return 'white'
     }
 
-    // Get border color
-    const getBorderColor = () => {
-        if (day.isToday) return '#3b82f6'
-        if (isSelected && bulkEditMode) return '#1d4ed8'
-        return 'transparent'
-    }
 
     // Format currency with enhanced mobile formatting
     const formatPrice = (amount: number) => {
-        return `AED ${amount.toLocaleString()}`
+        return `${amount.toLocaleString()}`
     }
 
     return (
         <Box
-            minHeight={'60px'}
             backgroundColor={getBackgroundColor()}
-            border={`2px solid ${getBorderColor()}`}
             cursor={day.isCurrentMonth && !isDisabled ? 'pointer' : 'not-allowed'}
             opacity={day.isCurrentMonth && !isDisabled ? 1 : 0.5}
             onClick={handleDayClick}
-            padding={'0.25rem'}
             position="relative"
             transition="all 0.2s"
             whileHover={day.isCurrentMonth ? {backgroundColor: '#f8fafc'} : {}}
@@ -182,9 +173,9 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
             {/* Day Number */}
             <Box
                 display="flex"
-                justifyContent="space-between"
+                padding={'0.25rem'}
+                gap={'0.25rem'}
                 alignItems="center"
-                marginBottom="0.25rem"
             >
         <span
             style={{
@@ -234,7 +225,6 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                         />
                     </Box>
                 )}
-
                 {/* Weekend Label - hidden on tiny mobile to save space */}
                 {day.isWeekend && day.isCurrentMonth && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
                     <span style={{fontSize: '0.625rem', color: '#92400e', fontWeight: '500'}}>
@@ -257,11 +247,11 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
 
             {/* Price Items */}
             {day.isCurrentMonth && !isDisabled && (
-                <Box display="flex" flexDirection="column" gap="0.25rem" flex="1">
+                <Box display="flex" flexDirection="column" flex="1">
                     {prices.length === 0 && selectedRatePlans.length > 0 && (
                         <Box
                             textAlign="center"
-                            padding="0.5rem"
+                            padding="0.25rem"
                             backgroundColor="#f3f4f6"
                             borderRadius="4px"
                             border="1px dashed #9ca3af"
@@ -314,10 +304,9 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                         return (
                             <Box
                                 key={isBasePricing ? `base-pricing-${index}` : `${priceData.ratePlan?.id || 'unknown'}-${index}`}
-                                padding={"0.25rem 0.5rem"}
+                                padding={"0.25rem"}
                                 backgroundColor={backgroundColor}
-                                border={`1px solid ${borderColor}`}
-                                borderRadius="4px"
+                                borderTop={`1px solid ${borderColor}`}
                                 fontSize={'0.75rem'}
                                 cursor={bulkEditMode ? "default" : "pointer"}
                                 onClick={(e) => {
@@ -333,7 +322,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                 whileHover={!bulkEditMode ? {backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9')} : {}}
                             >
 
-                                <Box display="flex" alignItems="center" justifyContent="space-between">
+                                <Box display="flex"  alignItems="center" justifyContent="space-between">
                                     <Box display="flex" alignItems="center" gap="0.25rem">
                                         <Box
                                             width="6px"
@@ -341,23 +330,11 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                             borderRadius="50%"
                                             backgroundColor={ratePlanColor}
                                         />
-                                        <span
-                                            style={{
-                                                color: textColor,
-                                                fontWeight: priceData.hasCustomPrice || isBasePricing ? '500' : '400',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                                maxWidth: '60px'
-                                            }}
-                                        >
-                        {ratePlanName}
-                      </span>
                                     </Box>
-
                                     <Box
                                         fontWeight="500"
                                         color={textColor}
+                                        textAlign={'center'}
                                     >
                                         {formatPrice(priceData.price.amount)}
                                     </Box>
