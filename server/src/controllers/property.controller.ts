@@ -227,6 +227,18 @@ export const getMyProperties = async (req: Request, res: Response): Promise<void
   }
 };
 
+export const getPublicProperties = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    // Get all live properties for public browsing (no authentication required)
+    const properties = await propertyService.getPublicProperties();
+
+    res.json({ properties });
+  } catch (error) {
+    console.error('Get public properties error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export const deleteProperty = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {

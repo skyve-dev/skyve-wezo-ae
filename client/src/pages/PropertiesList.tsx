@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react'
 import {IoIosWater, IoIosBed, IoIosCalendar, IoIosCreate, IoIosEye, IoIosPin, IoIosAdd, IoIosTrash} from 'react-icons/io'
 import {useAppShell} from '@/components/base/AppShell'
-import {SecuredPage} from '@/components/SecuredPage.tsx'
 import {Box, Input} from '@/components'
 import Button from '@/components/base/Button.tsx'
 import ConfirmationDialog from '@/components/base/ConfirmationDialog'
 import {useAppDispatch, useAppSelector} from '@/store'
-import {clearError, deleteProperty, fetchMyProperties, setCurrentProperty} from '@/store/slices/propertySlice'
+import {clearError, deleteProperty, fetchMyProperties, fetchPublicProperties, setCurrentProperty} from '@/store/slices/propertySlice'
 import {Property} from '@/types/property'
 import {resolvePhotoUrl} from '@/utils/api'
 
@@ -16,19 +15,25 @@ const PropertiesList: React.FC = () => {
 
     // Redux state
     const {properties, loading, error} = useAppSelector((state) => state.property)
-    const {currentRoleMode} = useAppSelector((state) => state.auth)
+    const {currentRoleMode, isAuthenticated, user} = useAppSelector((state) => state.auth)
 
     // Local state
     const [searchTerm, setSearchTerm] = useState('')
     
-    // Role-based permissions
-    const canManageProperties = currentRoleMode === 'HomeOwner' || currentRoleMode === 'Manager'
-    const isReadOnlyMode = currentRoleMode === 'Tenant'
+    // Role-based permissions - non-authenticated users are read-only
+    const canManageProperties = isAuthenticated && (currentRoleMode === 'HomeOwner' || currentRoleMode === 'Manager')
+    const isReadOnlyMode = !isAuthenticated || currentRoleMode === 'Tenant'
 
-    // Fetch properties on component mount
+    // Fetch properties on component mount - use smart fetching logic
     useEffect(() => {
-        dispatch(fetchMyProperties())
-    }, [dispatch])
+        if (isAuthenticated && user) {
+            // Authenticated user: fetch their properties
+            dispatch(fetchMyProperties())
+        } else {
+            // Non-authenticated user: fetch public properties
+            dispatch(fetchPublicProperties())
+        }
+    }, [dispatch, isAuthenticated, user])
 
     // Clear errors when component unmounts
     useEffect(() => {
@@ -270,35 +275,116 @@ const PropertiesList: React.FC = () => {
 
     if (loading) {
         return (
-            <SecuredPage>
-                <Box padding="2rem" maxWidth="1200px" margin="0 auto">
-                    <Box display="flex" justifyContent="center" alignItems="center" height="400px">
-                        <div>Loading properties...</div>
-                    </Box>
+            <Box padding="2rem" maxWidth="1200px" margin="0 auto">
+                <Box display="flex" justifyContent="center" alignItems="center" height="400px">
+                    <div>Loading properties...</div>
                 </Box>
-            </SecuredPage>
+            </Box>
         )
     }
 
     return (
-        <SecuredPage>
-            <Box padding="2rem" maxWidth="1200px" margin="0 auto">
-                {/* Header */}
-                <Box display="flex" flexDirection={'column'} flexDirectionSm={'row'} justifyContent="space-between" gap={'1rem'} marginBottom="2rem">
-                    <Box>
-                        <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>
-                            {isReadOnlyMode ? 'Browse Properties' : 'My Properties'}
-                        </h1>
-                        <p style={{color: '#666', margin: '0.5rem 0 0 0'}}>
-                            {isReadOnlyMode 
+        <Box padding="2rem" maxWidth="1200px" margin="0 auto">
+            {/* Header */}
+            <Box display="flex" flexDirection={'column'} flexDirectionSm={'row'} justifyContent="space-between" gap={'1rem'} marginBottom="2rem">
+                <Box>
+                    <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>
+                        {!isAuthenticated ? 'Browse Properties' : (isReadOnlyMode ? 'Browse Properties' : 'My Properties')}
+                    </h1>
+                    <p style={{color: '#666', margin: '0.5rem 0 0 0'}}>
+                        {!isAuthenticated 
+                            ? 'Discover and explore available properties for your next stay'
+                            : (isReadOnlyMode 
                                 ? 'Discover and explore available properties for your next stay'
-                                : 'Manage your property listings and track their performance'
-                            }
-                        </p>
+                                : 'Manage your property listings and track their performance')
+                        }
+                    </p>
+                </Box>
+                {canManageProperties && (
+                    <Button
+                        label="Add New Property"
+                        icon={<IoIosAdd/>}
+                        onClick={() => {
+                            navigateTo('property-create', {})
+                        }}
+                        variant="promoted"
+                    />
+                )}
+            </Box>
+
+            {/* Error Display */}
+            {error && (
+                <Box
+                    marginBottom="1rem"
+                    padding="1rem"
+                    backgroundColor="#fee2e2"
+                    color="#dc2626"
+                    borderRadius="8px"
+                >
+                    {error}
+                </Box>
+            )}
+
+            {/* Search and View Toggle */}
+            <Box
+                backgroundColor="white"
+                marginBottom="2rem"
+            >
+                <Box flex="1" minWidth="300px">
+                    <Input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search properties by name or location..."
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '4px',
+                            fontSize: '0.875rem'
+                        }}
+                    />
+                </Box>
+            </Box>
+
+            {/* Properties Count */}
+            <Box marginBottom="1rem">
+                <p style={{color: '#666', margin: 0}}>
+                    {filteredProperties.length} of {properties.length} properties
+                </p>
+            </Box>
+
+            {/* Properties Grid */}
+            {filteredProperties.length === 0 ? (
+                <Box
+                    padding="4rem 2rem"
+                    textAlign="center"
+                    backgroundColor="white"
+                    borderRadius="8px"
+                    boxShadow="0 2px 4px rgba(0,0,0,0.1)"
+                    display="flex"
+                    flexDirection={'column'}
+                    alignItems={'center'}
+                >
+                    <Box color="#9ca3af" marginBottom="1rem">
+                        <IoIosPin size={48}/>
                     </Box>
-                    {canManageProperties && (
+                    <h3 style={{margin: '0 0 1rem 0', color: '#4b5563'}}>
+                        {properties.length === 0 ? 'No properties available' : 'No properties match your search'}
+                    </h3>
+                    <p style={{color: '#6b7280', marginBottom: '1.5rem'}}>
+                        {properties.length === 0
+                            ? (!isAuthenticated 
+                                ? 'There are no properties available to browse at the moment'
+                                : (isReadOnlyMode 
+                                    ? 'There are no properties available to browse at the moment'
+                                    : 'Start by adding your first property to begin managing your listings'))
+                            : 'Try adjusting your search criteria'
+                        }
+                    </p>
+                    {properties.length === 0 && canManageProperties && (
                         <Button
-                            label="Add New Property"
+                            label="Add Your First Property"
                             icon={<IoIosAdd/>}
                             onClick={() => {
                                 navigateTo('property-create', {})
@@ -307,98 +393,16 @@ const PropertiesList: React.FC = () => {
                         />
                     )}
                 </Box>
-
-                {/* Error Display */}
-                {error && (
-                    <Box
-                        marginBottom="1rem"
-                        padding="1rem"
-                        backgroundColor="#fee2e2"
-                        color="#dc2626"
-                        borderRadius="8px"
-                    >
-                        {error}
-                    </Box>
-                )}
-
-                {/* Search and View Toggle */}
+            ) : (
                 <Box
-                    backgroundColor="white"
-                    marginBottom="2rem"
+                    display="grid"
+                    gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+                    gap="1.5rem"
                 >
-                    <Box flex="1" minWidth="300px">
-                        <Input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search properties by name or location..."
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '4px',
-                                fontSize: '0.875rem'
-                            }}
-                        />
-                    </Box>
+                    {filteredProperties.map(property => renderPropertyCard(property))}
                 </Box>
-
-                {/* Properties Count */}
-                <Box marginBottom="1rem">
-                    <p style={{color: '#666', margin: 0}}>
-                        {filteredProperties.length} of {properties.length} properties
-                    </p>
-                </Box>
-
-                {/* Properties Grid */}
-                {filteredProperties.length === 0 ? (
-                    <Box
-                        padding="4rem 2rem"
-                        textAlign="center"
-                        backgroundColor="white"
-                        borderRadius="8px"
-                        boxShadow="0 2px 4px rgba(0,0,0,0.1)"
-                        display="flex"
-                        flexDirection={'column'}
-                        alignItems={'center'}
-                    >
-                        <Box color="#9ca3af" marginBottom="1rem">
-                            <IoIosPin size={48}/>
-                        </Box>
-                        <h3 style={{margin: '0 0 1rem 0', color: '#4b5563'}}>
-                            {properties.length === 0 ? 'No properties available' : 'No properties match your search'}
-                        </h3>
-                        <p style={{color: '#6b7280', marginBottom: '1.5rem'}}>
-                            {properties.length === 0
-                                ? (isReadOnlyMode 
-                                    ? 'There are no properties available to browse at the moment'
-                                    : 'Start by adding your first property to begin managing your listings')
-                                : 'Try adjusting your search criteria'
-                            }
-                        </p>
-                        {properties.length === 0 && canManageProperties && (
-                            <Button
-                                label="Add Your First Property"
-                                icon={<IoIosAdd/>}
-                                onClick={() => {
-                                    navigateTo('property-create', {})
-                                }}
-                                variant="promoted"
-                            />
-                        )}
-                    </Box>
-                ) : (
-                    <Box
-                        display="grid"
-                        gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
-                        gap="1.5rem"
-                    >
-                        {filteredProperties.map(property => renderPropertyCard(property))}
-                    </Box>
-                )}
-            </Box>
-
-        </SecuredPage>
+            )}
+        </Box>
     )
 }
 

@@ -44,13 +44,13 @@ import MyBookings from "@/pages/booking/MyBookings";
 
 export const routes = createRoutes({
     home: {
-        component: LandingPage,
+        component: PropertiesList,
         icon: <FaHome/>,
         label: 'Home',
         showInNav: true,
         showInHeader: false,
-        showInFooter: true,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // Public page - all roles
+        showInFooter: true
+        // No roles = public access
     },
     dashboard: {
         component: Dashboard,
@@ -67,8 +67,8 @@ export const routes = createRoutes({
         label: 'Properties',
         showInNav: true,
         showInHeader: true,
-        showInFooter: true,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can browse (with different capabilities)
+        showInFooter: true
+        // No roles = public access for property browsing
     },
     'property-view': {
         component: ({ id }: { id: string }) => <PropertyDetail propertyId={id} />,
@@ -76,8 +76,8 @@ export const routes = createRoutes({
         label: 'Property Details',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view property details
+        showInFooter: false
+        // No roles = public access for property details
     },
     'property-create': {
         component: () => <PropertyManager propertyId="new" />,
@@ -193,8 +193,8 @@ export const routes = createRoutes({
         label: 'Booking Confirmation',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can make bookings
+        showInFooter: false
+        // No roles = allow guest checkout
     },
     'booking-payment': {
         component: BookingPayment,
@@ -202,8 +202,8 @@ export const routes = createRoutes({
         label: 'Payment',
         showInNav: false,
         showInHeader: false,
-        showInFooter: false,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can make bookings
+        showInFooter: false
+        // No roles = allow guest payment
     },
     'my-bookings': {
         component: MyBookings,

@@ -77,6 +77,8 @@ router.put(
 
 router.get('/my-properties', authenticate, propertyController.getMyProperties);
 
+router.get('/public', propertyController.getPublicProperties);
+
 router.get('/:propertyId', propertyController.getProperty);
 
 router.delete('/:propertyId', authenticate, propertyController.deleteProperty);

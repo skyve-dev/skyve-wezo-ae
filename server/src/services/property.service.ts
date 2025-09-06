@@ -626,6 +626,37 @@ export class PropertyService {
     return properties;
   }
 
+  async getPublicProperties() {
+    console.log('🔷 PropertyService - getPublicProperties called for public browsing');
+    
+    const properties = await prisma.property.findMany({
+      where: { 
+        status: 'Live' // Only show live properties for public browsing
+      },
+      include: {
+        address: {
+          include: {
+            latLong: true,
+          },
+        },
+        rooms: {
+          include: {
+            beds: true,
+          },
+        },
+        amenities: true,
+        photos: true,
+        checkInCheckout: true,
+        pricing: true, // Re-added pricing support for unified property management
+        // cancellation: removed - now handled by rate plans
+      },
+    });
+
+    console.log('🔷 PropertyService - getPublicProperties found', properties.length, 'live properties');
+    
+    return properties;
+  }
+
   async deleteProperty(propertyId: string, ownerId: string) {
     const existingProperty = await prisma.property.findFirst({
       where: {

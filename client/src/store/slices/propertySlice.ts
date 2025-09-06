@@ -221,6 +221,20 @@ export const fetchMyProperties = createAsyncThunk(
   }
 )
 
+export const fetchPublicProperties = createAsyncThunk(
+  'property/fetchPublicProperties',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get<{ properties: any[] }>('/api/properties/public')
+      return response.properties.map(transformServerPropertyData)
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to fetch public properties'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
 export const fetchPropertyById = createAsyncThunk(
   'property/fetchPropertyById',
   async (propertyId: string, { rejectWithValue }) => {
@@ -673,6 +687,20 @@ const propertySlice = createSlice({
         state.properties = action.payload
       })
       .addCase(fetchMyProperties.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch public properties
+      .addCase(fetchPublicProperties.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPublicProperties.fulfilled, (state, action) => {
+        state.loading = false
+        state.properties = action.payload
+      })
+      .addCase(fetchPublicProperties.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })

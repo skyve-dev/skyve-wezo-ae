@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import Tab, {TabItem} from '../Tab'
-import {IoIosMenu} from 'react-icons/io'
+import {IoIosMenu, IoIosLogIn, IoIosPersonAdd, IoIosPerson, IoIosLogOut} from 'react-icons/io'
 import {BaseRoute} from './types'
 import { filterRoutesByRole } from './roleUtils'
 import RoleToggleButton from '../RoleToggleButton'
@@ -10,7 +10,9 @@ import RoleSlidingDrawer from '../RoleSlidingDrawer'
 import wezoAe from "../../../assets/wezo-optimized.svg"
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '../../../store'
-import { switchUserRole, selectAvailableRoles } from '../../../store/slices/authSlice'
+import { switchUserRole, selectAvailableRoles, logout } from '../../../store/slices/authSlice'
+import { LoginForm } from '../../forms/LoginForm'
+import { RegisterForm } from '../../forms/RegisterForm'
 
 interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
@@ -20,6 +22,7 @@ interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     isMobile: boolean
     currentRole: 'Tenant' | 'HomeOwner' | 'Manager' | null
     isAuthenticated: boolean
+    openDialog: <T>(content: (close: (result: T) => void) => React.ReactNode) => Promise<T>
     headerConfig?: {
         title?: string
         logo?: React.ReactNode
@@ -41,6 +44,7 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                                                                        isMobile,
                                                                        currentRole,
                                                                        isAuthenticated,
+                                                                       openDialog,
                                                                        theme
                                                                    }: HeaderDefaultProps<T>) => {
     
@@ -54,6 +58,128 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
     const handleRoleSelect = (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
         dispatch(switchUserRole(role))
         setIsRoleDrawerOpen(false)
+    }
+
+    // Authentication dialog handlers
+    const handleLogin = async () => {
+        await openDialog((close) => (
+            <Box padding="2rem" backgroundColor="white" borderRadius="8px" minWidth="400px">
+                <Box fontSize="1.5rem" fontWeight="bold" marginBottom="1.5rem" textAlign="center">
+                    Welcome Back
+                </Box>
+                <LoginForm 
+                    onSwitchToRegister={() => {
+                        close(null)
+                        handleRegister()
+                    }}
+                    onSwitchToForgotPassword={() => {
+                        // TODO: Implement forgot password
+                        close(null)
+                    }}
+                />
+                <Box marginTop="1rem" textAlign="center">
+                    <Button 
+                        label="Cancel" 
+                        onClick={() => close(null)}
+                        variant="normal"
+                        size="small"
+                    />
+                </Box>
+            </Box>
+        ))
+    }
+
+    const handleRegister = async () => {
+        await openDialog((close) => (
+            <Box padding="2rem" backgroundColor="white" borderRadius="8px" minWidth="400px">
+                <Box fontSize="1.5rem" fontWeight="bold" marginBottom="1.5rem" textAlign="center">
+                    Create Account
+                </Box>
+                <RegisterForm 
+                    onSwitchToLogin={() => {
+                        close(null)
+                        handleLogin()
+                    }}
+                />
+                <Box marginTop="1rem" textAlign="center">
+                    <Button 
+                        label="Cancel" 
+                        onClick={() => close(null)}
+                        variant="normal"
+                        size="small"
+                    />
+                </Box>
+            </Box>
+        ))
+    }
+
+    const handleLogout = () => {
+        dispatch(logout())
+    }
+
+    const handleUserMenu = async () => {
+        await openDialog((close) => (
+            <Box padding="2rem" backgroundColor="white" borderRadius="8px" minWidth="300px">
+                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1.5rem" textAlign="center">
+                    Account Menu
+                </Box>
+                
+                {/* User info */}
+                <Box marginBottom="2rem" padding="1rem" backgroundColor="#f8f9fa" borderRadius="8px">
+                    <Box fontSize="0.875rem" color="#666" marginBottom="0.25rem">Welcome back</Box>
+                    <Box fontSize="1rem" fontWeight="600">Admin User</Box>
+                    <Box fontSize="0.875rem" color="#666">admin@wezo.ae</Box>
+                    <Box fontSize="0.875rem" color="#059669" fontWeight="500" marginTop="0.5rem">
+                        Current Role: {currentRole}
+                    </Box>
+                </Box>
+
+                {/* Menu options */}
+                <Box display="flex" flexDirection="column" gap="0.5rem" marginBottom="1.5rem">
+                    <Button
+                        label="My Properties"
+                        onClick={() => {
+                            close(null)
+                            navigateTo('properties', {})
+                        }}
+                        variant="normal"
+                        size="small"
+                        style={{ justifyContent: 'flex-start' }}
+                    />
+                    <Button
+                        label="My Bookings"
+                        onClick={() => {
+                            close(null)
+                            navigateTo('my-bookings', {})
+                        }}
+                        variant="normal"
+                        size="small"
+                        style={{ justifyContent: 'flex-start' }}
+                    />
+                </Box>
+
+                {/* Actions */}
+                <Box display="flex" gap="0.5rem" justifyContent="center">
+                    <Button
+                        label="Logout"
+                        icon={<IoIosLogOut/>}
+                        onClick={() => {
+                            close(null)
+                            handleLogout()
+                        }}
+                        variant="normal"
+                        size="small"
+                        style={{ color: '#dc2626' }}
+                    />
+                    <Button
+                        label="Close"
+                        onClick={() => close(null)}
+                        variant="normal"
+                        size="small"
+                    />
+                </Box>
+            </Box>
+        ))
     }
 
     // Filter routes based on current user role
@@ -113,16 +239,60 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                 )}
             </Box>
 
-            {/* Right: Role Toggle + Menu Button */}
+            {/* Right: Authentication Controls + Menu Button */}
             <Box display="flex" alignItems="center" gap="0.5rem">
-                {/* Role Toggle Button - only show for authenticated users with multiple roles */}
-                {isAuthenticated && currentRole && availableRoles.length > 1 && (
-                    <RoleToggleButton
-                        currentRole={currentRole}
-                        onClick={() => setIsRoleDrawerOpen(true)}
-                    />
+                {!isAuthenticated ? (
+                    // Anonymous user: Show Login/Register buttons
+                    <>
+                        <Button
+                            label="Login"
+                            icon={<IoIosLogIn/>}
+                            onClick={handleLogin}
+                            variant="plain"
+                            size="small"
+                            style={{
+                                color: 'white',
+                                fontSize: '0.875rem'
+                            }}
+                        />
+                        <Button
+                            label="Register"
+                            icon={<IoIosPersonAdd/>}
+                            onClick={handleRegister}
+                            variant="promoted"
+                            size="small"
+                            style={{
+                                fontSize: '0.875rem'
+                            }}
+                        />
+                    </>
+                ) : (
+                    // Authenticated user: Show user menu and role toggle
+                    <>
+                        {/* Role Toggle Button - only show for users with multiple roles */}
+                        {currentRole && availableRoles.length > 1 && (
+                            <RoleToggleButton
+                                currentRole={currentRole}
+                                onClick={() => setIsRoleDrawerOpen(true)}
+                            />
+                        )}
+                        
+                        {/* User menu button */}
+                        <Button
+                            label=""
+                            icon={<IoIosPerson/>}
+                            onClick={handleUserMenu}
+                            variant="plain"
+                            size="small"
+                            style={{
+                                color: 'white'
+                            }}
+                            title="User Menu"
+                        />
+                    </>
                 )}
 
+                {/* Menu Button */}
                 <Button
                     label=""
                     icon={<IoIosMenu fontSize={'1.2rem'}/>}
