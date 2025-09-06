@@ -6,6 +6,44 @@ import {RootState, useAppDispatch} from '@/store'
 import {Box} from '@/components'
 import {fetchPricingCalendar} from '@/store/slices/priceSlice'
 
+interface RatePlanWithColor {
+  id: string
+  propertyId: string
+  name: string
+  description?: string
+  priceModifierType: 'Percentage' | 'FixedAmount'
+  priceModifierValue: number
+  minStay?: number
+  maxStay?: number
+  minAdvanceBooking?: number
+  maxAdvanceBooking?: number
+  minGuests?: number
+  maxGuests?: number
+  isActive: boolean
+  isDefault: boolean
+  priority: number
+  createdAt: string
+  updatedAt: string
+  color: string
+  lightColor: string
+}
+
+interface PriceData {
+  ratePlan?: RatePlanWithColor
+  price: {
+    id: string
+    ratePlanId?: string
+    date: string
+    amount: number
+    createdAt: string
+    updatedAt: string
+  }
+  hasCustomPrice: boolean
+  isBasePricing?: boolean
+  reason?: string
+  halfDayPrice?: number
+}
+
 const CalendarView: React.FC = () => {
     const dispatch = useAppDispatch()
     const {
@@ -26,22 +64,21 @@ const CalendarView: React.FC = () => {
     const {ratePlans} = useSelector((state: RootState) => state.ratePlan)
     const {currentProperty} = useSelector((state: RootState) => state.property)
 
-    // Fetch pricing calendar when date range changes and no rate plans are selected (base pricing mode)
+    // Fetch pricing calendar when date range changes (unified pricing source)
     useEffect(() => {
         if (
             dateRange.startDate &&
             dateRange.endDate &&
-            selectedRatePlanIds.length === 0 &&
             currentProperty?.propertyId
         ) {
-            console.log('🔄 Fetching pricing calendar for base pricing mode')
+            console.log('🔄 Fetching pricing calendar for unified pricing calculations')
             dispatch(fetchPricingCalendar({
                 propertyId: currentProperty.propertyId,
                 startDate: dateRange.startDate,
                 endDate: dateRange.endDate
             }))
         }
-    }, [dateRange.startDate, dateRange.endDate, selectedRatePlanIds.length, currentProperty?.propertyId, dispatch])
+    }, [dateRange.startDate, dateRange.endDate, currentProperty?.propertyId, dispatch])
 
     // Helper function to format date without timezone issues
     const formatDateLocal = (date: Date): string => {
@@ -149,21 +186,31 @@ const CalendarView: React.FC = () => {
         return date.split('T')[0]
     }
 
-    // Helper function to get base price from PropertyPricing for a specific day
-    const getBasePriceFromPropertyPricing = (dayOfWeek: number): number | null => {
-        console.log('🔍 getBasePriceFromPropertyPricing called:', {
-            dayOfWeek,
-            propertyPricing: propertyPricing,
-            propertyPricingKeys: propertyPricing ? Object.keys(propertyPricing) : 'null',
-            propertyPricingValues: propertyPricing ? Object.values(propertyPricing) : 'null'
-        })
-
-        if (!propertyPricing) {
-            console.log('❌ No propertyPricing data available')
-            return null
+    // Unified function to get effective base price for any date (includes overrides)
+    const getEffectiveBasePriceForDate = (dateString: string): { price: number | null; isOverride: boolean; reason?: string } => {
+        console.log('🔍 getEffectiveBasePriceForDate called for date:', dateString)
+        
+        // First, check if we have pricing calendar data for this date
+        const calendarDay = pricingCalendar.find(day => normalizeDate(day.date) === dateString)
+        
+        if (calendarDay) {
+            console.log('✅ Using pricing calendar data for date:', dateString, 'price:', calendarDay.fullDayPrice, 'isOverride:', calendarDay.isOverride)
+            return {
+                price: calendarDay.fullDayPrice > 0 ? calendarDay.fullDayPrice : null,
+                isOverride: calendarDay.isOverride,
+                reason: calendarDay.reason
+            }
         }
-
-        // Map day of week to PropertyPricing field names
+        
+        // Fallback to PropertyPricing weekly rates if no calendar data
+        if (!propertyPricing) {
+            console.log('❌ No pricing data available for date:', dateString)
+            return { price: null, isOverride: false }
+        }
+        
+        const date = new Date(dateString)
+        const dayOfWeek = date.getDay()
+        
         const dayFieldMap = {
             0: 'priceSunday',     // Sunday
             1: 'priceMonday',     // Monday
@@ -173,118 +220,95 @@ const CalendarView: React.FC = () => {
             5: 'priceFriday',     // Friday
             6: 'priceSaturday'    // Saturday
         }
-
+        
         const fieldName = dayFieldMap[dayOfWeek as keyof typeof dayFieldMap]
-        console.log('🔍 Day field mapping:', {dayOfWeek, fieldName})
-
         if (!fieldName) {
             console.log('❌ No field name found for dayOfWeek:', dayOfWeek)
-            return null
+            return { price: null, isOverride: false }
         }
-
+        
         const basePrice = propertyPricing[fieldName as keyof typeof propertyPricing] as number
-        console.log('🔍 Base price lookup:', {fieldName, basePrice})
-
-        const result = basePrice > 0 ? basePrice : null
-        console.log('🔍 Final result:', result)
-
-        return result
+        console.log('🔍 Fallback to PropertyPricing for date:', dateString, 'dayOfWeek:', dayOfWeek, 'price:', basePrice)
+        
+        return {
+            price: basePrice > 0 ? basePrice : null,
+            isOverride: false
+        }
     }
 
-    // Get pricing data for display
-    const getPricesForDate = (dateString: string) => {
+    // Unified pricing calculation for all modes
+    const getPricesForDate = (dateString: string): PriceData[] => {
         console.log('🔍 getPricesForDate called for date:', dateString)
-        const prices = []
+        const prices: PriceData[] = []
 
-        // Get day of week for the date (0=Sunday, 1=Monday, ..., 6=Saturday)
-        const date = new Date(dateString)
-        const dayOfWeek = date.getDay()
-
-        console.log('🔍 Date info:', {dateString, date, dayOfWeek})
         console.log('🔍 Selected rate plans count:', selectedRatePlans.length)
 
-        // If rate plans are selected, show them as modifiers only
+        // Get the effective base price for this date (includes any overrides)
+        const effectivePriceData = getEffectiveBasePriceForDate(dateString)
+        
+        if (effectivePriceData.price === null || effectivePriceData.price <= 0) {
+            console.log('❌ No valid base price found for date:', dateString)
+            return prices
+        }
+
+        // If rate plans are selected, apply them as modifiers to the effective base price
         if (selectedRatePlans.length > 0) {
+            console.log('🔵 RATE PLAN MODE: Applying modifiers to effective base price:', effectivePriceData.price)
+            
             for (const ratePlan of selectedRatePlans) {
-                // Rate plans are now just modifiers - they don't have their own prices
-                const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
+                let calculatedAmount = effectivePriceData.price
 
-                if (basePrice !== null && basePrice > 0) {
-                    let calculatedAmount = basePrice
-
-                    if (ratePlan.priceModifierType === 'Percentage') {
-                        // Apply percentage adjustment
-                        // Positive values: +10% = 110% of base price (basePrice * 1.10)
-                        // Negative values: -15% = 85% of base price (basePrice * 0.85)
-                        calculatedAmount = basePrice * (1 + ratePlan.priceModifierValue / 100)
-                    }
-
-                    if (calculatedAmount > 0) {
-                        prices.push({
-                            ratePlan,
-                            price: {
-                                id: `calculated-${ratePlan.id}-${dateString}`,
-                                ratePlanId: ratePlan.id,
-                                date: dateString,
-                                amount: calculatedAmount,
-                                createdAt: '',
-                                updatedAt: ''
-                            },
-                            hasCustomPrice: false,
-                            isBasePricing: false
-                        })
-                    }
+                if (ratePlan.priceModifierType === 'Percentage') {
+                    // Apply percentage adjustment to the effective base price (includes overrides!)
+                    calculatedAmount = effectivePriceData.price * (1 + ratePlan.priceModifierValue / 100)
+                } else if (ratePlan.priceModifierType === 'FixedAmount') {
+                    // Apply fixed amount adjustment
+                    calculatedAmount = effectivePriceData.price + ratePlan.priceModifierValue
                 }
-            }
-        } else {
-            // Base pricing mode - use pricing calendar if available, otherwise fallback to PropertyPricing
-            console.log('🟡 BASE PRICING MODE: No rate plans selected for date:', dateString)
 
-            // First, check if we have pricing calendar data
-            const calendarDay = pricingCalendar.find(day => normalizeDate(day.date) === dateString)
-
-            if (calendarDay) {
-                console.log('✅ Using pricing calendar data for date:', dateString, 'price:', calendarDay.fullDayPrice, 'halfDay:', calendarDay.halfDayPrice, 'isOverride:', calendarDay.isOverride)
-                prices.push({
-                    ratePlan: undefined, // No rate plan for base pricing
-                    price: {
-                        id: calendarDay.isOverride ? `override-${dateString}` : `base-pricing-${dateString}`,
-                        ratePlanId: undefined,
-                        date: dateString,
-                        amount: calendarDay.fullDayPrice,
-                        createdAt: '',
-                        updatedAt: ''
-                    },
-                    hasCustomPrice: calendarDay.isOverride,
-                    isBasePricing: true,
-                    reason: calendarDay.reason, // Add reason for overrides
-                    halfDayPrice: calendarDay.halfDayPrice // Add half-day price from calendar data
-                })
-            } else {
-                // Fallback to PropertyPricing when no calendar data available
-                console.log('🟡 FALLBACK: Using PropertyPricing for date:', dateString, 'dayOfWeek:', dayOfWeek)
-
-                const basePrice = getBasePriceFromPropertyPricing(dayOfWeek)
-
-                if (basePrice !== null && basePrice > 0) {
-                    console.log('✅ Adding base pricing entry for date:', dateString, 'amount:', basePrice)
+                if (calculatedAmount > 0) {
+                    console.log('✅ Rate plan calculation:', {
+                        ratePlan: ratePlan.name,
+                        basePrice: effectivePriceData.price,
+                        modifier: `${ratePlan.priceModifierType} ${ratePlan.priceModifierValue}`,
+                        calculatedAmount,
+                        isOverride: effectivePriceData.isOverride
+                    })
+                    
                     prices.push({
-                        ratePlan: undefined, // No rate plan for base pricing
+                        ratePlan,
                         price: {
-                            id: `base-pricing-${dateString}`,
-                            ratePlanId: undefined,
+                            id: `calculated-${ratePlan.id}-${dateString}`,
+                            ratePlanId: ratePlan.id,
                             date: dateString,
-                            amount: basePrice,
+                            amount: calculatedAmount,
                             createdAt: '',
                             updatedAt: ''
                         },
-                        hasCustomPrice: false,
-                        isBasePricing: true
+                        hasCustomPrice: effectivePriceData.isOverride, // Mark as custom if base was override
+                        isBasePricing: false,
+                        reason: effectivePriceData.reason
                     })
-                } else {
-                    console.log('❌ No valid base price found for date:', dateString, 'dayOfWeek:', dayOfWeek)
                 }
             }
+        } else {
+            // Base pricing mode - show the effective price directly
+            console.log('🟡 BASE PRICING MODE: Using effective base price:', effectivePriceData.price)
+            
+            prices.push({
+                ratePlan: undefined,
+                price: {
+                    id: effectivePriceData.isOverride ? `override-${dateString}` : `base-pricing-${dateString}`,
+                    ratePlanId: undefined,
+                    date: dateString,
+                    amount: effectivePriceData.price,
+                    createdAt: '',
+                    updatedAt: ''
+                },
+                hasCustomPrice: effectivePriceData.isOverride,
+                isBasePricing: true,
+                reason: effectivePriceData.reason
+            })
         }
 
         console.log('🔍 Final prices array for date:', dateString, 'count:', prices.length, 'prices:', prices)
@@ -306,10 +330,10 @@ const CalendarView: React.FC = () => {
         )
     }
 
-    // Show pricing mode and view mode indicators
+    // Show pricing mode and view mode indicators  
     const pricingModeMessage = selectedRatePlanIds.length === 0
-        ? 'Showing base property pricing (no rate plans selected)'
-        : `Showing pricing for ${selectedRatePlanIds.length} selected rate plan${selectedRatePlanIds.length > 1 ? 's' : ''}`
+        ? 'Showing base property pricing (includes date overrides)'
+        : `Showing rate plan pricing for ${selectedRatePlanIds.length} plan${selectedRatePlanIds.length > 1 ? 's' : ''} (applied to effective base prices including overrides)`
 
     const viewModeMessage = '• Month View'
 
