@@ -4,7 +4,7 @@ import CalendarGrid from './CalendarGrid'
 import DateOverrideDialog from '../Controls/DateOverrideDialog'
 import {RootState, useAppDispatch} from '@/store'
 import {Box} from '@/components'
-import {fetchPricingCalendar} from '@/store/slices/priceSlice'
+import {fetchPublicPricingCalendar} from '@/store/slices/priceSlice'
 
 interface RatePlanWithColor {
   id: string
@@ -40,6 +40,7 @@ interface PriceData {
   }
   hasCustomPrice: boolean
   isBasePricing?: boolean
+  isAvailable?: boolean
   reason?: string
   halfDayPrice?: number
 }
@@ -50,7 +51,7 @@ const CalendarView: React.FC = () => {
         dateRange,
         selectedRatePlanIds,
         propertyPricing,
-        pricingCalendar
+        publicPricingCalendar
     } = useSelector((state: RootState) => state.price)
 
     // Debug logging for component state
@@ -58,21 +59,22 @@ const CalendarView: React.FC = () => {
         dateRange,
         selectedRatePlanIds,
         selectedRatePlanIdsLength: selectedRatePlanIds.length,
-        propertyPricing
+        propertyPricing,
+        publicPricingCalendarKeys: Object.keys(publicPricingCalendar).length
     })
 
     const {ratePlans} = useSelector((state: RootState) => state.ratePlan)
     const {currentProperty} = useSelector((state: RootState) => state.property)
 
-    // Fetch pricing calendar when date range changes (unified pricing source)
+    // Fetch pricing calendar with availability when date range changes (unified pricing source)
     useEffect(() => {
         if (
             dateRange.startDate &&
             dateRange.endDate &&
             currentProperty?.propertyId
         ) {
-            console.log('🔄 Fetching pricing calendar for unified pricing calculations')
-            dispatch(fetchPricingCalendar({
+            console.log('🔄 Fetching public pricing calendar with availability for unified pricing calculations')
+            dispatch(fetchPublicPricingCalendar({
                 propertyId: currentProperty.propertyId,
                 startDate: dateRange.startDate,
                 endDate: dateRange.endDate
@@ -181,32 +183,39 @@ const CalendarView: React.FC = () => {
     }, [ratePlans, selectedRatePlanIds, dateRange.startDate])
 
     // Helper function to normalize date for comparison
-    const normalizeDate = (date: string): string => {
-        // Handle both 'YYYY-MM-DD' and 'YYYY-MM-DDTHH:mm:ss.sssZ' formats
-        return date.split('T')[0]
-    }
+    // const normalizeDate = (date: string): string => {
+    //     // Handle both 'YYYY-MM-DD' and 'YYYY-MM-DDTHH:mm:ss.sssZ' formats
+    //     return date.split('T')[0]
+    // }
 
-    // Unified function to get effective base price for any date (includes overrides)
-    const getEffectiveBasePriceForDate = (dateString: string): { price: number | null; halfDayPrice: number | null; isOverride: boolean; reason?: string } => {
+    // Unified function to get effective base price for any date (includes overrides and availability)
+    const getEffectiveBasePriceForDate = (dateString: string): { 
+        price: number | null; 
+        halfDayPrice: number | null; 
+        isOverride: boolean; 
+        isAvailable: boolean;
+        reason?: string 
+    } => {
         console.log('🔍 getEffectiveBasePriceForDate called for date:', dateString)
         
-        // First, check if we have pricing calendar data for this date
-        const calendarDay = pricingCalendar.find(day => normalizeDate(day.date) === dateString)
+        // First, check if we have public pricing calendar data for this date (includes availability)
+        const publicCalendarDay = publicPricingCalendar[dateString]
         
-        if (calendarDay) {
-            console.log('✅ Using pricing calendar data for date:', dateString, 'fullDay:', calendarDay.fullDayPrice, 'halfDay:', calendarDay.halfDayPrice, 'isOverride:', calendarDay.isOverride)
+        if (publicCalendarDay) {
+            console.log('✅ Using public pricing calendar data for date:', dateString, 'fullDay:', publicCalendarDay.fullDayPrice, 'halfDay:', publicCalendarDay.halfDayPrice, 'isOverride:', publicCalendarDay.isOverride, 'isAvailable:', publicCalendarDay.isAvailable)
             return {
-                price: calendarDay.fullDayPrice > 0 ? calendarDay.fullDayPrice : null,
-                halfDayPrice: calendarDay.halfDayPrice > 0 ? calendarDay.halfDayPrice : null,
-                isOverride: calendarDay.isOverride,
-                reason: calendarDay.reason
+                price: publicCalendarDay.fullDayPrice > 0 ? publicCalendarDay.fullDayPrice : null,
+                halfDayPrice: publicCalendarDay.halfDayPrice > 0 ? publicCalendarDay.halfDayPrice : null,
+                isOverride: publicCalendarDay.isOverride || false,
+                isAvailable: publicCalendarDay.isAvailable !== false, // Default to true if not specified
+                reason: publicCalendarDay.isOverride ? 'Date override' : undefined
             }
         }
         
-        // Fallback to PropertyPricing weekly rates if no calendar data
+        // Fallback to PropertyPricing weekly rates if no public calendar data
         if (!propertyPricing) {
             console.log('❌ No pricing data available for date:', dateString)
-            return { price: null, halfDayPrice: null, isOverride: false }
+            return { price: null, halfDayPrice: null, isOverride: false, isAvailable: true }
         }
         
         const date = new Date(dateString)
@@ -225,7 +234,7 @@ const CalendarView: React.FC = () => {
         const fieldNames = dayFieldMap[dayOfWeek as keyof typeof dayFieldMap]
         if (!fieldNames) {
             console.log('❌ No field names found for dayOfWeek:', dayOfWeek)
-            return { price: null, halfDayPrice: null, isOverride: false }
+            return { price: null, halfDayPrice: null, isOverride: false, isAvailable: true }
         }
         
         const basePrice = propertyPricing[fieldNames.fullDay as keyof typeof propertyPricing] as number
@@ -235,7 +244,8 @@ const CalendarView: React.FC = () => {
         return {
             price: basePrice > 0 ? basePrice : null,
             halfDayPrice: baseHalfDayPrice > 0 ? baseHalfDayPrice : null,
-            isOverride: false
+            isOverride: false,
+            isAvailable: true // Default to available for fallback pricing
         }
     }
 
@@ -299,6 +309,7 @@ const CalendarView: React.FC = () => {
                         },
                         hasCustomPrice: effectivePriceData.isOverride, // Mark as custom if base was override
                         isBasePricing: false,
+                        isAvailable: effectivePriceData.isAvailable, // Pass through availability status
                         reason: effectivePriceData.reason,
                         halfDayPrice: calculatedHalfDayAmount || undefined // Pass through calculated half day price
                     })
@@ -320,6 +331,7 @@ const CalendarView: React.FC = () => {
                 },
                 hasCustomPrice: effectivePriceData.isOverride,
                 isBasePricing: true,
+                isAvailable: effectivePriceData.isAvailable, // Pass through availability status
                 reason: effectivePriceData.reason,
                 halfDayPrice: effectivePriceData.halfDayPrice || undefined // Pass through half day price
             })

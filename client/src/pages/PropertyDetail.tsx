@@ -168,13 +168,63 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         return {checkInDate: '', checkOutDate: ''}
     }
 
+    // Validate date range for availability
+    const validateDateRangeAvailability = (startDate: Date | null, endDate: Date | null): { isValid: boolean; unavailableDates: string[] } => {
+        if (!startDate || !publicPricingCalendar) {
+            return { isValid: true, unavailableDates: [] }
+        }
+
+        const unavailableDates: string[] = []
+        const checkEndDate = endDate || startDate
+
+        // Check each date in the range
+        const currentDate = new Date(startDate)
+        while (currentDate <= checkEndDate) {
+            const year = currentDate.getFullYear()
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+            const day = String(currentDate.getDate()).padStart(2, '0')
+            const dateString = `${year}-${month}-${day}`
+            
+            const priceInfo = publicPricingCalendar[dateString]
+            
+            // Check if date is unavailable
+            if (priceInfo && priceInfo.isAvailable === false) {
+                unavailableDates.push(dateString)
+            }
+            
+            currentDate.setDate(currentDate.getDate() + 1)
+        }
+
+        return {
+            isValid: unavailableDates.length === 0,
+            unavailableDates
+        }
+    }
+
     // Handle pricing calendar selection
     const handleCalendarSelection = (range: { startDate: Date | null, endDate: Date | null }) => {
         if (bookingType === 'half-day') {
+            // For half-day, validate single date
+            const validation = validateDateRangeAvailability(range.startDate, range.startDate)
+            
+            if (!validation.isValid) {
+                alert(`The selected date is not available for booking.`)
+                return
+            }
+            
             // For half-day, only use the start date
             setSingleDate(range.startDate)
             setDateRange({startDate: null, endDate: null})
         } else {
+            // For full-stay, validate the full range
+            const validation = validateDateRangeAvailability(range.startDate, range.endDate)
+            
+            if (!validation.isValid) {
+                const formattedDates = validation.unavailableDates.join(', ')
+                alert(`The following dates in your selected range are not available: ${formattedDates}\n\nPlease select a different date range without unavailable dates.`)
+                return
+            }
+            
             // For full-stay, use the full range
             setDateRange(range)
             setSingleDate(null)
@@ -888,7 +938,6 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                                 loading={pricingLoading}
                             />
                         </Box>
-
                         {/* Rate Plan Selector */}
                         <RatePlanSelector
                             propertyId={actualPropertyId || ''}

@@ -208,6 +208,25 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
   }
   
   // Handle date selection
+  // Check if date range has unavailable dates in between
+  const hasUnavailableDatesInRange = (startDate: Date, endDate: Date): boolean => {
+    if (!priceData) return false
+    
+    const current = new Date(startDate)
+    while (current <= endDate) {
+      const dateString = current.toISOString().split('T')[0]
+      const priceInfo = priceData[dateString]
+      
+      if (priceInfo && priceInfo.isAvailable === false) {
+        return true
+      }
+      
+      current.setDate(current.getDate() + 1)
+    }
+    
+    return false
+  }
+
   const handleDateSelect = (date: Date) => {
     if (isDateDisabled(date)) return
     
@@ -234,9 +253,17 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
           newRange.endDate = null
           setSelectionStep('end')
         } else {
-          // Complete the range selection
-          newRange.endDate = date
-          setSelectionStep('start')
+          // Complete the range selection - but first check for unavailable dates
+          if (hasUnavailableDatesInRange(internalRange.startDate, date)) {
+            // Show error and reset selection
+            alert('The selected date range contains unavailable dates. Please select a different range.')
+            newRange.startDate = null
+            newRange.endDate = null
+            setSelectionStep('start')
+          } else {
+            newRange.endDate = date
+            setSelectionStep('start')
+          }
         }
       }
     }
@@ -398,20 +425,21 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
           const priceInfo = getPriceForDate(date)
           
           let backgroundColor = 'white'
-          if (!isCurrentMonth) backgroundColor = '#f9fafb'
-          else if (isSelected) backgroundColor = '#3182ce'
-          else if (isDisabled) backgroundColor = '#f3f4f6'
-          else if (isInRange) backgroundColor = '#dbeafe'
-          else if (isToday) backgroundColor = '#eff6ff'
+          if (isSelected) backgroundColor = '#3182ce' // Selected dates get blue (highest priority)
+          else if (isDisabled) backgroundColor = '#f3f4f6' // Then disabled dates get gray
+          else if (isInRange) backgroundColor = '#dbeafe' // Then range highlighting
+          else if (!isCurrentMonth) backgroundColor = '#fafafa' // Then other month
+          else if (isToday) backgroundColor = '#eff6ff' // Then today highlighting
           
           return (
             <Box
               key={index}
               backgroundColor={backgroundColor}
-              cursor={!isCurrentMonth || isDisabled ? 'not-allowed' : 'pointer'}
-              opacity={!isCurrentMonth || isDisabled ? 0.5 : 1}
-              onClick={() => isCurrentMonth && !isDisabled && handleDateSelect(date)}
+              cursor={isDisabled ? 'not-allowed' : 'pointer'}
+              opacity={isDisabled ? 0.5 : (!isCurrentMonth ? 0.8 : 1)}
+              onClick={() => !isDisabled && handleDateSelect(date)}
               padding="0.5rem"
+              minHeight="60px"
               display="flex"
               flexDirection="column"
               alignItems="center"
@@ -431,7 +459,7 @@ const PricingCalendar: React.FC<PricingCalendarProps> = ({
               </Box>
               
               {/* Price display */}
-              {priceInfo && isCurrentMonth && !isDisabled && (
+              {priceInfo && !isDisabled && (
                 <Box
                   fontSize="0.75rem"
                   fontWeight="700"

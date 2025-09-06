@@ -428,7 +428,24 @@ export const getPublicPricingCalendar = async (req: Request, res: Response): Pro
     // Get pricing calendar from service
     const calendar = await propertyPricingService.getPricingCalendar(propertyId, parsedStartDate, parsedEndDate);
 
-    // Transform calendar data to include both full-day and half-day prices
+    // Get availability data for the same date range
+    const availabilityService = require('../services/availability.service').default;
+    const availability = await availabilityService.getPublicAvailability(
+      propertyId,
+      startDate as string,
+      endDate as string
+    );
+
+    // Create availability lookup map for efficient access
+    const availabilityMap = new Map(
+      availability.map((avail: any) => [
+        // Normalize date string for comparison
+        new Date(avail.date).toISOString().split('T')[0],
+        avail.isAvailable
+      ])
+    );
+
+    // Transform calendar data to include both pricing and availability
     const transformedCalendar: Record<string, any> = {};
     
     calendar.forEach(dayData => {
@@ -438,25 +455,31 @@ export const getPublicPricingCalendar = async (req: Request, res: Response): Pro
       const day = String(dayData.date.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
       
+      // Check availability for this date
+      const isDateAvailable = availabilityMap.get(dateString) !== false; // Default to true if no record
+      
       transformedCalendar[dateString] = {
         fullDayPrice: dayData.fullDayPrice,
         halfDayPrice: dayData.halfDayPrice,
         currency: 'AED',
         isOverride: dayData.isOverride,
+        reason: dayData.reason, // Include override reason if available
         hasDiscount: false, // This would need additional logic to determine discounts
         originalPrice: undefined, // Not available in current interface
-        isAvailable: true // Assume available for now, can be enhanced later
+        isAvailable: isDateAvailable, // Now includes real availability data
+        availabilityStatus: isDateAvailable ? 'available' : 'unavailable'
       };
     });
 
     res.json({
-      message: 'Public pricing calendar retrieved successfully',
+      message: 'Public pricing calendar with availability retrieved successfully',
       calendar: transformedCalendar,
       dateRange: {
         startDate: parsedStartDate,
         endDate: parsedEndDate,
         totalDays: calendar.length
-      }
+      },
+      availabilityIncluded: true
     });
   } catch (error: any) {
     console.error('Get public pricing calendar error:', error);

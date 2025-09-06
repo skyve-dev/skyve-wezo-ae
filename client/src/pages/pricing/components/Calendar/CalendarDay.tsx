@@ -3,6 +3,7 @@ import {useSelector} from 'react-redux'
 import {RootState, useAppDispatch} from '@/store'
 import {FaEdit, FaPlus} from 'react-icons/fa'
 import {IoIosCheckmark} from 'react-icons/io'
+import {IoClose, IoCheckmark} from 'react-icons/io5'
 import {Box} from '@/components'
 import {openDateOverrideForm, setSelectedDate, toggleDateSelection} from '@/store/slices/priceSlice'
 
@@ -48,6 +49,7 @@ interface PriceData {
     }
     hasCustomPrice: boolean
     isBasePricing?: boolean  // NEW: Flag for base PropertyPricing
+    isAvailable?: boolean  // Availability status for the date
     reason?: string  // Optional reason for overrides
     halfDayPrice?: number  // Optional half-day price for overrides
 }
@@ -82,6 +84,19 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     }
 
     const isDisabled = isPastDate()
+
+    // Helper function to get availability status
+    const getAvailabilityStatus = () => {
+        // Check availability from any price data that includes availability info
+        const priceWithAvailability = prices.find(p => p.isAvailable !== undefined)
+        if (priceWithAvailability) {
+            return priceWithAvailability.isAvailable
+        }
+        // Default to available if no explicit availability info
+        return true
+    }
+
+    const isAvailable = getAvailabilityStatus()
 
     // Helper function to detect existing override for unified pricing
     const getExistingOverride = () => {
@@ -149,8 +164,12 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
 
     // Handle day click
     const handleDayClick = () => {
-        if (!day.isCurrentMonth) return
+        // Allow clicks on other month dates, just not past dates or unavailable dates
         if (isDisabled) return // Prevent clicks on past dates
+        if (!isAvailable) {
+            // For unavailable dates, we could show a message but allow admin to edit pricing
+            // For now, allow clicks to maintain admin functionality
+        }
 
         if (bulkEditMode) {
             dispatch(toggleDateSelection(day.dateString))
@@ -185,9 +204,10 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
 
     // Get background color based on state
     const getBackgroundColor = () => {
-        if (!day.isCurrentMonth) return '#f9fafb'
-        if (isDisabled) return '#f3f4f6' // Gray background for past dates
+        if (isDisabled) return '#f3f4f6' // Gray background for past dates (highest priority)
+        if (!isAvailable && !isDisabled) return '#fef2f2' // Light red background for unavailable dates
         if (isSelected && bulkEditMode) return '#dbeafe'
+        if (!day.isCurrentMonth) return '#fafafa' // Very subtle gray for other month dates
         if (day.isToday) return '#eff6ff'
         if (day.isWeekend) return '#fffbeb'
         return 'white'
@@ -202,12 +222,12 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     return (
         <Box
             backgroundColor={getBackgroundColor()}
-            cursor={day.isCurrentMonth && !isDisabled ? 'pointer' : 'not-allowed'}
-            opacity={day.isCurrentMonth && !isDisabled ? 1 : 0.5}
+            cursor={!isDisabled && isAvailable ? 'pointer' : 'not-allowed'}
+            opacity={!isDisabled ? 1 : 0.6}
             onClick={handleDayClick}
             position="relative"
             transition="all 0.2s"
-            whileHover={day.isCurrentMonth ? {backgroundColor: '#f8fafc'} : {}}
+            whileHover={!isDisabled && isAvailable ? {backgroundColor: '#f8fafc'} : {}}
         >
             {/* Day Number */}
             <Box
@@ -227,7 +247,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         </span>
 
                 {/* Bulk Edit Selection Indicator */}
-                {bulkEditMode && day.isCurrentMonth && !isDisabled && (
+                {bulkEditMode && !isDisabled && (
                     <Box
                         width="20px"
                         height="20px"
@@ -245,7 +265,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 )}
 
                 {/* Override Indicator */}
-                {day.isCurrentMonth && prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
+                {!isDisabled && prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
                     <Box
                         width="16px"
                         height="16px"
@@ -264,8 +284,28 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                         />
                     </Box>
                 )}
+
+                {/* Availability Indicator */}
+                {!isDisabled && (
+                    <Box
+                        width="16px"
+                        height="16px"
+                        borderRadius="50%"
+                        backgroundColor={isAvailable ? "#10b981" : "#ef4444"}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        title={isAvailable ? 'Available for booking' : 'Not available for booking'}
+                    >
+                        {isAvailable ? (
+                            <IoCheckmark size={10} color="white" />
+                        ) : (
+                            <IoClose size={10} color="white" />
+                        )}
+                    </Box>
+                )}
                 {/* Weekend Label - hidden on tiny mobile to save space */}
-                {day.isWeekend && day.isCurrentMonth && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
+                {day.isWeekend && !isDisabled && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
                     <span style={{fontSize: '0.625rem', color: '#92400e', fontWeight: '500'}}>
             WE
           </span>
@@ -285,7 +325,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
             )}
 
             {/* Price Items */}
-            {day.isCurrentMonth && !isDisabled && (
+            {!isDisabled && (
                 <Box display="flex" flexDirection="column" flex="1">
                     {prices.length === 0 && selectedRatePlans.length > 0 && (
                         <Box
