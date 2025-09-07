@@ -11,8 +11,6 @@ import wezoAe from "../../../assets/wezo-optimized.svg"
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '../../../store'
 import { switchUserRole, selectAvailableRoles, logout } from '../../../store/slices/authSlice'
-import { LoginForm } from '../../forms/LoginForm'
-import { RegisterForm } from '../../forms/RegisterForm'
 
 interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
@@ -60,57 +58,13 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
         setIsRoleDrawerOpen(false)
     }
 
-    // Authentication dialog handlers
-    const handleLogin = async () => {
-        await openDialog((close) => (
-            <Box padding="2rem" backgroundColor="white" borderRadius="8px" minWidth="400px">
-                <Box fontSize="1.5rem" fontWeight="bold" marginBottom="1.5rem" textAlign="center">
-                    Welcome Back
-                </Box>
-                <LoginForm 
-                    onSwitchToRegister={() => {
-                        close(null)
-                        handleRegister()
-                    }}
-                    onSwitchToForgotPassword={() => {
-                        // TODO: Implement forgot password
-                        close(null)
-                    }}
-                />
-                <Box marginTop="1rem" textAlign="center">
-                    <Button 
-                        label="Cancel" 
-                        onClick={() => close(null)}
-                        variant="normal"
-                        size="small"
-                    />
-                </Box>
-            </Box>
-        ))
+    // Authentication navigation handlers
+    const handleLogin = () => {
+        navigateTo('login' as keyof T, {})
     }
 
-    const handleRegister = async () => {
-        await openDialog((close) => (
-            <Box padding="2rem" backgroundColor="white" borderRadius="8px" minWidth="400px">
-                <Box fontSize="1.5rem" fontWeight="bold" marginBottom="1.5rem" textAlign="center">
-                    Create Account
-                </Box>
-                <RegisterForm 
-                    onSwitchToLogin={() => {
-                        close(null)
-                        handleLogin()
-                    }}
-                />
-                <Box marginTop="1rem" textAlign="center">
-                    <Button 
-                        label="Cancel" 
-                        onClick={() => close(null)}
-                        variant="normal"
-                        size="small"
-                    />
-                </Box>
-            </Box>
-        ))
+    const handleRegister = () => {
+        navigateTo('register' as keyof T, {})
     }
 
     const handleLogout = () => {

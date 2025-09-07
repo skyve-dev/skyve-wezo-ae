@@ -425,6 +425,22 @@ export const updatePropertyAsync = createAsyncThunk(
   }
 )
 
+export const updatePropertyStatusAsync = createAsyncThunk(
+  'property/updatePropertyStatusAsync',
+  async (params: { propertyId: string; status: PropertyStatus }, { rejectWithValue }) => {
+    try {
+      const response = await api.put<{ property: any }>(`/api/properties/${params.propertyId}/status`, {
+        status: params.status
+      })
+      return transformServerPropertyData(response.property)
+    } catch (error: any) {
+      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
+                          error.serverMessage || error.message || 'Failed to update property status'
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
 const propertySlice = createSlice({
   name: 'property',
   initialState: {
@@ -930,6 +946,33 @@ const propertySlice = createSlice({
         state.error = null
       })
       .addCase(updatePropertyAsync.rejected, (state, action) => {
+        state.isSaving = false
+        state.error = action.payload as string
+      })
+      
+      // Update property status
+      .addCase(updatePropertyStatusAsync.pending, (state) => {
+        state.isSaving = true
+        state.error = null
+      })
+      .addCase(updatePropertyStatusAsync.fulfilled, (state, action) => {
+        state.isSaving = false
+        const index = state.properties.findIndex(p => p.propertyId === action.payload.propertyId)
+        if (index !== -1) {
+          state.properties[index] = action.payload
+        }
+        // Update currentForm if it matches the updated property
+        if (state.currentForm?.propertyId === action.payload.propertyId) {
+          state.currentForm = action.payload
+          state.originalForm = { ...action.payload }
+          state.hasUnsavedChanges = false
+        }
+        // Update currentProperty if it matches
+        if (state.currentProperty?.propertyId === action.payload.propertyId) {
+          state.currentProperty = action.payload
+        }
+      })
+      .addCase(updatePropertyStatusAsync.rejected, (state, action) => {
         state.isSaving = false
         state.error = action.payload as string
       })

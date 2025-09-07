@@ -13,16 +13,19 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { 
   createPropertyWithPromotion,
   updatePropertyAsync,
+  updatePropertyStatusAsync,
   initializeFormForCreate,
   initializeFormForEdit,
   updateFormField,
   resetFormToOriginal,
-  fetchPropertyById
+  fetchPropertyById,
+  PropertyStatus
 } from '@/store/slices/propertySlice'
 import { ApiError } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
 import PropertyManagerHeader from './PropertyManagerHeader'
 import PropertyManagerFooter from './PropertyManagerFooter'
+import PropertyStatusWidget from '@/components/PropertyStatusWidget'
 import { Address, Bed, Room, PropertyPricing } from '@/types/property'
 import { BookingType, PaymentType, ParkingType, PetPolicy, BedType, BookingTypeLabels, PaymentTypeLabels, ParkingTypeLabels, PetPolicyLabels, BedTypeLabels } from '@/constants/propertyEnums'
 import { AVAILABLE_AMENITIES, getAmenitiesByCategory } from '@/constants/amenities.tsx'
@@ -225,6 +228,28 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   
   const handleDiscard = async () => {
     dispatch(resetFormToOriginal())
+  }
+  
+  // Handle property status changes
+  const handleStatusChange = async (newStatus: PropertyStatus) => {
+    if (!currentForm?.propertyId) return
+    
+    try {
+      await dispatch(updatePropertyStatusAsync({
+        propertyId: currentForm.propertyId,
+        status: newStatus
+      })).unwrap()
+      
+      await showSuccess(`Property status updated to ${newStatus} successfully.`)
+    } catch (error: any) {
+      if (error instanceof ApiError) {
+        await showApiError(error, 'Status Update')
+      } else if (typeof error === 'string') {
+        await showApiError(new ApiError(error, 400, undefined, error), 'Status Update')
+      } else {
+        await showApiError(new ApiError('Failed to update property status', 500), 'Status Update')
+      }
+    }
   }
   
   // Handle form field changes
@@ -744,6 +769,16 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     <SecuredPage>
       <Box padding="1rem" paddingMd="2rem" maxWidth="800px" margin="0 auto">
         <Box display="flex" flexDirection="column" gap="3rem">
+
+          {/* Property Status Widget - Only show in edit mode */}
+          {isEditMode && currentForm && (
+            <PropertyStatusWidget
+              property={currentForm}
+              onStatusChange={handleStatusChange}
+              isSaving={isSaving}
+              disabled={hasUnsavedChanges}
+            />
+          )}
 
           {/* Basic Information Section */}
           <Box>

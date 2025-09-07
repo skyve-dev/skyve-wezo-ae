@@ -94,14 +94,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
       margin="0 auto"
     >
       <Box display="flex" flexDirection="column" gap={24}>
-        <Box textAlign="center">
-          <Box as="h2" margin={0} fontSize={24} fontWeight={600} marginBottom={8}>
-            Create Account
-          </Box>
-          <Box as="p" margin={0} color="#6c757d" fontSize={16}>
-            Join Wezo today
-          </Box>
-        </Box>
 
         {authError && (
           <Box

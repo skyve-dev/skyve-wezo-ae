@@ -140,17 +140,12 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
     const renderRoleOption = (option: RoleOption, isSelected: boolean) => (
         <Box
             display="flex"
-            alignItems="center"
             gap="1rem"
+            justifyContent={'flex-start'}
             padding="1rem"
             borderRadius="8px"
-            backgroundColor={isSelected ? 'rgba(59, 130, 246, 0.1)' : 'transparent'}
-            border={isSelected ? '2px solid #3b82f6' : '2px solid transparent'}
             cursor="pointer"
             transition="all 0.2s ease"
-            whileHover={{
-                backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'rgba(0, 0, 0, 0.05)'
-            }}
         >
             {/* Role Icon */}
             <Box flexShrink={0}>
@@ -175,27 +170,6 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
                     {option.description}
                 </Box>
             </Box>
-
-            {/* Selection Indicator */}
-            {isSelected && (
-                <Box
-                    width="1.5rem"
-                    height="1.5rem"
-                    borderRadius="50%"
-                    backgroundColor="#3b82f6"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                >
-                    <Box
-                        width="0.5rem"
-                        height="0.5rem"
-                        borderRadius="50%"
-                        backgroundColor="white"
-                    />
-                </Box>
-            )}
         </Box>
     )
 

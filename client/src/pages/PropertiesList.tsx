@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react'
-import {IoIosWater, IoIosBed, IoIosCalendar, IoIosCreate, IoIosEye, IoIosPin, IoIosAdd, IoIosTrash} from 'react-icons/io'
+import {IoIosWater, IoIosBed, IoIosCalendar, IoIosCreate, IoIosEye, IoIosPin, IoIosAdd, IoIosTrash, IoIosEyeOff, IoIosLock} from 'react-icons/io'
 import {useAppShell} from '@/components/base/AppShell'
 import {Box, Input} from '@/components'
 import Button from '@/components/base/Button.tsx'
 import ConfirmationDialog from '@/components/base/ConfirmationDialog'
 import {useAppDispatch, useAppSelector} from '@/store'
-import {clearError, deleteProperty, fetchMyProperties, fetchPublicProperties, setCurrentProperty} from '@/store/slices/propertySlice'
+import {clearError, deleteProperty, fetchMyProperties, fetchPublicProperties, setCurrentProperty, PropertyStatus} from '@/store/slices/propertySlice'
 import {Property} from '@/types/property'
 import {resolvePhotoUrl} from '@/utils/api'
 
@@ -131,6 +131,61 @@ const PropertiesList: React.FC = () => {
         navigateTo('availability', {propertyId: property.propertyId})
     }
 
+    // Status badge component
+    const renderStatusBadge = (status: PropertyStatus) => {
+        const getStatusConfig = () => {
+            switch (status) {
+                case PropertyStatus.Draft:
+                    return {
+                        icon: <IoIosEyeOff size={12} />,
+                        label: 'Draft',
+                        color: '#6b7280',
+                        bgColor: '#f3f4f6'
+                    }
+                case PropertyStatus.Live:
+                    return {
+                        icon: <IoIosEye size={12} />,
+                        label: 'Live',
+                        color: '#059669',
+                        bgColor: '#d1fae5'
+                    }
+                case PropertyStatus.Closed:
+                    return {
+                        icon: <IoIosLock size={12} />,
+                        label: 'Closed',
+                        color: '#dc2626',
+                        bgColor: '#fee2e2'
+                    }
+                default:
+                    return {
+                        icon: <IoIosEyeOff size={12} />,
+                        label: 'Draft',
+                        color: '#6b7280',
+                        bgColor: '#f3f4f6'
+                    }
+            }
+        }
+        
+        const config = getStatusConfig()
+        
+        return (
+            <Box
+                display="inline-flex"
+                alignItems="center"
+                gap="0.25rem"
+                padding="0.25rem 0.5rem"
+                borderRadius="4px"
+                backgroundColor={config.bgColor}
+                color={config.color}
+                fontSize="0.75rem"
+                fontWeight="500"
+            >
+                {config.icon}
+                {config.label}
+            </Box>
+        )
+    }
+
     const renderPropertyCard = (property: Property) => (
         <Box
             key={property.propertyId}
@@ -185,9 +240,13 @@ const PropertiesList: React.FC = () => {
 
             {/* Property Info */}
             <Box marginBottom="1rem">
-                <h3 style={{fontSize: '1.25rem', fontWeight: '600', margin: '0 0 0.5rem 0'}}>
-                    {property.name}
-                </h3>
+                <Box display="flex" alignItems="center" justifyContent="space-between" marginBottom="0.5rem">
+                    <h3 style={{fontSize: '1.25rem', fontWeight: '600', margin: 0, flex: 1}}>
+                        {property.name}
+                    </h3>
+                    {/* Show status badge only for authenticated users (property owners) */}
+                    {canManageProperties && property.status && renderStatusBadge(property.status)}
+                </Box>
 
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem" color="#666">
                     <IoIosPin/>

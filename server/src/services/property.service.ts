@@ -855,6 +855,89 @@ export class PropertyService {
 
     return updatedPhoto;
   }
+
+  async updatePropertyStatus(propertyId: string, status: string, ownerId: string) {
+    // Validate status value
+    const validStatuses = ['Draft', 'Live', 'Closed'];
+    if (!validStatuses.includes(status)) {
+      throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+    }
+
+    // Check if property exists and user has permission
+    const existingProperty = await prisma.property.findFirst({
+      where: {
+        propertyId,
+        ownerId,
+      },
+      include: {
+        photos: true,
+        amenities: true,
+        pricing: true,
+      },
+    });
+
+    if (!existingProperty) {
+      throw new Error('Property not found or you do not have permission to update it');
+    }
+
+    // Validation rules for publishing (Draft → Live)
+    if (status === 'Live') {
+      const validationErrors: string[] = [];
+
+      // Check minimum photos requirement
+      if (!existingProperty.photos || existingProperty.photos.length < 5) {
+        validationErrors.push('At least 5 photos are required to publish a property');
+      }
+
+      // Check basic property information
+      if (!existingProperty.name || existingProperty.name.trim().length === 0) {
+        validationErrors.push('Property name is required');
+      }
+
+      if (!existingProperty.maximumGuest || existingProperty.maximumGuest < 1) {
+        validationErrors.push('Maximum guest capacity must be at least 1');
+      }
+
+      // Check if pricing is configured (optional for MVP)
+      // Note: This could be expanded to check for rate plans in the future
+
+      if (validationErrors.length > 0) {
+        throw new Error(`Cannot publish property: ${validationErrors.join(', ')}`);
+      }
+    }
+
+    // Update the property status
+    const updatedProperty = await prisma.property.update({
+      where: { propertyId },
+      data: { status: status as any }, // Cast to PropertyStatus enum
+      include: {
+        address: {
+          include: {
+            latLong: true,
+          },
+        },
+        rooms: {
+          include: {
+            beds: true,
+          },
+        },
+        amenities: true,
+        photos: true,
+        checkInCheckout: true,
+        pricing: true,
+        owner: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return updatedProperty;
+  }
 }
 
 export default new PropertyService();

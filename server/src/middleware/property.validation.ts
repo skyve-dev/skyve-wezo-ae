@@ -207,5 +207,29 @@ export const validateRulesUpdate = (req: Request, res: Response, next: NextFunct
   next();
 };
 
+export const validateStatusUpdate = (req: Request, res: Response, next: NextFunction): void => {
+  const { status } = req.body;
+
+  const validations = [
+    () => !status ? 'status: Status is required' : null,
+    () => {
+      if (status) {
+        const validStatuses = ['Draft', 'Live', 'Closed'];
+        return !validStatuses.includes(status) ? `status: Must be one of ${validStatuses.join(', ')}` : null;
+      }
+      return null;
+    },
+  ];
+
+  const errors = validateAndCollectErrors(validations);
+  
+  if (Object.keys(errors).length > 0) {
+    returnValidationResponse(res, errors);
+    return;
+  }
+
+  next();
+};
+
 // validatePricingUpdate removed - pricing now managed through rate plans
 // validateCancellationUpdate removed - cancellation policies now managed through rate plans

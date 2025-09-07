@@ -16,7 +16,9 @@ import {
     FaTags,
     FaShoppingCart,
     FaCreditCard,
-    FaHistory
+    FaHistory,
+    FaSignInAlt,
+    FaUserPlus
 } from "react-icons/fa";
 
 // Import page components
@@ -29,8 +31,9 @@ import Inbox from "@/pages/Inbox";
 import Reviews from "@/pages/Reviews";
 import Finance from "@/pages/Finance";
 import Support from "@/pages/Support";
-import LandingPage from "@/pages/LandingPage";
 import PropertyDetail from "@/pages/PropertyDetail";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
 
 // Revenue management pages
 import RatePlans from "@/pages/revenue/RatePlans";
@@ -50,6 +53,24 @@ export const routes = createRoutes({
         showInNav: true,
         showInHeader: false,
         showInFooter: true
+        // No roles = public access
+    },
+    login: {
+        component: LoginPage,
+        icon: <FaSignInAlt />,
+        label: 'Sign In',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false
+        // No roles = public access
+    },
+    register: {
+        component: RegisterPage,
+        icon: <FaUserPlus />,
+        label: 'Create Account',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false
         // No roles = public access
     },
     dashboard: {

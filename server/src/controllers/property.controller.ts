@@ -358,3 +358,44 @@ export const updatePropertyPhoto = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const updatePropertyStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { propertyId } = req.params;
+    const { status } = req.body;
+
+    // Debug logging
+    console.log('🔷 PropertyController - updatePropertyStatus called');
+    console.log('🔷 PropertyController - propertyId:', propertyId);
+    console.log('🔷 PropertyController - userId:', req.user.id);
+    console.log('🔷 PropertyController - requested status:', status);
+
+    if (!status) {
+      res.status(400).json({ error: 'Status is required' });
+      return;
+    }
+
+    const property = await propertyService.updatePropertyStatus(propertyId, status, req.user.id);
+
+    res.json({
+      message: `Property status updated to ${status} successfully`,
+      property,
+    });
+  } catch (error: any) {
+    console.error('Update property status error:', error);
+    if (error.message.includes('Property not found') || error.message.includes('permission')) {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+    if (error.message.includes('Invalid status') || error.message.includes('Cannot publish')) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

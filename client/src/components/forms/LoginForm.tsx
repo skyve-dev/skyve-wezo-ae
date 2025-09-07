@@ -77,14 +77,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       margin="0 auto"
     >
       <Box display="flex" flexDirection="column" gap={24}>
-        <Box textAlign="center">
-          <Box as={'h2'} margin={'0px'} fontSize={'1.5rem'} fontWeight={'600'} marginBottom={'8px'}>
-            Welcome Back
-          </Box>
-          <Box as={'p'} margin={'0px'} color={'#6c757d'} fontSize={'1rem'}>
-            Sign in to your account
-          </Box>
-        </Box>
 
         {authError && (
           <Box
