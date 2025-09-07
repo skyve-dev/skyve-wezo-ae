@@ -9,6 +9,8 @@ import {
 } from '../utils/emailService'
 import bookingCalculatorService from '../services/booking-calculator.service'
 import crypto from 'crypto'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -18,7 +20,9 @@ const otpStore = new Map<string, { code: string; expires: Date; verified: boolea
 
 // Generate OTP code
 function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString()
+  // For development: use fixed OTP to make testing easier
+  // TODO: Replace with random generation for production
+  return "123456"
 }
 
 // Calculate booking options (direct + rate plans)
@@ -70,6 +74,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Send OTP email (for now, we'll just log it)
     console.log(`📧 OTP for ${email}: ${otpCode}`)
+    console.log(`🔐 OTP stored in memory for: ${email}`)
     
     return res.json({ message: 'OTP sent successfully', expires })
   } catch (error) {
@@ -106,15 +111,60 @@ router.post('/verify-otp', async (req, res) => {
     storedOtp.verified = true
     otpStore.set(email, storedOtp)
 
-    return res.json({ message: 'Email verified successfully', verified: true })
+    // Auto-create user account after email verification
+    let user = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (!user) {
+      // Create new user account with hardcoded password for development
+      const hashedPassword = await bcrypt.hash('123456', 10) // Development password
+      
+      user = await prisma.user.create({
+        data: {
+          username: email.split('@')[0], // Use email prefix as username
+          email: email,
+          password: hashedPassword,
+          role: 'Tenant'
+        }
+      })
+      
+      console.log(`✅ Auto-created user account for: ${email} with password: 123456`)
+    }
+
+    // Generate JWT token for auto-login
+    const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    )
+
+    return res.json({ 
+      message: 'Email verified and account created successfully', 
+      verified: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      },
+      token,
+      autoCreated: !user.createdAt || user.createdAt > new Date(Date.now() - 5000) // Created in last 5 seconds
+    })
   } catch (error) {
     console.error('Error verifying OTP:', error)
     return res.status(500).json({ message: 'Failed to verify OTP' })
   }
 })
 
-// Create booking
-router.post('/create', authenticate, async (req, res) => {
+// Create booking (guest booking - no authentication required)
+router.post('/create', async (req, res) => {
   try {
     const {
       propertyId,
@@ -257,8 +307,8 @@ router.post('/create', authenticate, async (req, res) => {
   }
 })
 
-// Process payment (mock)
-router.post('/payment', authenticate, async (req, res) => {
+// Process payment (guest payment - no authentication required)
+router.post('/payment', async (req, res) => {
   try {
     const { bookingId, paymentMethod } = req.body
 

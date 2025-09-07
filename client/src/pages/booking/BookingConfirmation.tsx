@@ -10,11 +10,11 @@ import {
   clearError,
   setCurrentStep
 } from '@/store/slices/bookingSlice'
+import { autoLogin } from '@/store/slices/authSlice'
 import { fetchPropertyById } from '@/store/slices/propertySlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
 import { Input } from '@/components/base/Input'
-import { SecuredPage } from '@/components/SecuredPage'
 import { 
   IoArrowBack,
   IoCheckmarkCircle,
@@ -132,11 +132,32 @@ const BookingConfirmation: React.FC = () => {
     }))
     
     if (result.meta.requestStatus === 'fulfilled') {
-      addToast('Email verified successfully! Proceeding to payment...', { 
-        type: 'success', 
-        autoHide: true, 
-        duration: 3000 
-      })
+      // Check if account was auto-created and dispatch auto-login
+      const response = (result.payload as any)?.data
+      if (response?.user && response?.token) {
+        // Dispatch auto-login to update auth state
+        dispatch(autoLogin({ user: response.user, token: response.token }))
+        
+        if (response?.autoCreated) {
+          addToast('Account created successfully! Email: ' + response.user.email + ' | Password: 123456', { 
+            type: 'success', 
+            autoHide: false, // Don't auto-hide so user can see credentials
+            duration: 10000 
+          })
+        } else {
+          addToast('Email verified and logged in! Proceeding to payment...', { 
+            type: 'success', 
+            autoHide: true, 
+            duration: 3000 
+          })
+        }
+      } else {
+        addToast('Email verified successfully! Proceeding to payment...', { 
+          type: 'success', 
+          autoHide: true, 
+          duration: 3000 
+        })
+      }
       
       // Navigate to payment after verification
       setTimeout(() => {
@@ -183,7 +204,7 @@ const BookingConfirmation: React.FC = () => {
   }
   
   return (
-    <SecuredPage>
+    <>
       <Box maxWidth="600px" margin="0 auto" padding="1rem" paddingMd="2rem">
         {/* Header */}
         <Box 
@@ -407,7 +428,7 @@ const BookingConfirmation: React.FC = () => {
           </Box>
         )}
       </Box>
-    </SecuredPage>
+    </>
   )
 }
 

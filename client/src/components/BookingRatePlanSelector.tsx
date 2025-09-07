@@ -41,7 +41,7 @@ const BookingRatePlanSelector: React.FC<BookingRatePlanSelectorProps> = ({
   }
 
   // Render individual rate plan option
-  const renderRatePlanCard = (option: any, isSelected: boolean) => (
+  const renderRatePlanCard = (option: any, _isSelected: boolean) => (
     <Box 
       padding="1rem"
       position="relative"

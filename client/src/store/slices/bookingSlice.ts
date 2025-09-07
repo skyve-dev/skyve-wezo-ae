@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { api } from '@/utils/api'
+import { autoLogin } from './authSlice'
 
 interface BookingFormData {
   // Property and booking details
@@ -66,6 +67,9 @@ interface BookingState {
   // Step tracking
   currentStep: 'details' | 'otp' | 'payment' | 'confirmation'
   
+  // Auto-login data from email verification
+  autoLoginData: any | null
+  
   // User's bookings
   userBookings: any[]
   userBookingsLoading: boolean
@@ -81,6 +85,7 @@ const initialState: BookingState = {
   isSaving: false,
   error: null,
   currentStep: 'details',
+  autoLoginData: null,
   userBookings: [],
   userBookingsLoading: false
 }
@@ -301,11 +306,28 @@ const bookingSlice = createSlice({
         state.isLoading = true
         state.error = null
       })
-      .addCase(verifyOtpCode.fulfilled, (state) => {
+      .addCase(verifyOtpCode.fulfilled, (state, action) => {
         state.isLoading = false
         if (state.currentBooking) {
           state.currentBooking.otpVerified = true
         }
+        
+        // Store user data if account was auto-created
+        const response = action.payload?.data
+        if (response?.user && response?.token) {
+          // Store token in localStorage for auto-login
+          localStorage.setItem('authToken', response.token)
+          localStorage.setItem('user', JSON.stringify(response.user))
+          
+          console.log('✅ User auto-created and logged in:', response.user.email)
+          if (response.autoCreated) {
+            console.log('🔑 Auto-created account with password: 123456')
+          }
+          
+          // Set flag to trigger auth update (will be handled by extraReducers)
+          state.autoLoginData = response
+        }
+        
         state.currentStep = 'payment'
       })
       .addCase(verifyOtpCode.rejected, (state, action) => {

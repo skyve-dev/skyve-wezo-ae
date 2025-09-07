@@ -145,6 +145,17 @@ const authSlice = createSlice({
     updateAvailableRoles: (state, action) => {
       state.availableRoles = action.payload
     },
+    // Auto-login action for booking flow
+    autoLogin: (state, action) => {
+      const { user, token } = action.payload
+      state.user = user
+      state.token = token
+      state.isAuthenticated = true
+      state.error = null
+      state.currentRoleMode = user.role
+      state.availableRoles = [user.role] // Guest users typically only have Tenant role
+      apiClient.setToken(token)
+    },
     initializeRoleMode: (state) => {
       if (state.user) {
         // Determine available roles based on user's highest capability (not current role)
@@ -292,7 +303,7 @@ const authSlice = createSlice({
   },
 })
 
-export const { logout, clearError, setCurrentRoleMode, updateAvailableRoles, initializeRoleMode } = authSlice.actions
+export const { logout, clearError, setCurrentRoleMode, updateAvailableRoles, initializeRoleMode, autoLogin } = authSlice.actions
 
 // Selectors - memoized for performance
 export const selectUser = (state: { auth: AuthState }) => state.auth.user

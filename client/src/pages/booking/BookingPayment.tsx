@@ -5,7 +5,6 @@ import { processPayment, clearError } from '@/store/slices/bookingSlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
 import { ToggleButton } from '@/components'
-import { SecuredPage } from '@/components/SecuredPage'
 import { 
   IoArrowBack,
   IoCard,
@@ -70,7 +69,7 @@ const BookingPayment: React.FC = () => {
           
           // Show success and navigate to confirmation
           await openDialog<void>((close) => (
-            <Box padding="2rem" textAlign="center">
+            <Box padding="2rem" textAlign="center" alignItems={'center'}>
               <Box display="flex" justifyContent="center" marginBottom="1rem">
                 <IoCheckmarkCircle color="#059669" size={48} />
               </Box>
@@ -119,7 +118,7 @@ const BookingPayment: React.FC = () => {
   }
   
   return (
-    <SecuredPage>
+    <>
       <Box maxWidth="600px" margin="0 auto" padding="1rem" paddingMd="2rem">
         {/* Header */}
         <Box 
@@ -369,6 +368,36 @@ const BookingPayment: React.FC = () => {
               Your booking has been confirmed. You will receive a confirmation email shortly.
             </Box>
             
+            {/* Optional Account Creation Suggestion */}
+            <Box 
+              backgroundColor="#f0fdf4" 
+              border="1px solid #bbf7d0" 
+              borderRadius="8px" 
+              padding="1.5rem" 
+              marginBottom="2rem"
+            >
+              <Box fontSize="0.9375rem" fontWeight="600" marginBottom="0.75rem" color="#065f46">
+                💡 Create an account to manage your bookings
+              </Box>
+              <Box fontSize="0.875rem" color="#166534" marginBottom="1rem" lineHeight="1.4">
+                Save time on future bookings and easily track your reservation history by creating a free account.
+              </Box>
+              <Box display="flex" gap="0.75rem" justifyContent="center">
+                <Button
+                  label="Create Account"
+                  onClick={() => navigateTo('register', {})}
+                  variant="normal"
+                  size="medium"
+                />
+                <Button
+                  label="Skip for Now"
+                  onClick={() => navigateTo('home', {})}
+                  variant="plain"
+                  size="medium"
+                />
+              </Box>
+            </Box>
+            
             <Button
               label="View My Bookings"
               onClick={() => navigateTo('my-bookings', {})}
@@ -386,7 +415,7 @@ const BookingPayment: React.FC = () => {
           100% { transform: rotate(360deg); }
         }
       `}</style>
-    </SecuredPage>
+    </>
   )
 }
 

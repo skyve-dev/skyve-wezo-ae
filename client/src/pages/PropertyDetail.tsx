@@ -5,7 +5,7 @@ import {fetchPropertyById, setSelectedRatePlan} from '@/store/slices/propertySli
 import {fetchPublicRatePlans} from '@/store/slices/ratePlanSlice'
 import {checkBookingAvailability} from '@/store/slices/availabilitySlice'
 import {fetchPublicPricingCalendar} from '@/store/slices/priceSlice'
-import {calculateBookingOptions, initializeBooking} from '@/store/slices/bookingSlice'
+import {calculateBookingOptions} from '@/store/slices/bookingSlice'
 import {Box} from '@/components/base/Box'
 import {Button} from '@/components/base/Button'
 import {PricingCalendar, ToggleButton} from '@/components'
@@ -58,7 +58,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
     const {currentRoleMode} = useAppSelector((state) => state.auth)
     const {ratePlans} = useAppSelector((state) => state.ratePlan)
     const {publicPricingCalendar, loading: pricingLoading} = useAppSelector((state) => state.price)
-    const {bookingOptions, selectedRatePlanOption, calculatingOptions} = useAppSelector((state: any) => state.booking)
+    const {selectedRatePlanOption, calculatingOptions} = useAppSelector((state: any) => state.booking)
 
     // Local state for booking widget
     const [bookingType, setBookingType] = useState<'half-day' | 'full-stay'>('full-stay')
