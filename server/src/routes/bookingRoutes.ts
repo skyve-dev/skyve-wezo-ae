@@ -7,6 +7,7 @@ import {
   generateOwnerNotificationEmail,
   generateCancellationEmail 
 } from '../utils/emailService'
+import bookingCalculatorService from '../services/booking-calculator.service'
 import crypto from 'crypto'
 
 const router = express.Router()
@@ -19,6 +20,38 @@ const otpStore = new Map<string, { code: string; expires: Date; verified: boolea
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString()
 }
+
+// Calculate booking options (direct + rate plans)
+router.post('/calculate-options', async (req, res) => {
+  try {
+    const {
+      propertyId,
+      checkInDate,
+      checkOutDate,
+      guestCount = 1,
+      isHalfDay = false
+    } = req.body
+
+    if (!propertyId || !checkInDate || !checkOutDate) {
+      return res.status(400).json({ 
+        message: 'Property ID, check-in date, and check-out date are required' 
+      })
+    }
+
+    const options = await bookingCalculatorService.calculateBookingOptions({
+      propertyId,
+      checkInDate: new Date(checkInDate),
+      checkOutDate: new Date(checkOutDate),
+      guestCount,
+      isHalfDay
+    })
+
+    return res.json(options)
+  } catch (error: any) {
+    console.error('Error calculating booking options:', error)
+    return res.status(400).json({ message: error.message })
+  }
+})
 
 // Send OTP for email verification
 router.post('/send-otp', async (req, res) => {
@@ -85,14 +118,15 @@ router.post('/create', authenticate, async (req, res) => {
   try {
     const {
       propertyId,
-      ratePlanId,
+      ratePlanId, // Now optional
       checkInDate,
       checkOutDate,
       numGuests,
       guestName,
       guestEmail,
       specialRequests,
-      totalPrice
+      totalPrice,
+      isHalfDay = false
     } = req.body
 
     // Verify OTP was completed
@@ -119,26 +153,68 @@ router.post('/create', authenticate, async (req, res) => {
       })
     }
 
-    // Check rate plan exists
-    const ratePlan = await prisma.ratePlan.findUnique({
-      where: { id: ratePlanId },
-      include: { 
-        property: {
-          include: {
-            owner: true
+    let ratePlan = null
+    let property = null
+
+    if (ratePlanId) {
+      // Booking with rate plan
+      ratePlan = await prisma.ratePlan.findUnique({
+        where: { id: ratePlanId },
+        include: { 
+          property: {
+            include: {
+              owner: true
+            }
           }
         }
-      }
-    })
+      })
 
-    if (!ratePlan || ratePlan.propertyId !== propertyId) {
-      return res.status(400).json({ message: 'Invalid rate plan' })
+      if (!ratePlan || ratePlan.propertyId !== propertyId) {
+        return res.status(400).json({ message: 'Invalid rate plan' })
+      }
+
+      property = ratePlan.property
+    } else {
+      // Direct property booking (no rate plan)
+      property = await prisma.property.findUnique({
+        where: { propertyId },
+        include: {
+          owner: true
+        }
+      })
+
+      if (!property || property.status !== 'Live') {
+        return res.status(400).json({ message: 'Property not found or not available for booking' })
+      }
     }
 
-    // Create reservation
+    // Validate booking price using booking calculator
+    try {
+      const calculatedOption = await bookingCalculatorService.calculateBookingPrice({
+        propertyId,
+        checkInDate: new Date(checkInDate),
+        checkOutDate: new Date(checkOutDate),
+        guestCount: numGuests,
+        isHalfDay
+      }, ratePlanId)
+
+      const priceDifference = Math.abs(calculatedOption.totalPrice - parseFloat(totalPrice.toString()))
+      if (priceDifference > 0.01) { // Allow for small rounding differences
+        return res.status(400).json({ 
+          message: 'Price mismatch', 
+          expected: calculatedOption.totalPrice,
+          provided: parseFloat(totalPrice.toString())
+        })
+      }
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message })
+    }
+
+    // Create reservation (with optional rate plan)
     const reservation = await prisma.reservation.create({
       data: {
-        ratePlanId,
+        ratePlanId: ratePlanId || null, // Optional
+        propertyId, // Direct property reference
         guestId: guestUser.id,
         checkInDate: new Date(checkInDate),
         checkOutDate: new Date(checkOutDate),
@@ -156,6 +232,11 @@ router.post('/create', authenticate, async (req, res) => {
                 owner: true
               }
             }
+          }
+        },
+        property: {
+          include: {
+            owner: true
           }
         },
         guest: true
@@ -202,6 +283,11 @@ router.post('/payment', authenticate, async (req, res) => {
               }
             }
           },
+          property: {
+            include: {
+              owner: true
+            }
+          },
           guest: true
         }
       })
@@ -218,11 +304,12 @@ router.post('/payment', authenticate, async (req, res) => {
       }
 
       // Create availability blocks
+      const actualPropertyId = reservation.propertyId // Direct property reference
       for (const date of dates) {
         await prisma.availability.upsert({
           where: {
             propertyId_date: {
-              propertyId: reservation.ratePlan.propertyId,
+              propertyId: actualPropertyId,
               date: date
             }
           },
@@ -230,7 +317,7 @@ router.post('/payment', authenticate, async (req, res) => {
             isAvailable: false
           },
           create: {
-            propertyId: reservation.ratePlan.propertyId,
+            propertyId: actualPropertyId,
             date: date,
             isAvailable: false
           }
@@ -244,9 +331,9 @@ router.post('/payment', authenticate, async (req, res) => {
         await sendEmail(guestEmail)
         
         // Send owner notification email  
-        const property = reservation.ratePlan.property
-        if (property && property.owner && property.owner.email) {
-          const ownerEmail = generateOwnerNotificationEmail(property.owner.email, reservation)
+        const bookingProperty = reservation.ratePlan?.property || reservation.property
+        if (bookingProperty && bookingProperty.owner && bookingProperty.owner.email) {
+          const ownerEmail = generateOwnerNotificationEmail(bookingProperty.owner.email, reservation)
           await sendEmail(ownerEmail)
         }
         
@@ -255,7 +342,7 @@ router.post('/payment', authenticate, async (req, res) => {
         const adminNotification = generateOwnerNotificationEmail(adminEmail, reservation)
         await sendEmail({
           ...adminNotification,
-          subject: `[ADMIN] New Booking - ${reservation.ratePlan.property.name}`
+          subject: `[ADMIN] New Booking - ${bookingProperty.name}`
         })
       } catch (emailError) {
         console.error('Failed to send booking confirmation emails:', emailError)
@@ -296,27 +383,36 @@ router.get('/my-bookings', authenticate, async (req, res) => {
               }
             }
           }
+        },
+        property: {
+          include: {
+            address: true,
+            photos: true
+          }
         }
       },
       orderBy: { createdAt: 'desc' }
     })
 
     // Transform data for frontend
-    const bookings = reservations.map(reservation => ({
-      id: reservation.id,
-      propertyId: reservation.ratePlan.propertyId,
-      propertyName: reservation.ratePlan.property.name,
-      propertyLocation: reservation.ratePlan.property.address?.city || 'Location',
-      checkInDate: reservation.checkInDate.toISOString().split('T')[0],
-      checkOutDate: reservation.checkOutDate.toISOString().split('T')[0],
-      numGuests: reservation.numGuests,
-      totalPrice: reservation.totalPrice,
-      status: reservation.status,
-      paymentStatus: reservation.paymentStatus,
-      createdAt: reservation.createdAt,
-      ratePlanName: reservation.ratePlan.name,
-      specialRequests: reservation.guestRequests
-    }))
+    const bookings = reservations.map(reservation => {
+      const bookingProperty = reservation.ratePlan?.property || reservation.property
+      return {
+        id: reservation.id,
+        propertyId: reservation.propertyId,
+        propertyName: bookingProperty.name,
+        propertyLocation: bookingProperty.address?.city || 'Location',
+        checkInDate: reservation.checkInDate.toISOString().split('T')[0],
+        checkOutDate: reservation.checkOutDate.toISOString().split('T')[0],
+        numGuests: reservation.numGuests,
+        totalPrice: reservation.totalPrice,
+        status: reservation.status,
+        paymentStatus: reservation.paymentStatus,
+        createdAt: reservation.createdAt,
+        ratePlanName: reservation.ratePlan?.name || 'Standard Rate',
+        specialRequests: reservation.guestRequests
+      }
+    })
 
     return res.json(bookings)
   } catch (error) {
@@ -345,6 +441,11 @@ router.post('/:bookingId/cancel', authenticate, async (req, res) => {
                 owner: true
               }
             }
+          }
+        },
+        property: {
+          include: {
+            owner: true
           }
         },
         guest: true
@@ -377,7 +478,7 @@ router.post('/:bookingId/cancel', authenticate, async (req, res) => {
       await prisma.availability.upsert({
         where: {
           propertyId_date: {
-            propertyId: reservation.ratePlan.propertyId,
+            propertyId: reservation.propertyId,
             date: new Date(currentDate)
           }
         },
@@ -385,7 +486,7 @@ router.post('/:bookingId/cancel', authenticate, async (req, res) => {
           isAvailable: true
         },
         create: {
-          propertyId: reservation.ratePlan.propertyId,
+          propertyId: reservation.propertyId,
           date: new Date(currentDate),
           isAvailable: true
         }

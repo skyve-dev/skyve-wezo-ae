@@ -256,6 +256,7 @@ model Property {
   // Relations for Property Management
   availability Availability[] /// Calendar availability (supports date blocking)
   ratePlans    RatePlan[] /// Multiple rate plans for different traveler segments
+  reservations Reservation[] /// Direct property bookings (both with and without rate plans)
   reviews      Review[] /// Guest reviews and ratings
 }
 
@@ -484,8 +485,10 @@ model CancellationPolicy {
 /// Purpose: Core booking entity tracking all reservation details and lifecycle
 model Reservation {
   id         String   @id @default(uuid()) /// Unique identifier
-  ratePlanId String /// Foreign key to rate plan
-  ratePlan   RatePlan @relation(fields: [ratePlanId], references: [id]) /// Selected rate plan (property accessible via ratePlan.property)
+  ratePlanId String? /// Foreign key to rate plan (optional for direct property bookings)
+  ratePlan   RatePlan? @relation(fields: [ratePlanId], references: [id]) /// Selected rate plan (optional)
+  propertyId String /// Foreign key to property (direct access for bookings without rate plans)
+  property   Property @relation(fields: [propertyId], references: [propertyId]) /// Property being booked
   guestId    String /// Foreign key to guest user
   guest      User     @relation(fields: [guestId], references: [id]) /// Guest making the booking
 

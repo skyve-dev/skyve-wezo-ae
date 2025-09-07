@@ -98,7 +98,6 @@ describe('propertySlice', () => {
       checkOutUntil: '12:00'
     },
     photos: [],
-    photoIds: [], // New field
     bookingType: BookingType.BookInstantly,
     paymentType: PaymentType.Online,
     // New PropertyPricing field
@@ -356,7 +355,6 @@ describe('propertySlice', () => {
         partiesOrEventsAllowed: false,
         petsAllowed: PetPolicy.No,
         photos: [],
-        photoIds: [], // New field
         bookingType: BookingType.NeedToRequestBook,
         paymentType: PaymentType.Online,
         pricing: undefined, // New field - undefined for create mode

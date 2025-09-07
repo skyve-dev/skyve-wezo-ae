@@ -4,10 +4,11 @@ import { api } from '@/utils/api'
 interface BookingFormData {
   // Property and booking details
   propertyId: string
-  ratePlanId: string
+  ratePlanId?: string | null // Now optional for direct bookings
   checkInDate: string
   checkOutDate: string
   numGuests: number
+  isHalfDay?: boolean
   totalPrice: number
   pricePerNight: number
   
@@ -27,8 +28,36 @@ interface BookingFormData {
   paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
 }
 
+// Booking options from server
+interface BookingOptions {
+  propertyId: string
+  checkInDate: string
+  checkOutDate: string
+  nights: number
+  guestCount: number
+  isHalfDay: boolean
+  baseTotal: number
+  options: RatePlanOption[]
+}
+
+interface RatePlanOption {
+  ratePlan: any | null
+  name: string
+  description?: string
+  totalPrice: number
+  pricePerNight: number
+  savings: number
+  features?: any
+  cancellationPolicy?: any
+  priceBreakdown: any
+}
+
 interface BookingState {
   currentBooking: BookingFormData | null
+  bookingOptions: BookingOptions | null // Available booking options (direct + rate plans)
+  selectedRatePlanOption: RatePlanOption | null // Currently selected option
+  calculatingOptions: boolean // Loading state for options calculation
+  
   otpTimer: number
   isLoading: boolean
   isSaving: boolean
@@ -44,6 +73,9 @@ interface BookingState {
 
 const initialState: BookingState = {
   currentBooking: null,
+  bookingOptions: null,
+  selectedRatePlanOption: null,
+  calculatingOptions: false,
   otpTimer: 0,
   isLoading: false,
   isSaving: false,
@@ -54,14 +86,33 @@ const initialState: BookingState = {
 }
 
 // Async thunks
+export const calculateBookingOptions = createAsyncThunk(
+  'booking/calculateOptions',
+  async (criteria: {
+    propertyId: string
+    checkInDate: string
+    checkOutDate: string
+    guestCount?: number
+    isHalfDay?: boolean
+  }, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/api/booking/calculate-options', criteria)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to calculate booking options')
+    }
+  }
+)
+
 export const initializeBooking = createAsyncThunk(
   'booking/initialize',
   async (bookingData: {
     propertyId: string
-    ratePlanId: string
+    ratePlanId?: string | null
     checkInDate: string
     checkOutDate: string
     numGuests: number
+    isHalfDay?: boolean
     totalPrice: number
     pricePerNight: number
   }) => {
@@ -97,7 +148,11 @@ export const createBooking = createAsyncThunk(
   'booking/create',
   async (bookingData: Partial<BookingFormData>, { rejectWithValue }) => {
     try {
-      const response = await api.post('/api/booking/create', bookingData)
+      // Include isHalfDay in the booking data
+      const response = await api.post('/api/booking/create', {
+        ...bookingData,
+        isHalfDay: bookingData.isHalfDay || false
+      })
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create booking')
@@ -151,6 +206,19 @@ const bookingSlice = createSlice({
       }
     },
     
+    selectRatePlanOption: (state, action: PayloadAction<RatePlanOption>) => {
+      state.selectedRatePlanOption = action.payload
+      // Update current booking with selected option
+      if (state.currentBooking) {
+        state.currentBooking = {
+          ...state.currentBooking,
+          ratePlanId: action.payload.ratePlan?.id || null,
+          totalPrice: action.payload.totalPrice,
+          pricePerNight: action.payload.pricePerNight
+        }
+      }
+    },
+    
     setCurrentStep: (state, action: PayloadAction<BookingState['currentStep']>) => {
       state.currentStep = action.payload
     },
@@ -161,6 +229,8 @@ const bookingSlice = createSlice({
     
     clearBooking: (state) => {
       state.currentBooking = null
+      state.bookingOptions = null
+      state.selectedRatePlanOption = null
       state.currentStep = 'details'
       state.otpTimer = 0
       state.error = null
@@ -173,6 +243,24 @@ const bookingSlice = createSlice({
   
   extraReducers: (builder) => {
     builder
+      // Calculate booking options
+      .addCase(calculateBookingOptions.pending, (state) => {
+        state.calculatingOptions = true
+        state.error = null
+      })
+      .addCase(calculateBookingOptions.fulfilled, (state, action) => {
+        state.calculatingOptions = false
+        state.bookingOptions = action.payload as BookingOptions
+        // Auto-select the first option (cheapest)
+        if ((action.payload as BookingOptions).options.length > 0) {
+          state.selectedRatePlanOption = (action.payload as BookingOptions).options[0]
+        }
+      })
+      .addCase(calculateBookingOptions.rejected, (state, action) => {
+        state.calculatingOptions = false
+        state.error = action.payload as string
+      })
+      
       // Initialize booking
       .addCase(initializeBooking.fulfilled, (state, action) => {
         state.currentBooking = {
@@ -301,6 +389,7 @@ const bookingSlice = createSlice({
 
 export const { 
   updateBookingField, 
+  selectRatePlanOption,
   setCurrentStep, 
   setOtpTimer, 
   clearBooking, 

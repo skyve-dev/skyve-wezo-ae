@@ -5,10 +5,11 @@ import {fetchPropertyById, setSelectedRatePlan} from '@/store/slices/propertySli
 import {fetchPublicRatePlans} from '@/store/slices/ratePlanSlice'
 import {checkBookingAvailability} from '@/store/slices/availabilitySlice'
 import {fetchPublicPricingCalendar} from '@/store/slices/priceSlice'
+import {calculateBookingOptions, initializeBooking} from '@/store/slices/bookingSlice'
 import {Box} from '@/components/base/Box'
 import {Button} from '@/components/base/Button'
 import {PricingCalendar, ToggleButton} from '@/components'
-import RatePlanSelector from '@/components/RatePlanSelector'
+import BookingRatePlanSelector from '@/components/BookingRatePlanSelector'
 import NumberStepperInput from '@/components/base/NumberStepperInput'
 import SlidingDrawer from '@/components/base/SlidingDrawer'
 import {
@@ -57,6 +58,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
     const {currentRoleMode} = useAppSelector((state) => state.auth)
     const {ratePlans} = useAppSelector((state) => state.ratePlan)
     const {publicPricingCalendar, loading: pricingLoading} = useAppSelector((state) => state.price)
+    const {bookingOptions, selectedRatePlanOption, calculatingOptions} = useAppSelector((state: any) => state.booking)
 
     // Local state for booking widget
     const [bookingType, setBookingType] = useState<'half-day' | 'full-stay'>('full-stay')
@@ -113,27 +115,20 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         return { totalBasePrice, nights }
     }
 
-    // Calculate pricing based on selected rate plan
+    // Calculate pricing using the new booking system
     const calculatePricing = () => {
-        const { totalBasePrice, nights } = calculateBasePriceFromCalendar()
-        
-        if (!selectedRatePlan) {
+        if (selectedRatePlanOption) {
             return {
-                totalPrice: totalBasePrice,
-                pricePerNight: nights > 0 ? totalBasePrice / nights : 0
+                totalPrice: selectedRatePlanOption.totalPrice,
+                pricePerNight: selectedRatePlanOption.pricePerNight
             }
         }
-
-        let modifiedPrice = totalBasePrice
-        if (selectedRatePlan.priceModifierType === 'Percentage') {
-            modifiedPrice = totalBasePrice * (1 + selectedRatePlan.priceModifierValue / 100)
-        } else if (selectedRatePlan.priceModifierType === 'FixedAmount') {
-            modifiedPrice = totalBasePrice + (selectedRatePlan.priceModifierValue * nights)
-        }
-
+        
+        // Fallback to calendar-based pricing if no booking options yet
+        const { totalBasePrice, nights } = calculateBasePriceFromCalendar()
         return {
-            totalPrice: modifiedPrice,
-            pricePerNight: nights > 0 ? modifiedPrice / nights : 0
+            totalPrice: totalBasePrice,
+            pricePerNight: nights > 0 ? totalBasePrice / nights : 0
         }
     }
 
@@ -231,10 +226,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         }
     }
 
-    // Handle rate plan selection
-    const handleRatePlanChange = (ratePlan: any) => {
-        dispatch(setSelectedRatePlan(ratePlan))
-    }
+    // Rate plan selection is now handled by BookingRatePlanSelector internally
 
     // Fetch property data on mount
     useEffect(() => {
@@ -324,6 +316,26 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
         }
     }, [dateRange.startDate, dateRange.endDate, singleDate, bookingType, numGuests, selectedRatePlan, ratePlans, dispatch])
 
+    // Calculate booking options when dates/guests change (new booking system)
+    useEffect(() => {
+        const checkInDateObj = bookingType === 'half-day' ? singleDate : dateRange.startDate
+        const checkOutDateObj = bookingType === 'half-day' ? singleDate : dateRange.endDate
+        
+        const hasCompleteDates = bookingType === 'half-day'
+            ? checkInDateObj
+            : (checkInDateObj && checkOutDateObj)
+        
+        if (actualPropertyId && hasCompleteDates && numGuests) {
+            dispatch(calculateBookingOptions({
+                propertyId: actualPropertyId,
+                checkInDate: formatDateForAPI(checkInDateObj),
+                checkOutDate: formatDateForAPI(checkOutDateObj),
+                guestCount: numGuests,
+                isHalfDay: bookingType === 'half-day'
+            }))
+        }
+    }, [actualPropertyId, dateRange.startDate, dateRange.endDate, singleDate, bookingType, numGuests, dispatch])
+
     // Smart back navigation
     const handleBack = () => {
         if (canNavigateBack) {
@@ -356,14 +368,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
             return
         }
 
-        if (!selectedRatePlan) {
-            addToast('Please select a rate plan', { 
-                type: 'warning', 
-                autoHide: true, 
-                duration: 4000 
-            })
-            return
-        }
+        // Rate plan is now optional for direct property booking
 
         // Check availability first
         try {
@@ -383,7 +388,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                         checkInDate,
                         checkOutDate,
                         numGuests,
-                        ratePlanId: selectedRatePlan.id,
+                        ratePlanId: selectedRatePlanOption?.ratePlan?.id || null, // Optional for direct booking
                         totalPrice: selectedTotalPrice,
                         pricePerNight: selectedPricePerNight
                     })
@@ -958,19 +963,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                                 loading={pricingLoading}
                             />
                         </Box>
-                        {/* Rate Plan Selector */}
-                        <RatePlanSelector
-                            propertyId={actualPropertyId || ''}
-                            selectedRatePlan={selectedRatePlan}
-                            onRatePlanChange={handleRatePlanChange}
-                            bookingCriteria={{
-                                checkInDate: bookingType === 'half-day' ? singleDate : dateRange.startDate,
-                                checkOutDate: bookingType === 'half-day' ? singleDate : dateRange.endDate,
-                                guestCount: numGuests,
-                                isHalfDay: bookingType === 'half-day'
-                            }}
-                            basePrice={calculateBasePriceFromCalendar().totalBasePrice}
-                            propertyStatus={property.status}
+                        {/* Booking Rate Plan Selector */}
+                        <BookingRatePlanSelector
+                            loading={calculatingOptions}
                         />
 
                         <Box marginBottom="1.5rem">
@@ -1069,19 +1064,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                         />
                     </Box>
 
-                    {/* Rate Plan Selector */}
-                    <RatePlanSelector
-                        propertyId={actualPropertyId || ''}
-                        selectedRatePlan={selectedRatePlan}
-                        onRatePlanChange={handleRatePlanChange}
-                        bookingCriteria={{
-                            checkInDate: bookingType === 'half-day' ? singleDate : dateRange.startDate,
-                            checkOutDate: bookingType === 'half-day' ? singleDate : dateRange.endDate,
-                            guestCount: numGuests,
-                            isHalfDay: bookingType === 'half-day'
-                        }}
-                        basePrice={calculateBasePriceFromCalendar().totalBasePrice}
-                        propertyStatus={property.status}
+                    {/* Booking Rate Plan Selector */}
+                    <BookingRatePlanSelector
+                        loading={calculatingOptions}
                     />
 
                     <Box marginBottom="1.5rem">

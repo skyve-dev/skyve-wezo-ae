@@ -137,15 +137,12 @@ const RoleSlidingDrawer: React.FC<RoleSlidingDrawerProps> = ({
     }
 
     // Custom render function for role options
-    const renderRoleOption = (option: RoleOption, isSelected: boolean) => (
+    const renderRoleOption = (option: RoleOption, _isSelected: boolean) => (
         <Box
             display="flex"
             gap="1rem"
             justifyContent={'flex-start'}
             padding="1rem"
-            borderRadius="8px"
-            cursor="pointer"
-            transition="all 0.2s ease"
         >
             {/* Role Icon */}
             <Box flexShrink={0}>

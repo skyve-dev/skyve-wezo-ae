@@ -93,11 +93,6 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
         display="flex"
         gap="1rem"
         padding="1rem"
-        backgroundColor={isSelected ? '#f3f4f6' : 'transparent'}
-        borderRadius="8px"
-        cursor="pointer"
-        transition="all 0.2s"
-        whileHover={{ backgroundColor: '#f9fafb' }}
       >
         {/* Property Image */}
         {photoUrl ? (

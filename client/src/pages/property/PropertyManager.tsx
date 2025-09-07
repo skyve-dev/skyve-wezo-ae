@@ -2133,21 +2133,6 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 itemStyles={{paddingTop:'0.25rem',paddingBottom:'0.25rem'}}
                 renderItem={(amenity, isSelected) => (
                   <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
-                    <Box
-                      display="inline-flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      width="1.25rem"
-                      height="1.25rem"
-                      border={`2px solid ${isSelected ? '#3182ce' : '#d1d5db'}`}
-                      borderRadius="0.25rem"
-                      backgroundColor={isSelected ? '#3182ce' : 'transparent'}
-                      transition="all 0.2s"
-                    >
-                      {isSelected && (
-                        <IoIosCheckmarkCircle style={{color: 'white', fontSize: '0.75rem'}} />
-                      )}
-                    </Box>
                     <Box fontSize="1.5rem">{amenity.icon}</Box>
                     <Box flex="1">
                       <Box fontWeight="500" fontSize="1rem">{amenity.name}</Box>

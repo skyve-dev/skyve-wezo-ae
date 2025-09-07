@@ -10,19 +10,47 @@ export class FinancialService {
       propertyId?: string;
     }
   ): Promise<any> {
+    // Build where clause to handle both rate plan and direct bookings
     const whereClause: any = {
-      ratePlan: {
-        property: {
-          ownerId: userId,
+      OR: [
+        // Reservations with rate plans
+        {
+          ratePlan: {
+            property: {
+              ownerId: userId,
+            },
+          },
         },
-      },
+        // Direct property reservations
+        {
+          property: {
+            ownerId: userId,
+          },
+        },
+      ],
       status: {
         in: ['Confirmed', 'Completed'],
       },
     };
 
+    // Apply property filter to both scenarios
     if (filters.propertyId) {
-      whereClause.ratePlan.property.propertyId = filters.propertyId;
+      whereClause.OR = [
+        {
+          ratePlan: {
+            property: {
+              ownerId: userId,
+              propertyId: filters.propertyId,
+            },
+          },
+        },
+        {
+          property: {
+            ownerId: userId,
+            propertyId: filters.propertyId,
+          },
+        },
+      ];
     }
 
     if (filters.startDate || filters.endDate) {
@@ -50,6 +78,12 @@ export class FinancialService {
             },
           },
         },
+        property: {
+          select: {
+            propertyId: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -69,11 +103,14 @@ export class FinancialService {
     }, 0);
 
     const earningsByProperty = reservations.reduce((acc: any, reservation) => {
-      const propertyId = reservation.ratePlan.property.propertyId;
+      // Get property info from either rate plan or direct property
+      const property = reservation.ratePlan?.property || reservation.property;
+      const propertyId = property.propertyId;
+      
       if (!acc[propertyId]) {
         acc[propertyId] = {
           propertyId,
-          propertyName: reservation.ratePlan.property.name,
+          propertyName: property.name,
           totalEarnings: 0,
           totalCommission: 0,
           reservationCount: 0,
@@ -119,11 +156,22 @@ export class FinancialService {
 
     const reservations = await prisma.reservation.findMany({
       where: {
-        ratePlan: {
-          property: {
-            ownerId: userId,
+        OR: [
+          // Reservations with rate plans
+          {
+            ratePlan: {
+              property: {
+                ownerId: userId,
+              },
+            },
           },
-        },
+          // Direct property reservations
+          {
+            property: {
+              ownerId: userId,
+            },
+          },
+        ],
         checkInDate: {
           gte: startDate,
           lte: endDate,
@@ -143,6 +191,12 @@ export class FinancialService {
                 name: true,
               },
             },
+          },
+        },
+        property: {
+          select: {
+            propertyId: true,
+            name: true,
           },
         },
       },
@@ -172,10 +226,13 @@ export class FinancialService {
       statement.revenue.commission += commission;
       statement.revenue.net += net;
 
+      // Get property info from either rate plan or direct property
+      const property = reservation.ratePlan?.property || reservation.property;
+      
       statement.transactions.push({
         date: reservation.checkInDate,
         reservationId: reservation.id,
-        propertyName: reservation.ratePlan.property.name,
+        propertyName: property.name,
         amount: gross,
         commission,
         netAmount: net,

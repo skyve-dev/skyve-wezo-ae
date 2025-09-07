@@ -654,8 +654,8 @@ const propertySlice = createSlice({
     },
     
     // Form management actions (following RatePlanManager pattern)
-    initializeFormForCreate: (state, action: PayloadAction<{ propertyId?: string } | void>) => {
-      const propertyId = action.payload?.propertyId
+    initializeFormForCreate: (state, _action: PayloadAction<{ propertyId?: string } | void>) => {
+      // const _propertyId = _action.payload?.propertyId
       
       // Set draft mode
       state.draftMode = 'create'
