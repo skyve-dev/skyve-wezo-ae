@@ -172,6 +172,7 @@ export class PropertyService {
       amenities,
       services,
       rules,
+      photos,
       bookingType,
       paymentType,
       pricing, // Re-added pricing support for unified property management
@@ -316,6 +317,13 @@ export class PropertyService {
           })),
         };
       }
+    }
+
+    // Update photos if provided (using same mechanism as createProperty)
+    if (photos !== undefined) {
+      updateData.photos = photos ? {
+        connect: photos.filter((photo: any) => photo.id).map((photo: any) => ({ id: photo.id })),
+      } : { set: [] }; // Clear all photos if empty array is provided
     }
 
     // Pricing updates removed - now managed through rate plans

@@ -19,6 +19,8 @@ import {
   updateFormField,
   resetFormToOriginal,
   fetchPropertyById,
+  clearDraft,
+  acknowledgeDraftRestored,
   PropertyStatus
 } from '@/store/slices/propertySlice'
 import { ApiError } from '@/utils/api'
@@ -82,10 +84,11 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     currentForm,
     hasUnsavedChanges,
     formValidationErrors,
-    isSaving
+    isSaving,
+    hasDraftRestored
   } = useAppSelector((state) => state.property)
   
-  const { openDialog, navigateTo, mountHeader, mountFooter } = useAppShell()
+  const { openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard } = useAppShell()
   const [isLoading, setIsLoading] = useState(true)
   
   // Room management
@@ -107,6 +110,9 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   const [uploadSuccess, setUploadSuccess] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   
+  // All localStorage functionality is now handled in Redux
+  // Draft management is automatic through Redux actions
+  
   // Location management
   const [searchAddress, setSearchAddress] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -116,7 +122,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   // Services
   const [newLanguage, setNewLanguage] = useState('')
   
-  // Initialize form based on mode
+  // Initialize form based on mode (Redux now handles localStorage automatically)
   useEffect(() => {
     if (isCreateMode) {
       dispatch(initializeFormForCreate())
@@ -134,7 +140,46 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
       }
     }
   }, [isCreateMode, isEditMode, params.propertyId, properties, dispatch])
+  
+  // Show draft restoration notification
+  useEffect(() => {
+    if (hasDraftRestored) {
+      showSuccess('Draft restored from your previous session')
+      dispatch(acknowledgeDraftRestored())
+    }
+  }, [hasDraftRestored, dispatch, showSuccess])
 
+  // Navigation guard for unsaved changes
+  useEffect(() => {
+    if (!hasUnsavedChanges) return
+    
+    const cleanup = registerNavigationGuard(async () => {
+      const shouldLeave = await openDialog<boolean>((close) => (
+        <Box padding="2rem" textAlign="center">
+          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
+            Unsaved Changes
+          </Box>
+          <Box marginBottom="2rem">
+            You have unsaved changes. Are you sure you want to leave?
+          </Box>
+          <Box display="flex" gap="1rem" justifyContent="center">
+            <Button onClick={() => close(false)}>Stay</Button>
+            <Button onClick={() => close(true)} variant="promoted">Yes, Leave</Button>
+          </Box>
+        </Box>
+      ))
+      
+      if (shouldLeave) {
+        // Clear draft when leaving with unsaved changes
+        dispatch(clearDraft())
+      }
+      
+      return shouldLeave
+    })
+    
+    return cleanup
+  }, [hasUnsavedChanges, registerNavigationGuard, openDialog])
+  
   // Mount header and footer using AppShell (ENABLE IMMEDIATE SAVE/EDIT like RatePlanManager)
   useEffect(() => {
     const title = isCreateMode ? 'Create Property' : `Edit ${currentForm?.name || 'Property'}`
@@ -177,6 +222,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           data: currentForm 
         })).unwrap()
       }
+      
+      // Draft is automatically cleared by Redux after successful save
       
       // Wait for Redux state to update (hasUnsavedChanges = false)
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -221,6 +268,9 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
       if (shouldSaveAndLeave) {
         await handleSave()
         return
+      } else {
+        // User chose to leave without saving - clear draft
+        dispatch(clearDraft())
       }
     }
     navigateTo('properties', {})
@@ -228,6 +278,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   
   const handleDiscard = async () => {
     dispatch(resetFormToOriginal())
+    // Draft is automatically cleared by Redux when discarding
   }
   
   // Handle property status changes
@@ -255,6 +306,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   // Handle form field changes
   const handleFieldChange = (field: string, value: any) => {
     dispatch(updateFormField({ [field]: value }))
+    
+    // Auto-save is now handled automatically by Redux
   }
   
   // Handle address changes
@@ -487,16 +540,11 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     try {
       // Use independent photo upload API
       const response = await api.post('/api/photos/upload', formData, {})
-      const uploadedPhotos = (response as any).data?.photos || []
       
-      // Store photo IDs in the form
-      const currentPhotoIds = currentForm?.photoIds || []
-      const newPhotoIds = uploadedPhotos.map((photo: any) => photo.id)
-      const updatedPhotoIds = [...currentPhotoIds, ...newPhotoIds]
+      // API client returns data directly, not wrapped in response.data
+      const uploadedPhotos = (response as any).photos || []
       
-      handleFieldChange('photoIds', updatedPhotoIds)
-      
-      // Also update the photos array for immediate display
+      // Update the photos array for immediate display
       const currentPhotos = currentForm?.photos || []
       const newPhotos = uploadedPhotos.map((photo: any) => ({
         id: photo.id,
@@ -546,11 +594,6 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     try {
       // Use independent photo delete API
       await api.delete(`/api/photos/${photoId}`)
-      
-      // Remove photo ID from photoIds array
-      const currentPhotoIds = currentForm?.photoIds || []
-      const updatedPhotoIds = currentPhotoIds.filter(id => id !== photoId)
-      handleFieldChange('photoIds', updatedPhotoIds)
       
       // Remove photo from photos array for immediate UI update
       const currentPhotos = currentForm?.photos || []

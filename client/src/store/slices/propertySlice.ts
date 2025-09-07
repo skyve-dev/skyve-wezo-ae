@@ -12,6 +12,87 @@ export enum PropertyStatus {
 }
 
 const WIZARD_STORAGE_KEY = 'property-wizard-data'
+const DRAFT_STORAGE_PREFIX = 'property-draft-'
+
+// LocalStorage keys for PropertyManager drafts
+const getDraftStorageKey = (mode: 'create' | 'edit', propertyId?: string): string => {
+  if (mode === 'create') return `${DRAFT_STORAGE_PREFIX}new`
+  if (mode === 'edit' && propertyId) return `${DRAFT_STORAGE_PREFIX}${propertyId}`
+  throw new Error('PropertyId required for edit mode')
+}
+
+// Save PropertyManager draft to localStorage
+const saveDraftToStorage = (data: Property, mode: 'create' | 'edit', propertyId?: string) => {
+  try {
+    const key = getDraftStorageKey(mode, propertyId)
+    const draftData = {
+      data,
+      timestamp: new Date().toISOString(),
+      mode,
+      propertyId: propertyId || null
+    }
+    localStorage.setItem(key, JSON.stringify(draftData))
+  } catch (error) {
+    console.error('Failed to save draft to localStorage:', error)
+  }
+}
+
+// Load PropertyManager draft from localStorage
+const loadDraftFromStorage = (mode: 'create' | 'edit', propertyId?: string): Property | null => {
+  try {
+    const key = getDraftStorageKey(mode, propertyId)
+    const stored = localStorage.getItem(key)
+    if (stored) {
+      const { data, timestamp, mode: storedMode, propertyId: storedPropertyId } = JSON.parse(stored)
+      
+      // Verify mode and property match
+      if (storedMode === mode && (mode === 'create' || storedPropertyId === propertyId)) {
+        // Check if data is not too old (24 hours)
+        const age = Date.now() - new Date(timestamp).getTime()
+        const maxAge = 24 * 60 * 60 * 1000 // 24 hours
+        
+        if (age < maxAge) {
+          return data
+        } else {
+          // Clear old draft
+          clearDraftFromStorage(mode, propertyId)
+        }
+      } else {
+        // Clear mismatched draft
+        clearDraftFromStorage(mode, propertyId)
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load draft from localStorage:', error)
+    clearDraftFromStorage(mode, propertyId)
+  }
+  return null
+}
+
+// Clear PropertyManager draft from localStorage
+const clearDraftFromStorage = (mode: 'create' | 'edit', propertyId?: string) => {
+  try {
+    const key = getDraftStorageKey(mode, propertyId)
+    localStorage.removeItem(key)
+  } catch (error) {
+    console.error('Failed to clear draft from localStorage:', error)
+  }
+}
+
+// Clear all other property drafts (for property switching)
+const clearOtherDrafts = (currentMode: 'create' | 'edit', currentPropertyId?: string) => {
+  try {
+    const currentKey = getDraftStorageKey(currentMode, currentPropertyId)
+    const keys = Object.keys(localStorage)
+    keys.forEach(key => {
+      if (key.startsWith(DRAFT_STORAGE_PREFIX) && key !== currentKey) {
+        localStorage.removeItem(key)
+      }
+    })
+  } catch (error) {
+    console.error('Failed to clear other drafts:', error)
+  }
+}
 
 // Debug utility to help identify data structure mismatches
 const debugServerDataStructure = (_serverData: any, _context: string = '') => {
@@ -30,6 +111,11 @@ const initialState: PropertyState = {
   hasUnsavedChanges: false,
   formValidationErrors: {},
   isSaving: false,
+  
+  // Draft management state
+  draftMode: null, // 'create' | 'edit' | null
+  draftPropertyId: null, // propertyId for edit mode
+  hasDraftRestored: false, // flag to show draft restoration notification
   
   // Rate plan selection for PropertyDetail page
   selectedRatePlan: null,
@@ -94,14 +180,8 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
       partiesOrEventsAllowed: data.partiesOrEventsAllowed || false,
       petsAllowed: data.petsAllowed || 'No',
     },
-    // Filter out blob URLs from photos and ensure proper structure
-    photos: (data.photos || []).map(photo => ({
-      id: photo.id, // Include photo ID for server-side linking
-      url: photo.url.startsWith('blob:') ? '' : photo.url, // Skip blob URLs
-      altText: photo.altText || '',
-      description: photo.description || '',
-      tags: photo.tags || []
-    })).filter(photo => photo.url && photo.id), // Only include photos with valid URLs and IDs
+    // Photos are already uploaded server objects with valid IDs and URLs
+    photos: data.photos || [],
     bookingType: data.bookingType || 'NeedToRequestBook',
     paymentType: data.paymentType || 'Online',
     aboutTheProperty: data.aboutTheProperty || '',
@@ -146,10 +226,6 @@ const transformPropertyDataForServer = (data: WizardFormData) => {
     transformedData.pricing = data.pricing
   }
 
-  // Handle photoIds for independent photo upload
-  if (data.photoIds && data.photoIds.length > 0) {
-    transformedData.photoIds = data.photoIds
-  }
 
   return transformedData
 }
@@ -192,8 +268,6 @@ const transformServerPropertyData = (serverData: any): Property => {
     paymentType: serverData.paymentType,
     // PropertyPricing data (new weekly pricing setup)
     pricing: serverData.pricing,
-    // Photo IDs for independent photo upload
-    photoIds: serverData.photoIds || [],
     // New relationships from schema
     ratePlans: serverData.ratePlans || [],  // Associated rate plans
     propertyGroupId: serverData.propertyGroupId, // Optional property group
@@ -580,7 +654,15 @@ const propertySlice = createSlice({
     },
     
     // Form management actions (following RatePlanManager pattern)
-    initializeFormForCreate: (state) => {
+    initializeFormForCreate: (state, action: PayloadAction<{ propertyId?: string } | void>) => {
+      const propertyId = action.payload?.propertyId
+      
+      // Set draft mode
+      state.draftMode = 'create'
+      state.draftPropertyId = null
+      
+      // Clear other drafts when switching to create mode
+      clearOtherDrafts('create')
       state.currentForm = {
         status: PropertyStatus.Draft,
         name: '',
@@ -624,16 +706,29 @@ const propertySlice = createSlice({
           halfDayPriceSunday: 130,
           currency: 'AED' as any
         },
-        // Photo IDs for independent photo upload
-        photoIds: []
       } as Property
       state.originalForm = { ...state.currentForm }
       state.hasUnsavedChanges = false
       state.formValidationErrors = {}
+      
+      // Try to restore draft from localStorage
+      const restoredDraft = loadDraftFromStorage('create')
+      if (restoredDraft) {
+        state.currentForm = restoredDraft
+        state.hasUnsavedChanges = true
+        state.hasDraftRestored = true
+      }
     },
     
     initializeFormForEdit: (state, action: PayloadAction<Property>) => {
       const property = action.payload
+      
+      // Set draft mode
+      state.draftMode = 'edit'
+      state.draftPropertyId = property.propertyId!
+      
+      // Clear other drafts when switching to this property
+      clearOtherDrafts('edit', property.propertyId!)
       
       // Ensure pricing defaults exist
       const defaultPricing = {
@@ -656,12 +751,19 @@ const propertySlice = createSlice({
       
       state.currentForm = {
         ...property,
-        pricing: property.pricing || defaultPricing,
-        photoIds: property.photoIds || []
+        pricing: property.pricing || defaultPricing
       }
       state.originalForm = { ...state.currentForm }
       state.hasUnsavedChanges = false
       state.formValidationErrors = {}
+      
+      // Try to restore draft from localStorage
+      const restoredDraft = loadDraftFromStorage('edit', property.propertyId!)
+      if (restoredDraft) {
+        state.currentForm = restoredDraft
+        state.hasUnsavedChanges = true
+        state.hasDraftRestored = true
+      }
     },
     
     updateFormField: (state, action: PayloadAction<Partial<Property>>) => {
@@ -669,6 +771,11 @@ const propertySlice = createSlice({
         state.currentForm = { ...state.currentForm, ...action.payload }
         // Detect changes
         state.hasUnsavedChanges = JSON.stringify(state.currentForm) !== JSON.stringify(state.originalForm)
+        
+        // Auto-save to localStorage
+        if (state.draftMode && state.hasUnsavedChanges) {
+          saveDraftToStorage(state.currentForm, state.draftMode, state.draftPropertyId || undefined)
+        }
       }
     },
     
@@ -677,18 +784,43 @@ const propertySlice = createSlice({
         state.currentForm = { ...state.originalForm }
         state.hasUnsavedChanges = false
         state.formValidationErrors = {}
+        
+        // Clear draft from localStorage when discarding changes
+        if (state.draftMode) {
+          clearDraftFromStorage(state.draftMode, state.draftPropertyId || undefined)
+        }
       }
     },
     
     clearForm: (state) => {
+      // Clear draft from localStorage before clearing form
+      if (state.draftMode) {
+        clearDraftFromStorage(state.draftMode, state.draftPropertyId || undefined)
+      }
+      
       state.currentForm = null
       state.originalForm = null
       state.hasUnsavedChanges = false
       state.formValidationErrors = {}
+      state.draftMode = null
+      state.draftPropertyId = null
+      state.hasDraftRestored = false
     },
     
     setFormValidationErrors: (state, action: PayloadAction<Record<string, string>>) => {
       state.formValidationErrors = action.payload
+    },
+    
+    // Draft management actions
+    clearDraft: (state) => {
+      if (state.draftMode) {
+        clearDraftFromStorage(state.draftMode, state.draftPropertyId || undefined)
+      }
+      state.hasDraftRestored = false
+    },
+    
+    acknowledgeDraftRestored: (state) => {
+      state.hasDraftRestored = false
     }
   },
   extraReducers: (builder) => {
@@ -919,6 +1051,13 @@ const propertySlice = createSlice({
         state.hasUnsavedChanges = false
         state.formValidationErrors = {}
         state.error = null
+        
+        // Clear draft from localStorage after successful save
+        if (state.draftMode) {
+          clearDraftFromStorage(state.draftMode, state.draftPropertyId || undefined)
+          state.draftMode = null
+          state.draftPropertyId = null
+        }
       })
       .addCase(createPropertyWithPromotion.rejected, (state, action) => {
         state.isSaving = false
@@ -944,6 +1083,13 @@ const propertySlice = createSlice({
         state.hasUnsavedChanges = false
         state.formValidationErrors = {}
         state.error = null
+        
+        // Clear draft from localStorage after successful save
+        if (state.draftMode) {
+          clearDraftFromStorage(state.draftMode, state.draftPropertyId || undefined)
+          state.draftMode = null
+          state.draftPropertyId = null
+        }
       })
       .addCase(updatePropertyAsync.rejected, (state, action) => {
         state.isSaving = false
@@ -998,7 +1144,10 @@ export const {
   updateFormField,
   resetFormToOriginal,
   clearForm,
-  setFormValidationErrors
+  setFormValidationErrors,
+  // Draft management actions
+  clearDraft,
+  acknowledgeDraftRestored
 } = propertySlice.actions
 
 // New async thunks are exported above in their declarations

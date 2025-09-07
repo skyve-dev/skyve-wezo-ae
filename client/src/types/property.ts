@@ -155,8 +155,6 @@ export interface Property {
   // New PropertyPricing relationship
   pricing?: PropertyPricing // Weekly pricing setup
   
-  // Photo IDs for independent photo upload
-  photoIds?: string[] // Store uploaded photo IDs before property creation
   
   // New relationships from updated schema
   ratePlans?: any[] // Associated rate plans
@@ -210,6 +208,11 @@ export interface PropertyState {
   hasUnsavedChanges: boolean
   formValidationErrors: Record<string, string>
   isSaving: boolean
+  
+  // Draft management state
+  draftMode: 'create' | 'edit' | null
+  draftPropertyId: string | null
+  hasDraftRestored: boolean
   
   // Rate plan selection for PropertyDetail page
   selectedRatePlan: any | null // Import RatePlan type when available
