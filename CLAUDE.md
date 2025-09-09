@@ -120,7 +120,14 @@ When building UI features:
 1. **Reuse existing components** - Always use components from `src/components/base` instead of creating new ones
 2. **Understand before using** - Fully understand how existing components work before implementation
 3. **Avoid creativity** - Stick to established patterns and component APIs, don't introduce new patterns
-4. **Use react-icons** - Always use icons from `react-icons` library that are relevant to the functionality
+4. **Use IoIos icons ONLY** - CRITICAL: Always use `IoIos` icons from `react-icons/io5`, NEVER use `Fa` icons from `react-icons/fa`
+   ```typescript
+   // ✅ CORRECT - Always use IoIos icons
+   import { IoHome, IoSettings, IoAdd, IoTrash, IoEdit } from 'react-icons/io5'
+   
+   // ❌ WRONG - Never use Fa icons
+   import { FaHome, FaSettings, FaPlus, FaTrash, FaEdit } from 'react-icons/fa'
+   ```
 5. **Maintain consistency** - Follow the existing UI patterns and styling approaches in the codebase
 
 This ensures UI consistency and maintainability across the application.

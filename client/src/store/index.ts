@@ -12,6 +12,7 @@ import ratePlanReducer from './slices/ratePlanSlice'
 import priceReducer from './slices/priceSlice'
 import errorReducer from './slices/errorSlice'
 import bookingReducer from './slices/bookingSlice'
+import bookingDetailsReducer from './slices/bookingDetailsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -27,6 +28,7 @@ export const store = configureStore({
     price: priceReducer,
     error: errorReducer,
     booking: bookingReducer,
+    bookingDetails: bookingDetailsReducer,
   },
 })
 

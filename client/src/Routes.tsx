@@ -42,6 +42,7 @@ import RatePlanManager from "@/pages/revenue/RatePlanManager";
 import BookingConfirmation from "@/pages/booking/BookingConfirmation";
 import BookingPayment from "@/pages/booking/BookingPayment";
 import MyBookings from "@/pages/booking/MyBookings";
+import BookingDetails from "@/pages/booking/BookingDetails";
 
 export const routes = createRoutes({
     home: {
@@ -223,6 +224,15 @@ export const routes = createRoutes({
         showInHeader: false,
         showInFooter: true,
         roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view their bookings
+    },
+    'booking-details': {
+        component: ({ id }: { id: string }) => <BookingDetails bookingId={id} />,
+        icon: <FaHistory />,
+        label: 'Booking Details',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view booking details
     }
 })
 

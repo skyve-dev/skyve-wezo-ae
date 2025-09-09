@@ -686,8 +686,11 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                     >
                         <Box 
                             height="100%"
+                            display={'flex'}
+                            alignItems={'center'}
+                            justifyContent={'center'}
+                            background={'white'}
                             overflow="auto"
-                            backgroundColor="white"
                             borderRadius="0 0 0 0"
                             boxShadow="0 -10px 40px rgba(0, 0, 0, 0.15)"
                         >
