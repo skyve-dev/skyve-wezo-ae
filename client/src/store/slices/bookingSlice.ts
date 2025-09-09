@@ -335,7 +335,8 @@ const bookingSlice = createSlice({
           state.currentBooking.otpVerified = true
           
           // Store booking ID from the server response
-          const response = action.payload?.data
+          // Handle both response.data and direct response structure
+          const response = (action.payload as any)?.data || (action.payload as any)
           if (response?.bookingId) {
             state.currentBooking.bookingId = response.bookingId
             state.currentBooking.bookingExpiresAt = response.bookingExpiresAt
@@ -343,15 +344,15 @@ const bookingSlice = createSlice({
         }
         
         // Store user data if account was auto-created
-        const response = action.payload?.data
+        // Handle both response.data and direct response structure
+        const response = (action.payload as any)?.data || (action.payload as any)
         if (response?.user && response?.token) {
           // Store token in localStorage for auto-login
           localStorage.setItem('authToken', response.token)
           localStorage.setItem('user', JSON.stringify(response.user))
           
-
           if (response.autoCreated) {
-
+            console.log('✅ User auto-created and logged in:', response.user.email)
           }
           
           // Set flag to trigger auth update (will be handled by extraReducers)

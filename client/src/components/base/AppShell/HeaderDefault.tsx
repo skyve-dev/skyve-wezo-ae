@@ -2,11 +2,10 @@ import React, { useState } from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import Tab, {TabItem} from '../Tab'
-import {IoIosMenu, IoIosLogIn, IoIosPersonAdd, IoIosPerson, IoIosLogOut} from 'react-icons/io'
+import {IoIosMenu, IoIosLogIn, IoIosPersonAdd, IoIosPerson} from 'react-icons/io'
 import {BaseRoute} from './types'
 import { filterRoutesByRole } from './roleUtils'
-import RoleToggleButton from '../RoleToggleButton'
-import RoleSlidingDrawer from '../RoleSlidingDrawer'
+import AccountMenuDrawer from '../AccountMenuDrawer'
 import wezoAe from "../../../assets/wezo-optimized.svg"
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '../../../store'
@@ -20,7 +19,6 @@ interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     isMobile: boolean
     currentRole: 'Tenant' | 'HomeOwner' | 'Manager' | null
     isAuthenticated: boolean
-    openDialog: <T>(content: (close: (result: T) => void) => React.ReactNode) => Promise<T>
     headerConfig?: {
         title?: string
         logo?: React.ReactNode
@@ -42,12 +40,11 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                                                                        isMobile,
                                                                        currentRole,
                                                                        isAuthenticated,
-                                                                       openDialog,
                                                                        theme
                                                                    }: HeaderDefaultProps<T>) => {
     
-    // State for role switching drawer
-    const [isRoleDrawerOpen, setIsRoleDrawerOpen] = useState(false)
+    // State for account menu drawer
+    const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
     const dispatch = useDispatch<AppDispatch>()
     
     // Get available roles from Redux
@@ -55,7 +52,6 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
     // Handle role switching (client-side only)
     const handleRoleSelect = (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
         dispatch(switchUserRole(role))
-        setIsRoleDrawerOpen(false)
     }
 
     // Authentication navigation handlers
@@ -71,69 +67,13 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
         dispatch(logout())
     }
 
-    const handleUserMenu = async () => {
-        await openDialog((close) => (
-            <Box padding="2rem" backgroundColor="white" borderRadius="8px" minWidth="300px">
-                <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1.5rem" textAlign="center">
-                    Account Menu
-                </Box>
-                
-                {/* User info */}
-                <Box marginBottom="2rem" padding="1rem" backgroundColor="#f8f9fa" borderRadius="8px">
-                    <Box fontSize="0.875rem" color="#666" marginBottom="0.25rem">Welcome back</Box>
-                    <Box fontSize="1rem" fontWeight="600">Admin User</Box>
-                    <Box fontSize="0.875rem" color="#666">admin@wezo.ae</Box>
-                    <Box fontSize="0.875rem" color="#059669" fontWeight="500" marginTop="0.5rem">
-                        Current Role: {currentRole}
-                    </Box>
-                </Box>
+    // Navigation handlers for account menu
+    const handleNavigateToProperties = () => {
+        navigateTo('properties' as keyof T, {})
+    }
 
-                {/* Menu options */}
-                <Box display="flex" flexDirection="column" gap="0.5rem" marginBottom="1.5rem">
-                    <Button
-                        label="My Properties"
-                        onClick={() => {
-                            close(null)
-                            navigateTo('properties', {})
-                        }}
-                        variant="normal"
-                        size="small"
-                        style={{ justifyContent: 'flex-start' }}
-                    />
-                    <Button
-                        label="My Bookings"
-                        onClick={() => {
-                            close(null)
-                            navigateTo('my-bookings', {})
-                        }}
-                        variant="normal"
-                        size="small"
-                        style={{ justifyContent: 'flex-start' }}
-                    />
-                </Box>
-
-                {/* Actions */}
-                <Box display="flex" gap="0.5rem" justifyContent="center">
-                    <Button
-                        label="Logout"
-                        icon={<IoIosLogOut/>}
-                        onClick={() => {
-                            close(null)
-                            handleLogout()
-                        }}
-                        variant="normal"
-                        size="small"
-                        style={{ color: '#dc2626' }}
-                    />
-                    <Button
-                        label="Close"
-                        onClick={() => close(null)}
-                        variant="normal"
-                        size="small"
-                    />
-                </Box>
-            </Box>
-        ))
+    const handleNavigateToBookings = () => {
+        navigateTo('my-bookings' as keyof T, {})
     }
 
     // Filter routes based on current user role
@@ -221,29 +161,18 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                         />
                     </>
                 ) : (
-                    // Authenticated user: Show user menu and role toggle
-                    <>
-                        {/* Role Toggle Button - only show for users with multiple roles */}
-                        {currentRole && availableRoles.length > 1 && (
-                            <RoleToggleButton
-                                currentRole={currentRole}
-                                onClick={() => setIsRoleDrawerOpen(true)}
-                            />
-                        )}
-                        
-                        {/* User menu button */}
-                        <Button
-                            label=""
-                            icon={<IoIosPerson/>}
-                            onClick={handleUserMenu}
-                            variant="plain"
-                            size="small"
-                            style={{
-                                color: 'white'
-                            }}
-                            title="User Menu"
-                        />
-                    </>
+                    // Authenticated user: Show unified account menu
+                    <Button
+                        label=""
+                        icon={<IoIosPerson/>}
+                        onClick={() => setIsAccountMenuOpen(true)}
+                        variant="plain"
+                        size="small"
+                        style={{
+                            color: 'white'
+                        }}
+                        title="Account Menu"
+                    />
                 )}
 
                 {/* Menu Button */}
@@ -267,10 +196,10 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                 />
             </Box>
 
-            {/* Role Switching Drawer */}
-            <RoleSlidingDrawer
-                isOpen={isRoleDrawerOpen}
-                onClose={() => setIsRoleDrawerOpen(false)}
+            {/* Unified Account Menu Drawer */}
+            <AccountMenuDrawer
+                isOpen={isAccountMenuOpen}
+                onClose={() => setIsAccountMenuOpen(false)}
                 userInfo={{
                     firstName: 'Admin',
                     lastName: 'User', 
@@ -279,6 +208,9 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
                 }}
                 availableRoles={availableRoles}
                 onRoleSelect={handleRoleSelect}
+                onNavigateToProperties={handleNavigateToProperties}
+                onNavigateToBookings={handleNavigateToBookings}
+                onLogout={handleLogout}
             />
         </Box>
     )

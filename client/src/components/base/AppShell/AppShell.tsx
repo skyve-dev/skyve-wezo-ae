@@ -548,7 +548,6 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                                 isMobile={isMobile}
                                 currentRole={currentRole}
                                 isAuthenticated={isAuthenticated}
-                                openDialog={openDialog}
                                 theme={{
                                     primaryColor: theme.primaryColor || '#D52122',
                                     backgroundColor: theme.backgroundColor || '#FAFAFA',
