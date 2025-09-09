@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@/components/base/Box';
 import { Button } from '@/components/base/Button';
+import { resolvePhotoUrl } from '@/utils/api';
 import { 
   IoBusiness,
   IoLocation,
@@ -80,14 +81,14 @@ const PropertyInformation: React.FC<PropertyInformationProps> = ({ booking, user
             overflow="hidden"
           >
             <Box
-              backgroundImage={`url(${property.photos[0]?.url || property.photos[0]})`}
+              backgroundImage={`url(${resolvePhotoUrl(property.photos[0]?.url || property.photos[0])})`}
               backgroundSize="cover"
               backgroundPosition="center"
               borderRadius="8px"
             />
             {property.photos[1] && (
               <Box
-                backgroundImage={`url(${property.photos[1]?.url || property.photos[1]})`}
+                backgroundImage={`url(${resolvePhotoUrl(property.photos[1]?.url || property.photos[1])})`}
                 backgroundSize="cover"
                 backgroundPosition="center"
                 borderRadius="8px"
@@ -95,7 +96,7 @@ const PropertyInformation: React.FC<PropertyInformationProps> = ({ booking, user
             )}
             {property.photos[2] && (
               <Box
-                backgroundImage={`url(${property.photos[2]?.url || property.photos[2]})`}
+                backgroundImage={`url(${resolvePhotoUrl(property.photos[2]?.url || property.photos[2])})`}
                 backgroundSize="cover"
                 backgroundPosition="center"
                 borderRadius="8px"

@@ -15,6 +15,7 @@ import { fetchPropertyById } from '@/store/slices/propertySlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
 import { Input } from '@/components/base/Input'
+import { resolvePhotoUrl } from '@/utils/api'
 import { 
   IoArrowBack,
   IoCheckmarkCircle,
@@ -272,7 +273,7 @@ const BookingConfirmation: React.FC = () => {
                   height="60px"
                   backgroundColor="#e5e7eb"
                   borderRadius="8px"
-                  backgroundImage={`url(${currentProperty.photos[0].url})`}
+                  backgroundImage={`url(${resolvePhotoUrl(currentProperty.photos[0].url)})`}
                   backgroundSize="cover"
                   backgroundPosition="center"
                 />

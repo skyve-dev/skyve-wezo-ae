@@ -5,6 +5,7 @@ import { processPayment, clearError } from '@/store/slices/bookingSlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
 import { ToggleButton } from '@/components'
+import { resolvePhotoUrl } from '@/utils/api'
 import { 
   IoArrowBack,
   IoCard,
@@ -282,7 +283,7 @@ const BookingPayment: React.FC = () => {
                   height="60px"
                   backgroundColor="#e5e7eb"
                   borderRadius="8px"
-                  backgroundImage={`url(${currentProperty.photos[0].url})`}
+                  backgroundImage={`url(${resolvePhotoUrl(currentProperty.photos[0].url)})`}
                   backgroundSize="cover"
                   backgroundPosition="center"
                 />

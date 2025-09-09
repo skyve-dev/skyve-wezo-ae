@@ -15,6 +15,7 @@ import BookingDetailsHeader from '@/components/booking/BookingDetailsHeader';
 import BookingOverview from '@/components/booking/BookingOverview';
 import GuestInformation from '@/components/booking/GuestInformation';
 import PropertyInformation from '@/components/booking/PropertyInformation';
+import RatePlanInformation from '@/components/booking/RatePlanInformation';
 import MessagingSection from '@/components/booking/MessagingSection';
 import FeeBreakdownSection from '@/components/booking/FeeBreakdownSection';
 import AuditTrailSection from '@/components/booking/AuditTrailSection';
@@ -222,6 +223,12 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ bookingId }) => {
             
             {/* Property Information */}
             <PropertyInformation 
+              booking={currentBooking}
+              userRole={userRole}
+            />
+            
+            {/* Rate Plan Information - Show if booking has rate plan */}
+            <RatePlanInformation 
               booking={currentBooking}
               userRole={userRole}
             />

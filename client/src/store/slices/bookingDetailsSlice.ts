@@ -40,6 +40,26 @@ interface BookingDetails {
     id: string;
     name: string;
     description?: string;
+    modifierType?: string;
+    modifierValue?: number;
+    minStayNights?: number;
+    maxStayNights?: number;
+    minAdvanceBooking?: number;
+    requiresDeposit?: boolean;
+    cancellationPolicy?: {
+      type: string;
+      description?: string;
+    };
+    features?: {
+      includesBreakfast?: boolean;
+      includesParking?: boolean;
+      includedAmenityIds?: string[];
+    };
+    amenities?: Array<{
+      id: string;
+      name: string;
+      category?: string;
+    }>;
   };
 }
 

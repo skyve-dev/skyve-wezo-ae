@@ -959,11 +959,8 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                                 loading={pricingLoading}
                             />
                         </Box>
-                        {/* Booking Rate Plan Selector */}
-                        <BookingRatePlanSelector
-                            loading={calculatingOptions}
-                        />
-
+                        
+                        {/* Guest Count Selector */}
                         <Box marginBottom="1.5rem">
                             <NumberStepperInput
                                 label="Guests"
@@ -976,6 +973,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                                 required
                             />
                         </Box>
+
+                        {/* Booking Rate Plan Selector */}
+                        <BookingRatePlanSelector
+                            loading={calculatingOptions}
+                        />
 
                         <Button
                             label="Book Now"
@@ -1060,11 +1062,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                         />
                     </Box>
 
-                    {/* Booking Rate Plan Selector */}
-                    <BookingRatePlanSelector
-                        loading={calculatingOptions}
-                    />
-
+                    {/* Guest Count Selector */}
                     <Box marginBottom="1.5rem">
                         <NumberStepperInput
                             label="Guests"
@@ -1077,6 +1075,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
                             required
                         />
                     </Box>
+
+                    {/* Booking Rate Plan Selector */}
+                    <BookingRatePlanSelector
+                        loading={calculatingOptions}
+                    />
 
                     {/* Price Summary */}
                     {selectedTotalPrice > 0 && (

@@ -4,7 +4,23 @@ import SelectionPicker from '@/components/base/SelectionPicker'
 import Tab from '@/components/base/Tab'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRatePlanOption } from '@/store/slices/bookingSlice'
-import { IoIosCheckmark, IoIosPricetag, IoIosInformationCircle } from 'react-icons/io'
+import { 
+  IoIosCheckmark, 
+  IoIosPricetag, 
+  IoIosInformationCircle, 
+  IoIosClose,
+  IoIosTime,
+  IoIosHome,
+  IoIosRestaurant,
+  IoIosCar,
+  IoIosWifi,
+  IoIosWater,
+  IoIosFitness,
+  IoIosCalendar,
+  IoIosClock,
+  IoIosCard,
+  IoIosWarning
+} from 'react-icons/io'
 
 interface BookingRatePlanSelectorProps {
   loading?: boolean
@@ -40,6 +56,17 @@ const BookingRatePlanSelector: React.FC<BookingRatePlanSelectorProps> = ({
     }
   }
 
+  // Helper function to get amenity icon
+  const getAmenityIcon = (amenityName: string) => {
+    const name = amenityName.toLowerCase()
+    if (name.includes('wifi') || name.includes('internet')) return <IoIosWifi size={14} color="#059669" />
+    if (name.includes('parking')) return <IoIosCar size={14} color="#059669" />
+    if (name.includes('pool') || name.includes('swimming')) return <IoIosWater size={14} color="#059669" />
+    if (name.includes('gym') || name.includes('fitness')) return <IoIosFitness size={14} color="#059669" />
+    if (name.includes('breakfast') || name.includes('restaurant')) return <IoIosRestaurant size={14} color="#059669" />
+    return <IoIosHome size={14} color="#059669" />
+  }
+
   // Render individual rate plan option
   const renderRatePlanCard = (option: any, _isSelected: boolean) => (
     <Box 
@@ -47,7 +74,7 @@ const BookingRatePlanSelector: React.FC<BookingRatePlanSelectorProps> = ({
       position="relative"
     >
       {/* Header with name and savings */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="0.5rem">
+      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="0.75rem">
         <Box fontWeight="600" color="#1a202c" fontSize="1rem">
           {option.name}
         </Box>
@@ -71,59 +98,159 @@ const BookingRatePlanSelector: React.FC<BookingRatePlanSelectorProps> = ({
           {option.description}
         </Box>
       )}
-      
-      {/* Features */}
+
+      {/* Detailed Cancellation Policy */}
+      {option.cancellationPolicy && (
+        <Box marginBottom="1rem" padding="0.75rem" backgroundColor="#f8fafc" borderRadius="6px" border="1px solid #e2e8f0">
+          <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+            <IoIosCalendar color="#3b82f6" size={16} />
+            <Box fontSize="0.875rem" fontWeight="600" color="#374151">
+              Cancellation Policy
+            </Box>
+            <Box 
+              fontSize="0.75rem"
+              color="white"
+              backgroundColor={
+                option.cancellationPolicy.type === 'NonRefundable' ? '#ef4444' :
+                option.cancellationPolicy.type === 'FullyFlexible' ? '#059669' : '#f59e0b'
+              }
+              padding="0.125rem 0.5rem"
+              borderRadius="10px"
+              fontWeight="500"
+            >
+              {option.cancellationPolicy.type === 'NonRefundable' && 'Non-Refundable'}
+              {option.cancellationPolicy.type === 'FullyFlexible' && 'Flexible'}
+              {option.cancellationPolicy.type === 'Moderate' && 'Moderate'}
+              {option.cancellationPolicy.description && !option.ratePlan && 'Flexible'}
+            </Box>
+          </Box>
+          
+          {/* Cancellation details */}
+          <Box fontSize="0.8125rem" color="#6b7280" lineHeight="1.4">
+            {option.cancellationPolicy.type === 'NonRefundable' && (
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <IoIosClose color="#ef4444" size={14} />
+                No refund available for cancellations
+              </Box>
+            )}
+            {option.cancellationPolicy.type === 'FullyFlexible' && (
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <IoIosCheckmark color="#059669" size={14} />
+                Free cancellation until check-in
+              </Box>
+            )}
+            {option.cancellationPolicy.type === 'Moderate' && (
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <IoIosTime color="#f59e0b" size={14} />
+                Free cancellation up to 48 hours before check-in
+              </Box>
+            )}
+            {option.cancellationPolicy.description && (
+              <Box marginTop="0.25rem" display="flex" alignItems="flex-start" gap="0.5rem">
+                <IoIosInformationCircle color="#6b7280" size={14} style={{ marginTop: '1px', flexShrink: 0 }} />
+                <Box flex="1">{option.cancellationPolicy.description}</Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      )}
+
+      {/* Enhanced Features & Amenities */}
       {option.features && (
-        <Box display="flex" flexWrap="wrap" gap="0.5rem" marginBottom="0.75rem" fontSize="0.875rem" color="#666">
-          {option.features.includedAmenityIds?.length > 0 && (
-            <Box display="flex" alignItems="center" gap="0.25rem">
-              <IoIosCheckmark color="#059669" size="16px" />
-              Premium amenities
-            </Box>
-          )}
-          {option.features.includesBreakfast && (
-            <Box display="flex" alignItems="center" gap="0.25rem">
-              <IoIosCheckmark color="#059669" size="16px" />
-              Breakfast included
-            </Box>
-          )}
-          {option.features.includesParking && (
-            <Box display="flex" alignItems="center" gap="0.25rem">
-              <IoIosCheckmark color="#059669" size="16px" />
-              Free parking
+        <Box marginBottom="1rem">
+          <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.5rem" display="flex" alignItems="center" gap="0.5rem">
+            <IoIosCheckmark color="#059669" size={16} />
+            What's Included
+          </Box>
+          
+          <Box display="flex" flexDirection="column" gap="0.375rem" fontSize="0.8125rem">
+            {option.features.includesBreakfast && (
+              <Box display="flex" alignItems="center" gap="0.5rem" color="#059669">
+                <IoIosRestaurant size={14} />
+                Breakfast included for all guests
+              </Box>
+            )}
+            {option.features.includesParking && (
+              <Box display="flex" alignItems="center" gap="0.5rem" color="#059669">
+                <IoIosCar size={14} />
+                Free parking available
+              </Box>
+            )}
+            {option.features.includedAmenityIds?.length > 0 && (
+              <Box display="flex" alignItems="center" gap="0.5rem" color="#059669">
+                <IoIosHome size={14} />
+                Access to {option.features.includedAmenityIds.length} premium amenities
+              </Box>
+            )}
+            
+            {/* Specific amenities if available */}
+            {option.ratePlan?.amenities?.slice(0, 3).map((amenity: any, index: number) => (
+              <Box key={index} display="flex" alignItems="center" gap="0.5rem" color="#6b7280">
+                {getAmenityIcon(amenity.name)}
+                {amenity.name}
+              </Box>
+            ))}
+            
+            {option.ratePlan?.amenities?.length > 3 && (
+              <Box fontSize="0.75rem" color="#9ca3af" marginLeft="1.25rem">
+                +{option.ratePlan.amenities.length - 3} more amenities
+              </Box>
+            )}
+          </Box>
+        </Box>
+      )}
+
+      {/* Booking Conditions */}
+      <Box marginBottom="1rem" padding="0.75rem" backgroundColor="#fefce8" borderRadius="6px" border="1px solid #fde047">
+        <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+          <IoIosCard color="#ca8a04" size={16} />
+          <Box fontSize="0.875rem" fontWeight="600" color="#713f12">
+            Booking Conditions
+          </Box>
+        </Box>
+        
+        <Box display="flex" flexDirection="column" gap="0.375rem" fontSize="0.8125rem" color="#854d0e">
+          <Box display="flex" alignItems="center" gap="0.5rem">
+            <IoIosTime size={14} />
+            Minimum stay: {option.minStayNights || 1} night{(option.minStayNights || 1) > 1 ? 's' : ''}
+          </Box>
+          
+          <Box display="flex" alignItems="center" gap="0.5rem">
+            <IoIosClock size={14} />
+            Check-in: 3:00 PM - 10:00 PM
+          </Box>
+          
+          <Box display="flex" alignItems="center" gap="0.5rem">
+            <IoIosClock size={14} />
+            Check-out: Before 12:00 PM
+          </Box>
+          
+          {option.requiresDeposit && (
+            <Box display="flex" alignItems="center" gap="0.5rem">
+              <IoIosWarning size={14} />
+              Security deposit may be required
             </Box>
           )}
         </Box>
-      )}
+      </Box>
       
       {/* Pricing */}
       <Box>
         <Box fontSize="1.5rem" fontWeight="bold" color="#059669">
           AED {option.totalPrice.toFixed(2)}
         </Box>
-        <Box fontSize="0.875rem" color="#666">
+        <Box fontSize="0.875rem" color="#666" marginBottom="0.25rem">
           AED {option.pricePerNight.toFixed(2)} per night
         </Box>
-      </Box>
-      
-      {/* Cancellation policy badge */}
-      {option.cancellationPolicy && (
-        <Box 
-          position="absolute"
-          top="0.5rem"
-          right="0.5rem"
-          fontSize="0.75rem"
-          color="#666"
-          backgroundColor="#f3f4f6"
-          padding="0.25rem 0.5rem"
-          borderRadius="4px"
-        >
-          {option.cancellationPolicy.type === 'NonRefundable' && 'Non-Refundable'}
-          {option.cancellationPolicy.type === 'FullyFlexible' && 'Flexible'}
-          {option.cancellationPolicy.type === 'Moderate' && 'Moderate'}
-          {option.cancellationPolicy.description && !option.ratePlan && 'Flexible'}
+        
+        {/* Tax information */}
+        <Box fontSize="0.75rem" color="#9ca3af">
+          <Box display="flex" alignItems="center" gap="0.25rem">
+            <IoIosInformationCircle size={12} />
+            Includes all taxes and fees
+          </Box>
         </Box>
-      )}
+      </Box>
     </Box>
   )
 

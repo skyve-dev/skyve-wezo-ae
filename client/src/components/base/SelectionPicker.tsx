@@ -1086,7 +1086,6 @@ function SelectionPicker<T>({
     
     const baseStyles = {
       display: 'flex',
-      alignItems: 'center',
       padding: '0.75rem 1rem',
       borderRadius: '0.5rem',
       cursor: disabled || itemDisabled ? 'not-allowed' : 'pointer',
