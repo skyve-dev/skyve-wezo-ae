@@ -47,11 +47,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
     const actualPropertyId = propertyId || (currentParams as any)?.id
 
     // Debug logging
-    console.log('🔍 PropertyDetail Debug:', {
-        propPropertyId: propertyId,
-        currentParams,
-        actualPropertyId
-    })
+
 
     // Redux state
     const {currentProperty, selectedRatePlan, loading, error} = useAppSelector((state) => state.property)

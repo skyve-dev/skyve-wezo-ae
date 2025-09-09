@@ -467,7 +467,7 @@ interface TimeOption {
  *       <TimePicker
  *         label="Custom Time"
  *         placeholder="Or select custom time"
- *         onChange={(time) => console.log('Custom time:', time)}
+ *         onChange={(time) => }
  *         use12HourFormat={false}
  *         interval={15}
  *       />
@@ -618,7 +618,7 @@ interface TimeOption {
  *           variant="promoted"
  *           onClick={() => {
  *             if (validateTimes()) {
- *               console.log('Booking confirmed:', bookingDetails)
+ *
  *             }
  *           }}
  *           disabled={!bookingDetails.checkInTime || !bookingDetails.checkOutTime}

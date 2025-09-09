@@ -133,8 +133,15 @@ const BookingConfirmation: React.FC = () => {
     }))
     
     if (result.meta.requestStatus === 'fulfilled') {
+      // Debug: Log the full response
+
+
+      
       // Check if account was auto-created and dispatch auto-login
-      const response = (result.payload as any)?.data
+      const response = (result.payload as any)?.data || (result.payload as any)
+
+
+      
       if (response?.user && response?.token) {
         // Dispatch auto-login to update auth state
         dispatch(autoLogin({ user: response.user, token: response.token }))

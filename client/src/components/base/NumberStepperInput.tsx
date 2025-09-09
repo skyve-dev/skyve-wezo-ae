@@ -320,7 +320,7 @@ export interface NumberStepperInputProps extends Pick<BoxProps, 'width' | 'width
  * <NumberStepperInput
  *   label="Uncontrolled Input"
  *   defaultValue={10}
- *   onChange={(value) => console.log('Value changed:', value)}
+ *   onChange={(value) => }
  * />
  * ```
  * 

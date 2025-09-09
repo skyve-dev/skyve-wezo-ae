@@ -197,8 +197,8 @@ import { AppShell } from './AppShell'
 
 const handleBeforeNavigate = async (next, target, source) => {
   // Access source and target route information
-  console.log('Navigating from:', source.path, source.params)
-  console.log('Navigating to:', target.path, target.params)
+  
+  
   
   // Your pre-navigation logic here
   
@@ -229,8 +229,8 @@ The `onAfterNavigate` hook is called after successful navigation completion, per
 ```tsx
 const handleAfterNavigate = async (target, source) => {
   // Post-navigation logic with route information
-  console.log('Navigation completed')
-  console.log('From:', source.path, 'To:', target.path)
+  
+  
   
   // Analytics tracking with detailed route info
   analytics.track('page_view', {
@@ -478,7 +478,7 @@ await alertDialog({
   ]
 })
 
-console.log('Dialog closed')
+
 ```
 
 ### Async Button Handlers
@@ -801,8 +801,8 @@ const routes = createRoutes({
 })
 
 // Add debugging
-console.log('Routes:', routes)
-console.log('Current route:', currentRoute)
+
+
 ```
 
 ## Examples Repository

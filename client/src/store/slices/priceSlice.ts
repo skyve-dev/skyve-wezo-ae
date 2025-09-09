@@ -297,18 +297,18 @@ const priceSlice = createSlice({
     // Fetch PropertyPricing
     builder
       .addCase(fetchPropertyPricing.pending, (state) => {
-        console.log('🔷 priceSlice - fetchPropertyPricing.pending')
+
         state.loading = true
         state.error = null
       })
       .addCase(fetchPropertyPricing.fulfilled, (state, action) => {
-        console.log('🔷 priceSlice - fetchPropertyPricing.fulfilled with payload:', action.payload)
+
         state.loading = false
         state.propertyPricing = action.payload
         state.error = null
       })
       .addCase(fetchPropertyPricing.rejected, (state, action) => {
-        console.log('🔷 priceSlice - fetchPropertyPricing.rejected:', action.payload)
+
         state.loading = false
         state.propertyPricing = null
         state.error = action.payload as string
@@ -418,10 +418,10 @@ export const {
 export const fetchPropertyPricing = createAsyncThunk(
   'price/fetchPropertyPricing',
   async (propertyId: string, { rejectWithValue }) => {
-    console.log('🔷 fetchPropertyPricing THUNK called for propertyId:', propertyId)
+
     try {
       const response = await api.get<{ pricing: any }>(`/api/properties/${propertyId}/pricing/weekly`)
-      console.log('🔷 fetchPropertyPricing API RESPONSE:', response)
+
       
       // Transform server format to client format
       const serverPricing = response.pricing
@@ -451,11 +451,11 @@ export const fetchPropertyPricing = createAsyncThunk(
         updatedAt: serverPricing.updatedAt || ''
       }
       
-      console.log('🔷 fetchPropertyPricing TRANSFORMED pricing:', transformedPricing)
+
       
       return transformedPricing
     } catch (error: any) {
-      console.log('🔷 fetchPropertyPricing ERROR:', error)
+
       const errorMessage = error.getUserMessage ? error.getUserMessage() : 
                           error.serverMessage || error.message || 'Failed to fetch property pricing'
       return rejectWithValue(errorMessage)

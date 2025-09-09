@@ -1,6 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { api } from '@/utils/api'
-import { autoLogin } from './authSlice'
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit'
+import {api} from '@/utils/api'
 
 interface BookingFormData {
   // Property and booking details
@@ -350,9 +349,9 @@ const bookingSlice = createSlice({
           localStorage.setItem('authToken', response.token)
           localStorage.setItem('user', JSON.stringify(response.user))
           
-          console.log('✅ User auto-created and logged in:', response.user.email)
+
           if (response.autoCreated) {
-            console.log('🔑 Auto-created account with password: 123456')
+
           }
           
           // Set flag to trigger auth update (will be handled by extraReducers)

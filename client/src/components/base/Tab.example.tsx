@@ -679,7 +679,6 @@ const TabExample: React.FC = () => {
                         <Button 
                             label="Submit Form" 
                             variant="promoted" 
-                            onClick={() => console.log('Form submitted:', formData)}
                         />
                     </Box>
                 </Box>

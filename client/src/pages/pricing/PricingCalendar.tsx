@@ -106,7 +106,7 @@ const PricingCalendar: React.FC = () => {
         .map(rp => rp.id)
         .slice(0, 5) // Limit to 5 rate plans for performance
       
-      console.log('🟠 AUTO-SELECTING rate plans:', activeRatePlans)
+
       dispatch(setSelectedRatePlans(activeRatePlans))
     }
   }, [ratePlans, selectedRatePlanIds.length, dispatch])

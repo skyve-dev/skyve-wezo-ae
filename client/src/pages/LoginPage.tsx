@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
 
   const handleSwitchToForgotPassword = () => {
     // TODO: Implement forgot password page
-    console.log('Forgot password feature coming soon')
+
   }
 
   return (

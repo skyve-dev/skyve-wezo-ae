@@ -400,7 +400,7 @@ function MobileNavigationDrawer() {
                 whileHover={{ backgroundColor: '#f3f4f6' }}
                 onClick={() => {
                   // Navigate to path
-                  console.log('Navigate to:', item.path)
+                  
                   setIsMobileMenuOpen(false)
                 }}
               >

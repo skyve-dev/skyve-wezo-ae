@@ -161,6 +161,15 @@ router.post('/verify-otp', async (req, res) => {
 
     // Create booking if booking details were provided
     let reservation = null
+    console.log('🔍 Checking if booking should be created:', {
+      propertyId,
+      checkInDate,
+      checkOutDate,
+      numGuests,
+      totalPrice,
+      hasAllRequiredFields: !!(propertyId && checkInDate && checkOutDate && numGuests && totalPrice)
+    })
+    
     if (propertyId && checkInDate && checkOutDate && numGuests && totalPrice) {
       try {
         // Validate property exists and is available
@@ -274,7 +283,7 @@ router.post('/verify-otp', async (req, res) => {
       }
     }
 
-    return res.json({ 
+    const responseData = {
       message: 'Email verified and account created successfully', 
       verified: true,
       user: {
@@ -287,7 +296,11 @@ router.post('/verify-otp', async (req, res) => {
       autoCreated: !user.createdAt || user.createdAt > new Date(Date.now() - 5000), // Created in last 5 seconds
       bookingId: reservation?.id || null,
       bookingExpiresAt: reservation?.expiresAt || null
-    })
+    }
+    
+    console.log('🔍 Sending response:', responseData)
+    
+    return res.json(responseData)
   } catch (error) {
     console.error('Error verifying OTP:', error)
     return res.status(500).json({ message: 'Failed to verify OTP' })

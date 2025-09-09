@@ -144,9 +144,6 @@ const DateRangePickerTest: React.FC = () => {
             label="Property Booking"
             value={dateRangeWithPrices}
             onChange={setDateRangeWithPrices}
-            onComplete={(range) => {
-              console.log('Range selection completed:', range)
-            }}
             placeholder={{ start: "Arrival", end: "Departure" }}
             clearable
             showPrices

@@ -72,20 +72,10 @@ export const useDependencyTracker = (
             if (useGroup) {
                 console.group(groupLabel)
             } else {
-                console.log(groupLabel)
+
             }
 
-            // Log changed dependencies
-            if (changedDeps.length > 0) {
-                changedDeps.forEach(({ name, previousValue, currentValue }) => {
-                    console.log(
-                        `%c❌ ${name}:%c ${getValueDescription(previousValue)} → ${getValueDescription(currentValue)} %c(CHANGED)`,
-                        'color: #ef4444; font-weight: bold',
-                        'color: #374151',
-                        'color: #ef4444; font-weight: bold'
-                    )
-                })
-            }
+
 
             // Log unchanged dependencies if requested
             if (logUnchanged && unchangedDeps.length > 0) {
