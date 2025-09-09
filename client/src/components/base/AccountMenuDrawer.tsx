@@ -100,7 +100,19 @@ const AccountMenuDrawer: React.FC<AccountMenuDrawerProps> = ({
         : userInfo.email.split('@')[0]
 
     return (
-        <SlidingDrawer isOpen={isOpen} onClose={onClose} side="bottom">
+        <SlidingDrawer 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            side="bottom"
+            contentStyles={{
+                maxWidth: 600,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                borderTopLeftRadius: '1rem',
+                borderTopRightRadius: '1rem',
+                height:'auto'
+            }}
+        >
             <Box padding="1.5rem" paddingBottom="2rem">
                 
                 {/* Title */}

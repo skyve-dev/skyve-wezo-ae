@@ -9,7 +9,7 @@ import AccountMenuDrawer from '../AccountMenuDrawer'
 import wezoAe from "../../../assets/wezo-optimized.svg"
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '../../../store'
-import { switchUserRole, selectAvailableRoles, logout } from '../../../store/slices/authSlice'
+import { switchUserRole, selectAvailableRoles, selectUser, logout } from '../../../store/slices/authSlice'
 
 interface HeaderDefaultProps<T extends Record<string, BaseRoute>> {
     routes: T
@@ -47,8 +47,9 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
     const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
     const dispatch = useDispatch<AppDispatch>()
     
-    // Get available roles from Redux
+    // Get available roles and user info from Redux
     const availableRoles = useSelector(selectAvailableRoles)
+    const user = useSelector(selectUser)
     // Handle role switching (client-side only)
     const handleRoleSelect = (role: 'Tenant' | 'HomeOwner' | 'Manager') => {
         dispatch(switchUserRole(role))
@@ -197,21 +198,23 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
             </Box>
 
             {/* Unified Account Menu Drawer */}
-            <AccountMenuDrawer
-                isOpen={isAccountMenuOpen}
-                onClose={() => setIsAccountMenuOpen(false)}
-                userInfo={{
-                    firstName: 'Admin',
-                    lastName: 'User', 
-                    email: 'admin@wezo.ae',
-                    role: currentRole || 'Tenant'
-                }}
-                availableRoles={availableRoles}
-                onRoleSelect={handleRoleSelect}
-                onNavigateToProperties={handleNavigateToProperties}
-                onNavigateToBookings={handleNavigateToBookings}
-                onLogout={handleLogout}
-            />
+            {user && (
+                <AccountMenuDrawer
+                    isOpen={isAccountMenuOpen}
+                    onClose={() => setIsAccountMenuOpen(false)}
+                    userInfo={{
+                        firstName: user.firstName || undefined,
+                        lastName: user.lastName || undefined,
+                        email: user.email,
+                        role: currentRole || 'Tenant'
+                    }}
+                    availableRoles={availableRoles}
+                    onRoleSelect={handleRoleSelect}
+                    onNavigateToProperties={handleNavigateToProperties}
+                    onNavigateToBookings={handleNavigateToBookings}
+                    onLogout={handleLogout}
+                />
+            )}
         </Box>
     )
 }
