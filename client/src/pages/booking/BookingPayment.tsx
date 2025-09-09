@@ -15,13 +15,19 @@ import {
 } from 'react-icons/io5'
 
 const BookingPayment: React.FC = () => {
-  const { navigateBack, navigateTo, addToast, openDialog } = useAppShell()
+  const { navigateBack, navigateTo, addToast, openDialog, currentParams } = useAppShell()
   const dispatch = useAppDispatch()
+  
+  // Get booking ID from route params
+  const params = currentParams as any
   
   const { 
     currentBooking, 
     error 
   } = useAppSelector((state) => state.booking)
+  
+  const bookingId = params?.bookingId || currentBooking?.bookingId
+  const bookingExpiresAt = params?.bookingExpiresAt || currentBooking?.bookingExpiresAt
   
   const { currentProperty } = useAppSelector((state) => state.property)
   
@@ -32,6 +38,45 @@ const BookingPayment: React.FC = () => {
   // Mock payment simulation state
   const [paymentStep, setPaymentStep] = useState<'select' | 'processing' | 'completed' | 'failed'>('select')
   
+  // Countdown timer state
+  const [timeLeft, setTimeLeft] = useState<number>(0)
+  const [bookingExpired, setBookingExpired] = useState(false)
+  
+  // Calculate time left for booking
+  useEffect(() => {
+    if (bookingExpiresAt) {
+      const calculateTimeLeft = () => {
+        const expiryTime = new Date(bookingExpiresAt).getTime()
+        const now = new Date().getTime()
+        const difference = Math.floor((expiryTime - now) / 1000) // in seconds
+        
+        if (difference <= 0) {
+          setBookingExpired(true)
+          setTimeLeft(0)
+          return 0
+        }
+        
+        setTimeLeft(difference)
+        return difference
+      }
+      
+      // Initial calculation
+      const initialTime = calculateTimeLeft()
+      
+      if (initialTime > 0) {
+        // Set up interval for countdown
+        const interval = setInterval(() => {
+          const remaining = calculateTimeLeft()
+          if (remaining <= 0) {
+            clearInterval(interval)
+          }
+        }, 1000)
+        
+        return () => clearInterval(interval)
+      }
+    }
+  }, [bookingExpiresAt])
+  
   useEffect(() => {
     if (error) {
       addToast(error, { type: 'error', autoHide: true, duration: 4000 })
@@ -39,8 +84,32 @@ const BookingPayment: React.FC = () => {
     }
   }, [error, addToast, dispatch])
   
+  // Format time for display
+  const formatTimeDisplay = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+  
   const handlePayment = async () => {
-    if (!currentBooking) return
+    if (!currentBooking || !bookingId) {
+      addToast('No valid booking found. Please start over.', { 
+        type: 'error', 
+        autoHide: true, 
+        duration: 5000 
+      })
+      return
+    }
+    
+    if (bookingExpired) {
+      addToast('Your booking has expired. Please start over.', { 
+        type: 'error', 
+        autoHide: true, 
+        duration: 5000 
+      })
+      navigateTo('properties', {})
+      return
+    }
     
     setIsProcessing(true)
     setPaymentStep('processing')
@@ -60,7 +129,7 @@ const BookingPayment: React.FC = () => {
         // Simulate successful payment
         try {
           await dispatch(processPayment({ 
-            bookingId: 'temp-booking-id', 
+            bookingId: bookingId, // Use actual booking ID
             paymentMethod 
           }))
           
@@ -79,11 +148,13 @@ const BookingPayment: React.FC = () => {
               <Box marginBottom="2rem">
                 Your booking has been confirmed and you will receive a confirmation email shortly.
               </Box>
+              <Box display={'flex'} alignItems={'center'}>
               <Button 
                 onClick={() => close()} 
                 variant="promoted"
                 label="Continue"
               />
+              </Box>
             </Box>
           ))
           
@@ -103,15 +174,40 @@ const BookingPayment: React.FC = () => {
     setPaymentMethod('mock-success')
   }
   
-  if (!currentBooking) {
+  if (!currentBooking || !bookingId) {
     return (
       <Box padding="2rem" textAlign="center">
         <Box marginBottom="1rem">Booking not found</Box>
+        <Box fontSize="0.875rem" color="#666" marginBottom="2rem">
+          Please complete the booking process from the beginning.
+        </Box>
         <Button
           label="Back to Properties"
           icon={<IoArrowBack />}
           onClick={() => navigateTo('properties', {})}
           variant="normal"
+        />
+      </Box>
+    )
+  }
+  
+  if (bookingExpired) {
+    return (
+      <Box padding="2rem" textAlign="center">
+        <Box display="flex" justifyContent="center" marginBottom="2rem">
+          <IoCloseCircle color="#dc2626" size={60} />
+        </Box>
+        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
+          Booking Expired
+        </Box>
+        <Box fontSize="0.875rem" color="#666" marginBottom="2rem">
+          Your booking has expired. Please start over to check availability.
+        </Box>
+        <Button
+          label="Start New Booking"
+          icon={<IoArrowBack />}
+          onClick={() => navigateTo('properties', {})}
+          variant="promoted"
         />
       </Box>
     )
@@ -149,6 +245,27 @@ const BookingPayment: React.FC = () => {
             </Box>
           </Box>
         </Box>
+        
+        {/* Booking Timer */}
+        {bookingExpiresAt && timeLeft > 0 && (
+          <Box 
+            backgroundColor="#fef2f2" 
+            padding="1rem" 
+            borderRadius="8px" 
+            marginBottom="2rem"
+            border="1px solid #fecaca"
+          >
+            <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+              <IoTime color="#dc2626" />
+              <Box fontWeight="600" color="#dc2626">
+                Complete payment within: {formatTimeDisplay(timeLeft)}
+              </Box>
+            </Box>
+            <Box fontSize="0.875rem" color="#b91c1c">
+              🔒 We're holding this property for you. Don't lose your booking!
+            </Box>
+          </Box>
+        )}
         
         {/* Booking Summary */}
         {currentProperty && (
@@ -274,12 +391,12 @@ const BookingPayment: React.FC = () => {
             </Box>
             
             <Button
-              label={`Pay AED ${Math.round(currentBooking.totalPrice)}`}
+              label={!bookingId ? 'Invalid Booking' : bookingExpired ? 'Booking Expired' : `Pay AED ${Math.round(currentBooking.totalPrice)}`}
               icon={<IoCard />}
               onClick={handlePayment}
               variant="promoted"
               size="large"
-              disabled={isProcessing}
+              disabled={isProcessing || !bookingId || bookingExpired}
               style={{ width: '100%' }}
             />
             

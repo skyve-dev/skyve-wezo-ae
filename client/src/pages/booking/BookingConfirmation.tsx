@@ -128,7 +128,8 @@ const BookingConfirmation: React.FC = () => {
     
     const result = await dispatch(verifyOtpCode({
       email: currentBooking.guestEmail,
-      otpCode: currentBooking.otpCode
+      otpCode: currentBooking.otpCode,
+      bookingData: currentBooking // Pass full booking data for server-side booking creation
     }))
     
     if (result.meta.requestStatus === 'fulfilled') {
@@ -159,13 +160,30 @@ const BookingConfirmation: React.FC = () => {
         })
       }
       
-      // Navigate to payment after verification
-      setTimeout(() => {
-        navigateTo('booking-payment', {
-          bookingId: 'temp', // Will be replaced with actual booking ID
-          ...params
+      // Check if booking was created successfully
+      if (response?.bookingId) {
+        addToast('Booking created! Proceeding to payment...', { 
+          type: 'info', 
+          autoHide: true, 
+          duration: 2000 
         })
-      }, 1500)
+        
+        // Navigate to payment with actual booking ID
+        setTimeout(() => {
+          navigateTo('booking-payment', {
+            bookingId: response.bookingId,
+            bookingExpiresAt: response.bookingExpiresAt,
+            ...params
+          })
+        }, 1500)
+      } else {
+        // If booking wasn't created for some reason, show error
+        addToast('Booking creation failed. Please try again.', { 
+          type: 'error', 
+          autoHide: true, 
+          duration: 5000 
+        })
+      }
     }
   }
   

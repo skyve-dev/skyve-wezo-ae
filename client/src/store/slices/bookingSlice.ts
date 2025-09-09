@@ -24,6 +24,10 @@ interface BookingFormData {
   otpVerified: boolean
   otpCode: string
   
+  // Booking creation
+  bookingId?: string
+  bookingExpiresAt?: string
+  
   // Payment details
   paymentMethod?: string
   paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
@@ -139,9 +143,29 @@ export const sendOtpCode = createAsyncThunk(
 
 export const verifyOtpCode = createAsyncThunk(
   'booking/verifyOtp',
-  async ({ email, otpCode }: { email: string; otpCode: string }, { rejectWithValue }) => {
+  async ({ email, otpCode, bookingData }: { 
+    email: string; 
+    otpCode: string;
+    bookingData?: Partial<BookingFormData>
+  }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/api/booking/verify-otp', { email, otpCode })
+      const response = await api.post('/api/booking/verify-otp', { 
+        email, 
+        otpCode,
+        // Include booking details for automatic booking creation
+        ...(bookingData ? {
+          propertyId: bookingData.propertyId,
+          ratePlanId: bookingData.ratePlanId,
+          checkInDate: bookingData.checkInDate,
+          checkOutDate: bookingData.checkOutDate,
+          numGuests: bookingData.numGuests,
+          guestName: bookingData.guestName,
+          guestPhone: bookingData.guestPhone,
+          specialRequests: bookingData.specialRequests,
+          totalPrice: bookingData.totalPrice,
+          isHalfDay: bookingData.isHalfDay || false
+        } : {})
+      })
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Invalid OTP code')
@@ -310,6 +334,13 @@ const bookingSlice = createSlice({
         state.isLoading = false
         if (state.currentBooking) {
           state.currentBooking.otpVerified = true
+          
+          // Store booking ID from the server response
+          const response = action.payload?.data
+          if (response?.bookingId) {
+            state.currentBooking.bookingId = response.bookingId
+            state.currentBooking.bookingExpiresAt = response.bookingExpiresAt
+          }
         }
         
         // Store user data if account was auto-created
