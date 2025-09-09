@@ -148,7 +148,7 @@ export const fetchBookingDetails = createAsyncThunk(
     try {
       const includeParam = params.include ? `?include=${params.include.join(',')}` : '';
       const response = await api.get(`/api/booking/reservations/${params.bookingId}/details${includeParam}`);
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch booking details');
     }
@@ -160,7 +160,7 @@ export const fetchMessages = createAsyncThunk(
   async (bookingId: string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/api/booking/reservations/${bookingId}/messages`);
-      return (response as any).data.messages;
+      return response.messages;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch messages');
     }
@@ -174,7 +174,7 @@ export const sendMessage = createAsyncThunk(
       const response = await api.post(`/api/booking/reservations/${params.bookingId}/messages`, {
         message: params.message
       });
-      return (response as any).data.messageData;
+      return response.messageData;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to send message');
     }
@@ -190,7 +190,7 @@ export const fetchAuditTrail = createAsyncThunk(
         limit: String(params.limit || 50)
       });
       const response = await api.get(`/api/booking/reservations/${params.bookingId}/audit-log?${queryParams}`);
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch audit trail');
     }
@@ -202,7 +202,7 @@ export const fetchFeeBreakdown = createAsyncThunk(
   async (bookingId: string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/api/booking/reservations/${bookingId}/fee-breakdown`);
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch fee breakdown');
     }
@@ -217,7 +217,7 @@ export const updateReservationStatus = createAsyncThunk(
         status: params.status,
         reason: params.reason
       });
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update status');
     }
@@ -229,7 +229,7 @@ export const modifyReservation = createAsyncThunk(
   async (params: { bookingId: string; data: any }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/api/booking/reservations/${params.bookingId}/modify`, params.data);
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to modify reservation');
     }
@@ -243,7 +243,7 @@ export const updatePrivateNotes = createAsyncThunk(
       const response = await api.put(`/api/booking/reservations/${params.bookingId}/notes`, {
         notes: params.notes
       });
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update notes');
     }
@@ -258,7 +258,7 @@ export const reportNoShow = createAsyncThunk(
         reason: params.reason,
         description: params.description
       });
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to report no-show');
     }
@@ -274,7 +274,7 @@ export const createPayout = createAsyncThunk(
         payoutDate: params.payoutDate,
         bankDetails: params.bankDetails
       });
-      return (response as any).data;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to create payout');
     }
@@ -324,8 +324,8 @@ const bookingDetailsSlice = createSlice({
         if (action.payload.feeBreakdown) {
           state.feeBreakdown = action.payload.feeBreakdown;
         }
-        if (action.payload.messages) {
-          state.messages = action.payload.messages;
+        if (action.payload.booking.messages) {
+          state.messages = action.payload.booking.messages;
         }
         if (action.payload.auditTrail) {
           state.auditTrail = action.payload.auditTrail.auditLogs || [];

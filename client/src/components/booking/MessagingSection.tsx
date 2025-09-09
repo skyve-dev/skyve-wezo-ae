@@ -60,11 +60,11 @@ const MessagingSection: React.FC<MessagingSectionProps> = ({ booking, userRole, 
   };
   
   const getMessageSenderLabel = (message: any) => {
-    if (message.sender?.role === 'Tenant') {
+    if (message.senderType === 'Tenant') {
       return 'Guest';
-    } else if (message.sender?.role === 'HomeOwner') {
+    } else if (message.senderType === 'HomeOwner') {
       return 'Host';
-    } else if (message.sender?.role === 'Manager') {
+    } else if (message.senderType === 'Manager') {
       return 'Wezo Support';
     }
     return message.sender?.username || 'User';
@@ -115,8 +115,8 @@ const MessagingSection: React.FC<MessagingSectionProps> = ({ booking, userRole, 
                   height="32px"
                   borderRadius="50%"
                   backgroundColor={
-                    message.sender?.role === 'Tenant' ? '#dbeafe' :
-                    message.sender?.role === 'HomeOwner' ? '#dcfce7' : '#fef3c7'
+                    message.senderType === 'Tenant' ? '#dbeafe' :
+                    message.senderType === 'HomeOwner' ? '#dcfce7' : '#fef3c7'
                   }
                   display="flex"
                   alignItems="center"
@@ -124,8 +124,8 @@ const MessagingSection: React.FC<MessagingSectionProps> = ({ booking, userRole, 
                   fontSize="0.875rem"
                   fontWeight="600"
                   color={
-                    message.sender?.role === 'Tenant' ? '#1e40af' :
-                    message.sender?.role === 'HomeOwner' ? '#166534' : '#92400e'
+                    message.senderType === 'Tenant' ? '#1e40af' :
+                    message.senderType === 'HomeOwner' ? '#166534' : '#92400e'
                   }
                   flexShrink={0}
                 >

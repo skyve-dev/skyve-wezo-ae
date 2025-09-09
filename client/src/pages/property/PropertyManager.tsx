@@ -13,6 +13,7 @@ import {useAppDispatch, useAppSelector} from '@/store'
 import {
     acknowledgeDraftRestored,
     clearDraft,
+    clearForm,
     createPropertyWithPromotion,
     fetchPropertyById,
     initializeFormForCreate,
@@ -264,14 +265,14 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
                 })).unwrap()
             }
 
-            // Draft is automatically cleared by Redux after successful save
-
-            // Wait for Redux state to update (hasUnsavedChanges = false)
-            await new Promise(resolve => setTimeout(resolve, 100))
+            // Clear the form immediately after successful save
+            // This will trigger the useEffect to clean up the navigation guard
+            dispatch(clearForm())
 
             // Show success dialog
             await showSuccess(`Property has been ${isCreateMode ? 'created' : 'updated'} successfully.`)
 
+            // Navigate away
             navigateTo('properties', {})
         } catch (error: any) {
             // Handle different types of errors

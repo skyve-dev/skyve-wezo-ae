@@ -282,19 +282,49 @@ export class ReservationService {
           },
         ],
       },
+      include: {
+        property: {
+          select: {
+            ownerId: true,
+          },
+        },
+        ratePlan: {
+          include: {
+            property: {
+              select: {
+                ownerId: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!reservation) {
       throw new Error('Reservation not found or you do not have permission to message');
     }
 
+    // Determine sender and recipient types based on who is sending the message
+    const isGuestSending = userId === reservation.guestId;
+    const senderType = isGuestSending ? 'Tenant' : 'HomeOwner';
+    const recipientType = isGuestSending ? 'HomeOwner' : 'Tenant';
+    
+    // Determine recipient ID based on who is sending
+    const recipientId = isGuestSending ? 
+      (reservation.property?.ownerId || reservation.ratePlan?.property?.ownerId) :
+      reservation.guestId;
+
+    if (!recipientId) {
+      throw new Error('Unable to determine message recipient');
+    }
+
     const message = await prisma.message.create({
       data: {
         reservationId,
         senderId: userId,
-        senderType: 'HomeOwner',
-        recipientId: reservation.guestId,
-        recipientType: 'Tenant',
+        senderType,
+        recipientId,
+        recipientType,
         content: messageContent,
       },
     });
@@ -445,17 +475,15 @@ export class ReservationService {
           features: true
         }
       },
-      ...(userRole !== 'Tenant' ? {
-        guest: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            firstName: true,
-            lastName: true
-          }
+      guest: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true
         }
-      } : {}),
+      },
       messages: include.includes('messages') ? {
         include: {
           attachments: true

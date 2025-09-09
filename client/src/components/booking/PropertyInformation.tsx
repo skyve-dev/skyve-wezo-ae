@@ -29,7 +29,8 @@ const PropertyInformation: React.FC<PropertyInformationProps> = ({ booking, user
     navigateTo('property-view', { id: booking.propertyId });
   };
   
-  const getAmenityIcon = (amenityName: string) => {
+  const getAmenityIcon = (amenityName: string | undefined) => {
+    if (!amenityName || typeof amenityName !== 'string') return null;
     switch (amenityName.toLowerCase()) {
       case 'wifi':
       case 'internet':
@@ -214,7 +215,7 @@ const PropertyInformation: React.FC<PropertyInformationProps> = ({ booking, user
             Amenities
           </Box>
           <Box display="flex" flexWrap="wrap" gap="0.5rem">
-            {property.amenities.slice(0, 8).map((amenity: string, index: number) => (
+            {property.amenities.slice(0, 8).map((amenity: any, index: number) => (
               <Box
                 key={index}
                 display="flex"
@@ -226,8 +227,8 @@ const PropertyInformation: React.FC<PropertyInformationProps> = ({ booking, user
                 fontSize="0.75rem"
                 color="#374151"
               >
-                {getAmenityIcon(amenity)}
-                {amenity}
+                {getAmenityIcon(amenity?.name || amenity)}
+                {amenity?.name || amenity}
               </Box>
             ))}
             {property.amenities.length > 8 && (
