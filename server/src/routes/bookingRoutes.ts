@@ -560,42 +560,146 @@ router.post('/payment', async (req, res) => {
   }
 })
 
-// Get user's bookings
+// Get user's bookings based on their role
 router.get('/my-bookings', authenticate, async (req, res) => {
   try {
-    const userId = (req as any).user.userId
+    const userId = (req as any).user.id
+    const userRole = (req as any).user.role
+    
+    let reservations: any[] = []
 
-    const reservations = await prisma.reservation.findMany({
-      where: { guestId: userId },
-      include: {
-        ratePlan: {
-          include: {
-            property: {
-              include: {
-                address: true,
-                photos: true
+    if (userRole === 'Tenant') {
+      // Tenants see only their own bookings (as guests)
+      reservations = await prisma.reservation.findMany({
+        where: { guestId: userId },
+        include: {
+          ratePlan: {
+            include: {
+              property: {
+                include: {
+                  address: true,
+                  photos: true
+                }
               }
+            }
+          },
+          property: {
+            include: {
+              address: true,
+              photos: true
             }
           }
         },
-        property: {
-          include: {
-            address: true,
-            photos: true
+        orderBy: { createdAt: 'desc' }
+      })
+    } else if (userRole === 'HomeOwner') {
+      // HomeOwners see bookings for their properties only
+      reservations = await prisma.reservation.findMany({
+        where: {
+          OR: [
+            {
+              // Direct property bookings
+              property: {
+                ownerId: userId
+              }
+            },
+            {
+              // Rate plan based bookings
+              ratePlan: {
+                property: {
+                  ownerId: userId
+                }
+              }
+            }
+          ]
+        },
+        include: {
+          ratePlan: {
+            include: {
+              property: {
+                include: {
+                  address: true,
+                  photos: true
+                }
+              }
+            }
+          },
+          property: {
+            include: {
+              address: true,
+              photos: true
+            }
+          },
+          guest: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              firstName: true,
+              lastName: true
+            }
           }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+    } else if (userRole === 'Manager') {
+      // Managers see all bookings across all properties
+      reservations = await prisma.reservation.findMany({
+        include: {
+          ratePlan: {
+            include: {
+              property: {
+                include: {
+                  address: true,
+                  photos: true,
+                  owner: {
+                    select: {
+                      id: true,
+                      username: true,
+                      email: true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          property: {
+            include: {
+              address: true,
+              photos: true,
+              owner: {
+                select: {
+                  id: true,
+                  username: true,
+                  email: true
+                }
+              }
+            }
+          },
+          guest: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              firstName: true,
+              lastName: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+    }
 
     // Transform data for frontend
     const bookings = reservations.map(reservation => {
       const bookingProperty = reservation.ratePlan?.property || reservation.property
+      const propertyOwner = bookingProperty?.owner
+      
       return {
         id: reservation.id,
         propertyId: reservation.propertyId,
-        propertyName: bookingProperty.name,
-        propertyLocation: bookingProperty.address?.city || 'Location',
+        propertyName: bookingProperty?.name || 'Unknown Property',
+        propertyLocation: bookingProperty?.address?.city || 'Location',
         checkInDate: reservation.checkInDate.toISOString().split('T')[0],
         checkOutDate: reservation.checkOutDate.toISOString().split('T')[0],
         numGuests: reservation.numGuests,
@@ -604,7 +708,21 @@ router.get('/my-bookings', authenticate, async (req, res) => {
         paymentStatus: reservation.paymentStatus,
         createdAt: reservation.createdAt,
         ratePlanName: reservation.ratePlan?.name || 'Standard Rate',
-        specialRequests: reservation.guestRequests
+        specialRequests: reservation.guestRequests,
+        // Guest information (for HomeOwner and Manager views)
+        guest: userRole !== 'Tenant' ? {
+          id: (reservation as any).guest?.id,
+          name: (reservation as any).guest?.firstName && (reservation as any).guest?.lastName 
+            ? `${(reservation as any).guest.firstName} ${(reservation as any).guest.lastName}`.trim()
+            : (reservation as any).guest?.username || 'Guest',
+          email: (reservation as any).guest?.email
+        } : undefined,
+        // Property owner information (for Manager view)
+        propertyOwner: userRole === 'Manager' && propertyOwner ? {
+          id: propertyOwner.id,
+          name: propertyOwner.username,
+          email: propertyOwner.email
+        } : undefined
       }
     })
 
@@ -619,7 +737,7 @@ router.get('/my-bookings', authenticate, async (req, res) => {
 router.post('/:bookingId/cancel', authenticate, async (req, res) => {
   try {
     const { bookingId } = req.params
-    const userId = (req as any).user.userId
+    const userId = (req as any).user.id
 
     // Find reservation
     const reservation = await prisma.reservation.findFirst({

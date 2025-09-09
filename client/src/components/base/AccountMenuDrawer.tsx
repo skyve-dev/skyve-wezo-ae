@@ -143,17 +143,20 @@ const AccountMenuDrawer: React.FC<AccountMenuDrawerProps> = ({
                         Quick Actions
                     </Box>
                     <Box display="flex" flexDirection="column" gap="0.5rem">
-                        <Button
-                            label="My Properties"
-                            icon={<IoIosBuild />}
-                            onClick={() => {
-                                onClose()
-                                onNavigateToProperties()
-                            }}
-                            variant="normal"
-                            size="medium"
-                            style={{ justifyContent: 'flex-start' }}
-                        />
+                        {/* Only show My Properties for HomeOwner and Manager roles */}
+                        {(userInfo.role === 'HomeOwner' || userInfo.role === 'Manager') && (
+                            <Button
+                                label="My Properties"
+                                icon={<IoIosBuild />}
+                                onClick={() => {
+                                    onClose()
+                                    onNavigateToProperties()
+                                }}
+                                variant="normal"
+                                size="medium"
+                                style={{ justifyContent: 'flex-start' }}
+                            />
+                        )}
                         <Button
                             label="My Bookings"
                             icon={<IoIosHome />}

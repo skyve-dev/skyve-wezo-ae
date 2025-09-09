@@ -14,16 +14,20 @@ import {
   IoTime,
   IoClose,
   IoRefresh,
-  IoAdd
+  IoAdd,
+  IoPerson,
+  IoMail,
+  IoBusiness
 } from 'react-icons/io5'
 
 interface BookingCardProps {
   booking: any
   onCancel: (bookingId: string) => void
   onViewDetails: (bookingId: string) => void
+  userRole: string
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDetails }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDetails, userRole }) => {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'confirmed': return { bg: '#dcfce7', color: '#166534', icon: <IoCheckmarkCircle /> }
@@ -76,8 +80,42 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
         </Box>
       </Box>
       
-      {/* Booking details */}
+      {/* Booking details - Dynamic based on user role */}
       <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsSm="1fr 1fr" gap="1rem" marginBottom="1.5rem">
+        {/* Guest Information - Show for HomeOwner and Manager */}
+        {(userRole === 'HomeOwner' || userRole === 'Manager') && booking.guest && (
+          <Box>
+            <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" marginBottom="0.5rem">
+              <IoPerson color="#059669" />
+              <Box fontWeight="600">Guest</Box>
+            </Box>
+            <Box fontSize="0.875rem" color="#666" marginLeft="1.5rem">
+              {booking.guest.name}
+            </Box>
+            {booking.guest.email && (
+              <Box fontSize="0.75rem" color="#999" marginLeft="1.5rem">
+                {booking.guest.email}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* Property Owner Information - Show for Manager only */}
+        {userRole === 'Manager' && booking.propertyOwner && (
+          <Box>
+            <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" marginBottom="0.5rem">
+              <IoBusiness color="#059669" />
+              <Box fontWeight="600">Property Owner</Box>
+            </Box>
+            <Box fontSize="0.875rem" color="#666" marginLeft="1.5rem">
+              {booking.propertyOwner.name}
+            </Box>
+            <Box fontSize="0.75rem" color="#999" marginLeft="1.5rem">
+              {booking.propertyOwner.email}
+            </Box>
+          </Box>
+        )}
+        
         <Box>
           <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" marginBottom="0.5rem">
             <IoCalendar color="#059669" />
@@ -121,7 +159,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
         </Box>
       </Box>
       
-      {/* Action buttons */}
+      {/* Action buttons - Role-specific */}
       <Box display="flex" gap="0.75rem" flexDirection="column" flexDirectionSm="row">
         <Button
           label="View Details"
@@ -131,7 +169,8 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
           style={{ flex: 1 }}
         />
         
-        {canCancel && (
+        {/* Tenant-specific actions */}
+        {userRole === 'Tenant' && canCancel && (
           <Button
             label="Cancel Booking"
             onClick={() => onCancel(booking.id)}
@@ -143,6 +182,21 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
               color: '#dc2626',
               border: '1px solid #fecaca'
             }}
+          />
+        )}
+        
+        {/* HomeOwner and Manager actions */}
+        {(userRole === 'HomeOwner' || userRole === 'Manager') && booking.guest && (
+          <Button
+            label="Message Guest"
+            icon={<IoMail />}
+            onClick={() => {
+              // TODO: Implement messaging functionality
+              console.log('Message guest:', booking.guest.email)
+            }}
+            variant="normal"
+            size="small"
+            style={{ flex: 1 }}
           />
         )}
       </Box>
@@ -160,6 +214,9 @@ const MyBookings: React.FC = () => {
     isLoading, 
     error 
   } = useAppSelector((state) => state.booking)
+  
+  const { user, currentRoleMode } = useAppSelector((state) => state.auth)
+  const userRole = currentRoleMode || user?.role || 'Tenant'
   
   useEffect(() => {
     dispatch(fetchUserBookings())
@@ -251,10 +308,18 @@ const MyBookings: React.FC = () => {
         >
           <Box>
             <h1 style={{ fontSize: '1.75rem', fontWeight: '600', margin: '0 0 0.5rem 0' }}>
-              My Bookings
+              {userRole === 'Tenant' 
+                ? 'My Bookings' 
+                : userRole === 'HomeOwner' 
+                ? 'Property Reservations' 
+                : 'All Reservations'}
             </h1>
             <Box fontSize="0.875rem" color="#666">
-              View and manage your property bookings
+              {userRole === 'Tenant' 
+                ? 'View and manage your property bookings' 
+                : userRole === 'HomeOwner' 
+                ? 'View and manage reservations for your properties' 
+                : 'View and manage all reservations across all properties'}
             </Box>
           </Box>
           
@@ -268,13 +333,16 @@ const MyBookings: React.FC = () => {
               disabled={isLoading}
               title="Refresh bookings"
             />
-            <Button
-              label="New Booking"
-              icon={<IoAdd />}
-              onClick={handleNewBooking}
-              variant="promoted"
-              size="small"
-            />
+            {/* Only show "New Booking" button for Tenants */}
+            {userRole === 'Tenant' && (
+              <Button
+                label="New Booking"
+                icon={<IoAdd />}
+                onClick={handleNewBooking}
+                variant="promoted"
+                size="small"
+              />
+            )}
           </Box>
         </Box>
         
@@ -296,19 +364,28 @@ const MyBookings: React.FC = () => {
             </Box>
             
             <Box fontSize="1.25rem" fontWeight="600" marginBottom="1rem" color="#374151">
-              No Bookings Yet
+              {userRole === 'Tenant' 
+                ? 'No Bookings Yet' 
+                : 'No Reservations Yet'}
             </Box>
             
             <Box fontSize="0.875rem" color="#666" marginBottom="2rem">
-              You haven't made any bookings yet. Start exploring properties and make your first booking!
+              {userRole === 'Tenant' 
+                ? 'You haven\'t made any bookings yet. Start exploring properties and make your first booking!' 
+                : userRole === 'HomeOwner' 
+                ? 'No guests have booked your properties yet. Make sure your properties are live and visible to guests.'
+                : 'No reservations found across all properties in the system.'}
             </Box>
             
-            <Button
-              label="Browse Properties"
-              icon={<IoAdd />}
-              onClick={handleNewBooking}
-              variant="promoted"
-            />
+            {/* Only show browse button for Tenants */}
+            {userRole === 'Tenant' && (
+              <Button
+                label="Browse Properties"
+                icon={<IoAdd />}
+                onClick={handleNewBooking}
+                variant="promoted"
+              />
+            )}
           </Box>
         ) : (
           <Box>
@@ -372,6 +449,7 @@ const MyBookings: React.FC = () => {
                 booking={booking}
                 onCancel={handleCancelBooking}
                 onViewDetails={handleViewDetails}
+                userRole={userRole}
               />
             ))}
           </Box>

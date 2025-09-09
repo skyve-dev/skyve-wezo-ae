@@ -118,6 +118,8 @@ model User {
   reservations    Reservation[] /// Reservations made by this user (when acting as guest)
   notifications   Notification[] /// Notifications received by this user
   supportTickets  SupportTicket[] /// Support tickets created by this user
+  auditLogs       ReservationAuditLog[] @relation("AuditLogs") /// Audit logs for reservation changes made by this user
+  payouts         Payout[] @relation("HomeOwnerPayouts") /// Payouts received as property owner
 }
 
 /// BedType specifies the types of beds available in property rooms
@@ -507,11 +509,107 @@ model Reservation {
   notes            String? /// Internal notes for property owner
 
   // Relations
-  messages Message[] /// Related communications
-  review   Review? /// Guest review if submitted
+  messages     Message[] /// Related communications
+  review       Review? /// Guest review if submitted
+  auditLogs    ReservationAuditLog[] /// Audit trail for all changes
+  feeBreakdown ReservationFeeBreakdown? /// Detailed fee breakdown for this reservation
+  payout       Payout? /// Payout information for property owner
 
   createdAt DateTime @default(now()) /// Booking creation timestamp
   updatedAt DateTime @updatedAt /// Last update timestamp
+}
+
+/// ReservationAuditLog tracks all changes made to reservations for compliance and transparency
+/// Purpose: Maintains a complete audit trail of who changed what and when for reservations
+model ReservationAuditLog {
+  id            String      @id @default(uuid()) /// Unique identifier
+  reservationId String /// Foreign key to reservation
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade) /// Associated reservation
+  
+  // User who made the change
+  userId   String /// Foreign key to user who made the change
+  user     User   @relation("AuditLogs", fields: [userId], references: [id]) /// User who performed the action
+  userRole UserRole /// Role of user at time of change (for historical accuracy)
+  
+  // Change Information
+  action      String /// Action performed (e.g., "created", "modified", "status_changed", "cancelled")
+  field       String? /// Field that was changed (optional for create/delete operations)
+  oldValue    String? /// Previous value (JSON serialized if complex object)
+  newValue    String? /// New value (JSON serialized if complex object)
+  description String /// Human-readable description of the change
+  
+  createdAt DateTime @default(now()) /// When the change occurred
+  
+  @@index([reservationId]) /// Index for reservation-specific audit queries
+  @@index([userId]) /// Index for user-specific audit queries
+  @@index([createdAt]) /// Index for chronological queries
+  @@index([action]) /// Index for filtering by action type
+}
+
+/// ReservationFeeBreakdown provides detailed pricing breakdown for reservations
+/// Purpose: Transparent fee structure showing all costs, commissions, and payouts
+model ReservationFeeBreakdown {
+  id            String      @id @default(uuid()) /// Unique identifier
+  reservationId String      @unique /// Foreign key to reservation (one-to-one)
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade) /// Associated reservation
+  
+  // Base pricing information
+  basePrice Decimal @db.Decimal(10, 2) /// Base nightly rate × nights
+  nights    Int /// Number of nights booked
+  
+  // Additional fees (guest-facing)
+  cleaningFee     Decimal? @db.Decimal(10, 2) /// One-time cleaning fee
+  serviceFee      Decimal? @db.Decimal(10, 2) /// Platform service fee
+  taxAmount       Decimal? @db.Decimal(10, 2) /// Government taxes
+  securityDeposit Decimal? @db.Decimal(10, 2) /// Refundable security deposit
+  
+  // Platform fees (for HomeOwner/Manager visibility)
+  platformCommission      Decimal? @db.Decimal(10, 2) /// Commission taken by platform
+  paymentProcessingFee    Decimal? @db.Decimal(10, 2) /// Payment processor fees
+  
+  // Calculated totals
+  totalGuestPays  Decimal @db.Decimal(10, 2) /// Total amount paid by guest
+  ownerReceives   Decimal @db.Decimal(10, 2) /// Amount homeowner receives
+  platformRevenue Decimal @db.Decimal(10, 2) /// Total platform revenue
+  
+  createdAt DateTime @default(now()) /// Fee calculation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+  
+  @@index([reservationId]) /// Index for reservation lookup
+}
+
+/// Payout tracks payment schedules and status for property owners
+/// Purpose: Manages homeowner earnings from reservations with full payment lifecycle tracking
+model Payout {
+  id            String      @id @default(uuid()) /// Unique identifier
+  reservationId String      @unique /// Foreign key to reservation (one-to-one)
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade) /// Associated reservation
+  
+  // Property owner information
+  homeOwnerId String /// Foreign key to property owner
+  homeOwner   User   @relation("HomeOwnerPayouts", fields: [homeOwnerId], references: [id]) /// Property owner receiving payout
+  
+  // Payout details
+  amount   Decimal @db.Decimal(10, 2) /// Amount to be paid out
+  currency String  @default("AED") /// Payout currency (AED for UAE market)
+  status   PayoutStatus @default(Pending) /// Current payout status
+  
+  // Payout timeline
+  scheduledAt DateTime? /// When payout is scheduled (usually after checkout)
+  processedAt DateTime? /// When payout processing began
+  completedAt DateTime? /// When payout was successfully received
+  
+  // Additional information
+  bankReference String? /// Bank transaction reference number
+  failureReason String? /// Reason for payout failure (if applicable)
+  
+  createdAt DateTime @default(now()) /// Payout creation timestamp
+  updatedAt DateTime @updatedAt /// Last update timestamp
+  
+  @@index([reservationId]) /// Index for reservation lookup
+  @@index([homeOwnerId]) /// Index for homeowner payout queries
+  @@index([status]) /// Index for status-based queries
+  @@index([scheduledAt]) /// Index for payout scheduling
 }
 
 /// Message represents communications between partners, guests, and the platform
@@ -533,11 +631,33 @@ model Message {
   sentAt  DateTime @default(now()) /// Send timestamp
   isRead  Boolean  @default(false) /// Read status flag
 
+  // Relations
+  attachments MessageAttachment[] /// File attachments for this message
+
   createdAt DateTime @default(now()) /// Creation timestamp
   updatedAt DateTime @updatedAt /// Last update timestamp
 
   // Note: For MVP, sender/recipient IDs are generic strings. In production,
   // these would be foreign keys to a unified User table
+}
+
+/// MessageAttachment represents file attachments for reservation messages
+/// Purpose: Enables file sharing within booking communications (photos, documents, etc.)
+model MessageAttachment {
+  id        String  @id @default(uuid()) /// Unique identifier
+  messageId String /// Foreign key to message
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade) /// Associated message
+
+  // File Information
+  fileName String /// Original filename
+  fileUrl  String /// URL to stored file (S3/storage service)
+  fileType String /// MIME type (e.g., "image/jpeg", "application/pdf")
+  fileSize Int /// File size in bytes
+
+  uploadedAt DateTime @default(now()) /// Upload timestamp
+  createdAt  DateTime @default(now()) /// Creation timestamp
+
+  @@index([messageId]) /// Index for efficient message attachment queries
 }
 
 /// Review represents guest feedback for a property based on a completed stay
@@ -841,4 +961,12 @@ enum SenderType {
   User /// Message from user
   Support /// Message from support agent
   System /// Automated system message
+}
+
+enum PayoutStatus {
+  Pending /// Scheduled but not sent
+  Processing /// Being processed by bank
+  Completed /// Successfully received
+  Failed /// Failed to process
+  Cancelled /// Cancelled/reversed
 }

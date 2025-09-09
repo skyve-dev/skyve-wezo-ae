@@ -5,7 +5,6 @@ import {
     FaTachometerAlt,
     FaBuilding,
     FaCalendarAlt,
-    FaClipboardList,
     FaEnvelope,
     FaStar,
     FaChartLine,
@@ -26,7 +25,6 @@ import Dashboard from "@/pages/Dashboard";
 import PropertiesList from "@/pages/PropertiesList";
 import PropertyManager from "@/pages/property/PropertyManager";
 import AvailabilityManager from "@/pages/availability/AvailabilityManager";
-import Reservations from "@/pages/Reservations";
 import Inbox from "@/pages/Inbox";
 import Reviews from "@/pages/Reviews";
 import Finance from "@/pages/Finance";
@@ -126,15 +124,6 @@ export const routes = createRoutes({
         showInHeader: true,
         showInFooter: false,
         roles: ['HomeOwner', 'Manager']  // Host-only feature
-    },
-    reservations: {
-        component: Reservations,
-        icon: <FaClipboardList />,
-        label: 'Reservations',
-        showInNav: true,
-        showInHeader: false,
-        showInFooter: true,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles (different views)
     },
     inbox: {
         component: Inbox,

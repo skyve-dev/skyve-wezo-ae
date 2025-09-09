@@ -15,7 +15,7 @@ const PropertiesList: React.FC = () => {
 
     // Redux state
     const {properties, loading, error} = useAppSelector((state) => state.property)
-    const {currentRoleMode, isAuthenticated, user} = useAppSelector((state) => state.auth)
+    const {currentRoleMode, isAuthenticated} = useAppSelector((state) => state.auth)
 
     // Local state
     const [searchTerm, setSearchTerm] = useState('')
@@ -24,16 +24,16 @@ const PropertiesList: React.FC = () => {
     const canManageProperties = isAuthenticated && (currentRoleMode === 'HomeOwner' || currentRoleMode === 'Manager')
     const isReadOnlyMode = !isAuthenticated || currentRoleMode === 'Tenant'
 
-    // Fetch properties on component mount - use smart fetching logic
+    // Fetch properties on component mount - use role-based fetching logic
     useEffect(() => {
-        if (isAuthenticated && user) {
-            // Authenticated user: fetch their properties
+        if (isAuthenticated && (currentRoleMode === 'HomeOwner' || currentRoleMode === 'Manager')) {
+            // Property owners/managers: fetch their properties
             dispatch(fetchMyProperties())
         } else {
-            // Non-authenticated user: fetch public properties
+            // Guests and non-authenticated users: fetch public properties for browsing
             dispatch(fetchPublicProperties())
         }
-    }, [dispatch, isAuthenticated, user])
+    }, [dispatch, isAuthenticated, currentRoleMode])
 
     // Clear errors when component unmounts
     useEffect(() => {
