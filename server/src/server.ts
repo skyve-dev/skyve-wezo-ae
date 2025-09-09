@@ -1,6 +1,7 @@
 import app from './app';
 import prisma from './config/database';
 import { networkInterfaces } from 'os';
+import { bookingCleanupService } from './services/booking-cleanup.service';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
@@ -31,6 +32,11 @@ async function startServer() {
         console.log(`🌐 API exposed at http://${networkIP}:${PORT}/api (accessible from network)`);
       }
       console.log(`🏥 Health check at http://${networkIP}:${PORT}/api/health`);
+      
+      // Start the booking cleanup service
+      const cleanupInterval = parseInt(process.env.BOOKING_CLEANUP_INTERVAL || '60000', 10);
+      bookingCleanupService.start(cleanupInterval);
+      console.log(`🧹 Booking cleanup service started (interval: ${cleanupInterval / 1000}s)`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
@@ -40,12 +46,14 @@ async function startServer() {
 
 process.on('SIGINT', async () => {
   console.log('\n👋 Shutting down gracefully...');
+  bookingCleanupService.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('\n👋 Shutting down gracefully...');
+  bookingCleanupService.stop();
   await prisma.$disconnect();
   process.exit(0);
 });

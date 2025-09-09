@@ -11,6 +11,7 @@ import notificationRoutes from './notification.routes';
 import reviewRoutes from './review.routes';
 import supportRoutes from './support.routes';
 import bookingRoutes from './bookingRoutes';
+import adminRoutes from './admin.routes';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use('/', notificationRoutes);
 router.use('/', reviewRoutes);
 router.use('/', supportRoutes);
 router.use('/booking', bookingRoutes);
+router.use('/admin', adminRoutes);
 
 router.get('/health', (_req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
