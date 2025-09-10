@@ -4,7 +4,7 @@
 **Project:** Wezo.ae Property Rental Platform  
 
 ## Executive Summary
-Completed **35 commits** with **21,809 lines added** and **7,783 lines removed** across **117 files**. Major focus on booking system implementation, pricing calendar enhancements, and UI/UX improvements.
+Completed **35 commits**  Major focus on booking system implementation, pricing calendar enhancements, and UI/UX improvements.
 
 ---
 
