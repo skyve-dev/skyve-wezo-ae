@@ -674,7 +674,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
                     border={variantStyles.border}
                     transition="all 0.2s ease"
                     style={{ outline: 'none' }}
-                    {...inputProps}
+                    {...{
+                        ...inputProps,
+                        value: inputProps.value === null ? '' : inputProps.value
+                    }}
                 />
             </Box>
             

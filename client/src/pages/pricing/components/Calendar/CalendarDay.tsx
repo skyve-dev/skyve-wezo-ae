@@ -1,9 +1,8 @@
 import React from 'react'
 import {useSelector} from 'react-redux'
 import {RootState, useAppDispatch} from '@/store'
-import {FaEdit, FaPlus} from 'react-icons/fa'
+import {FaPlus} from 'react-icons/fa'
 import {IoIosCheckmark} from 'react-icons/io'
-import {IoClose, IoCheckmark} from 'react-icons/io5'
 import {Box} from '@/components'
 import {openDateOverrideForm, setSelectedDate, toggleDateSelection} from '@/store/slices/priceSlice'
 
@@ -264,46 +263,6 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                     </Box>
                 )}
 
-                {/* Override Indicator */}
-                {!isDisabled && prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
-                    <Box
-                        width="16px"
-                        height="16px"
-                        borderRadius="4px"
-                        backgroundColor="#3182ce"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        title={`Price Override: ${prices.find(p => p.isBasePricing && p.hasCustomPrice)?.reason || 'Custom pricing'}`}
-                    >
-                        <Box
-                            width="8px"
-                            height="8px"
-                            backgroundColor="white"
-                            borderRadius="2px"
-                        />
-                    </Box>
-                )}
-
-                {/* Availability Indicator */}
-                {!isDisabled && (
-                    <Box
-                        width="16px"
-                        height="16px"
-                        borderRadius="50%"
-                        backgroundColor={isAvailable ? "#10b981" : "#ef4444"}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        title={isAvailable ? 'Available for booking' : 'Not available for booking'}
-                    >
-                        {isAvailable ? (
-                            <IoCheckmark size={10} color="white" />
-                        ) : (
-                            <IoClose size={10} color="white" />
-                        )}
-                    </Box>
-                )}
                 {/* Weekend Label - hidden on tiny mobile to save space */}
                 {day.isWeekend && !isDisabled && !prices.some(p => p.isBasePricing && p.hasCustomPrice) && (
                     <span style={{fontSize: '0.625rem', color: '#92400e', fontWeight: '500'}}>
@@ -412,6 +371,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                     </Box>
                                     <Box
                                         fontWeight="500"
+                                        fontSize={'1rem'}
                                         color={textColor}
                                         textAlign={'center'}
                                     >
@@ -438,22 +398,6 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 </Box>
             )}
 
-            {/* Edit Indicator */}
-            {!bulkEditMode && day.isCurrentMonth && prices.length > 0 && (
-                <Box
-                    position="absolute"
-                    top="0.25rem"
-                    right="0.25rem"
-                    opacity={0}
-                    transition="opacity 0.2s"
-                    style={{
-                        opacity: 'inherit'
-                    }}
-                    pointerEvents="none"
-                >
-                    <FaEdit size={8} color="#6b7280"/>
-                </Box>
-            )}
         </Box>
     )
 }

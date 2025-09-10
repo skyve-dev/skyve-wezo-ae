@@ -797,20 +797,20 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
     // Pricing management
     const updatePricing = (field: keyof PropertyPricing, value: number) => {
         const currentPricing = currentForm?.pricing || {
-            priceMonday: 150,
-            priceTuesday: 150,
-            priceWednesday: 150,
-            priceThursday: 150,
-            priceFriday: 200,
-            priceSaturday: 250,
-            priceSunday: 200,
-            halfDayPriceMonday: 100,
-            halfDayPriceTuesday: 100,
-            halfDayPriceWednesday: 100,
-            halfDayPriceThursday: 100,
-            halfDayPriceFriday: 130,
-            halfDayPriceSaturday: 160,
-            halfDayPriceSunday: 130,
+            priceMonday: 0,
+            priceTuesday: 0,
+            priceWednesday: 0,
+            priceThursday: 0,
+            priceFriday: 0,
+            priceSaturday: 0,
+            priceSunday: 0,
+            halfDayPriceMonday: 0,
+            halfDayPriceTuesday: 0,
+            halfDayPriceWednesday: 0,
+            halfDayPriceThursday: 0,
+            halfDayPriceFriday: 0,
+            halfDayPriceSaturday: 0,
+            halfDayPriceSunday: 0,
             currency: 'AED' as any
         }
 
@@ -1493,7 +1493,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
                                      gap="1rem">
                                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
                                         const priceField = `price${day}` as keyof PropertyPricing
-                                        const currentPrice = Number(currentForm?.pricing?.[priceField]) || 150
+                                        const currentPrice = Number(currentForm?.pricing?.[priceField]) || 0
 
                                         return (
                                             <Box
@@ -1507,12 +1507,16 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
                                                     label={getDayName(day)}
                                                     value={currentPrice}
                                                     onChange={(value) => updatePricing(priceField, value)}
-                                                    min={10}
-                                                    max={5000}
-                                                    step={10}
-                                                    format="integer"
+                                                    min={0}
+                                                    max={10000}
+                                                    step={100}
+                                                    format="currency"
+                                                    currency="AED"
+                                                    currencyPosition="suffix"
+                                                    decimalPlaces={0}
                                                     size="small"
                                                     width="100%"
+                                                    required
                                                 />
                                                 <Box fontSize="0.75rem" color="#666" textAlign="center"
                                                      marginTop="0.25rem">
@@ -1537,7 +1541,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
                                      gap="1rem">
                                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
                                         const priceField = `halfDayPrice${day}` as keyof PropertyPricing
-                                        const currentPrice = Number(currentForm?.pricing?.[priceField]) || 100
+                                        const currentPrice = Number(currentForm?.pricing?.[priceField]) || 0
 
                                         return (
                                             <Box
@@ -1551,10 +1555,13 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
                                                     label={getDayName(day)}
                                                     value={currentPrice}
                                                     onChange={(value) => updatePricing(priceField, value)}
-                                                    min={5}
-                                                    max={2500}
-                                                    step={5}
-                                                    format="integer"
+                                                    min={0}
+                                                    max={5000}
+                                                    step={50}
+                                                    format="currency"
+                                                    currency="AED"
+                                                    currencyPosition="suffix"
+                                                    decimalPlaces={0}
                                                     size="small"
                                                     width="100%"
                                                 />

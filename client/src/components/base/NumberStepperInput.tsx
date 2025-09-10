@@ -756,7 +756,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
         handleValueChange(newValue);
     }, [currentValue, step, disabled, readOnly, handleValueChange]);
 
-    // Handle input change
+    // Handle input change (including paste)
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setInputValue(value);
@@ -766,6 +766,18 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
         if (!isNaN(parsed)) {
             handleValueChange(parsed);
         }
+    }, [parseNumber, handleValueChange]);
+
+    // Handle paste event explicitly
+    const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+        // Let the default paste happen, then trigger change
+        setTimeout(() => {
+            const value = e.currentTarget.value;
+            const parsed = parseNumber(value);
+            if (!isNaN(parsed)) {
+                handleValueChange(parsed);
+            }
+        }, 0);
     }, [parseNumber, handleValueChange]);
 
     // Handle focus
@@ -909,6 +921,7 @@ export const NumberStepperInput: React.FC<NumberStepperInputProps> = ({
                     name={name}
                     value={inputValue}
                     onChange={handleInputChange}
+                    onPaste={handlePaste}
                     onFocus={handleInputFocus}
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
