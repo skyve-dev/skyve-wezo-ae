@@ -36,14 +36,6 @@ interface DatePriceOverride {
   updatedAt: string
 }
 
-interface PricingCalendarDay {
-  date: string
-  fullDayPrice: number
-  halfDayPrice: number
-  isOverride: boolean
-  reason?: string
-  dayOfWeek: string
-}
 
 interface PriceState {
   // Property base pricing (weekly rates)
@@ -51,9 +43,6 @@ interface PriceState {
   
   // Date-specific overrides for base pricing
   dateOverrides: DatePriceOverride[]
-  
-  // Pricing calendar data (combined weekly + overrides)
-  pricingCalendar: PricingCalendarDay[]
   
   // Public pricing calendar data for display (date string as key)
   publicPricingCalendar: Record<string, {
@@ -102,7 +91,6 @@ interface PriceState {
 const initialState: PriceState = {
   propertyPricing: null,
   dateOverrides: [],
-  pricingCalendar: [],
   publicPricingCalendar: {},
   
   // Date override form
@@ -200,7 +188,6 @@ const priceSlice = createSlice({
     // Clear State
     clearPrices: (state) => {
       state.dateOverrides = []
-      state.pricingCalendar = []
       state.error = null
     },
     
@@ -286,10 +273,6 @@ const priceSlice = createSlice({
     
     setDateOverrides: (state, action: PayloadAction<DatePriceOverride[]>) => {
       state.dateOverrides = action.payload
-    },
-    
-    setPricingCalendar: (state, action: PayloadAction<PricingCalendarDay[]>) => {
-      state.pricingCalendar = action.payload
     }
   },
   
@@ -311,20 +294,6 @@ const priceSlice = createSlice({
 
         state.loading = false
         state.propertyPricing = null
-        state.error = action.payload as string
-      })
-      
-      // Fetch Pricing Calendar
-      .addCase(fetchPricingCalendar.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(fetchPricingCalendar.fulfilled, (state, action) => {
-        state.pricingCalendar = action.payload
-        state.loading = false
-      })
-      .addCase(fetchPricingCalendar.rejected, (state, action) => {
-        state.loading = false
         state.error = action.payload as string
       })
       
@@ -408,8 +377,7 @@ export const {
   openDateOverrideForm,
   closeDateOverrideForm,
   updateDateOverrideForm,
-  setDateOverrides,
-  setPricingCalendar
+  setDateOverrides
 } = priceSlice.actions
 
 // Async Thunks with API Integration
@@ -463,28 +431,6 @@ export const fetchPropertyPricing = createAsyncThunk(
   }
 )
 
-// Fetch pricing calendar with date overrides
-export const fetchPricingCalendar = createAsyncThunk(
-  'price/fetchPricingCalendar',
-  async (params: { propertyId: string; startDate: string; endDate: string }, { rejectWithValue }) => {
-    try {
-      const queryParams = new URLSearchParams({
-        startDate: params.startDate,
-        endDate: params.endDate
-      })
-      
-      const response = await api.get<{ calendar: PricingCalendarDay[] }>(
-        `/api/properties/${params.propertyId}/pricing/calendar?${queryParams}`
-      )
-      
-      return response.calendar || []
-    } catch (error: any) {
-      const errorMessage = error.getUserMessage ? error.getUserMessage() : 
-                          error.serverMessage || error.message || 'Failed to fetch pricing calendar'
-      return rejectWithValue(errorMessage)
-    }
-  }
-)
 
 // Create or update date override
 export const saveDateOverride = createAsyncThunk(
@@ -572,6 +518,6 @@ export const fetchPublicPricingCalendar = createAsyncThunk(
 // - deletePriceAsync
 
 // Export types
-export type { DatePriceOverride, PricingCalendarDay }
+export type { DatePriceOverride }
 
 export default priceSlice.reducer

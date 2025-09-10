@@ -19,7 +19,7 @@ import {
   closeDateOverrideForm, 
   saveDateOverride,
   deleteDateOverrides,
-  fetchPricingCalendar
+  fetchPublicPricingCalendar
 } from '@/store/slices/priceSlice'
 import { ApiError } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
@@ -170,7 +170,7 @@ const DateOverrideDialog: React.FC = () => {
       
       // Refresh pricing calendar if date range is set
       if (dateRange.startDate && dateRange.endDate) {
-        dispatch(fetchPricingCalendar({
+        dispatch(fetchPublicPricingCalendar({
           propertyId: currentProperty.propertyId,
           startDate: dateRange.startDate,
           endDate: dateRange.endDate
@@ -217,7 +217,7 @@ const DateOverrideDialog: React.FC = () => {
       
       // Refresh pricing calendar
       if (dateRange.startDate && dateRange.endDate) {
-        dispatch(fetchPricingCalendar({
+        dispatch(fetchPublicPricingCalendar({
           propertyId: currentProperty.propertyId,
           startDate: dateRange.startDate,
           endDate: dateRange.endDate
