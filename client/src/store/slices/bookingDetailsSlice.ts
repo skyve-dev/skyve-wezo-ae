@@ -180,7 +180,7 @@ export const fetchMessages = createAsyncThunk(
   async (bookingId: string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/api/booking/reservations/${bookingId}/messages`);
-      return response.messages;
+      return (response as any).messages;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch messages');
     }
@@ -194,7 +194,7 @@ export const sendMessage = createAsyncThunk(
       const response = await api.post(`/api/booking/reservations/${params.bookingId}/messages`, {
         message: params.message
       });
-      return response.messageData;
+      return (response as any).messageData;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to send message');
     }
@@ -340,18 +340,18 @@ const bookingDetailsSlice = createSlice({
       })
       .addCase(fetchBookingDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentBooking = action.payload.booking;
-        if (action.payload.feeBreakdown) {
-          state.feeBreakdown = action.payload.feeBreakdown;
+        state.currentBooking = (action.payload as any).booking;
+        if ((action.payload as any).feeBreakdown) {
+          state.feeBreakdown = (action.payload as any).feeBreakdown;
         }
-        if (action.payload.booking.messages) {
-          state.messages = action.payload.booking.messages;
+        if ((action.payload as any).booking?.messages) {
+          state.messages = (action.payload as any).booking.messages;
         }
-        if (action.payload.auditTrail) {
-          state.auditTrail = action.payload.auditTrail.auditLogs || [];
+        if ((action.payload as any).auditTrail) {
+          state.auditTrail = (action.payload as any).auditTrail.auditLogs || [];
         }
-        if (action.payload.statistics) {
-          state.statistics = action.payload.statistics;
+        if ((action.payload as any).statistics) {
+          state.statistics = (action.payload as any).statistics;
         }
       })
       .addCase(fetchBookingDetails.rejected, (state, action) => {
@@ -361,7 +361,7 @@ const bookingDetailsSlice = createSlice({
 
       // Send message
       .addCase(sendMessage.fulfilled, (state, action) => {
-        state.messages.unshift(action.payload);
+        state.messages.unshift(action.payload as any);
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -386,7 +386,7 @@ const bookingDetailsSlice = createSlice({
       })
       .addCase(fetchAuditTrail.fulfilled, (state, action) => {
         state.auditLoading = false;
-        state.auditTrail = action.payload.auditLogs || [];
+        state.auditTrail = (action.payload as any).auditLogs || [];
       })
       .addCase(fetchAuditTrail.rejected, (state, action) => {
         state.auditLoading = false;
@@ -395,7 +395,7 @@ const bookingDetailsSlice = createSlice({
 
       // Fetch fee breakdown
       .addCase(fetchFeeBreakdown.fulfilled, (state, action) => {
-        state.feeBreakdown = action.payload;
+        state.feeBreakdown = action.payload as any;
       })
       .addCase(fetchFeeBreakdown.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -408,13 +408,13 @@ const bookingDetailsSlice = createSlice({
       .addCase(updateReservationStatus.fulfilled, (state, action) => {
         state.actionLoading = false;
         if (state.currentBooking) {
-          state.currentBooking.status = action.payload.reservation.status;
-          state.currentBooking.paymentStatus = action.payload.reservation.paymentStatus;
-          state.currentBooking.updatedAt = action.payload.reservation.updatedAt;
+          state.currentBooking.status = (action.payload as any).reservation.status;
+          state.currentBooking.paymentStatus = (action.payload as any).reservation.paymentStatus;
+          state.currentBooking.updatedAt = (action.payload as any).reservation.updatedAt;
         }
         // Add audit log entry
-        if (action.payload.auditLog) {
-          state.auditTrail.unshift(action.payload.auditLog);
+        if ((action.payload as any).auditLog) {
+          state.auditTrail.unshift((action.payload as any).auditLog);
         }
       })
       .addCase(updateReservationStatus.rejected, (state, action) => {
@@ -429,11 +429,11 @@ const bookingDetailsSlice = createSlice({
       .addCase(modifyReservation.fulfilled, (state, action) => {
         state.actionLoading = false;
         if (state.currentBooking) {
-          state.currentBooking = { ...state.currentBooking, ...action.payload.reservation };
+          state.currentBooking = { ...state.currentBooking, ...(action.payload as any).reservation };
         }
         // Add audit log entry
-        if (action.payload.auditLog) {
-          state.auditTrail.unshift(action.payload.auditLog);
+        if ((action.payload as any).auditLog) {
+          state.auditTrail.unshift((action.payload as any).auditLog);
         }
       })
       .addCase(modifyReservation.rejected, (state, action) => {
@@ -444,12 +444,12 @@ const bookingDetailsSlice = createSlice({
       // Update private notes
       .addCase(updatePrivateNotes.fulfilled, (state, action) => {
         if (state.currentBooking) {
-          state.currentBooking.privateNotes = action.payload.reservation.privateNotes;
-          state.currentBooking.updatedAt = action.payload.reservation.updatedAt;
+          state.currentBooking.privateNotes = (action.payload as any).reservation.privateNotes;
+          state.currentBooking.updatedAt = (action.payload as any).reservation.updatedAt;
         }
         // Add audit log entry
-        if (action.payload.auditLog) {
-          state.auditTrail.unshift(action.payload.auditLog);
+        if ((action.payload as any).auditLog) {
+          state.auditTrail.unshift((action.payload as any).auditLog);
         }
       })
       .addCase(updatePrivateNotes.rejected, (state, action) => {
@@ -463,8 +463,8 @@ const bookingDetailsSlice = createSlice({
       .addCase(reportNoShow.fulfilled, (state, action) => {
         state.actionLoading = false;
         if (state.currentBooking) {
-          state.currentBooking.status = action.payload.reservation.status;
-          state.currentBooking.updatedAt = action.payload.reservation.updatedAt;
+          state.currentBooking.status = (action.payload as any).reservation.status;
+          state.currentBooking.updatedAt = (action.payload as any).reservation.updatedAt;
         }
       })
       .addCase(reportNoShow.rejected, (state, action) => {

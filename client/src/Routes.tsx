@@ -43,6 +43,7 @@ import BookingConfirmation from "@/pages/booking/BookingConfirmation";
 import BookingPayment from "@/pages/booking/BookingPayment";
 import MyBookings from "@/pages/booking/MyBookings";
 import BookingDetails from "@/pages/booking/BookingDetails";
+import CancellationPage from "@/pages/CancellationPage";
 
 export const routes = createRoutes({
     home: {
@@ -233,6 +234,15 @@ export const routes = createRoutes({
         showInHeader: false,
         showInFooter: false,
         roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can view booking details
+    },
+    'cancel-reservation': {
+        component: ({ id }: { id: string }) => <CancellationPage reservationId={id} />,
+        icon: <FaHistory />,
+        label: 'Cancel Reservation',
+        showInNav: false,
+        showInHeader: false,
+        showInFooter: false,
+        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can cancel their reservations
     }
 })
 

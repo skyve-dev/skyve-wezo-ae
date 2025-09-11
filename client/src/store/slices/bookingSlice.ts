@@ -56,6 +56,18 @@ interface RatePlanOption {
   priceBreakdown: any
 }
 
+interface CancellationPreview {
+  reservationId: string
+  originalAmount: number
+  refundAmount: number
+  cancellationFee: number
+  refundPercentage: number
+  policyType: 'FullyFlexible' | 'Moderate' | 'NonRefundable'
+  policyDetails: string
+  daysBeforeCheckIn: number
+  canCancel: boolean
+}
+
 interface BookingState {
   currentBooking: BookingFormData | null
   bookingOptions: BookingOptions | null // Available booking options (direct + rate plans)
@@ -76,6 +88,11 @@ interface BookingState {
   // User's bookings
   userBookings: any[]
   userBookingsLoading: boolean
+  
+  // Cancellation
+  cancellationPreview: CancellationPreview | null
+  cancellationLoading: boolean
+  cancellationHistory: any[]
 }
 
 const initialState: BookingState = {
@@ -90,7 +107,10 @@ const initialState: BookingState = {
   currentStep: 'details',
   autoLoginData: null,
   userBookings: [],
-  userBookingsLoading: false
+  userBookingsLoading: false,
+  cancellationPreview: null,
+  cancellationLoading: false,
+  cancellationHistory: []
 }
 
 // Async thunks
@@ -212,6 +232,49 @@ export const fetchUserBookings = createAsyncThunk(
   }
 )
 
+// Get cancellation preview
+export const fetchCancellationPreview = createAsyncThunk(
+  'booking/fetchCancellationPreview',
+  async (reservationId: string, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/reservations/${reservationId}/cancellation-preview`) as any
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch cancellation preview')
+    }
+  }
+)
+
+// Process cancellation
+export const cancelReservation = createAsyncThunk(
+  'booking/cancelReservation',
+  async (params: { reservationId: string; reason: string; reasonCategory: string }, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/api/reservations/${params.reservationId}/cancel`, {
+        reason: params.reason,
+        reasonCategory: params.reasonCategory
+      }) as any
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to cancel reservation')
+    }
+  }
+)
+
+// Fetch cancellation history
+export const fetchCancellationHistory = createAsyncThunk(
+  'booking/fetchCancellationHistory',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/cancellations/history') as any
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch cancellation history')
+    }
+  }
+)
+
+// Legacy - keeping for backward compatibility
 export const cancelBooking = createAsyncThunk(
   'booking/cancel',
   async (bookingId: string, { rejectWithValue }) => {
@@ -420,7 +483,7 @@ const bookingSlice = createSlice({
         state.error = action.payload as string
       })
       
-      // Cancel booking
+      // Cancel booking (legacy)
       .addCase(cancelBooking.pending, (state) => {
         state.isLoading = true
         state.error = null
@@ -435,6 +498,60 @@ const bookingSlice = createSlice({
       })
       .addCase(cancelBooking.rejected, (state, action) => {
         state.isLoading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch cancellation preview
+      .addCase(fetchCancellationPreview.pending, (state) => {
+        state.cancellationLoading = true
+        state.error = null
+      })
+      .addCase(fetchCancellationPreview.fulfilled, (state, action) => {
+        state.cancellationLoading = false
+        state.cancellationPreview = action.payload.data
+      })
+      .addCase(fetchCancellationPreview.rejected, (state, action) => {
+        state.cancellationLoading = false
+        state.error = action.payload as string
+      })
+      
+      // Cancel reservation
+      .addCase(cancelReservation.pending, (state) => {
+        state.cancellationLoading = true
+        state.error = null
+      })
+      .addCase(cancelReservation.fulfilled, (state, action) => {
+        state.cancellationLoading = false
+        // Update the booking in userBookings array if it exists
+        const reservationId = action.payload.data?.reservation?.id
+        if (reservationId) {
+          const bookingIndex = state.userBookings.findIndex(b => b.id === reservationId)
+          if (bookingIndex !== -1) {
+            state.userBookings[bookingIndex] = {
+              ...state.userBookings[bookingIndex],
+              status: 'Cancelled'
+            }
+          }
+        }
+        // Clear the preview after successful cancellation
+        state.cancellationPreview = null
+      })
+      .addCase(cancelReservation.rejected, (state, action) => {
+        state.cancellationLoading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch cancellation history
+      .addCase(fetchCancellationHistory.pending, (state) => {
+        state.cancellationLoading = true
+        state.error = null
+      })
+      .addCase(fetchCancellationHistory.fulfilled, (state, action) => {
+        state.cancellationLoading = false
+        state.cancellationHistory = action.payload.data || []
+      })
+      .addCase(fetchCancellationHistory.rejected, (state, action) => {
+        state.cancellationLoading = false
         state.error = action.payload as string
       })
   }

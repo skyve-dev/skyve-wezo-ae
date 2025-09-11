@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useAppShell } from '@/components/base/AppShell'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { fetchUserBookings, cancelBooking, clearError } from '@/store/slices/bookingSlice'
+import { fetchUserBookings, clearError } from '@/store/slices/bookingSlice'
 import { Box } from '@/components/base/Box'
 import { Button } from '@/components/base/Button'
 import { SecuredPage } from '@/components/SecuredPage'
@@ -205,7 +205,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
 }
 
 const MyBookings: React.FC = () => {
-  const { navigateTo, addToast, openDialog } = useAppShell()
+  const { navigateTo, addToast } = useAppShell()
   const dispatch = useAppDispatch()
   
   const { 
@@ -229,40 +229,9 @@ const MyBookings: React.FC = () => {
     }
   }, [error, addToast, dispatch])
   
-  const handleCancelBooking = async (bookingId: string) => {
-    const shouldCancel = await openDialog<boolean>((close) => (
-      <Box padding="2rem" textAlign="center">
-        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#dc2626">
-          Cancel Booking?
-        </Box>
-        <Box marginBottom="2rem">
-          Are you sure you want to cancel this booking? This action cannot be undone and may be subject to cancellation fees.
-        </Box>
-        <Box display="flex" gap="1rem" justifyContent="center">
-          <Button onClick={() => close(false)}>Keep Booking</Button>
-          <Button 
-            onClick={() => close(true)} 
-            variant="promoted"
-            style={{ backgroundColor: '#dc2626' }}
-          >
-            Yes, Cancel
-          </Button>
-        </Box>
-      </Box>
-    ))
-    
-    if (shouldCancel) {
-      try {
-        await dispatch(cancelBooking(bookingId))
-        addToast('Booking cancelled successfully', { 
-          type: 'success', 
-          autoHide: true, 
-          duration: 3000 
-        })
-      } catch (err) {
-        // Error handled by Redux
-      }
-    }
+  const handleCancelBooking = (bookingId: string) => {
+    // Navigate to the cancellation page for proper cancellation flow with refund preview
+    navigateTo('cancel-reservation', { id: bookingId })
   }
   
   const handleViewDetails = (bookingId: string) => {

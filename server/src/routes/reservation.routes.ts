@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as reservationController from '../controllers/reservation.controller';
+import { CancellationController } from '../controllers/cancellation.controller';
 import { authenticate } from '../middleware/auth';
 import {
   validateReservationUpdate,
@@ -9,6 +10,7 @@ import {
 } from '../middleware/reservation.validation';
 
 const router = Router();
+const cancellationController = new CancellationController();
 
 router.get(
   '/reservations',
@@ -54,6 +56,25 @@ router.post(
   authenticate,
   validateReviewResponse,
   reservationController.respondToReview
+);
+
+// Cancellation routes
+router.get(
+  '/reservations/:id/cancellation-preview',
+  authenticate,
+  cancellationController.getCancellationPreview
+);
+
+router.post(
+  '/reservations/:id/cancel',
+  authenticate,
+  cancellationController.cancelReservation
+);
+
+router.get(
+  '/cancellations/history',
+  authenticate,
+  cancellationController.getCancellationHistory
 );
 
 export default router;
