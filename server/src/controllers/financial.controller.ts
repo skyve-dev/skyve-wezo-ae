@@ -26,6 +26,59 @@ export const getEarnings = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
+export const getEarningsStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { startDate, endDate } = req.query;
+
+    const stats = await financialService.getEarningsStats(
+      req.user.id,
+      {
+        startDate: startDate as string,
+        endDate: endDate as string,
+      }
+    );
+
+    res.json({ stats });
+  } catch (error: any) {
+    console.error('Get earnings stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getTransactions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { type, status, propertyId, startDate, endDate, page = 1, limit = 20 } = req.query;
+
+    const transactions = await financialService.getTransactions(
+      req.user.id,
+      {
+        type: type as string,
+        status: status as string,
+        propertyId: propertyId as string,
+        startDate: startDate as string,
+        endDate: endDate as string,
+        page: Number(page),
+        limit: Number(limit),
+      }
+    );
+
+    res.json(transactions);
+  } catch (error: any) {
+    console.error('Get transactions error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export const getFinancialStatements = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
@@ -93,45 +146,197 @@ export const getInvoice = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const getBankDetails = async (req: Request, res: Response): Promise<void> => {
+export const getBankAccounts = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    const bankDetails = await financialService.getBankDetails(req.user.id);
+    const bankAccounts = await financialService.getBankAccounts(req.user.id);
 
-    res.json(bankDetails);
+    res.json({ bankAccounts });
   } catch (error: any) {
-    console.error('Get bank details error:', error);
+    console.error('Get bank accounts error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-export const updateBankDetails = async (req: Request, res: Response): Promise<void> => {
+export const addBankAccount = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    const bankDetailsData = req.body;
+    const bankAccount = await financialService.addBankAccount(req.user.id, req.body);
 
-    const bankDetails = await financialService.updateBankDetails(
-      req.user.id,
-      bankDetailsData
+    res.status(201).json({ 
+      message: 'Bank account added successfully',
+      bankAccount 
+    });
+  } catch (error: any) {
+    console.error('Add bank account error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateBankAccount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { accountId } = req.params;
+    const bankAccount = await financialService.updateBankAccount(
+      req.user.id, 
+      accountId, 
+      req.body
     );
 
     res.json({
-      message: 'Bank details updated successfully',
-      bankDetails: {
-        ...bankDetails,
-        accountNumber: `****${bankDetails.accountNumber.slice(-4)}`,
-      },
+      message: 'Bank account updated successfully',
+      bankAccount
     });
   } catch (error: any) {
-    console.error('Update bank details error:', error);
+    console.error('Update bank account error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const deleteBankAccount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { accountId } = req.params;
+    await financialService.deleteBankAccount(req.user.id, accountId);
+
+    res.json({ message: 'Bank account deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete bank account error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const verifyBankAccount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { accountId } = req.params;
+    const bankAccount = await financialService.verifyBankAccount(
+      req.user.id, 
+      accountId, 
+      req.body
+    );
+
+    res.json({
+      message: 'Bank account verified successfully',
+      bankAccount
+    });
+  } catch (error: any) {
+    console.error('Verify bank account error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getPayouts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { status, startDate, endDate } = req.query;
+
+    const payouts = await financialService.getPayouts(
+      req.user.id,
+      {
+        status: status as string,
+        startDate: startDate as string,
+        endDate: endDate as string,
+      }
+    );
+
+    res.json({ payouts });
+  } catch (error: any) {
+    console.error('Get payouts error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const requestPayout = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { bankAccountId, amount } = req.body;
+
+    const payout = await financialService.requestPayout(
+      req.user.id,
+      {
+        bankAccountId,
+        amount,
+      }
+    );
+
+    res.status(201).json({
+      message: 'Payout requested successfully',
+      payout
+    });
+  } catch (error: any) {
+    console.error('Request payout error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const downloadInvoice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { invoiceId } = req.params;
+    const downloadUrl = await financialService.generateInvoiceDownload(invoiceId, req.user.id);
+
+    res.json({ downloadUrl });
+  } catch (error: any) {
+    console.error('Download invoice error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const settleInvoice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { invoiceId } = req.params;
+    const { paymentReference } = req.body;
+
+    const invoice = await financialService.settleInvoice(
+      invoiceId, 
+      req.user.id,
+      paymentReference
+    );
+
+    res.json({
+      message: 'Invoice settled successfully',
+      invoice
+    });
+  } catch (error: any) {
+    console.error('Settle invoice error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

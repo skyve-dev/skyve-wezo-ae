@@ -2,6 +2,181 @@ import prisma from '../config/database';
 import { Prisma } from '@prisma/client';
 
 export class ReviewService {
+  // Guest Review Methods
+  async createReview(
+    guestId: string,
+    reservationId: string,
+    rating: number,
+    comment?: string
+  ): Promise<any> {
+    // Validate that the guest can review this reservation
+    const canReview = await this.canGuestReview(guestId, reservationId);
+    if (!canReview.allowed) {
+      throw new Error(canReview.reason || 'You cannot review this reservation');
+    }
+
+    // Create the review
+    const review = await prisma.review.create({
+      data: {
+        guestId,
+        propertyId: canReview.reservation!.propertyId,
+        reservationId,
+        rating,
+        comment: comment || null,
+      },
+      include: {
+        property: {
+          select: {
+            propertyId: true,
+            name: true,
+            photos: true,
+          },
+        },
+        reservation: {
+          select: {
+            id: true,
+            checkInDate: true,
+            checkOutDate: true,
+          },
+        },
+      },
+    });
+
+    return review;
+  }
+
+  async canGuestReview(
+    guestId: string,
+    reservationId: string
+  ): Promise<{ allowed: boolean; reason?: string; reservation?: any }> {
+    // Check if reservation exists and belongs to the guest
+    const reservation = await prisma.reservation.findFirst({
+      where: {
+        id: reservationId,
+        guestId,
+      },
+      include: {
+        property: {
+          select: {
+            propertyId: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!reservation) {
+      return { allowed: false, reason: 'Reservation not found or does not belong to you' };
+    }
+
+    // Check if reservation is completed
+    if (reservation.status !== 'Completed') {
+      return { allowed: false, reason: 'You can only review completed stays' };
+    }
+
+    // Check if checkout date has passed
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkoutDate = new Date(reservation.checkOutDate);
+    checkoutDate.setHours(0, 0, 0, 0);
+    
+    if (checkoutDate > today) {
+      return { allowed: false, reason: 'You can only review after your stay is complete' };
+    }
+
+    // Check if review already exists
+    const existingReview = await prisma.review.findFirst({
+      where: {
+        reservationId,
+      },
+    });
+
+    if (existingReview) {
+      return { allowed: false, reason: 'You have already reviewed this stay' };
+    }
+
+    // Check if within review window (30 days after checkout)
+    const daysSinceCheckout = Math.floor((today.getTime() - checkoutDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceCheckout > 30) {
+      return { allowed: false, reason: 'Review period has expired (30 days after checkout)' };
+    }
+
+    return { allowed: true, reservation };
+  }
+
+  async getGuestPendingReviews(guestId: string): Promise<any> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Find completed reservations without reviews
+    const pendingReviews = await prisma.reservation.findMany({
+      where: {
+        guestId,
+        status: 'Completed',
+        checkOutDate: {
+          lte: today,
+          gte: thirtyDaysAgo, // Within 30-day review window
+        },
+        review: null, // No review exists
+      },
+      include: {
+        property: {
+          select: {
+            propertyId: true,
+            name: true,
+            photos: true,
+            address: true,
+          },
+        },
+      },
+      orderBy: {
+        checkOutDate: 'desc',
+      },
+    });
+
+    return pendingReviews;
+  }
+
+  async getGuestReviews(guestId: string, page: number = 1, limit: number = 20): Promise<any> {
+    const skip = (page - 1) * limit;
+
+    const [reviews, totalCount] = await prisma.$transaction([
+      prisma.review.findMany({
+        where: { guestId },
+        skip,
+        take: limit,
+        orderBy: { reviewedAt: 'desc' },
+        include: {
+          property: {
+            select: {
+              propertyId: true,
+              name: true,
+              photos: true,
+            },
+          },
+          reservation: {
+            select: {
+              id: true,
+              checkInDate: true,
+              checkOutDate: true,
+            },
+          },
+        },
+      }),
+      prisma.review.count({ where: { guestId } }),
+    ]);
+
+    return {
+      reviews,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+  }
   async getReviews(
     userId: string,
     filters: {

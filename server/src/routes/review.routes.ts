@@ -9,6 +9,36 @@ import {
 
 const router = Router();
 
+// Guest Review Endpoints
+// Submit a new review
+router.post(
+  '/reviews/submit',
+  authenticate,
+  reviewController.createReview
+);
+
+// Get pending reviews for guest
+router.get(
+  '/reviews/pending',
+  authenticate,
+  reviewController.getGuestPendingReviews
+);
+
+// Get guest's submitted reviews
+router.get(
+  '/reviews/my-reviews',
+  authenticate,
+  reviewController.getGuestReviews
+);
+
+// Check if guest can review a reservation
+router.get(
+  '/reviews/can-review/:reservationId',
+  authenticate,
+  reviewController.canReviewReservation
+);
+
+// HomeOwner Review Endpoints
 // Get all reviews for user's properties
 router.get(
   '/reviews',

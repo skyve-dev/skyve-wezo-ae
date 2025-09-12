@@ -8,13 +8,102 @@ import {
 
 const router = Router();
 
+// Earnings and Stats endpoints (matching frontend expectations)
 router.get(
-  '/financial/earnings',
+  '/finance/earnings/stats',
+  authenticate,
+  validateDateRange,
+  financialController.getEarningsStats
+);
+
+router.get(
+  '/finance/earnings',
   authenticate,
   validateDateRange,
   financialController.getEarnings
 );
 
+// Transaction endpoints  
+router.get(
+  '/finance/transactions',
+  authenticate,
+  validateDateRange,
+  financialController.getTransactions
+);
+
+// Bank Account endpoints (matching frontend expectations)
+router.get(
+  '/finance/bank-accounts',
+  authenticate,
+  financialController.getBankAccounts
+);
+
+router.post(
+  '/finance/bank-accounts',
+  authenticate,
+  validateBankDetails,
+  financialController.addBankAccount
+);
+
+router.patch(
+  '/finance/bank-accounts/:accountId',
+  authenticate,
+  validateBankDetails,
+  financialController.updateBankAccount
+);
+
+router.delete(
+  '/finance/bank-accounts/:accountId',
+  authenticate,
+  financialController.deleteBankAccount
+);
+
+router.post(
+  '/finance/bank-accounts/:accountId/verify',
+  authenticate,
+  financialController.verifyBankAccount
+);
+
+// Payout endpoints
+router.get(
+  '/finance/payouts',
+  authenticate,
+  validateDateRange,
+  financialController.getPayouts
+);
+
+router.post(
+  '/finance/payouts/request',
+  authenticate,
+  financialController.requestPayout
+);
+
+// Invoice endpoints
+router.get(
+  '/finance/invoices',
+  authenticate,
+  financialController.getInvoices
+);
+
+router.get(
+  '/finance/invoices/:invoiceId',
+  authenticate,
+  financialController.getInvoice
+);
+
+router.get(
+  '/finance/invoices/:invoiceId/download',
+  authenticate,
+  financialController.downloadInvoice
+);
+
+router.patch(
+  '/finance/invoices/:invoiceId/settle',
+  authenticate,
+  financialController.settleInvoice
+);
+
+// Financial Statements (legacy endpoint)
 router.get(
   '/financial/statements',
   authenticate,
@@ -22,31 +111,7 @@ router.get(
   financialController.getFinancialStatements
 );
 
-router.get(
-  '/financial/invoices',
-  authenticate,
-  financialController.getInvoices
-);
-
-router.get(
-  '/financial/invoices/:invoiceId',
-  authenticate,
-  financialController.getInvoice
-);
-
-router.get(
-  '/financial/bank-details',
-  authenticate,
-  financialController.getBankDetails
-);
-
-router.put(
-  '/financial/bank-details',
-  authenticate,
-  validateBankDetails,
-  financialController.updateBankDetails
-);
-
+// Security reporting
 router.post(
   '/security/report',
   authenticate,

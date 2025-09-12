@@ -64,9 +64,12 @@ export interface ReviewStats {
 
 export interface ReviewState {
   reviews: Review[]
+  guestReviews: Review[]
+  pendingReviews: any[]
   currentReview: Review | null
   stats: ReviewStats
   loading: boolean
+  statsLoading: boolean
   error: string | null
   filters: {
     rating: number | null
@@ -78,6 +81,8 @@ export interface ReviewState {
 
 const initialState: ReviewState = {
   reviews: [],
+  guestReviews: [],
+  pendingReviews: [],
   currentReview: null,
   stats: {
     totalReviews: 0,
@@ -101,6 +106,7 @@ const initialState: ReviewState = {
     responseRate: 0
   },
   loading: false,
+  statsLoading: false,
   error: null,
   filters: {
     rating: null,
@@ -149,7 +155,7 @@ const calculateStats = (reviews: Review[]): ReviewStats => {
   }
 }
 
-// Async thunks
+// Async thunks for HomeOwner (viewing received reviews)
 export const fetchReviews = createAsyncThunk(
   'reviews/fetchReviews',
   async (filters: { propertyId?: string; rating?: number; hasResponse?: boolean; sortBy?: string } = {}, { rejectWithValue }) => {
@@ -168,10 +174,54 @@ export const fetchReviews = createAsyncThunk(
         params.append('sortBy', filters.sortBy)
       }
 
-      const response = await api.get<{ reviews: Review[] }>(`/api/reviews?${params}`)
-      return response.reviews
+      const response = await api.get(`/api/reviews?${params}`)
+      return (response as any).reviews || []
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch reviews')
+    }
+  }
+)
+
+// Async thunks for Tenant (viewing their submitted reviews)
+export const fetchGuestReviews = createAsyncThunk(
+  'reviews/fetchGuestReviews',
+  async (params: { page?: number; limit?: number } = {}, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams()
+      if (params.page) queryParams.append('page', params.page.toString())
+      if (params.limit) queryParams.append('limit', params.limit.toString())
+
+      const response = await api.get(`/api/reviews/my-reviews?${queryParams}`)
+      return (response as any).reviews || []
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch guest reviews')
+    }
+  }
+)
+
+// Fetch pending reviews for guest
+export const fetchPendingReviews = createAsyncThunk(
+  'reviews/fetchPendingReviews',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/reviews/pending')
+      return (response as any).pendingReviews || []
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch pending reviews')
+    }
+  }
+)
+
+// Fetch review statistics for HomeOwner
+export const fetchReviewStats = createAsyncThunk(
+  'reviews/fetchStats',
+  async (propertyId: string | undefined = undefined, { rejectWithValue }) => {
+    try {
+      const params = propertyId ? `?propertyId=${propertyId}` : ''
+      const response = await api.get(`/api/reviews/stats${params}`)
+      return response as any
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch review stats')
     }
   }
 )
@@ -192,11 +242,10 @@ export const respondToReview = createAsyncThunk(
   'reviews/respond',
   async ({ reviewId, responseText }: ReviewResponse, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ review: Review }>(`/api/reviews/${reviewId}/respond`, {
-        responseText,
-        respondedAt: new Date().toISOString()
+      const response = await api.post(`/api/review-management/${reviewId}/response`, {
+        response: responseText
       })
-      return response.review
+      return (response as any).review
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to respond to review')
     }
@@ -207,11 +256,10 @@ export const updateReviewResponse = createAsyncThunk(
   'reviews/updateResponse',
   async ({ reviewId, responseText }: ReviewResponse, { rejectWithValue }) => {
     try {
-      const response = await api.patch<{ review: Review }>(`/api/reviews/${reviewId}/response`, {
-        responseText,
-        updatedAt: new Date().toISOString()
+      const response = await api.put(`/api/review-management/${reviewId}/response`, {
+        response: responseText
       })
-      return response.review
+      return (response as any).review
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update review response')
     }
@@ -222,8 +270,8 @@ export const deleteReviewResponse = createAsyncThunk(
   'reviews/deleteResponse',
   async (reviewId: string, { rejectWithValue }) => {
     try {
-      const response = await api.delete<{ review: Review }>(`/api/reviews/${reviewId}/response`)
-      return response.review
+      const response = await api.delete(`/api/review-management/${reviewId}/response`)
+      return (response as any).review
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to delete review response')
     }
@@ -288,7 +336,7 @@ const reviewSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch reviews
+      // Fetch reviews (HomeOwner)
       .addCase(fetchReviews.pending, (state) => {
         state.loading = true
         state.error = null
@@ -305,6 +353,48 @@ const reviewSlice = createSlice({
       })
       .addCase(fetchReviews.rejected, (state, action) => {
         state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch guest reviews (Tenant)
+      .addCase(fetchGuestReviews.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchGuestReviews.fulfilled, (state, action) => {
+        state.loading = false
+        state.guestReviews = action.payload
+      })
+      .addCase(fetchGuestReviews.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch pending reviews (Tenant)
+      .addCase(fetchPendingReviews.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPendingReviews.fulfilled, (state, action) => {
+        state.loading = false
+        state.pendingReviews = action.payload
+      })
+      .addCase(fetchPendingReviews.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+      
+      // Fetch review stats (HomeOwner)
+      .addCase(fetchReviewStats.pending, (state) => {
+        state.statsLoading = true
+        state.error = null
+      })
+      .addCase(fetchReviewStats.fulfilled, (state, action) => {
+        state.statsLoading = false
+        state.stats = action.payload
+      })
+      .addCase(fetchReviewStats.rejected, (state, action) => {
+        state.statsLoading = false
         state.error = action.payload as string
       })
       

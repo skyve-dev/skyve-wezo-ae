@@ -16,17 +16,21 @@ import {
   IoRefresh,
   IoAdd,
   IoPerson,
-  IoBusiness
+  IoBusiness,
+  IoStar
 } from 'react-icons/io5'
+import ReviewSubmissionForm from '@/components/review/ReviewSubmissionForm'
+import { api } from '@/utils/api'
 
 interface BookingCardProps {
   booking: any
   onCancel: (bookingId: string) => void
   onViewDetails: (bookingId: string) => void
+  onWriteReview: (booking: any) => void
   userRole: string
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDetails, userRole }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDetails, onWriteReview, userRole }) => {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'confirmed': return { bg: '#dcfce7', color: '#166534', icon: <IoCheckmarkCircle /> }
@@ -40,6 +44,19 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
   const statusStyle = getStatusColor(booking.status)
   
   const canCancel = booking.status?.toLowerCase() === 'confirmed' || booking.status?.toLowerCase() === 'pending'
+  
+  // Check if booking can be reviewed (Tenant only, completed status, within 30 days)
+  const canReview = () => {
+    if (userRole !== 'Tenant') return false
+    if (booking.status?.toLowerCase() !== 'completed') return false
+    if (booking.hasReview) return false // Already reviewed
+    
+    const checkoutDate = new Date(booking.checkOutDate)
+    const today = new Date()
+    const daysSinceCheckout = Math.floor((today.getTime() - checkoutDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    return daysSinceCheckout >= 0 && daysSinceCheckout <= 30
+  }
   
   return (
     <Box
@@ -168,6 +185,18 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
           style={{ flex: 1 }}
         />
         
+        {/* Write Review button for completed stays */}
+        {canReview() && (
+          <Button
+            label="Write Review"
+            icon={<IoStar />}
+            onClick={() => onWriteReview(booking)}
+            variant="promoted"
+            size="small"
+            style={{ flex: 1 }}
+          />
+        )}
+        
         {/* Cancel button for Tenants only */}
         {userRole === 'Tenant' && canCancel && (
           <Button
@@ -189,8 +218,9 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
 }
 
 const MyBookings: React.FC = () => {
-  const { navigateTo, addToast } = useAppShell()
+  const { navigateTo, addToast, openDialog } = useAppShell()
   const dispatch = useAppDispatch()
+  const [reviewingBooking, setReviewingBooking] = React.useState<any>(null)
   
   const { 
     userBookings, 
@@ -228,6 +258,45 @@ const MyBookings: React.FC = () => {
   
   const handleNewBooking = () => {
     navigateTo('properties', {})
+  }
+  
+  const handleWriteReview = (booking: any) => {
+    setReviewingBooking(booking)
+  }
+  
+  const handleSubmitReview = async (rating: number, comment: string) => {
+    if (!reviewingBooking) return
+    
+    try {
+      await api.post('/api/reviews/submit', {
+        reservationId: reviewingBooking.id,
+        rating,
+        comment
+      })
+      
+      addToast('Review submitted successfully!', { type: 'success', autoHide: true, duration: 3000 })
+      
+      // Update the booking to mark it as reviewed
+      dispatch(fetchUserBookings())
+      setReviewingBooking(null)
+      
+      // Show success dialog
+      await openDialog<void>((close) => (
+        <Box padding="2rem" textAlign="center">
+          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
+            Thank You for Your Review!
+          </Box>
+          <Box marginBottom="2rem">
+            Your feedback helps other guests and helps the property owner improve their service.
+          </Box>
+          <Button onClick={() => close()} variant="promoted">Continue</Button>
+        </Box>
+      ))
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Failed to submit review'
+      addToast(errorMessage, { type: 'error', autoHide: true, duration: 4000 })
+      throw new Error(errorMessage)
+    }
   }
   
   if (userBookingsLoading) {
@@ -402,12 +471,42 @@ const MyBookings: React.FC = () => {
                 booking={booking}
                 onCancel={handleCancelBooking}
                 onViewDetails={handleViewDetails}
+                onWriteReview={handleWriteReview}
                 userRole={userRole}
               />
             ))}
           </Box>
         )}
       </Box>
+      
+      {/* Review Submission Modal */}
+      {reviewingBooking && (
+        <Box
+          position="fixed"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          zIndex="9999"
+          padding="1rem"
+        >
+          <ReviewSubmissionForm
+            reservation={{
+              id: reviewingBooking.id,
+              propertyId: reviewingBooking.propertyId,
+              propertyName: reviewingBooking.propertyName,
+              checkInDate: reviewingBooking.checkInDate,
+              checkOutDate: reviewingBooking.checkOutDate
+            }}
+            onSubmit={handleSubmitReview}
+            onCancel={() => setReviewingBooking(null)}
+          />
+        </Box>
+      )}
       
       {/* Custom CSS for spinner animation */}
       <style>{`
