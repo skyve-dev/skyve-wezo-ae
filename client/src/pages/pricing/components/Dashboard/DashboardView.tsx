@@ -5,8 +5,10 @@ import { FaChartLine } from 'react-icons/fa'
 // Temporarily disabled - needs refactoring for property-only pricing
 const DashboardView: React.FC = () => {
   return (
-    <Box 
-      textAlign="center" 
+    <Box
+        display={'flex'}
+        flexDirection={'column'}
+      alignItems={'center'}
       padding="3rem" 
       backgroundColor="#f9fafb" 
       borderRadius="8px"

@@ -7,8 +7,7 @@ import {
   IoWarning,
   IoDownload,
   IoPrint,
-  IoCreate,
-  IoMail
+  IoCreate
 } from 'react-icons/io5';
 
 interface BookingActionsSectionProps {
@@ -117,26 +116,6 @@ const BookingActionsSection: React.FC<BookingActionsSectionProps> = ({
               }}
             />
           )}
-        </Box>
-      </Box>
-      
-      {/* Communication Actions */}
-      <Box marginBottom="1.5rem">
-        <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.75rem">
-          Communication
-        </Box>
-        
-        <Box display="flex" flexDirection="column" gap="0.5rem">
-          <Button
-            label={userRole === 'Tenant' ? 'Message Host' : 'Message Guest'}
-            icon={<IoMail />}
-            onClick={() => {
-              // TODO: Scroll to messaging section
-              console.log('Focus on messaging');
-            }}
-            variant="normal"
-            size="small"
-          />
         </Box>
       </Box>
       

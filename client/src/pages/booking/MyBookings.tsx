@@ -16,7 +16,6 @@ import {
   IoRefresh,
   IoAdd,
   IoPerson,
-  IoMail,
   IoBusiness
 } from 'react-icons/io5'
 
@@ -159,7 +158,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
         </Box>
       </Box>
       
-      {/* Action buttons - Role-specific */}
+      {/* Action buttons */}
       <Box display="flex" gap="0.75rem" flexDirection="column" flexDirectionSm="row">
         <Button
           label="View Details"
@@ -169,7 +168,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
           style={{ flex: 1 }}
         />
         
-        {/* Tenant-specific actions */}
+        {/* Cancel button for Tenants only */}
         {userRole === 'Tenant' && canCancel && (
           <Button
             label="Cancel Booking"
@@ -182,21 +181,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onCancel, onViewDeta
               color: '#dc2626',
               border: '1px solid #fecaca'
             }}
-          />
-        )}
-        
-        {/* HomeOwner and Manager actions */}
-        {(userRole === 'HomeOwner' || userRole === 'Manager') && booking.guest && (
-          <Button
-            label="Message Guest"
-            icon={<IoMail />}
-            onClick={() => {
-              // TODO: Implement messaging functionality
-              console.log('Message guest:', booking.guest.email)
-            }}
-            variant="normal"
-            size="small"
-            style={{ flex: 1 }}
           />
         )}
       </Box>
