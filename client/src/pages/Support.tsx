@@ -1,10 +1,27 @@
 import React from 'react'
 import { IoIosHelpCircle, IoIosMail, IoIosWarning } from 'react-icons/io'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '@/store'
+import { setShowNewMessageDrawer } from '@/store/slices/messageSlice'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
 import { Box } from '@/components'
+import { useAppShell } from '@/components/base/AppShell'
+import NewMessageDrawer from '@/components/messaging/NewMessageDrawer'
 
 // Support Component
 const Support: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>()
+    const { navigateTo } = useAppShell()
+
+    const handleContactSupport = () => {
+        // Navigate to inbox
+        navigateTo('inbox', {})
+        
+        // Open new message drawer with support pre-selected
+        // Note: The NewMessageDrawer will auto-select support when type is 'support'
+        dispatch(setShowNewMessageDrawer(true))
+    }
+
     return (
         <SecuredPage>
             <Box padding="2rem" maxWidth="1200px" margin="0 auto">
@@ -33,10 +50,24 @@ const Support: React.FC = () => {
                         <h3 style={{fontSize: '1.125rem', margin: '0 0 0.5rem 0'}}>FAQs</h3>
                         <p style={{color: '#666', margin: 0, fontSize: '0.875rem'}}>Find answers to common questions</p>
                     </Box>
-                    <Box padding="1.5rem" backgroundColor="white" borderRadius="8px" boxShadow="0 2px 4px rgba(0,0,0,0.1)" cursor="pointer">
+                    <Box 
+                        padding="1.5rem" 
+                        backgroundColor="white" 
+                        borderRadius="8px" 
+                        boxShadow="0 2px 4px rgba(0,0,0,0.1)" 
+                        cursor="pointer"
+                        onClick={handleContactSupport}
+                        style={{ transition: 'all 0.2s' }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                    >
                         <IoIosMail style={{fontSize: '2rem', color: '#10b981', marginBottom: '1rem'}} />
                         <h3 style={{fontSize: '1.125rem', margin: '0 0 0.5rem 0'}}>Contact Support</h3>
-                        <p style={{color: '#666', margin: 0, fontSize: '0.875rem'}}>Get in touch with our support team</p>
+                        <p style={{color: '#666', margin: 0, fontSize: '0.875rem'}}>Get in touch with our support team via messages</p>
                     </Box>
                     <Box padding="1.5rem" backgroundColor="white" borderRadius="8px" boxShadow="0 2px 4px rgba(0,0,0,0.1)" cursor="pointer">
                         <IoIosWarning style={{fontSize: '2rem', color: '#ef4444', marginBottom: '1rem'}} />
@@ -73,6 +104,9 @@ const Support: React.FC = () => {
                         </Box>
                     </Box>
                 </Box>
+
+                {/* New Message Drawer for support messaging */}
+                <NewMessageDrawer />
             </Box>
         </SecuredPage>
     )

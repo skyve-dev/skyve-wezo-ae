@@ -4,282 +4,259 @@ import { api } from '../../utils/api'
 // Types
 export interface Message {
   id: string
-  conversationId: string
   senderId: string
-  senderName: string
-  senderType: 'guest' | 'host' | 'support'
+  senderType: 'Tenant' | 'HomeOwner' | 'Manager'
   recipientId: string
-  recipientName: string
-  recipientType: 'guest' | 'host' | 'support'
-  subject: string
+  recipientType: 'Tenant' | 'HomeOwner' | 'Manager'
   content: string
   isRead: boolean
-  isStarred: boolean
   attachments?: MessageAttachment[]
-  translatedContent?: {
-    language: string
-    content: string
-  }
-  reservationId?: string
-  propertyId?: string
-  priority: 'low' | 'normal' | 'high' | 'urgent'
+  reservationId?: string | null
+  sentAt: string
   createdAt: string
   updatedAt: string
-  readAt?: string
 }
 
 export interface MessageAttachment {
   id: string
-  filename: string
-  url: string
-  mimeType: string
-  size: number
+  fileName: string
+  fileUrl: string
+  fileType: string
+  fileSize: number
+  uploadedAt: string
 }
 
-export interface Conversation {
+export interface ConversationSummary {
   id: string
   participants: {
     id: string
     name: string
-    type: 'guest' | 'host' | 'support'
-    avatar?: string
+    role: 'Tenant' | 'HomeOwner' | 'Manager'
   }[]
-  subject: string
-  lastMessage: Message
-  unreadCount: number
-  isArchived: boolean
-  reservationId?: string
-  propertyId?: string
+  reservationId: string | null
   propertyName?: string
-  tags: string[]
+  propertyId?: string
+  checkInDate?: string
+  checkOutDate?: string
+  lastMessage: {
+    id: string
+    content: string
+    sentAt: string
+    senderId: string
+    senderType: 'Tenant' | 'HomeOwner' | 'Manager'
+  }
+  unreadCount: number
+  totalMessages: number
+  type: 'reservation' | 'general' | 'support'
   createdAt: string
   updatedAt: string
 }
 
-export interface MessageState {
-  conversations: Conversation[]
-  currentConversation: Conversation | null
+export interface MessageFilters {
+  type?: 'all' | 'unread' | 'reservations' | 'support'
+  unreadOnly?: boolean
+  conversationWith?: string
+  reservationId?: string
+}
+
+export interface SendMessageParams {
+  recipientId: string
+  recipientType: 'Tenant' | 'HomeOwner' | 'Manager'
+  content: string
+  reservationId?: string | null
+  attachments?: MessageAttachment[]
+}
+
+export interface StartConversationParams {
+  recipientId: string
+  recipientType: 'Tenant' | 'HomeOwner' | 'Manager'
+  subject?: string
+  content: string
+  reservationId?: string | null
+}
+
+interface MessageState {
+  // Conversations
+  conversations: ConversationSummary[]
+  conversationsLoading: boolean
+  conversationsTotalCount: number
+  
+  // Current conversation
+  selectedConversation: ConversationSummary | null
   messages: Message[]
-  currentMessage: Message | null
-  loading: boolean
+  messagesLoading: boolean
+  
+  // Message composition
+  isSending: boolean
+  
+  // Filters and search
+  activeFilter: 'all' | 'unread' | 'reservations' | 'support'
+  searchQuery: string
+  searchResults: Message[]
+  searchLoading: boolean
+  
+  // Unread count
+  unreadCount: number
+  
+  // UI state
+  selectedConversationId: string | null
+  showNewMessageDrawer: boolean
+  showAttachmentDrawer: boolean
+  
+  // Error handling
   error: string | null
-  stats: {
-    totalUnread: number
-    totalConversations: number
-    totalMessages: number
-    guestMessages: number
-    supportMessages: number
-  }
-  filters: {
-    type: 'all' | 'guest' | 'support' | 'unread' | 'starred'
-    priority: string | null
-    propertyId: string | null
-    dateRange: {
-      start: string | null
-      end: string | null
-    }
-  }
-  compose: {
-    isOpen: boolean
-    draft: {
-      to: string
-      subject: string
-      content: string
-      reservationId?: string
-      propertyId?: string
-    }
-  }
 }
 
 const initialState: MessageState = {
   conversations: [],
-  currentConversation: null,
+  conversationsLoading: false,
+  conversationsTotalCount: 0,
+  selectedConversation: null,
   messages: [],
-  currentMessage: null,
-  loading: false,
-  error: null,
-  stats: {
-    totalUnread: 0,
-    totalConversations: 0,
-    totalMessages: 0,
-    guestMessages: 0,
-    supportMessages: 0
-  },
-  filters: {
-    type: 'all',
-    priority: null,
-    propertyId: null,
-    dateRange: {
-      start: null,
-      end: null
-    }
-  },
-  compose: {
-    isOpen: false,
-    draft: {
-      to: '',
-      subject: '',
-      content: ''
-    }
-  }
-}
-
-// Helper function to calculate stats
-const calculateStats = (conversations: Conversation[]): MessageState['stats'] => {
-  const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)
-  const guestMessages = conversations.filter(conv => 
-    conv.participants.some(p => p.type === 'guest')
-  ).length
-  const supportMessages = conversations.filter(conv => 
-    conv.participants.some(p => p.type === 'support')
-  ).length
-
-  return {
-    totalUnread,
-    totalConversations: conversations.length,
-    totalMessages: conversations.length, // Simplified count
-    guestMessages,
-    supportMessages
-  }
+  messagesLoading: false,
+  isSending: false,
+  activeFilter: 'all',
+  searchQuery: '',
+  searchResults: [],
+  searchLoading: false,
+  unreadCount: 0,
+  selectedConversationId: null,
+  showNewMessageDrawer: false,
+  showAttachmentDrawer: false,
+  error: null
 }
 
 // Async thunks
 export const fetchConversations = createAsyncThunk(
   'messages/fetchConversations',
-  async (filters: { type?: string; propertyId?: string } = {}, { rejectWithValue }) => {
+  async (params: { 
+    page?: number
+    limit?: number
+    filters?: MessageFilters 
+  } = {}, { rejectWithValue }) => {
     try {
-      const params = new URLSearchParams()
-      if (filters?.type && filters.type !== 'all') {
-        params.append('type', filters.type)
-      }
-      if (filters?.propertyId) {
-        params.append('propertyId', filters.propertyId)
-      }
-
-      const response = await api.get<{ conversations: Conversation[] }>(`/api/messages/conversations?${params}`)
-      return response.conversations
+      const { page = 1, limit = 20, filters = {} } = params
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(filters.type && { type: filters.type }),
+        ...(filters.unreadOnly && { unreadOnly: 'true' }),
+        ...(filters.conversationWith && { conversationWith: filters.conversationWith }),
+        ...(filters.reservationId && { reservationId: filters.reservationId })
+      })
+      
+      const response = await api.get(`/api/messages/conversations?${queryParams}`) as any
+      return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch conversations')
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch conversations')
     }
   }
 )
 
 export const fetchConversationMessages = createAsyncThunk(
   'messages/fetchConversationMessages',
-  async (conversationId: string, { rejectWithValue }) => {
+  async (params: { 
+    conversationId: string
+    page?: number
+    limit?: number 
+  }, { rejectWithValue }) => {
     try {
-      const response = await api.get<{ messages: Message[]; conversation: Conversation }>(`/api/messages/conversations/${conversationId}`)
-      return response
+      const { conversationId, page = 1, limit = 50 } = params
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      })
+      
+      const response = await api.get(`/api/messages/conversations/${conversationId}?${queryParams}`) as any
+      return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch conversation messages')
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch messages')
     }
   }
 )
 
 export const sendMessage = createAsyncThunk(
-  'messages/send',
-  async (params: { 
-    conversationId?: string
-    content: string
-    attachments?: File[]
-  } = { content: '' }, { getState, rejectWithValue }) => {
-    const { conversationId, content, attachments } = params
+  'messages/sendMessage',
+  async (params: SendMessageParams, { rejectWithValue }) => {
     try {
-      const state = getState() as { messages: MessageState }
-      const { compose } = state.messages
-      
-      const formData = new FormData()
-      formData.append('content', content)
-      if (conversationId) {
-        formData.append('conversationId', conversationId)
-      } else {
-        // New conversation
-        formData.append('to', compose.draft.to)
-        formData.append('subject', compose.draft.subject)
-        if (compose.draft.reservationId) {
-          formData.append('reservationId', compose.draft.reservationId)
-        }
-        if (compose.draft.propertyId) {
-          formData.append('propertyId', compose.draft.propertyId)
-        }
-      }
-      
-      if (attachments) {
-        attachments.forEach(file => {
-          formData.append('attachments', file)
-        })
-      }
-
-      const response = await api.post<{ message: Message; conversation: Conversation }>('/api/messages/send', formData)
-      return response
+      const response = await api.post('/api/messages', params) as any
+      return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to send message')
+      return rejectWithValue(error.response?.data?.message || 'Failed to send message')
     }
   }
 )
 
-export const markAsRead = createAsyncThunk(
+export const startConversation = createAsyncThunk(
+  'messages/startConversation',
+  async (params: StartConversationParams, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/api/messages/conversations', params) as any
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to start conversation')
+    }
+  }
+)
+
+export const markMessagesAsRead = createAsyncThunk(
   'messages/markAsRead',
-  async ({ messageId, conversationId }: { messageId?: string; conversationId?: string }, { rejectWithValue }) => {
+  async (messageIds: string[], { rejectWithValue }) => {
     try {
-      const endpoint = messageId 
-        ? `/api/messages/${messageId}/read`
-        : `/api/messages/conversations/${conversationId}/read`
-      
-      const response = await api.patch<{ success: boolean; updatedIds: string[] }>(endpoint)
-      return { messageId, conversationId, updatedIds: response.updatedIds }
+      await api.put('/api/messages/mark-read', { messageIds }) as any
+      return { messageIds }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to mark as read')
+      return rejectWithValue(error.response?.data?.message || 'Failed to mark messages as read')
     }
   }
 )
 
-export const markAsStarred = createAsyncThunk(
-  'messages/markAsStarred',
-  async ({ messageId, starred }: { messageId: string; starred: boolean }, { rejectWithValue }) => {
+export const fetchUnreadCount = createAsyncThunk(
+  'messages/fetchUnreadCount',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await api.patch<{ message: Message }>(`/api/messages/${messageId}/star`, { starred })
-      return response.message
+      const response = await api.get('/api/messages/unread-count') as any
+      return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update starred status')
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch unread count')
     }
   }
 )
 
-export const archiveConversation = createAsyncThunk(
-  'messages/archive',
-  async ({ conversationId, archived }: { conversationId: string; archived: boolean }, { rejectWithValue }) => {
+export const searchMessages = createAsyncThunk(
+  'messages/searchMessages',
+  async (params: {
+    query: string
+    page?: number
+    limit?: number
+    filters?: Pick<MessageFilters, 'type' | 'reservationId'>
+  }, { rejectWithValue }) => {
     try {
-      const response = await api.patch<{ conversation: Conversation }>(`/api/messages/conversations/${conversationId}/archive`, { archived })
-      return response.conversation
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to archive conversation')
-    }
-  }
-)
-
-export const deleteMessage = createAsyncThunk(
-  'messages/delete',
-  async (messageId: string, { rejectWithValue }) => {
-    try {
-      await api.delete(`/api/messages/${messageId}`)
-      return messageId
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete message')
-    }
-  }
-)
-
-export const translateMessage = createAsyncThunk(
-  'messages/translate',
-  async ({ messageId, targetLanguage }: { messageId: string; targetLanguage: string }, { rejectWithValue }) => {
-    try {
-      const response = await api.post<{ translatedContent: string }>(`/api/messages/${messageId}/translate`, {
-        targetLanguage
+      const { query, page = 1, limit = 20, filters = {} } = params
+      const queryParams = new URLSearchParams({
+        q: query,
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(filters.type && { type: filters.type }),
+        ...(filters.reservationId && { reservationId: filters.reservationId })
       })
-      return { messageId, translatedContent: response.translatedContent, targetLanguage }
+      
+      const response = await api.get(`/api/messages/search?${queryParams}`) as any
+      return response.data
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to translate message')
+      return rejectWithValue(error.response?.data?.message || 'Failed to search messages')
+    }
+  }
+)
+
+export const deleteConversation = createAsyncThunk(
+  'messages/deleteConversation',
+  async (conversationId: string, { rejectWithValue }) => {
+    try {
+      await api.delete(`/api/messages/conversations/${conversationId}`)
+      return { conversationId }
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete conversation')
     }
   }
 )
@@ -288,208 +265,195 @@ const messageSlice = createSlice({
   name: 'messages',
   initialState,
   reducers: {
+    // UI state management
+    setActiveFilter: (state, action: PayloadAction<'all' | 'unread' | 'reservations' | 'support'>) => {
+      state.activeFilter = action.payload
+    },
+    
+    setSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload
+    },
+    
+    setSelectedConversation: (state, action: PayloadAction<ConversationSummary | null>) => {
+      state.selectedConversation = action.payload
+      state.selectedConversationId = action.payload?.id || null
+      if (action.payload) {
+        state.messages = [] // Clear previous messages
+      }
+    },
+    
+    setShowNewMessageDrawer: (state, action: PayloadAction<boolean>) => {
+      state.showNewMessageDrawer = action.payload
+    },
+    
+    setShowAttachmentDrawer: (state, action: PayloadAction<boolean>) => {
+      state.showAttachmentDrawer = action.payload
+    },
+    
     clearError: (state) => {
       state.error = null
     },
-    setCurrentConversation: (state, action: PayloadAction<Conversation | null>) => {
-      state.currentConversation = action.payload
-      if (action.payload) {
-        // Mark conversation as read when opened
-        const conversation = state.conversations.find(c => c.id === action.payload!.id)
-        if (conversation) {
-          conversation.unreadCount = 0
-        }
-      }
-    },
-    setCurrentMessage: (state, action: PayloadAction<Message | null>) => {
-      state.currentMessage = action.payload
-    },
-    updateFilters: (state, action: PayloadAction<Partial<MessageState['filters']>>) => {
-      state.filters = { ...state.filters, ...action.payload }
-    },
-    clearFilters: (state) => {
-      state.filters = {
-        type: 'all',
-        priority: null,
-        propertyId: null,
-        dateRange: { start: null, end: null }
-      }
-    },
-    openCompose: (state, action: PayloadAction<Partial<MessageState['compose']['draft']>>) => {
-      state.compose.isOpen = true
-      state.compose.draft = { ...state.compose.draft, ...action.payload }
-    },
-    closeCompose: (state) => {
-      state.compose.isOpen = false
-      state.compose.draft = {
-        to: '',
-        subject: '',
-        content: ''
-      }
-    },
-    updateComposeDraft: (state, action: PayloadAction<Partial<MessageState['compose']['draft']>>) => {
-      state.compose.draft = { ...state.compose.draft, ...action.payload }
-    },
-    addMessage: (state, action: PayloadAction<Message>) => {
-      // Add new message to current conversation
+    
+    // Optimistic updates
+    addMessageOptimistic: (state, action: PayloadAction<Message>) => {
       state.messages.push(action.payload)
       
       // Update conversation last message
-      if (state.currentConversation && state.currentConversation.id === action.payload.conversationId) {
-        state.currentConversation.lastMessage = action.payload
+      if (state.selectedConversation) {
+        state.selectedConversation.lastMessage = {
+          id: action.payload.id,
+          content: action.payload.content,
+          sentAt: action.payload.sentAt,
+          senderId: action.payload.senderId,
+          senderType: action.payload.senderType
+        }
+        state.selectedConversation.updatedAt = action.payload.sentAt
       }
       
       // Update conversation in list
-      const convIndex = state.conversations.findIndex(c => c.id === action.payload.conversationId)
-      if (convIndex !== -1) {
-        state.conversations[convIndex].lastMessage = action.payload
-        if (!action.payload.isRead && action.payload.senderType !== 'host') {
-          state.conversations[convIndex].unreadCount += 1
+      const conversationIndex = state.conversations.findIndex(
+        conv => conv.id === state.selectedConversationId
+      )
+      if (conversationIndex !== -1) {
+        state.conversations[conversationIndex].lastMessage = {
+          id: action.payload.id,
+          content: action.payload.content,
+          sentAt: action.payload.sentAt,
+          senderId: action.payload.senderId,
+          senderType: action.payload.senderType
         }
+        state.conversations[conversationIndex].updatedAt = action.payload.sentAt
+      }
+    },
+    
+    markConversationAsRead: (state, action: PayloadAction<string>) => {
+      const conversationIndex = state.conversations.findIndex(
+        conv => conv.id === action.payload
+      )
+      if (conversationIndex !== -1) {
+        state.conversations[conversationIndex].unreadCount = 0
       }
       
-      // Recalculate stats
-      state.stats = calculateStats(state.conversations)
+      // Mark messages as read
+      state.messages.forEach(message => {
+        if (!message.isRead) {
+          message.isRead = true
+        }
+      })
     }
   },
+  
   extraReducers: (builder) => {
     builder
       // Fetch conversations
       .addCase(fetchConversations.pending, (state) => {
-        state.loading = true
+        state.conversationsLoading = true
         state.error = null
       })
       .addCase(fetchConversations.fulfilled, (state, action) => {
-        state.loading = false
-        state.conversations = action.payload
-        state.stats = calculateStats(action.payload)
+        state.conversationsLoading = false
+        state.conversations = (action.payload as any).conversations
+        state.conversationsTotalCount = (action.payload as any).totalCount
       })
       .addCase(fetchConversations.rejected, (state, action) => {
-        state.loading = false
+        state.conversationsLoading = false
         state.error = action.payload as string
       })
       
       // Fetch conversation messages
       .addCase(fetchConversationMessages.pending, (state) => {
-        state.loading = true
+        state.messagesLoading = true
         state.error = null
       })
       .addCase(fetchConversationMessages.fulfilled, (state, action) => {
-        state.loading = false
-        state.messages = action.payload.messages
-        state.currentConversation = action.payload.conversation
-        
-        // Update conversation in list
-        const convIndex = state.conversations.findIndex(c => c.id === action.payload.conversation.id)
-        if (convIndex !== -1) {
-          state.conversations[convIndex] = action.payload.conversation
-        }
+        state.messagesLoading = false
+        state.messages = action.payload as Message[]
       })
       .addCase(fetchConversationMessages.rejected, (state, action) => {
-        state.loading = false
+        state.messagesLoading = false
         state.error = action.payload as string
       })
       
       // Send message
       .addCase(sendMessage.pending, (state) => {
-        state.loading = true
+        state.isSending = true
         state.error = null
       })
-      .addCase(sendMessage.fulfilled, (state, action) => {
-        state.loading = false
-        state.messages.push(action.payload.message)
-        
-        // Update or add conversation
-        const convIndex = state.conversations.findIndex(c => c.id === action.payload.conversation.id)
-        if (convIndex !== -1) {
-          state.conversations[convIndex] = action.payload.conversation
-        } else {
-          state.conversations.unshift(action.payload.conversation)
-        }
-        
-        // Close compose if it was a new conversation
-        if (!state.currentConversation) {
-          state.compose.isOpen = false
-          state.compose.draft = { to: '', subject: '', content: '' }
-        }
-        
-        state.currentConversation = action.payload.conversation
-        state.stats = calculateStats(state.conversations)
+      .addCase(sendMessage.fulfilled, (state) => {
+        state.isSending = false
+        // Message will be added via addMessageOptimistic
       })
       .addCase(sendMessage.rejected, (state, action) => {
-        state.loading = false
+        state.isSending = false
+        state.error = action.payload as string
+      })
+      
+      // Start conversation
+      .addCase(startConversation.pending, (state) => {
+        state.isSending = true
+        state.error = null
+      })
+      .addCase(startConversation.fulfilled, (state) => {
+        state.isSending = false
+        state.showNewMessageDrawer = false
+        // Will trigger conversation refetch
+      })
+      .addCase(startConversation.rejected, (state, action) => {
+        state.isSending = false
         state.error = action.payload as string
       })
       
       // Mark as read
-      .addCase(markAsRead.fulfilled, (state, action) => {
-        const { conversationId, updatedIds } = action.payload
-        
-        // Update messages
-        updatedIds.forEach(id => {
-          const message = state.messages.find(m => m.id === id)
-          if (message) {
+      .addCase(markMessagesAsRead.fulfilled, (state, action) => {
+        const messageIds = (action.payload as any).messageIds
+        state.messages.forEach(message => {
+          if (messageIds.includes(message.id)) {
             message.isRead = true
-            message.readAt = new Date().toISOString()
           }
         })
-        
-        // Update conversation unread count
-        if (conversationId) {
-          const conversation = state.conversations.find(c => c.id === conversationId)
-          if (conversation) {
-            conversation.unreadCount = 0
-          }
-        }
-        
-        state.stats = calculateStats(state.conversations)
       })
       
-      // Mark as starred
-      .addCase(markAsStarred.fulfilled, (state, action) => {
-        const index = state.messages.findIndex(m => m.id === action.payload.id)
-        if (index !== -1) {
-          state.messages[index] = action.payload
-        }
+      // Fetch unread count
+      .addCase(fetchUnreadCount.fulfilled, (state, action) => {
+        state.unreadCount = (action.payload as any).count
       })
       
-      // Archive conversation
-      .addCase(archiveConversation.fulfilled, (state, action) => {
-        const index = state.conversations.findIndex(c => c.id === action.payload.id)
-        if (index !== -1) {
-          state.conversations[index] = action.payload
-        }
+      // Search messages
+      .addCase(searchMessages.pending, (state) => {
+        state.searchLoading = true
+        state.error = null
+      })
+      .addCase(searchMessages.fulfilled, (state, action) => {
+        state.searchLoading = false
+        state.searchResults = action.payload as Message[]
+      })
+      .addCase(searchMessages.rejected, (state, action) => {
+        state.searchLoading = false
+        state.error = action.payload as string
       })
       
-      // Delete message
-      .addCase(deleteMessage.fulfilled, (state, action) => {
-        state.messages = state.messages.filter(m => m.id !== action.payload)
-      })
-      
-      // Translate message
-      .addCase(translateMessage.fulfilled, (state, action) => {
-        const { messageId, translatedContent, targetLanguage } = action.payload
-        const message = state.messages.find(m => m.id === messageId)
-        if (message) {
-          message.translatedContent = {
-            language: targetLanguage,
-            content: translatedContent
-          }
+      // Delete conversation
+      .addCase(deleteConversation.fulfilled, (state, action) => {
+        const conversationId = (action.payload as any).conversationId
+        state.conversations = state.conversations.filter(conv => conv.id !== conversationId)
+        if (state.selectedConversationId === conversationId) {
+          state.selectedConversation = null
+          state.selectedConversationId = null
+          state.messages = []
         }
       })
   }
 })
 
 export const {
+  setActiveFilter,
+  setSearchQuery,
+  setSelectedConversation,
+  setShowNewMessageDrawer,
+  setShowAttachmentDrawer,
   clearError,
-  setCurrentConversation,
-  setCurrentMessage,
-  updateFilters,
-  clearFilters,
-  openCompose,
-  closeCompose,
-  updateComposeDraft,
-  addMessage
+  addMessageOptimistic,
+  markConversationAsRead
 } = messageSlice.actions
 
 export default messageSlice.reducer

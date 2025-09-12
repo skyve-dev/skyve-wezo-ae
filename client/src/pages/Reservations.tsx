@@ -1,14 +1,19 @@
 import React, { useState } from 'react'
 import { FaEnvelope, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from 'react-icons/fa'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '@/store'
+import { setShowNewMessageDrawer } from '@/store/slices/messageSlice'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
 import { Box } from '@/components'
 import Button from '@/components/base/Button.tsx'
 import { useAppShell } from '@/components/base/AppShell'
+import NewMessageDrawer from '@/components/messaging/NewMessageDrawer'
 
 // Reservations Component
 const Reservations: React.FC = () => {
     const [filter, setFilter] = useState('all')
-    const { openDialog } = useAppShell()
+    const { openDialog, navigateTo } = useAppShell()
+    const dispatch = useDispatch<AppDispatch>()
     const [reservations, setReservations] = useState([
         {id: 1, guest: "John Smith", property: "Luxury Villa Marina", checkIn: "Jan 15, 2025", checkOut: "Jan 20, 2025", status: "Confirmed", amount: "AED 4,500", isNoShowReported: false},
         {id: 2, guest: "Sarah Johnson", property: "Beach House JBR", checkIn: "Jan 18, 2025", checkOut: "Jan 25, 2025", status: "Pending", amount: "AED 7,200", isNoShowReported: false},
@@ -102,6 +107,15 @@ const Reservations: React.FC = () => {
                 ))
             }
         }
+    }
+
+    const handleMessageGuest = (_reservation: any) => {
+        // Navigate to inbox with new message drawer open for this reservation
+        navigateTo('inbox', {})
+        
+        // Open the new message drawer
+        // Note: In a real app, we'd pre-populate the reservation and guest info
+        dispatch(setShowNewMessageDrawer(true))
     }
 
     return (
@@ -269,6 +283,7 @@ const Reservations: React.FC = () => {
                                     icon={<FaEnvelope />} 
                                     size="small" 
                                     variant="normal"
+                                    onClick={() => handleMessageGuest(reservation)}
                                     style={{ flex: window.innerWidth < 640 ? '1' : 'unset' }}
                                 />
                                 {reservation.status === 'Confirmed' && 
@@ -309,6 +324,9 @@ const Reservations: React.FC = () => {
                         </Box>
                     ))}
                 </Box>
+
+                {/* New Message Drawer for guest messaging */}
+                <NewMessageDrawer />
             </Box>
         </SecuredPage>
     )

@@ -12,6 +12,7 @@ import reviewRoutes from './review.routes';
 import supportRoutes from './support.routes';
 import bookingRoutes from './bookingRoutes';
 import messageAttachmentRoutes from './messageAttachmentRoutes';
+import messageRoutes from './message.routes';
 import adminRoutes from './admin.routes';
 
 const router = Router();
@@ -29,6 +30,7 @@ router.use('/', reviewRoutes);
 router.use('/', supportRoutes);
 router.use('/booking', bookingRoutes);
 router.use('/api', messageAttachmentRoutes);
+router.use('/messages', messageRoutes);
 router.use('/admin', adminRoutes);
 
 router.get('/health', (_req, res) => {
