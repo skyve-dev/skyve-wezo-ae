@@ -250,11 +250,12 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
       if (shouldSaveAndLeave) {
         await handleSave()
         return
+      } else {
+        // User chose to leave without saving - clear form to prevent navigation guard
+        dispatch(clearForm())
       }
     }
     
-    // Clear form which will trigger navigation guard cleanup via useEffect
-    dispatch(clearForm())
     navigateTo('rate-plans', {})
   }
   

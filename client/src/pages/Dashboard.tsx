@@ -10,30 +10,36 @@ import {
     FaExclamationTriangle,
     FaArrowLeft,
 } from 'react-icons/fa'
+import { useSelector, useDispatch } from 'react-redux'
 import { useAppShell, useNavigation, useTheme } from '@/components/base/AppShell'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
 import { Box } from '@/components'
 import Button from '@/components/base/Button.tsx'
+import { RootState } from '@/store'
+import { refreshDashboard } from '@/store/slices/dashboardSlice'
 
 // Dashboard Component - Property Command Center
 const Dashboard: React.FC = () => {
     const {navigateTo} = useAppShell()
     const { navigateBack, canNavigateBack } = useNavigation()
     const theme = useTheme()
+    const dispatch = useDispatch()
+    
+    // Redux state
+    const {
+      stats,
+      quickActions,
+      loading,
+      error
+    } = useSelector((state: RootState) => state.dashboard)
     
     // KYC state
     const [kycStatus, setKycStatus] = useState<'pending' | 'submitted' | 'verified' | 'rejected'>('pending')
-    
-    const stats = {
-        activeProperties: 3,
-        totalReservations: 12,
-        pendingReviews: 4,
-        monthlyEarnings: "AED 45,320",
-        occupancyRate: "78%",
-        newMessages: 2
-    }
 
     useEffect(() => {
+        // Fetch dashboard data
+        dispatch(refreshDashboard() as any)
+        
         // Fetch KYC status - in real implementation this would be an API call
         const fetchKycStatus = async () => {
             try {
@@ -45,7 +51,7 @@ const Dashboard: React.FC = () => {
             }
         }
         fetchKycStatus()
-    }, [])
+    }, [dispatch])
 
     // KYC Banner component
     const KycBanner = () => {
@@ -103,21 +109,46 @@ const Dashboard: React.FC = () => {
         )
     }
 
+    // Format currency helper
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-AE', {
+            style: 'currency',
+            currency: 'AED',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(amount)
+    }
+
+    // Loading state
+    if (loading && !stats) {
+        return (
+            <SecuredPage>
+                <Box padding="2rem" maxWidth="1200px" margin="0 auto">
+                    <Box display="flex" justifyContent="center" alignItems="center" height="400px">
+                        <Box fontSize="1.125rem" color="#666">Loading dashboard...</Box>
+                    </Box>
+                </Box>
+            </SecuredPage>
+        )
+    }
+
     return (
         <SecuredPage>
             <Box padding="2rem" maxWidth="1200px" margin="0 auto">
-                {/* Demo Page Notice */}
-                <Box 
-                    padding="1rem" 
-                    backgroundColor="#fef3c7" 
-                    border="1px solid #fde68a"
-                    borderRadius="8px" 
-                    marginBottom="2rem"
-                >
-                    <p style={{ color: '#92400e', fontWeight: '600', margin: 0 }}>
-                        This page is a demo page
-                    </p>
-                </Box>
+                {/* Error Message */}
+                {error && (
+                    <Box 
+                        padding="1rem" 
+                        backgroundColor="#fee2e2" 
+                        border="1px solid #fecaca"
+                        borderRadius="8px" 
+                        marginBottom="2rem"
+                    >
+                        <p style={{ color: '#dc2626', fontWeight: '600', margin: 0 }}>
+                            {error}
+                        </p>
+                    </Box>
+                )}
 
                 <Box marginBottom="2rem">
                     <h1 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0'}}>Property Command Center</h1>
@@ -136,7 +167,7 @@ const Dashboard: React.FC = () => {
                             </Box>
                             <span style={{fontWeight: '600', color: '#2d3748'}}>Active Properties</span>
                         </Box>
-                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>{stats.activeProperties}</p>
+                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>{stats?.properties?.active || 0}</p>
                     </Box>
                     <Box padding="1.5rem" backgroundColor="white" borderRadius="12px" boxShadow="0 4px 20px rgba(213, 33, 34, 0.08)" border="1px solid rgba(213, 33, 34, 0.05)">
                         <Box display="flex" alignItems="center" marginBottom="0.5rem">
@@ -145,7 +176,7 @@ const Dashboard: React.FC = () => {
                             </Box>
                             <span style={{fontWeight: '600', color: '#2d3748'}}>Total Reservations</span>
                         </Box>
-                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>{stats.totalReservations}</p>
+                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>{stats?.reservations?.total || 0}</p>
                     </Box>
                     <Box padding="1.5rem" backgroundColor="white" borderRadius="12px" boxShadow="0 4px 20px rgba(213, 33, 34, 0.08)" border="1px solid rgba(213, 33, 34, 0.05)">
                         <Box display="flex" alignItems="center" marginBottom="0.5rem">
@@ -154,7 +185,9 @@ const Dashboard: React.FC = () => {
                             </Box>
                             <span style={{fontWeight: '600', color: '#2d3748'}}>Monthly Earnings</span>
                         </Box>
-                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>{stats.monthlyEarnings}</p>
+                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>
+                            {stats?.financial?.thisMonth?.earnings ? formatCurrency(stats.financial.thisMonth.earnings) : 'AED 0'}
+                        </p>
                     </Box>
                     <Box padding="1.5rem" backgroundColor="white" borderRadius="12px" boxShadow="0 4px 20px rgba(213, 33, 34, 0.08)" border="1px solid rgba(213, 33, 34, 0.05)">
                         <Box display="flex" alignItems="center" marginBottom="0.5rem">
@@ -163,7 +196,9 @@ const Dashboard: React.FC = () => {
                             </Box>
                             <span style={{fontWeight: '600', color: '#2d3748'}}>Occupancy Rate</span>
                         </Box>
-                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>{stats.occupancyRate}</p>
+                        <p style={{fontSize: '2rem', fontWeight: 'bold', margin: 0}}>
+                            {stats?.occupancy?.currentOccupancyRate ? `${stats.occupancy.currentOccupancyRate}%` : '0%'}
+                        </p>
                     </Box>
                 </Box>
 
@@ -201,11 +236,43 @@ const Dashboard: React.FC = () => {
                 </Box>
 
                 {/* Notifications */}
-                {stats.newMessages > 0 && (
+                {((stats?.messages?.totalUnread || 0) > 0 || (stats?.reviews?.pendingResponses || 0) > 0) && (
                     <Box padding="1rem" backgroundColor="#fef3c7" borderRadius="8px" marginBottom="2rem">
                         <Box display="flex" alignItems="center">
                             <FaExclamationTriangle style={{color: '#f59e0b', marginRight: '0.5rem'}} />
-                            <span>You have {stats.newMessages} new messages and {stats.pendingReviews} pending reviews</span>
+                            <span>
+                                {stats?.messages?.totalUnread ? `You have ${stats.messages.totalUnread} new messages` : ''}
+                                {stats?.messages?.totalUnread && stats?.reviews?.pendingResponses ? ' and ' : ''}
+                                {stats?.reviews?.pendingResponses ? `${stats.reviews.pendingResponses} pending reviews` : ''}
+                            </span>
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Recent Activity */}
+                {quickActions && quickActions.length > 0 && (
+                    <Box marginBottom="3rem">
+                        <h2 style={{fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem'}}>Quick Actions</h2>
+                        <Box display="grid" gap="1rem">
+                            {quickActions.slice(0, 5).map((action) => (
+                                <Box key={action.id} padding="1rem" backgroundColor="white" borderRadius="8px" boxShadow="0 2px 4px rgba(0,0,0,0.1)">
+                                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                                        <Box>
+                                            <h3 style={{margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: '600', 
+                                                color: action.type === 'urgent' ? '#ef4444' : action.type === 'important' ? '#f59e0b' : '#666'}}>
+                                                {action.title}
+                                            </h3>
+                                            <p style={{margin: 0, color: '#666', fontSize: '0.875rem'}}>{action.description}</p>
+                                        </Box>
+                                        <Button 
+                                            label={action.actionRequired} 
+                                            variant={action.type === 'urgent' ? 'promoted' : 'normal'} 
+                                            size="small"
+                                            onClick={() => navigateTo(action.relatedEntity.id as any, {})}
+                                        />
+                                    </Box>
+                                </Box>
+                            ))}
                         </Box>
                     </Box>
                 )}

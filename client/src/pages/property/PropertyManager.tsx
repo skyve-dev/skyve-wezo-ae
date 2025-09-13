@@ -311,8 +311,8 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
                 await handleSave()
                 return
             } else {
-                // User chose to leave without saving - clear draft
-                dispatch(clearDraft())
+                // User chose to leave without saving - clear form to prevent navigation guard
+                dispatch(clearForm())
             }
         }
         navigateTo('properties', {})
