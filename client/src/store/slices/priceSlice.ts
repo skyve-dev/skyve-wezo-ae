@@ -513,6 +513,7 @@ export const fetchPublicPricingCalendar = createAsyncThunk(
           hasDiscount?: boolean
           originalPrice?: number
           isAvailable?: boolean
+          reason?: string  // Include reason field for overrides
         }>
       }>(
         `/api/properties/${params.propertyId}/pricing/public-calendar?${queryParams}`

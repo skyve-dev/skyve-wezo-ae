@@ -200,7 +200,7 @@ const CalendarView: React.FC = () => {
                 halfDayPrice: publicCalendarDay.halfDayPrice > 0 ? publicCalendarDay.halfDayPrice : null,
                 isOverride: publicCalendarDay.isOverride || false,
                 isAvailable: publicCalendarDay.isAvailable !== false, // Default to true if not specified
-                reason: publicCalendarDay.isOverride ? 'Date override' : undefined
+                reason: publicCalendarDay.reason || (publicCalendarDay.isOverride ? 'Date override' : undefined)
             }
         }
         
@@ -241,25 +241,38 @@ const CalendarView: React.FC = () => {
         }
     }
 
-    // Unified pricing calculation for all modes
+    // Unified pricing calculation - always return both base and rate plan prices for accordion display
     const getPricesForDate = (dateString: string): PriceData[] => {
 
         const prices: PriceData[] = []
-
-
 
         // Get the effective base price for this date (includes any overrides)
         const effectivePriceData = getEffectiveBasePriceForDate(dateString)
         
         if (effectivePriceData.price === null || effectivePriceData.price <= 0) {
-
             return prices
         }
 
-        // If rate plans are selected, apply them as modifiers to the effective base price
-        if (selectedRatePlans.length > 0) {
+        // ALWAYS add the base/override price first (for accordion display)
+        prices.push({
+            ratePlan: undefined,
+            price: {
+                id: effectivePriceData.isOverride ? `override-${dateString}` : `base-pricing-${dateString}`,
+                ratePlanId: undefined,
+                date: dateString,
+                amount: effectivePriceData.price,
+                createdAt: '',
+                updatedAt: ''
+            },
+            hasCustomPrice: effectivePriceData.isOverride,
+            isBasePricing: true,
+            isAvailable: effectivePriceData.isAvailable,
+            reason: effectivePriceData.reason,
+            halfDayPrice: effectivePriceData.halfDayPrice || undefined
+        })
 
-            
+        // If rate plans are selected, ALSO add them as modifiers (for accordion display)
+        if (selectedRatePlans.length > 0) {
             for (const ratePlan of selectedRatePlans) {
                 let calculatedAmount = effectivePriceData.price
                 let calculatedHalfDayAmount = effectivePriceData.halfDayPrice
@@ -279,8 +292,6 @@ const CalendarView: React.FC = () => {
                 }
 
                 if (calculatedAmount > 0) {
-
-                    
                     prices.push({
                         ratePlan,
                         price: {
@@ -299,28 +310,7 @@ const CalendarView: React.FC = () => {
                     })
                 }
             }
-        } else {
-            // Base pricing mode - show the effective price directly
-
-            
-            prices.push({
-                ratePlan: undefined,
-                price: {
-                    id: effectivePriceData.isOverride ? `override-${dateString}` : `base-pricing-${dateString}`,
-                    ratePlanId: undefined,
-                    date: dateString,
-                    amount: effectivePriceData.price,
-                    createdAt: '',
-                    updatedAt: ''
-                },
-                hasCustomPrice: effectivePriceData.isOverride,
-                isBasePricing: true,
-                isAvailable: effectivePriceData.isAvailable, // Pass through availability status
-                reason: effectivePriceData.reason,
-                halfDayPrice: effectivePriceData.halfDayPrice || undefined // Pass through half day price
-            })
         }
-
 
         return prices
     }

@@ -1,8 +1,7 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {useSelector} from 'react-redux'
 import {RootState, useAppDispatch} from '@/store'
-import {IoIosAdd} from 'react-icons/io'
-import {IoIosCheckmark} from 'react-icons/io'
+import {IoIosAdd, IoIosCheckmark, IoIosArrowDown, IoIosArrowForward} from 'react-icons/io'
 import {Box} from '@/components'
 import {openDateOverrideForm, setSelectedDate, toggleDateSelection} from '@/store/slices/priceSlice'
 
@@ -70,6 +69,8 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
         selectedDates
     } = useSelector((state: RootState) => state.price)
 
+    // Accordion state for expandable pricing display
+    const [isExpanded, setIsExpanded] = useState(false)
 
     const isSelected = selectedDates.includes(day.dateString)
 
@@ -96,6 +97,19 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
     }
 
     const isAvailable = getAvailabilityStatus()
+
+    // Separate base prices from rate plan prices for accordion display
+    const basePrices = prices.filter(p => p.isBasePricing)
+    const ratePlanPrices = prices.filter(p => !p.isBasePricing)
+    const hasMultiplePrices = basePrices.length > 0 && ratePlanPrices.length > 0
+
+    // Toggle accordion expansion
+    const toggleExpansion = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (!isDisabled && hasMultiplePrices) {
+            setIsExpanded(!isExpanded)
+        }
+    }
 
     // Helper function to detect existing override for unified pricing
     const getExistingOverride = () => {
@@ -271,9 +285,10 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 )}
             </Box>
 
-            {/* Price Items - Show for all dates including past dates */}
+            {/* Accordion Price Display - Show for all dates including past dates */}
             {(
                 <Box display="flex" flexDirection="column" flex="1">
+                    {/* No prices state */}
                     {prices.length === 0 && selectedRatePlans.length > 0 && (
                         <Box
                             textAlign="center"
@@ -286,7 +301,6 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                             color="#6b7280"
                             onClick={(e) => {
                                 e.stopPropagation()
-                                // Open property pricing override dialog
                                 dispatch(openDateOverrideForm({
                                     date: day.dateString
                                 }))
@@ -297,65 +311,113 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                         </Box>
                     )}
 
-                    {prices.slice(0, 4).map((priceData, index) => {
-                        const isBasePricing = priceData.isBasePricing
-                        const isOverride = isBasePricing && priceData.hasCustomPrice
-
-                        // Enhanced styling for overrides
+                    {/* Base Price Section (Always visible when available) */}
+                    {basePrices.length > 0 && basePrices.map((basePrice, index) => {
+                        const isOverride = basePrice.hasCustomPrice
+                        
                         let backgroundColor, borderColor, textColor
                         if (isOverride) {
-                            backgroundColor = '#eff6ff'  // Blue background for overrides
-                            borderColor = '#3182ce'     // Blue border for overrides
-                            textColor = '#1e40af'       // Blue text for overrides
-                        } else if (isBasePricing) {
-                            backgroundColor = '#fef3c7'  // Yellow background for base pricing
-                            borderColor = '#f59e0b'     // Yellow border for base pricing
-                            textColor = '#92400e'       // Brown text for base pricing
+                            backgroundColor = isDisabled ? '#f3f4f6' : '#eff6ff'
+                            borderColor = isDisabled ? '#e5e7eb' : '#3182ce'
+                            textColor = isDisabled ? '#9ca3af' : '#1e40af'
                         } else {
-                            backgroundColor = priceData.hasCustomPrice ? '#f0fdf4' : '#f8fafc'
-                            borderColor = priceData.hasCustomPrice ? '#bbf7d0' : '#e2e8f0'
-                            textColor = priceData.hasCustomPrice ? '#166534' : '#475569'
+                            backgroundColor = isDisabled ? '#f9fafb' : '#fef3c7'
+                            borderColor = isDisabled ? '#e5e7eb' : '#f59e0b'
+                            textColor = isDisabled ? '#9ca3af' : '#92400e'
                         }
-
-                        // Apply muted styling for past dates
-                        if (isDisabled) {
-                            backgroundColor = '#f9fafb'
-                            borderColor = '#e5e7eb'
-                            textColor = '#9ca3af'
-                        }
-
-                        const ratePlanName = isBasePricing ? (isOverride ? 'Override' : 'Base') : (priceData.ratePlan?.name || 'Unknown')
-                        const ratePlanColor = isBasePricing ? (isOverride ? '#3182ce' : '#f59e0b') : (priceData.ratePlan?.color || '#6b7280')
-
-                        // Create tooltip text for overrides
-                        const tooltipText = isOverride && priceData.reason
-                            ? `Price Override: ${priceData.reason}`
-                            : isBasePricing
-                                ? 'Base property pricing'
-                                : `${ratePlanName} pricing`
 
                         return (
                             <Box
-                                key={isBasePricing ? `base-pricing-${index}` : `${priceData.ratePlan?.id || 'unknown'}-${index}`}
-                                padding={"0.25rem"}
+                                key={`base-pricing-${index}`}
+                                padding="0.25rem"
                                 backgroundColor={backgroundColor}
                                 borderTop={`1px solid ${borderColor}`}
-                                fontSize={'0.75rem'}
+                                fontSize="0.75rem"
                                 cursor={bulkEditMode ? "default" : (isDisabled ? "not-allowed" : "pointer")}
                                 onClick={(e) => {
                                     if (!bulkEditMode && !isDisabled) {
                                         handlePriceClick(e)
                                     }
-                                    // In bulk mode or for disabled dates, let the click propagate to the parent cell
                                 }}
                                 transition="all 0.2s"
-                                title={tooltipText}
+                                title={isOverride && basePrice.reason ? `Price Override: ${basePrice.reason}` : 'Base property pricing'}
                                 pointerEvents={bulkEditMode || isDisabled ? "none" : "auto"}
                                 opacity={bulkEditMode ? 0.7 : (isDisabled ? 0.6 : 1)}
-                                whileHover={!bulkEditMode ? {backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9')} : {}}
                             >
+                                <Box display="flex" alignItems="center" justifyContent="space-between">
+                                    <Box display="flex" alignItems="center" gap="0.25rem">
+                                        {hasMultiplePrices && !isDisabled && (
+                                            <Box
+                                                onClick={toggleExpansion}
+                                                cursor="pointer"
+                                                width="12px"
+                                                height="12px"
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                            >
+                                                {isExpanded ? <IoIosArrowDown size={8} /> : <IoIosArrowForward size={8} />}
+                                            </Box>
+                                        )}
+                                        <Box
+                                            width="6px"
+                                            height="6px"
+                                            borderRadius="50%"
+                                            backgroundColor={isOverride ? (isDisabled ? '#9ca3af' : '#3182ce') : (isDisabled ? '#9ca3af' : '#f59e0b')}
+                                        />
+                                        <Box fontSize="0.625rem" color={textColor} fontWeight="500">
+                                            {isOverride ? 'Override' : 'Base'}
+                                        </Box>
+                                    </Box>
+                                    <Box
+                                        fontWeight="600"
+                                        fontSize="0.875rem"
+                                        color={textColor}
+                                    >
+                                        {formatPrice(basePrice.price.amount)}
+                                    </Box>
+                                </Box>
+                            </Box>
+                        )
+                    })}
 
-                                <Box display="flex"  alignItems="center" justifyContent="space-between">
+                    {/* Rate Plan Prices Section (Collapsible) */}
+                    {ratePlanPrices.length > 0 && (isExpanded || !hasMultiplePrices) && ratePlanPrices.map((ratePlanPrice, index) => {
+                        let backgroundColor, borderColor, textColor
+                        
+                        if (isDisabled) {
+                            backgroundColor = '#f9fafb'
+                            borderColor = '#e5e7eb'
+                            textColor = '#9ca3af'
+                        } else {
+                            backgroundColor = ratePlanPrice.hasCustomPrice ? '#f0fdf4' : '#f8fafc'
+                            borderColor = ratePlanPrice.hasCustomPrice ? '#bbf7d0' : '#e2e8f0'
+                            textColor = ratePlanPrice.hasCustomPrice ? '#166534' : '#475569'
+                        }
+
+                        const ratePlanName = ratePlanPrice.ratePlan?.name || 'Unknown'
+                        const ratePlanColor = isDisabled ? '#9ca3af' : (ratePlanPrice.ratePlan?.color || '#6b7280')
+
+                        return (
+                            <Box
+                                key={`rate-plan-${ratePlanPrice.ratePlan?.id || 'unknown'}-${index}`}
+                                padding="0.25rem"
+                                backgroundColor={backgroundColor}
+                                borderTop={`1px solid ${borderColor}`}
+                                fontSize="0.75rem"
+                                marginLeft={hasMultiplePrices ? "1rem" : "0"} // Indent rate plans when in accordion
+                                cursor={bulkEditMode ? "default" : (isDisabled ? "not-allowed" : "pointer")}
+                                onClick={(e) => {
+                                    if (!bulkEditMode && !isDisabled) {
+                                        handlePriceClick(e)
+                                    }
+                                }}
+                                transition="all 0.2s"
+                                title={`${ratePlanName} pricing`}
+                                pointerEvents={bulkEditMode || isDisabled ? "none" : "auto"}
+                                opacity={bulkEditMode ? 0.7 : (isDisabled ? 0.6 : 1)}
+                            >
+                                <Box display="flex" alignItems="center" justifyContent="space-between">
                                     <Box display="flex" alignItems="center" gap="0.25rem">
                                         <Box
                                             width="6px"
@@ -363,31 +425,34 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                             borderRadius="50%"
                                             backgroundColor={ratePlanColor}
                                         />
+                                        <Box fontSize="0.625rem" color={textColor} fontWeight="500">
+                                            {ratePlanName}
+                                        </Box>
                                     </Box>
                                     <Box
                                         fontWeight="500"
-                                        fontSize={'1rem'}
+                                        fontSize="0.75rem"
                                         color={textColor}
-                                        textAlign={'center'}
                                     >
-                                        {formatPrice(priceData.price.amount)}
+                                        {formatPrice(ratePlanPrice.price.amount)}
                                     </Box>
                                 </Box>
                             </Box>
                         )
                     })}
 
-                    {/* Show count if more prices exist */}
-                    {prices.length > 4 && (
+                    {/* Collapsed state indicator */}
+                    {hasMultiplePrices && !isExpanded && ratePlanPrices.length > 0 && (
                         <Box
                             textAlign="center"
-                            fontSize={'0.625rem'}
+                            fontSize="0.625rem"
                             color="#6b7280"
-                            padding={'0.25rem'}
+                            padding="0.25rem"
                             backgroundColor="#f9fafb"
-                            borderRadius="4px"
+                            borderRadius="2px"
+                            marginTop="0.125rem"
                         >
-                            +{prices.length - 4} more
+                            {ratePlanPrices.length} rate plan{ratePlanPrices.length > 1 ? 's' : ''}
                         </Box>
                     )}
                 </Box>
