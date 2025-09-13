@@ -477,11 +477,31 @@ export const deleteDateOverrides = createAsyncThunk(
 // Fetch public pricing calendar (no authentication required)
 export const fetchPublicPricingCalendar = createAsyncThunk(
   'price/fetchPublicPricingCalendar',
-  async (params: { propertyId: string; startDate: string; endDate: string }, { rejectWithValue }) => {
+  async (params: { 
+    propertyId: string; 
+    dateRange: { startDate: string; endDate: string }
+    useExpandedRange?: boolean 
+  }, { rejectWithValue }) => {
     try {
+      // Import calendar helper function
+      const { calculateCalendarGridRange } = await import('@/utils/calendarHelpers')
+      
+      let startDate: string, endDate: string
+      
+      if (params.useExpandedRange !== false) { // Default to true
+        // Calculate expanded calendar grid range automatically
+        const expandedRange = calculateCalendarGridRange(params.dateRange)
+        startDate = expandedRange.calendarStartDate
+        endDate = expandedRange.calendarEndDate
+      } else {
+        // Use basic range if explicitly requested
+        startDate = params.dateRange.startDate
+        endDate = params.dateRange.endDate
+      }
+      
       const queryParams = new URLSearchParams({
-        startDate: params.startDate,
-        endDate: params.endDate
+        startDate,
+        endDate
       })
       
       const response = await api.get<{ 

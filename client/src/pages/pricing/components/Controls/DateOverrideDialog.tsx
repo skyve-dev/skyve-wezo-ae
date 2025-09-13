@@ -168,12 +168,15 @@ const DateOverrideDialog: React.FC = () => {
         await showSuccess('Date override has been saved successfully.')
       }
       
-      // Refresh pricing calendar if date range is set
+      // Refresh pricing calendar if date range is set (with expanded range for overflow dates)
       if (dateRange.startDate && dateRange.endDate) {
         dispatch(fetchPublicPricingCalendar({
           propertyId: currentProperty.propertyId,
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate
+          dateRange: {
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate
+          }
+          // useExpandedRange defaults to true, so overflow dates are automatically refreshed
         }))
       }
       
@@ -215,12 +218,15 @@ const DateOverrideDialog: React.FC = () => {
       
       await showSuccess('Date override has been deleted.')
       
-      // Refresh pricing calendar
+      // Refresh pricing calendar (with expanded range for overflow dates)
       if (dateRange.startDate && dateRange.endDate) {
         dispatch(fetchPublicPricingCalendar({
           propertyId: currentProperty.propertyId,
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate
+          dateRange: {
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate
+          }
+          // useExpandedRange defaults to true, so overflow dates are automatically refreshed
         }))
       }
       

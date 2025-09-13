@@ -568,20 +568,18 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                     </Box>
 
                     {/* Footer */}
+                    <Box ref={footerRef} position="fixed"
+                         bottom="0"
+                         bottomSm={'1rem'}
+                         left="0"
+                         zIndex="1000"
+                         right="0" display={'flex'} flexDirection={'column'} alignItems={'center'}>
                     <Box
-                        ref={footerRef}
-                        position="fixed"
-                        bottom="0"
-                        bottomSm={'1rem'}
+                        width={'100%'}
+                        widthSm={'unset'}
                         borderRadius={'0px'}
                         borderRadiusSm={'2rem'}
                         overflow={'hidden'}
-                        left="0"
-                        right="0"
-                        maxWidth={'100%'}
-                        maxWidthSm={320}
-                        margin={'auto'}
-                        zIndex="1000"
                         boxShadow="0 5px 10px rgba(0, 0, 0, 0.1)"
                         style={{
                             transform: isFooterVisible ? 'translateY(0)' : 'translateY(200%)',
@@ -603,7 +601,7 @@ const AppShellInternal = <T extends Record<string, BaseRoute>>({
                             />
                         )}
                     </Box>
-
+                    </Box>
                     {/* Side Navigation Drawer */}
                     <SlidingDrawer
                         isOpen={isSideNavOpen}

@@ -44,7 +44,6 @@ const BaseManagerFooter: React.FC<BaseManagerFooterProps> = ({
           style={{
             backgroundColor: 'transparent',
             color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
             padding: '0.5rem 1rem'
           }}
         />
@@ -59,7 +58,6 @@ const BaseManagerFooter: React.FC<BaseManagerFooterProps> = ({
           backgroundColor: isSaving || hasErrors ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)',
           color: 'white',
           fontWeight: '600',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
           padding: '0.5rem 1.25rem'
         }}
       />

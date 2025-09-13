@@ -109,29 +109,7 @@ export class PropertyPricingService {
       throw new Error('All prices must be between 0.01 and 99,999.99');
     }
 
-    // Validate half-day prices are typically less than full-day prices
-    const dayPairs = [
-      [prices.monday, prices.halfDayMonday],
-      [prices.tuesday, prices.halfDayTuesday],
-      [prices.wednesday, prices.halfDayWednesday],
-      [prices.thursday, prices.halfDayThursday],
-      [prices.friday, prices.halfDayFriday],
-      [prices.saturday, prices.halfDaySaturday],
-      [prices.sunday, prices.halfDaySunday]
-    ];
-
-    console.log('🔷 PropertyPricingService - Validating half-day vs full-day prices');
-    for (const [fullDay, halfDay] of dayPairs) {
-      const fullDayNum = Number(fullDay);
-      const halfDayNum = Number(halfDay);
-      console.log('🔷 PropertyPricingService - Comparing:', { fullDay, halfDay, fullDayNum, halfDayNum });
-      
-      if (halfDayNum > fullDayNum) {
-        console.log('❌ PropertyPricingService - Validation failed: halfDayNum', halfDayNum, '> fullDayNum', fullDayNum);
-        throw new Error('Half-day prices should not exceed full-day prices');
-      }
-    }
-    console.log('✅ PropertyPricingService - Validation passed');
+    // Pricing validation removed - users can set any pricing structure they want
 
     const result = await prisma.propertyPricing.upsert({
       where: { propertyId },
@@ -225,9 +203,7 @@ export class PropertyPricingService {
         throw new Error(`Half-day price for ${override.date.toDateString()} must be between 0.01 and 99,999.99`);
       }
 
-      if (override.halfDayPrice && override.halfDayPrice > override.price) {
-        throw new Error(`Half-day price for ${override.date.toDateString()} should not exceed full-day price`);
-      }
+      // Half-day price validation removed - users can set any pricing structure they want
 
       // Prevent setting overrides for past dates
       if (override.date < new Date(new Date().setHours(0, 0, 0, 0))) {

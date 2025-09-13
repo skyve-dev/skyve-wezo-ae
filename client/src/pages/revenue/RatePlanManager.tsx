@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { 
   IoIosBuild, IoIosPricetags, IoIosCalculator, 
   IoIosArrowUp, IoIosCash, IoIosPeople,
-  IoIosCalendar, IoIosTime
+  IoIosCalendar, IoIosTime, IoIosBusiness, IoIosPin
 } from 'react-icons/io'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
@@ -23,8 +23,8 @@ import {
   clearForm,
   type CancellationPolicy
 } from '@/store/slices/ratePlanSlice'
-import { fetchMyProperties, setCurrentProperty } from '@/store/slices/propertySlice'
-import { ApiError } from '@/utils/api'
+import { fetchMyProperties } from '@/store/slices/propertySlice'
+import { ApiError, resolvePhotoUrl } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
 import { useDialogs } from '@/hooks/useDialogs'
 import RatePlanManagerHeader from './RatePlanManagerHeader'
@@ -32,7 +32,6 @@ import RatePlanManagerFooter from './RatePlanManagerFooter'
 import CancellationPolicyBuilder from '@/components/CancellationPolicyBuilder'
 import RatePlanAmenitySelector from '@/components/RatePlanAmenitySelector'
 import RatePlanPricingPreview from '@/components/RatePlanPricingPreview'
-import PropertySelector from '@/components/PropertySelector'
 
 interface RatePlanManagerProps {
   ratePlanId?: string  // 'new' for create mode, actual ID for edit mode
@@ -63,7 +62,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   const { currentProperty, properties } = useAppSelector((state) => state.property)
   const propertyId = currentProperty?.propertyId
   
-  const { openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard } = useAppShell()
+  const { openDialog, navigateTo, mountHeader, mountFooter } = useAppShell()
   const dialogs = useDialogs()
   const [isLoading, setIsLoading] = useState(true)
   
@@ -141,28 +140,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     }
   }, [hasUnsavedChanges, isSaving, formValidationErrors, currentForm, isCreateMode])
   
-  // Navigation guard for unsaved changes
-  const [guardCleanup, setGuardCleanup] = useState<(() => void) | null>(null)
-  
-  useEffect(() => {
-    if (!hasUnsavedChanges) {
-      // Clean up guard when no unsaved changes
-      if (guardCleanup) {
-        guardCleanup()
-        setGuardCleanup(null)
-      }
-      return
-    }
-    
-    const cleanup = registerNavigationGuard(async () => {
-      const shouldLeave = await dialogs.confirmUnsavedChanges()
-      return shouldLeave
-    })
-    
-    setGuardCleanup(() => cleanup)
-    
-    return cleanup
-  }, [hasUnsavedChanges, registerNavigationGuard, openDialog])
+  // Navigation guard removed - no more annoying confirmations
   
   // Form validation
   const isFormValid = () => {
@@ -218,30 +196,14 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     }
   }
   
-  // Smart back button
-  const handleBack = async () => {
-    if (hasUnsavedChanges) {
-      const shouldSaveAndLeave = await dialogs.confirmSaveBeforeLeave()
-      
-      if (shouldSaveAndLeave) {
-        await handleSave()
-        return
-      } else {
-        // User chose to leave without saving - clear form to prevent navigation guard
-        dispatch(clearForm())
-      }
-    }
-    
+  // Simple back navigation - no more confirmations
+  const handleBack = () => {
     navigateTo('rate-plans', {})
   }
   
-  // Handle discard changes
-  const handleDiscard = async () => {
-    const shouldDiscard = await dialogs.confirmDiscardChanges()
-    
-    if (shouldDiscard) {
-      dispatch(resetFormToOriginal())
-    }
+  // Handle discard changes - no more confirmations
+  const handleDiscard = () => {
+    dispatch(resetFormToOriginal())
   }
   
   // Handle form field changes
@@ -249,18 +211,6 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     dispatch(updateFormField({ [field]: value }))
   }
 
-  // Handle property selection
-  const handlePropertyChange = (value: string | number | (string | number)[]) => {
-    const selectedPropertyId = value as string
-    const selectedProperty = properties.find(p => p.propertyId === selectedPropertyId)
-    if (selectedProperty) {
-      dispatch(setCurrentProperty(selectedProperty))
-      // Re-initialize form for the new property
-      if (isCreateMode) {
-        dispatch(initializeFormForCreate(selectedPropertyId))
-      }
-    }
-  }
   
   const modifierTypeOptions = [
     { 
@@ -298,27 +248,16 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
         <Box padding="2rem" maxWidth="600px" margin="0 auto">
           <Box textAlign="center" marginBottom="3rem">
             <Box fontSize="2rem" fontWeight="bold" marginBottom="0.5rem">
-              Select Property
+              No Property Selected
             </Box>
-            <Box color="#6b7280">
-              Rate plans require a property context. Please select a property to continue.
+            <Box color="#6b7280" marginBottom="2rem">
+              Please select a property first to create rate plans.
             </Box>
-          </Box>
-          
-          <PropertySelector
-            onPropertyChange={(property) => {
-              if (property) {
-                dispatch(setCurrentProperty(property))
-              }
-            }}
-            label="Choose Property for Rate Plan"
-            placeholder="Select a property to manage rate plans"
-            showDetails={true}
-            buttonVariant="promoted"
-          />
-          
-          <Box textAlign="center" marginTop="2rem">
-            <Button label="Back to Dashboard" onClick={() => navigateTo('dashboard', {})} />
+            <Button 
+              label="Go to Properties" 
+              onClick={() => navigateTo('properties', {})} 
+              variant="promoted"
+            />
           </Box>
         </Box>
       </SecuredPage>
@@ -380,38 +319,72 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
             </h2>
             
             <Box display="flex" flexDirection="column" gap="1.5rem">
-              {/* Property Selection */}
+              {/* Property Information (Read-only) */}
               <Box>
                 <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '500'}}>
                   <Box display="flex" alignItems="center" gap="0.5rem">
                     <IoIosBuild style={{color: '#374151', fontSize: '0.875rem'}} />
-                    Property *
+                    Property
                   </Box>
                 </label>
-                <SelectionPicker
-                  data={properties}
-                  idAccessor={(property) => property.propertyId!}
-                  value={(propertyId ?? '') as string}
-                  onChange={handlePropertyChange}
-                  disabled={!!isEditMode} // Can't change property in edit mode
-                  renderItem={(property, _isSelected) => (
-                    <Box display="flex" alignItems="center" gap="0.75rem">
-                      <IoIosBuild style={{color: '#6b7280', fontSize: '1rem'}} />
-                      <Box>
-                        <Box fontWeight="500">{property.name}</Box>
-                        <Box fontSize="0.875rem" color="#6b7280">
-                          {property.address?.city && `${property.address.city}, `}
-                          {property.address?.countryOrRegion || 'No address'}
-                        </Box>
+                <Box
+                  padding="1rem"
+                  border="2px solid #e5e7eb"
+                  borderRadius="8px"
+                  backgroundColor="#f9fafb"
+                >
+                  <Box display="flex" alignItems="center" gap="1rem">
+                    {/* Property Photo */}
+                    {currentProperty?.photos?.[0] ? (
+                      <Box
+                        width="48px"
+                        height="48px"
+                        borderRadius="6px"
+                        overflow="hidden"
+                        flexShrink="0"
+                      >
+                        <img
+                          src={resolvePhotoUrl(currentProperty.photos[0].url)}
+                          alt={currentProperty.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </Box>
+                    ) : (
+                      <Box
+                        width="48px"
+                        height="48px"
+                        borderRadius="6px"
+                        backgroundColor="#e5e7eb"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        flexShrink="0"
+                      >
+                        <IoIosBusiness size={20} color="#9ca3af" />
+                      </Box>
+                    )}
+                    
+                    {/* Property Details */}
+                    <Box flex="1">
+                      <Box fontWeight="600" fontSize="1.1rem" marginBottom="0.25rem">
+                        {currentProperty?.name}
+                      </Box>
+                      <Box display="flex" alignItems="center" gap="0.5rem" color="#6b7280" fontSize="0.875rem">
+                        <IoIosPin size={14} />
+                        <span>
+                          {currentProperty?.address?.city && `${currentProperty.address.city}, `}
+                          {currentProperty?.address?.countryOrRegion || 'No address'}
+                        </span>
                       </Box>
                     </Box>
-                  )}
-                />
+                  </Box>
+                </Box>
                 <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
-                  {isCreateMode 
-                    ? 'Choose which property this rate plan will be attached to'
-                    : 'Property associated with this rate plan'
-                  }
+                  This rate plan will be created for the property shown above
                 </p>
               </Box>
 

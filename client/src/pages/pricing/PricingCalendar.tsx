@@ -138,7 +138,6 @@ const PricingCalendar: React.FC = () => {
             onPropertyChange={handlePropertyChange}
             placeholder="Select a property to manage pricing"
             showDetails={true}
-            showSelectedStatus={false}
             label="Choose Property"
           />
         </Box>
@@ -177,7 +176,6 @@ const PricingCalendar: React.FC = () => {
           <PropertySelector
             onPropertyChange={handlePropertyChange}
             showDetails={false}
-            showSelectedStatus={true}
             buttonSize="small"
           />
         </Box>

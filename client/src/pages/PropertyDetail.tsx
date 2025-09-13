@@ -242,8 +242,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({propertyId}) => {
 
             dispatch(fetchPublicPricingCalendar({
                 propertyId: actualPropertyId,
-                startDate: formatDateLocal(startDate),
-                endDate: formatDateLocal(endDate)
+                dateRange: {
+                    startDate: formatDateLocal(startDate),
+                    endDate: formatDateLocal(endDate)
+                },
+                useExpandedRange: false // PropertyDetail might want exact range, not calendar grid
             })).then(() => {
                 setCalendarLoaded(true)
             })

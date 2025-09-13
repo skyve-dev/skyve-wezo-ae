@@ -131,7 +131,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
         hasDraftRestored
     } = useAppSelector((state) => state.property)
 
-    const {openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard} = useAppShell()
+    const {openDialog, navigateTo, mountHeader, mountFooter} = useAppShell()
     const dialogs = useDialogs()
     const [isLoading, setIsLoading] = useState(true)
 
@@ -193,23 +193,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
         }
     }, [hasDraftRestored, dispatch, showSuccess])
 
-    // Navigation guard for unsaved changes
-    useEffect(() => {
-        if (!hasUnsavedChanges) return
-
-        const cleanup = registerNavigationGuard(async () => {
-            const shouldLeave = await dialogs.confirmUnsavedChanges()
-
-            if (shouldLeave) {
-                // Clear draft when leaving with unsaved changes
-                dispatch(clearDraft())
-            }
-
-            return shouldLeave
-        })
-
-        return cleanup
-    }, [hasUnsavedChanges, registerNavigationGuard, dialogs])
+    // Navigation guard removed - no more annoying confirmations
 
     // Mount header and footer using AppShell (ENABLE IMMEDIATE SAVE/EDIT like RatePlanManager)
     useEffect(() => {
@@ -279,18 +263,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
     }
 
     // Smart back button
-    const handleBack = async () => {
-        if (hasUnsavedChanges) {
-            const shouldSaveAndLeave = await dialogs.confirmSaveBeforeLeave()
-
-            if (shouldSaveAndLeave) {
-                await handleSave()
-                return
-            } else {
-                // User chose to leave without saving - clear form to prevent navigation guard
-                dispatch(clearForm())
-            }
-        }
+    const handleBack = () => {
         navigateTo('properties', {})
     }
 

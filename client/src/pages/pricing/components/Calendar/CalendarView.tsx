@@ -5,6 +5,7 @@ import DateOverrideDialog from '../Controls/DateOverrideDialog'
 import {RootState, useAppDispatch} from '@/store'
 import {Box} from '@/components'
 import {fetchPublicPricingCalendar} from '@/store/slices/priceSlice'
+import { formatDateLocal } from '@/utils/calendarHelpers'
 
 interface RatePlanWithColor {
   id: string
@@ -67,22 +68,19 @@ const CalendarView: React.FC = () => {
             dateRange.endDate &&
             currentProperty?.propertyId
         ) {
-
+            // Use enhanced Redux action with automatic expanded range calculation
             dispatch(fetchPublicPricingCalendar({
                 propertyId: currentProperty.propertyId,
-                startDate: dateRange.startDate,
-                endDate: dateRange.endDate
+                dateRange: {
+                    startDate: dateRange.startDate,
+                    endDate: dateRange.endDate
+                }
+                // useExpandedRange defaults to true, so overflow dates are automatically included
             }))
         }
     }, [dateRange.startDate, dateRange.endDate, currentProperty?.propertyId, dispatch])
 
-    // Helper function to format date without timezone issues
-    const formatDateLocal = (date: Date): string => {
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const day = String(date.getDate()).padStart(2, '0')
-        return `${year}-${month}-${day}`
-    }
+    // Note: formatDateLocal is now imported from utils/calendarHelpers
 
     // Monitor dateRange changes
     useEffect(() => {

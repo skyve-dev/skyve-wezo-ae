@@ -271,20 +271,8 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                 )}
             </Box>
 
-            {/* Past Date Indicator */}
-            {isDisabled && (
-                <Box
-                    textAlign="center"
-                    fontSize="0.625rem"
-                    color="#9ca3af"
-                    marginTop="0.5rem"
-                >
-                    Past Date
-                </Box>
-            )}
-
-            {/* Price Items */}
-            {!isDisabled && (
+            {/* Price Items - Show for all dates including past dates */}
+            {(
                 <Box display="flex" flexDirection="column" flex="1">
                     {prices.length === 0 && selectedRatePlans.length > 0 && (
                         <Box
@@ -329,6 +317,13 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                             textColor = priceData.hasCustomPrice ? '#166534' : '#475569'
                         }
 
+                        // Apply muted styling for past dates
+                        if (isDisabled) {
+                            backgroundColor = '#f9fafb'
+                            borderColor = '#e5e7eb'
+                            textColor = '#9ca3af'
+                        }
+
                         const ratePlanName = isBasePricing ? (isOverride ? 'Override' : 'Base') : (priceData.ratePlan?.name || 'Unknown')
                         const ratePlanColor = isBasePricing ? (isOverride ? '#3182ce' : '#f59e0b') : (priceData.ratePlan?.color || '#6b7280')
 
@@ -346,17 +341,17 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                 backgroundColor={backgroundColor}
                                 borderTop={`1px solid ${borderColor}`}
                                 fontSize={'0.75rem'}
-                                cursor={bulkEditMode ? "default" : "pointer"}
+                                cursor={bulkEditMode ? "default" : (isDisabled ? "not-allowed" : "pointer")}
                                 onClick={(e) => {
-                                    if (!bulkEditMode) {
+                                    if (!bulkEditMode && !isDisabled) {
                                         handlePriceClick(e)
                                     }
-                                    // In bulk mode, let the click propagate to the parent cell
+                                    // In bulk mode or for disabled dates, let the click propagate to the parent cell
                                 }}
                                 transition="all 0.2s"
                                 title={tooltipText}
-                                pointerEvents={bulkEditMode ? "none" : "auto"}
-                                opacity={bulkEditMode ? 0.7 : 1}
+                                pointerEvents={bulkEditMode || isDisabled ? "none" : "auto"}
+                                opacity={bulkEditMode ? 0.7 : (isDisabled ? 0.6 : 1)}
                                 whileHover={!bulkEditMode ? {backgroundColor: isOverride ? '#dbeafe' : (isBasePricing ? '#fef3c7' : '#f1f5f9')} : {}}
                             >
 

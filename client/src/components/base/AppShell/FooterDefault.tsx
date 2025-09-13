@@ -49,7 +49,6 @@ export const FooterDefault = <T extends Record<string, BaseRoute>>({
             activeTab={currentRoute}
             onTabChange={(tabId) => navigateTo(tabId as keyof T, {} as any)}
             variant="underline"
-            size="small"
             fullWidth
             centered
             tabBarOnly

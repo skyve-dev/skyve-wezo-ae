@@ -109,7 +109,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        // pricing include removed - now managed through rate plans
+        pricing: true, // Include pricing data in response
         // cancellation: removed - now handled by rate plans
         owner: {
           select: {
@@ -146,6 +146,11 @@ export class PropertyService {
     if (pricing) {
       console.log('🔷 PropertyService - creating pricing for propertyId:', property.propertyId);
       console.log('🔷 PropertyService - pricing data received:', pricing);
+      console.log('🔷 PropertyService - pricing data types:');
+      console.log('  - priceMonday:', typeof pricing.priceMonday, '=', pricing.priceMonday);
+      console.log('  - halfDayPriceMonday:', typeof pricing.halfDayPriceMonday, '=', pricing.halfDayPriceMonday);
+      console.log('  - priceFriday:', typeof pricing.priceFriday, '=', pricing.priceFriday);
+      console.log('  - halfDayPriceFriday:', typeof pricing.halfDayPriceFriday, '=', pricing.halfDayPriceFriday);
       
       // Transform client pricing format to service format
       const weeklyPricingData: WeeklyPricingData = {
@@ -169,10 +174,47 @@ export class PropertyService {
       };
       
       console.log('🔷 PropertyService - transformed pricing data:', weeklyPricingData);
+      console.log('🔷 PropertyService - transformation verification:');
+      console.log('  - monday:', pricing.priceMonday, '→', weeklyPricingData.monday);
+      console.log('  - halfDayMonday:', pricing.halfDayPriceMonday, '→', weeklyPricingData.halfDayMonday);
+      console.log('  - friday:', pricing.priceFriday, '→', weeklyPricingData.friday);
+      console.log('  - halfDayFriday:', pricing.halfDayPriceFriday, '→', weeklyPricingData.halfDayFriday);
       
       try {
         await propertyPricingService.setWeeklyPricing(property.propertyId, ownerId, weeklyPricingData);
         console.log('🔷 PropertyService - pricing created successfully');
+        
+        // Re-fetch property with updated pricing to ensure response includes latest data
+        const updatedProperty = await prisma.property.findUnique({
+          where: { propertyId: property.propertyId },
+          include: {
+            address: {
+              include: {
+                latLong: true,
+              },
+            },
+            rooms: {
+              include: {
+                beds: true,
+              },
+            },
+            amenities: true,
+            photos: true,
+            checkInCheckout: true,
+            pricing: true, // Include fresh pricing data
+            owner: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        });
+        
+        console.log('🔷 PropertyService - re-fetched property with created pricing');
+        return updatedProperty || property;
       } catch (pricingError) {
         console.error('🔷 PropertyService - pricing creation failed:', pricingError);
         // Don't throw error here to avoid breaking property creation
@@ -235,6 +277,7 @@ export class PropertyService {
     console.log('🔷 PropertyService - pricing extracted:', pricing);
     console.log('🔷 PropertyService - pricing exists:', !!pricing);
     console.log('🔷 PropertyService - pricing keys:', pricing ? Object.keys(pricing) : 'no pricing');
+    console.log('🔷 PropertyService - pricing condition will be:', !!pricing ? 'EXECUTED' : 'SKIPPED');
 
     // Update address if provided
     if (address) {
@@ -385,7 +428,7 @@ export class PropertyService {
         amenities: true,
         photos: true,
         checkInCheckout: true,
-        // pricing include removed - now managed through rate plans
+        pricing: true, // Include pricing data in response
         // cancellation: removed - now handled by rate plans
         owner: {
           select: {
@@ -399,9 +442,15 @@ export class PropertyService {
     });
 
     // Handle PropertyPricing update if provided
+    console.log('🔷 PropertyService - About to check pricing condition. pricing =', !!pricing);
     if (pricing) {
       console.log('🔷 PropertyService - updating pricing for propertyId:', propertyId);
       console.log('🔷 PropertyService - pricing data received:', pricing);
+      console.log('🔷 PropertyService - pricing data types:');
+      console.log('  - priceMonday:', typeof pricing.priceMonday, '=', pricing.priceMonday);
+      console.log('  - halfDayPriceMonday:', typeof pricing.halfDayPriceMonday, '=', pricing.halfDayPriceMonday);
+      console.log('  - priceFriday:', typeof pricing.priceFriday, '=', pricing.priceFriday);
+      console.log('  - halfDayPriceFriday:', typeof pricing.halfDayPriceFriday, '=', pricing.halfDayPriceFriday);
       
       // Transform client pricing format to service format
       const weeklyPricingData: WeeklyPricingData = {
@@ -425,10 +474,47 @@ export class PropertyService {
       };
       
       console.log('🔷 PropertyService - transformed pricing data:', weeklyPricingData);
+      console.log('🔷 PropertyService - transformation verification:');
+      console.log('  - monday:', pricing.priceMonday, '→', weeklyPricingData.monday);
+      console.log('  - halfDayMonday:', pricing.halfDayPriceMonday, '→', weeklyPricingData.halfDayMonday);
+      console.log('  - friday:', pricing.priceFriday, '→', weeklyPricingData.friday);
+      console.log('  - halfDayFriday:', pricing.halfDayPriceFriday, '→', weeklyPricingData.halfDayFriday);
       
       try {
         await propertyPricingService.setWeeklyPricing(propertyId, ownerId, weeklyPricingData);
         console.log('🔷 PropertyService - pricing updated successfully');
+        
+        // Re-fetch property with updated pricing to ensure response includes latest data
+        const updatedProperty = await prisma.property.findUnique({
+          where: { propertyId },
+          include: {
+            address: {
+              include: {
+                latLong: true,
+              },
+            },
+            rooms: {
+              include: {
+                beds: true,
+              },
+            },
+            amenities: true,
+            photos: true,
+            checkInCheckout: true,
+            pricing: true, // Include fresh pricing data
+            owner: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        });
+        
+        console.log('🔷 PropertyService - re-fetched property with updated pricing');
+        return updatedProperty || property;
       } catch (pricingError) {
         console.error('🔷 PropertyService - pricing update failed:', pricingError);
         // Don't throw error here to avoid breaking property update

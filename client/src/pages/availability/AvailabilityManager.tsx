@@ -114,7 +114,6 @@ const AvailabilityManager: React.FC = () => {
             buttonSize={isMobile ? "small" : "medium"}
             showDetails={false}
             placeholder="Choose a property to manage availability"
-            label="Select Property"
           />
         </Box>
 

@@ -66,9 +66,11 @@ const PricingCalendarCell: React.FC<CalendarCellProps> = ({
     
     if (isPast) {
       return {
-        backgroundColor: '#f9fafb',
+        backgroundColor: pricingData?.price ? '#f9fafb' : '#fcfcfc',
         color: '#9ca3af',
-        border: '1px solid #e5e7eb'
+        border: '1px solid #e5e7eb',
+        cursor: 'not-allowed',
+        opacity: 0.85
       }
     }
     
@@ -88,21 +90,25 @@ const PricingCalendarCell: React.FC<CalendarCellProps> = ({
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      cursor="pointer"
-      onClick={() => onCellClick(dateStr)}
+      cursor={isPast ? "not-allowed" : "pointer"}
+      onClick={() => !isPast && onCellClick(dateStr)}
       fontWeight={isToday ? 'bold' : 'normal'}
       transition="all 0.2s ease"
       position="relative"
       style={styles}
       onMouseEnter={(e) => {
-        if (isSelected) {
-          e.currentTarget.style.backgroundColor = '#2563eb'
-        } else {
-          e.currentTarget.style.backgroundColor = '#f3f4f6'
+        if (!isPast) {
+          if (isSelected) {
+            e.currentTarget.style.backgroundColor = '#2563eb'
+          } else {
+            e.currentTarget.style.backgroundColor = '#f3f4f6'
+          }
         }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = styles.backgroundColor
+        if (!isPast) {
+          e.currentTarget.style.backgroundColor = styles.backgroundColor
+        }
       }}
     >
       {/* Day number */}
@@ -114,17 +120,26 @@ const PricingCalendarCell: React.FC<CalendarCellProps> = ({
         {day}
       </Box>
       
-      {/* Price or Add button */}
+      {/* Price, Add button, or past date indicator */}
       {pricingData?.price ? (
         <Box
           fontSize="0.75rem"
           fontWeight="600"
           textAlign="center"
-          color={isSelected ? 'white' : '#059669'}
+          color={isPast ? '#9ca3af' : (isSelected ? 'white' : '#059669')}
+          style={{ opacity: isPast ? 0.7 : 1 }}
         >
           {pricingData.currency || '$'}{pricingData.price}
         </Box>
-      ) : !isPast ? (
+      ) : isPast ? (
+        <Box
+          fontSize="0.75rem"
+          color="#9ca3af"
+          style={{ opacity: 0.5 }}
+        >
+          —
+        </Box>
+      ) : (
         <Box
           fontSize="0.75rem"
           color={isSelected ? 'white' : '#6b7280'}
@@ -138,7 +153,7 @@ const PricingCalendarCell: React.FC<CalendarCellProps> = ({
         >
           <IoIosAdd size={14} />
         </Box>
-      ) : null}
+      )}
       
       {/* Indicators */}
       <Box position="absolute" top="2px" right="2px" display="flex" gap="2px">

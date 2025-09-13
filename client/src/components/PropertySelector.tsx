@@ -39,20 +39,13 @@ interface PropertySelectorProps {
    * Optional label text above the selector
    */
   label?: string
-  
-  /**
-   * Optional flag to show selected property status
-   */
-  showSelectedStatus?: boolean
 }
 
 const PropertySelector: React.FC<PropertySelectorProps> = ({
   onPropertyChange,
   placeholder = 'Choose a property to manage availability',
   buttonSize = 'medium',
-  showDetails = true,
-  label = 'Select Property',
-  showSelectedStatus = true
+  showDetails = true
 }) => {
   const dispatch = useAppDispatch()
   const { properties, currentProperty, loading } = useAppSelector((state) => state.property)
@@ -184,12 +177,60 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
   
   // Button content
   const buttonContent = () => {
-    if (currentProperty && showDetails) {
+    if (currentProperty) {
+      const photoUrl = currentProperty.photos?.[0] ? resolvePhotoUrl(currentProperty.photos[0].url) : null
+      
       return (
-        <Box display="flex" alignItems="center" gap="0.5rem">
-          <IoIosBusiness />
-          <span>{currentProperty.name}</span>
-          <IoIosArrowDown style={{ marginLeft: 'auto' }} />
+        <Box display="flex" alignItems="center" gap="0.75rem" width="100%">
+          {/* Property Photo */}
+          {photoUrl ? (
+            <Box
+              width="40px"
+              height="40px"
+              borderRadius="6px"
+              overflow="hidden"
+              flexShrink="0"
+            >
+              <img
+                src={photoUrl}
+                alt={currentProperty.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            </Box>
+          ) : (
+            <Box
+              width="40px"
+              height="40px"
+              borderRadius="6px"
+              backgroundColor="#e5e7eb"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexShrink="0"
+            >
+              <IoIosBusiness size={18} color="#9ca3af" />
+            </Box>
+          )}
+          
+          {/* Property Details */}
+          <Box flex="1" textAlign="left">
+            <Box fontSize="0.75rem" color="#6b7280" marginBottom="0.125rem">
+              Working with property
+            </Box>
+            <Box fontWeight="500">
+              {currentProperty.name}
+            </Box>
+            {showDetails && currentProperty.address?.city && (
+              <Box fontSize="0.75rem" color="#6b7280">
+                {currentProperty.address.city}{currentProperty.address.countryOrRegion ? `, ${currentProperty.address.countryOrRegion}` : ''}
+              </Box>
+            )}
+          </Box>
+          <IoIosArrowDown />
         </Box>
       )
     }
@@ -197,7 +238,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
     return (
       <Box display="flex" alignItems="center" gap="0.5rem">
         <IoIosBusiness />
-        <span>{currentProperty ? currentProperty.name : placeholder}</span>
+        <span>{placeholder}</span>
         <IoIosArrowDown />
       </Box>
     )
@@ -205,38 +246,6 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
   
   return (
     <Box>
-      {/* Label */}
-      {label && (
-        <Box marginBottom="0.5rem">
-          <label style={{ fontWeight: '500', fontSize: '0.875rem', color: '#374151' }}>
-            {label}
-          </label>
-        </Box>
-      )}
-      
-      {/* Selected Status Display */}
-      {showSelectedStatus && currentProperty && (
-        <Box 
-          marginBottom="0.75rem" 
-          padding="0.5rem 0.75rem" 
-          backgroundColor="#f0f9ff" 
-          borderRadius="0.375rem"
-          border="1px solid #e0f2fe"
-        >
-          <Box display="flex" alignItems="center" gap="0.5rem">
-            <IoIosBusiness style={{ color: '#0369a1', fontSize: '0.875rem' }} />
-            <span style={{ color: '#0369a1', fontSize: '0.875rem', fontWeight: '500' }}>
-              Working with property: {currentProperty.name}
-            </span>
-            {currentProperty.address?.city && (
-              <span style={{ color: '#6b7280', fontSize: '0.75rem' }}>
-                • {currentProperty.address.city}{currentProperty.address.countryOrRegion ? `, ${currentProperty.address.countryOrRegion}` : ''}
-              </span>
-            )}
-          </Box>
-        </Box>
-      )}
-      
       {/* Trigger Button */}
       <Button
         onClick={() => setIsDrawerOpen(true)}
@@ -244,7 +253,10 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
         size={buttonSize}
         style={{
           minWidth: '200px',
-          justifyContent: 'space-between'
+          justifyContent: 'flex-start',
+          padding: currentProperty ? '0.75rem 1rem' : '0.5rem 1rem',
+          height: currentProperty ? 'auto' : undefined,
+          minHeight: currentProperty ? '4rem' : undefined
         }}
       >
         {buttonContent()}
@@ -270,13 +282,6 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
         <Box padding="1.5rem" height="100%" display="flex" flexDirection="column">
           {/* Header */}
           <Box marginBottom="1.5rem">
-            <h2 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              marginBottom: '0.5rem'
-            }}>
-              Select Property
-            </h2>
             <p style={{
               color: '#6b7280',
               fontSize: '0.875rem'
