@@ -675,7 +675,9 @@ const Reviews: React.FC = () => {
                         <>
                             {guestReviews.length === 0 ? (
                                 <Box
-                                    textAlign="center"
+                                    display={'flex'}
+                                    flexDirection={'column'}
+                                    alignItems="center"
                                     padding="3rem 1rem"
                                     backgroundColor="white"
                                     borderRadius="12px"

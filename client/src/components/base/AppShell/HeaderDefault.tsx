@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import {Box} from '../Box'
 import {Button} from '../Button'
 import Tab, {TabItem} from '../Tab'
-import {IoIosMenu, IoIosLogIn, IoIosPersonAdd, IoIosPerson} from 'react-icons/io'
+import {IoIosMenu, IoIosLogIn, IoIosPerson} from 'react-icons/io'
 import {BaseRoute} from './types'
 import { filterRoutesByRole } from './roleUtils'
 import AccountMenuDrawer from '../AccountMenuDrawer'
@@ -55,13 +55,9 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
         dispatch(switchUserRole(role))
     }
 
-    // Authentication navigation handlers
+    // Authentication navigation handler
     const handleLogin = () => {
         navigateTo('login' as keyof T, {})
-    }
-
-    const handleRegister = () => {
-        navigateTo('register' as keyof T, {})
     }
 
     const handleLogout = () => {
@@ -137,30 +133,17 @@ export const HeaderDefault = <T extends Record<string, BaseRoute>>({
             {/* Right: Authentication Controls + Menu Button */}
             <Box display="flex" alignItems="center" gap="0.5rem">
                 {!isAuthenticated ? (
-                    // Anonymous user: Show Login/Register buttons
-                    <>
-                        <Button
-                            label="Login"
-                            icon={<IoIosLogIn/>}
-                            onClick={handleLogin}
-                            variant="plain"
-                            size="small"
-                            style={{
-                                color: 'white',
-                                fontSize: '0.875rem'
-                            }}
-                        />
-                        <Button
-                            label="Register"
-                            icon={<IoIosPersonAdd/>}
-                            onClick={handleRegister}
-                            variant="promoted"
-                            size="small"
-                            style={{
-                                fontSize: '0.875rem'
-                            }}
-                        />
-                    </>
+                    // Anonymous user: Show single Sign In button (login page has register link)
+                    <Button
+                        label="Sign In"
+                        icon={<IoIosLogIn/>}
+                        onClick={handleLogin}
+                        variant="promoted"
+                        size="small"
+                        style={{
+                            fontSize: '0.875rem'
+                        }}
+                    />
                 ) : (
                     // Authenticated user: Show unified account menu
                     <Button

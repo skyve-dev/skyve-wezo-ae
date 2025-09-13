@@ -8,7 +8,6 @@ import {
     FaEnvelope,
     FaStar,
     FaChartLine,
-    FaQuestionCircle,
     FaPlus,
     FaEdit,
     FaDollarSign,
@@ -28,7 +27,6 @@ import AvailabilityManager from "@/pages/availability/AvailabilityManager";
 import Inbox from "@/pages/Inbox";
 import Reviews from "@/pages/Reviews";
 import Finance from "@/pages/Finance";
-import Support from "@/pages/Support";
 import PropertyDetail from "@/pages/PropertyDetail";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -153,15 +151,6 @@ export const routes = createRoutes({
         showInHeader: false,
         showInFooter: false,
         roles: ['HomeOwner', 'Manager']  // Host/Manager financial data only
-    },
-    support: {
-        component: Support,
-        icon: <FaQuestionCircle />,
-        label: 'Support',
-        showInNav: true,
-        showInHeader: false,
-        showInFooter: false,
-        roles: ['Tenant', 'HomeOwner', 'Manager']  // All roles can access support
     },
     'rate-plans': {
         component: RatePlans,

@@ -315,7 +315,9 @@ const ConversationList: React.FC = () => {
             <Box color="#6b7280">Loading conversations...</Box>
           </Box>
         ) : conversations.length === 0 ? (
-          <Box padding="2rem" textAlign="center">
+          <Box padding="2rem" display="flex"
+               flexDirection="column"
+               alignItems="center" >
             <IoMail size={48} color="#9ca3af" style={{ marginBottom: '1rem' }} />
             <Box marginBottom="0.5rem" color="#6b7280" fontWeight="600">
               {searchQuery ? 'No conversations found' : 'No conversations yet'}

@@ -14,7 +14,7 @@ export class PropertyService {
       photos,
       bookingType,
       paymentType,
-      // pricing removed - now managed through rate plans
+      pricing, // Re-added pricing support for unified property management
       aboutTheProperty,
       aboutTheNeighborhood,
       firstDateGuestCanCheckIn,
@@ -89,7 +89,7 @@ export class PropertyService {
             },
           }
         : undefined,
-      // pricing removed - now managed through rate plans
+      // Property pricing now handled separately after property creation
       // Cancellation policies now managed through rate plans
     };
 
@@ -139,6 +139,44 @@ export class PropertyService {
       
       if (photoUpdates.length > 0) {
         await Promise.all(photoUpdates);
+      }
+    }
+
+    // Handle PropertyPricing creation if provided
+    if (pricing) {
+      console.log('🔷 PropertyService - creating pricing for propertyId:', property.propertyId);
+      console.log('🔷 PropertyService - pricing data received:', pricing);
+      
+      // Transform client pricing format to service format
+      const weeklyPricingData: WeeklyPricingData = {
+        // Full day prices (ensure numbers)
+        monday: Number(pricing.priceMonday) || 0,
+        tuesday: Number(pricing.priceTuesday) || 0,
+        wednesday: Number(pricing.priceWednesday) || 0,
+        thursday: Number(pricing.priceThursday) || 0,
+        friday: Number(pricing.priceFriday) || 0,
+        saturday: Number(pricing.priceSaturday) || 0,
+        sunday: Number(pricing.priceSunday) || 0,
+        
+        // Half day prices (ensure numbers, default to 70% of full day if not provided)
+        halfDayMonday: Number(pricing.halfDayPriceMonday) || Math.round(Number(pricing.priceMonday || 0) * 0.7),
+        halfDayTuesday: Number(pricing.halfDayPriceTuesday) || Math.round(Number(pricing.priceTuesday || 0) * 0.7),
+        halfDayWednesday: Number(pricing.halfDayPriceWednesday) || Math.round(Number(pricing.priceWednesday || 0) * 0.7),
+        halfDayThursday: Number(pricing.halfDayPriceThursday) || Math.round(Number(pricing.priceThursday || 0) * 0.7),
+        halfDayFriday: Number(pricing.halfDayPriceFriday) || Math.round(Number(pricing.priceFriday || 0) * 0.7),
+        halfDaySaturday: Number(pricing.halfDayPriceSaturday) || Math.round(Number(pricing.priceSaturday || 0) * 0.7),
+        halfDaySunday: Number(pricing.halfDayPriceSunday) || Math.round(Number(pricing.priceSunday || 0) * 0.7)
+      };
+      
+      console.log('🔷 PropertyService - transformed pricing data:', weeklyPricingData);
+      
+      try {
+        await propertyPricingService.setWeeklyPricing(property.propertyId, ownerId, weeklyPricingData);
+        console.log('🔷 PropertyService - pricing created successfully');
+      } catch (pricingError) {
+        console.error('🔷 PropertyService - pricing creation failed:', pricingError);
+        // Don't throw error here to avoid breaking property creation
+        // Pricing creation failure should be logged but not block property creation
       }
     }
 

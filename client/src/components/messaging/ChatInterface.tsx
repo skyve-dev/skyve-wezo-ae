@@ -431,13 +431,13 @@ const ChatInterface: React.FC = () => {
   if (!selectedConversation) {
     return (
       <Box 
-        height="100%" 
-        display="flex" 
-        alignItems="center" 
-        justifyContent="center"
+        height="100%"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
         backgroundColor="#f9fafb"
+        padding={'2rem'}
       >
-        <Box textAlign="center" color="#6b7280">
           <IoPerson size={64} color="#d1d5db" style={{ marginBottom: '1rem' }} />
           <Box fontSize="1.125rem" fontWeight="600" marginBottom="0.5rem">
             No conversation selected
@@ -445,7 +445,6 @@ const ChatInterface: React.FC = () => {
           <Box fontSize="0.875rem">
             Choose a conversation from the list to start messaging
           </Box>
-        </Box>
       </Box>
     )
   }

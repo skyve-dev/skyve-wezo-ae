@@ -7,6 +7,15 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const createProperty = async (req: Request, res: Response): Promise<void> => {
+  console.log('=== PROPERTY CREATION DEBUG ===');
+  console.log('Request body keys:', Object.keys(req.body));
+  console.log('Pricing in request:', req.body.pricing ? 'YES' : 'NO');
+  if (req.body.pricing) {
+    console.log('Pricing data:', JSON.stringify(req.body.pricing, null, 2));
+  }
+  console.log('=== PROPERTY CREATION DEBUG ===');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('Request body pricing:', req.body.pricing);
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Unauthorized' });
