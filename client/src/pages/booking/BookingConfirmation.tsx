@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useAppShell } from '@/components/base/AppShell'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { 
@@ -6,6 +6,7 @@ import {
   updateBookingField, 
   sendOtpCode, 
   verifyOtpCode,
+  createAuthenticatedBooking,
   setOtpTimer,
   clearError,
   setCurrentStep
@@ -40,9 +41,13 @@ const BookingConfirmation: React.FC = () => {
   } = useAppSelector((state) => state.booking)
   
   const { currentProperty } = useAppSelector((state) => state.property)
+  const { user } = useAppSelector((state) => state.auth)
   
   // OTP Timer countdown
   const [countdown, setCountdown] = useState(0)
+  
+  // Ref to track if we've already auto-populated for this user/booking combination
+  const autoPopulatedRef = useRef<string | null>(null)
   
   // Initialize booking when component mounts
   useEffect(() => {
@@ -91,6 +96,32 @@ const BookingConfirmation: React.FC = () => {
     }
   }, [error, addToast, dispatch])
   
+  // Auto-populate guest information for logged-in users
+  useEffect(() => {
+    if (user && currentBooking) {
+      const firstName = user.firstName?.trim() || ''
+      const lastName = user.lastName?.trim() || ''
+      
+      // Create a unique key for this user/booking combination
+      const autoPopulateKey = `${user.id}_${currentBooking.propertyId}_${currentBooking.checkInDate}_${currentBooking.checkOutDate}`
+      
+      // Only auto-populate once per user/booking combination and only if fields are truly empty
+      if (autoPopulatedRef.current !== autoPopulateKey &&
+          (!currentBooking.guestFirstName || !currentBooking.guestLastName || !currentBooking.guestEmail)) {
+        
+        autoPopulatedRef.current = autoPopulateKey
+        
+        dispatch(updateBookingField({
+          guestFirstName: firstName,
+          guestLastName: lastName,
+          guestEmail: user.email,
+          // Note: User interface doesn't have phoneNumber field, so only preserve existing value
+          guestPhone: currentBooking.guestPhone || ''
+        }))
+      }
+    }
+  }, [user, currentBooking?.propertyId, currentBooking?.checkInDate, currentBooking?.checkOutDate, dispatch])
+  
   const handleInputChange = (field: string, value: string) => {
     dispatch(updateBookingField({ [field]: value }))
   }
@@ -105,8 +136,8 @@ const BookingConfirmation: React.FC = () => {
       return
     }
     
-    if (!currentBooking?.guestName.trim()) {
-      addToast('Please enter your full name', { 
+    if (!currentBooking?.guestFirstName.trim() || !currentBooking?.guestLastName.trim()) {
+      addToast('Please enter your first and last name', { 
         type: 'warning', 
         autoHide: true, 
         duration: 4000 
@@ -114,7 +145,79 @@ const BookingConfirmation: React.FC = () => {
       return
     }
     
-    await dispatch(sendOtpCode(currentBooking.guestEmail))
+    // If user is logged in, skip OTP verification and proceed directly to booking creation
+    if (user) {
+      await handleDirectBookingForLoggedInUser()
+    } else {
+      // For guest users, continue with OTP verification
+      await dispatch(sendOtpCode(currentBooking.guestEmail))
+    }
+  }
+  
+  const handleDirectBookingForLoggedInUser = async () => {
+    if (!currentBooking) return
+    
+    try {
+      // Create booking directly with authenticated user - no OTP needed
+      const bookingData = {
+        ...currentBooking,
+        // Combine first and last name for backend compatibility
+        guestName: `${currentBooking.guestFirstName.trim()} ${currentBooking.guestLastName.trim()}`.trim()
+      }
+      
+      const result = await dispatch(createAuthenticatedBooking(bookingData))
+      
+      console.log('🔍 DEBUG: Full result object:', result)
+      console.log('🔍 DEBUG: result.meta:', result.meta)
+      console.log('🔍 DEBUG: result.payload:', result.payload)
+      
+      if (result.meta.requestStatus === 'fulfilled') {
+        const response = (result.payload as any)
+        
+        console.log('🔍 DEBUG: Extracted response:', response)
+        console.log('🔍 DEBUG: response.bookingId:', response?.bookingId)
+        console.log('🔍 DEBUG: response.bookingExpiresAt:', response?.bookingExpiresAt)
+        
+        // Update user profile if names have changed
+        if (user && (user.firstName !== currentBooking.guestFirstName.trim() || 
+            user.lastName !== currentBooking.guestLastName.trim())) {
+          addToast('Profile updated with your booking information', { 
+            type: 'info', 
+            autoHide: true, 
+            duration: 3000 
+          })
+        }
+        
+        if (response?.bookingId) {
+          addToast('Booking created successfully! Proceeding to payment...', { 
+            type: 'success', 
+            autoHide: true, 
+            duration: 2000 
+          })
+          
+          // Navigate to payment
+          setTimeout(() => {
+            navigateTo('booking-payment', {
+              bookingId: response.bookingId,
+              bookingExpiresAt: response.bookingExpiresAt,
+              ...params
+            })
+          }, 1500)
+        } else {
+          addToast('Booking creation failed. Please try again.', { 
+            type: 'error', 
+            autoHide: true, 
+            duration: 5000 
+          })
+        }
+      }
+    } catch (error) {
+      addToast('Failed to create booking. Please try again.', { 
+        type: 'error', 
+        autoHide: true, 
+        duration: 5000 
+      })
+    }
   }
   
   const handleVerifyOtp = async () => {
@@ -311,14 +414,50 @@ const BookingConfirmation: React.FC = () => {
                 </h2>
               </Box>
               
+              {/* Visual indicator when using account information */}
+              {user && (
+                <Box 
+                  backgroundColor="#e6fffa" 
+                  padding="0.75rem" 
+                  borderRadius="8px" 
+                  marginBottom="1rem"
+                  border="1px solid #81e6d9"
+                >
+                  <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" color="#059669" fontWeight="600">
+                    <IoCheckmarkCircle />
+                    Using your account information
+                  </Box>
+                </Box>
+              )}
+              
               <Box marginBottom="1rem">
                 <Input
-                  label="Full Name"
-                  value={currentBooking.guestName}
-                  onChange={(e) => handleInputChange('guestName', e.target.value)}
-                  placeholder="Enter your full name"
+                  label="First Name"
+                  value={currentBooking.guestFirstName}
+                  onChange={(e) => handleInputChange('guestFirstName', e.target.value)}
+                  placeholder="Enter your first name"
                   required
                 />
+                {user && (
+                  <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+                    Auto-filled from your account • You can edit this if needed
+                  </Box>
+                )}
+              </Box>
+              
+              <Box marginBottom="1rem">
+                <Input
+                  label="Last Name"
+                  value={currentBooking.guestLastName}
+                  onChange={(e) => handleInputChange('guestLastName', e.target.value)}
+                  placeholder="Enter your last name"
+                  required
+                />
+                {user && (
+                  <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+                    Auto-filled from your account • You can edit this if needed
+                  </Box>
+                )}
               </Box>
               
               <Box marginBottom="1rem">
@@ -329,7 +468,17 @@ const BookingConfirmation: React.FC = () => {
                   onChange={(e) => handleInputChange('guestEmail', e.target.value)}
                   placeholder="Enter your email address"
                   required
+                  disabled={!!user}
+                  style={user ? { 
+                    backgroundColor: '#f3f4f6',
+                    cursor: 'not-allowed'
+                  } : undefined}
                 />
+                {user && (
+                  <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+                    This information is automatically filled from your account
+                  </Box>
+                )}
               </Box>
               
               <Box marginBottom="1rem">
@@ -338,8 +487,13 @@ const BookingConfirmation: React.FC = () => {
                   type="tel"
                   value={currentBooking.guestPhone || ''}
                   onChange={(e) => handleInputChange('guestPhone', e.target.value)}
-                  placeholder="Enter your phone number"
+                  placeholder={user ? "Enter your phone number" : "Enter your phone number"}
                 />
+                {user && (
+                  <Box fontSize="0.75rem" color="#6b7280" marginTop="0.25rem">
+                    You can add or update your phone number here
+                  </Box>
+                )}
               </Box>
               
               <Box marginBottom="1rem">
@@ -353,17 +507,24 @@ const BookingConfirmation: React.FC = () => {
             </Box>
             
             <Button
-              label={isLoading ? "Sending verification code..." : "Continue to Email Verification"}
-              icon={<IoMail />}
+              label={
+                isLoading 
+                  ? (user ? "Creating booking..." : "Sending verification code...") 
+                  : (user ? "Proceed to Payment" : "Continue to Email Verification")
+              }
+              icon={user ? <IoCheckmarkCircle /> : <IoMail />}
               onClick={handleSendOtp}
               variant="promoted"
               size="large"
-              disabled={isLoading || !currentBooking.guestName.trim() || !currentBooking.guestEmail.trim()}
+              disabled={isLoading || !currentBooking.guestFirstName.trim() || !currentBooking.guestLastName.trim() || !currentBooking.guestEmail.trim()}
               style={{ width: '100%' }}
             />
             
             <Box fontSize="0.75rem" color="#666" textAlign="center" marginTop="1rem">
-              We'll send a verification code to your email to confirm your booking
+              {user 
+                ? "You're logged in, so we'll create your booking and proceed directly to payment"
+                : "We'll send a verification code to your email to confirm your booking"
+              }
             </Box>
           </Box>
         )}

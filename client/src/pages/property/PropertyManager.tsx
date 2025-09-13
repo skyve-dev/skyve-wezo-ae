@@ -12,7 +12,6 @@ import {useAppShell} from '@/components/base/AppShell'
 import {useAppDispatch, useAppSelector} from '@/store'
 import {
     acknowledgeDraftRestored,
-    clearDraft,
     clearForm,
     createPropertyWithPromotion,
     fetchPropertyById,
@@ -26,7 +25,6 @@ import {
 } from '@/store/slices/propertySlice'
 import {api, ApiError, resolvePhotoUrl} from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
-import { useDialogs } from '@/hooks/useDialogs'
 import PropertyManagerHeader from './PropertyManagerHeader'
 import PropertyManagerFooter from './PropertyManagerFooter'
 import PropertyStatusWidget from '@/components/PropertyStatusWidget'
@@ -132,7 +130,6 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
     } = useAppSelector((state) => state.property)
 
     const {openDialog, navigateTo, mountHeader, mountFooter} = useAppShell()
-    const dialogs = useDialogs()
     const [isLoading, setIsLoading] = useState(true)
 
     // Room management

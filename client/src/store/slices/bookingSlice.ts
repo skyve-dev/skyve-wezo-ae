@@ -13,7 +13,8 @@ interface BookingFormData {
   pricePerNight: number
   
   // Guest details
-  guestName: string
+  guestFirstName: string
+  guestLastName: string
   guestEmail: string
   guestPhone?: string
   specialRequests?: string
@@ -178,7 +179,8 @@ export const verifyOtpCode = createAsyncThunk(
           checkInDate: bookingData.checkInDate,
           checkOutDate: bookingData.checkOutDate,
           numGuests: bookingData.numGuests,
-          guestName: bookingData.guestName,
+          guestFirstName: bookingData.guestFirstName,
+          guestLastName: bookingData.guestLastName,
           guestPhone: bookingData.guestPhone,
           specialRequests: bookingData.specialRequests,
           totalPrice: bookingData.totalPrice,
@@ -204,6 +206,22 @@ export const createBooking = createAsyncThunk(
       return response
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create booking')
+    }
+  }
+)
+
+export const createAuthenticatedBooking = createAsyncThunk(
+  'booking/createAuthenticated',
+  async (bookingData: Partial<BookingFormData>, { rejectWithValue }) => {
+    try {
+      // Include isHalfDay in the booking data
+      const response = await api.post('/api/booking/create-authenticated', {
+        ...bookingData,
+        isHalfDay: bookingData.isHalfDay || false
+      })
+      return response
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to create authenticated booking')
     }
   }
 )
@@ -356,7 +374,8 @@ const bookingSlice = createSlice({
       .addCase(initializeBooking.fulfilled, (state, action) => {
         state.currentBooking = {
           ...action.payload,
-          guestName: '',
+          guestFirstName: '',
+          guestLastName: '',
           guestEmail: '',
           guestPhone: '',
           specialRequests: '',
@@ -508,7 +527,7 @@ const bookingSlice = createSlice({
       })
       .addCase(fetchCancellationPreview.fulfilled, (state, action) => {
         state.cancellationLoading = false
-        state.cancellationPreview = action.payload.data
+        state.cancellationPreview = action.payload
       })
       .addCase(fetchCancellationPreview.rejected, (state, action) => {
         state.cancellationLoading = false

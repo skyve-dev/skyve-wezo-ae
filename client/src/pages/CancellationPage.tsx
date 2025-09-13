@@ -131,7 +131,7 @@ const CancellationPage: React.FC<CancellationPageProps> = ({ reservationId }) =>
     // Show confirmation dialog
     const confirmed = await openDialog<boolean>((close) => (
       <Box padding="2rem" textAlign="center">
-        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
+        <Box display={'flex'} flexDirection={'column'} alignItems={'center'} fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
           <IoWarning size={30} style={{ marginBottom: '0.5rem' }} />
           <div>Confirm Cancellation</div>
         </Box>
@@ -197,7 +197,7 @@ const CancellationPage: React.FC<CancellationPageProps> = ({ reservationId }) =>
 
       // Show success dialog
       await openDialog<void>((close) => (
-        <Box padding="2rem" textAlign="center">
+        <Box display={'flex'} flexDirection={'column'} alignItems={'center'} padding="2rem" textAlign="center">
           <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#059669">
             <IoCheckmarkCircle size={40} style={{ marginBottom: '0.5rem' }} />
             <div>Reservation Cancelled</div>

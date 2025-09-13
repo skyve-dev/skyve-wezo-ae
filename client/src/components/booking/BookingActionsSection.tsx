@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@/components/base/Box';
 import { Button } from '@/components/base/Button';
+import { useAppShell } from '@/components/base/AppShell';
 import { 
   IoCheckmarkCircle,
   IoCloseCircle,
@@ -23,6 +24,7 @@ const BookingActionsSection: React.FC<BookingActionsSectionProps> = ({
   onStatusChange,
   onNoShow
 }) => {
+  const { navigateTo } = useAppShell();
   const canConfirm = booking.status?.toLowerCase() === 'pending';
   const canCancel = ['pending', 'confirmed'].includes(booking.status?.toLowerCase());
   const canComplete = booking.status?.toLowerCase() === 'confirmed';
@@ -41,6 +43,11 @@ const BookingActionsSection: React.FC<BookingActionsSectionProps> = ({
   const handleModify = () => {
     // TODO: Implement modify booking functionality
     console.log('Modify booking');
+  };
+  
+  const handleCancel = () => {
+    // Navigate to the comprehensive cancellation page
+    navigateTo('cancel-reservation', { id: booking.id });
   };
   
   return (
@@ -91,7 +98,7 @@ const BookingActionsSection: React.FC<BookingActionsSectionProps> = ({
             <Button
               label="Cancel Booking"
               icon={<IoCloseCircle />}
-              onClick={() => onStatusChange('Cancelled', 'Cancelled by user')}
+              onClick={handleCancel}
               variant="normal"
               size="small"
               style={{ 

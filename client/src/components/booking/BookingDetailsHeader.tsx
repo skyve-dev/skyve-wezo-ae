@@ -1,13 +1,24 @@
 import React from 'react';
 import { Box } from '@/components/base/Box';
 import { Button } from '@/components/base/Button';
+import { resolvePhotoUrl } from '@/utils/api';
 import { 
   IoArrowBack, 
   IoCalendar, 
   IoCheckmarkCircle, 
   IoTime, 
   IoCloseCircle,
-  IoWarning
+  IoWarning,
+  IoBed,
+  IoWater,
+  IoPeople,
+  IoLocation,
+  IoHome,
+  IoWifi,
+  IoCar,
+  IoCall,
+  IoMail,
+  IoKey
 } from 'react-icons/io5';
 
 interface BookingDetailsHeaderProps {
@@ -21,6 +32,37 @@ const BookingDetailsHeader: React.FC<BookingDetailsHeaderProps> = ({
   userRole, 
   onBack 
 }) => {
+  // Helper function to format dates safely
+  const formatDate = (dateString: string, options: Intl.DateTimeFormatOptions = {}) => {
+    if (!dateString) return 'N/A';
+    
+    const defaultOptions: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    };
+    
+    // Handle both date-only strings and full datetime strings
+    if (dateString.includes('T')) {
+      // Full datetime string - safe to use Date constructor
+      return new Date(dateString).toLocaleDateString('en-AE', { ...defaultOptions, ...options });
+    } else {
+      // Date-only string - parse manually to avoid timezone shift
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-AE', { ...defaultOptions, ...options });
+    }
+  };
+  
+  // Helper function to get amenity icons
+  const getAmenityIcon = (amenityName: string) => {
+    const name = amenityName.toLowerCase();
+    if (name.includes('wifi') || name.includes('internet')) return <IoWifi size={14} color="#059669" />;
+    if (name.includes('parking')) return <IoCar size={14} color="#059669" />;
+    if (name.includes('pool')) return <IoWater size={14} color="#059669" />;
+    return <IoHome size={14} color="#059669" />;
+  };
+  
   const getStatusConfig = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'confirmed':
@@ -119,27 +161,153 @@ const BookingDetailsHeader: React.FC<BookingDetailsHeaderProps> = ({
         style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="flex-start" flexDirection="column" flexDirectionMd="row" gap="1rem">
-          {/* Property Information */}
+          {/* Enhanced Property Information */}
           <Box flex="1">
-            <Box fontSize="1.25rem" fontWeight="600" marginBottom="0.5rem" color="#111827">
-              {booking.propertyName || 'Property Name'}
+            {/* Property Photos */}
+            {booking.property?.photos && booking.property.photos.length > 0 && (
+              <Box display="flex" gap="0.5rem" marginBottom="1rem" height="80px">
+                <Box
+                  width="120px"
+                  height="80px"
+                  backgroundImage={`url(${resolvePhotoUrl(booking.property.photos[0]?.url || booking.property.photos[0])})`}
+                  backgroundSize="cover"
+                  backgroundPosition="center"
+                  borderRadius="8px"
+                />
+                {booking.property.photos[1] && (
+                  <Box
+                    width="80px"
+                    height="80px"
+                    backgroundImage={`url(${resolvePhotoUrl(booking.property.photos[1]?.url || booking.property.photos[1])})`}
+                    backgroundSize="cover"
+                    backgroundPosition="center"
+                    borderRadius="8px"
+                  />
+                )}
+                {booking.property.photos[2] && (
+                  <Box
+                    width="80px"
+                    height="80px"
+                    backgroundImage={`url(${resolvePhotoUrl(booking.property.photos[2]?.url || booking.property.photos[2])})`}
+                    backgroundSize="cover"
+                    backgroundPosition="center"
+                    borderRadius="8px"
+                    position="relative"
+                  >
+                    {booking.property.photos.length > 3 && (
+                      <Box
+                        position="absolute"
+                        bottom="0"
+                        right="0"
+                        backgroundColor="rgba(0,0,0,0.7)"
+                        color="white"
+                        padding="0.125rem 0.25rem"
+                        fontSize="0.625rem"
+                        borderRadius="4px"
+                        margin="0.25rem"
+                      >
+                        +{booking.property.photos.length - 3}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {/* Property Name & Type */}
+            <Box marginBottom="0.75rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.25rem">
+                <Box fontSize="1.25rem" fontWeight="600" color="#111827">
+                  {booking.propertyName || booking.property?.name || 'Property Name'}
+                </Box>
+                {booking.property?.type && (
+                  <Box
+                    fontSize="0.75rem"
+                    fontWeight="500"
+                    color="#059669"
+                    backgroundColor="#dcfce7"
+                    padding="0.125rem 0.5rem"
+                    borderRadius="12px"
+                  >
+                    {booking.property.type}
+                  </Box>
+                )}
+              </Box>
+
+              {/* Property Details Row */}
+              <Box display="flex" alignItems="center" gap="1rem" flexWrap="wrap" fontSize="0.875rem" color="#6b7280">
+                {booking.property?.bedrooms && (
+                  <Box display="flex" alignItems="center" gap="0.25rem">
+                    <IoBed size={14} />
+                    {booking.property.bedrooms} bed{booking.property.bedrooms > 1 ? 's' : ''}
+                  </Box>
+                )}
+                {booking.property?.bathrooms && (
+                  <Box display="flex" alignItems="center" gap="0.25rem">
+                    <IoWater size={14} />
+                    {booking.property.bathrooms} bath{booking.property.bathrooms > 1 ? 's' : ''}
+                  </Box>
+                )}
+                {booking.property?.maxGuests && (
+                  <Box display="flex" alignItems="center" gap="0.25rem">
+                    <IoPeople size={14} />
+                    Up to {booking.property.maxGuests} guests
+                  </Box>
+                )}
+                {booking.property?.area && (
+                  <Box display="flex" alignItems="center" gap="0.25rem">
+                    <IoHome size={14} />
+                    {booking.property.area} sq ft
+                  </Box>
+                )}
+              </Box>
             </Box>
-            <Box fontSize="0.875rem" color="#6b7280" marginBottom="1rem">
-              {booking.propertyLocation || 'Location'}
+
+            {/* Location Information */}
+            <Box marginBottom="1rem">
+              <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.25rem">
+                <IoLocation color="#059669" size={14} />
+                <Box fontSize="0.875rem" fontWeight="500" color="#374151">
+                  {booking.property?.address ? 
+                    `${booking.property.address.street}, ${booking.property.address.city}, ${booking.property.address.emirate}` :
+                    (booking.propertyLocation || 'Location')
+                  }
+                </Box>
+              </Box>
             </Box>
+
+            {/* Key Amenities */}
+            {booking.property?.amenities && booking.property.amenities.length > 0 && (
+              <Box marginBottom="1rem">
+                <Box display="flex" alignItems="center" gap="0.5rem" flexWrap="wrap">
+                  {booking.property.amenities.slice(0, 4).map((amenity: any, index: number) => (
+                    <Box key={index} display="flex" alignItems="center" gap="0.25rem" fontSize="0.75rem" color="#6b7280">
+                      {getAmenityIcon(amenity?.name || amenity)}
+                      {amenity?.name || amenity}
+                    </Box>
+                  ))}
+                  {booking.property.amenities.length > 4 && (
+                    <Box fontSize="0.75rem" color="#6b7280">
+                      +{booking.property.amenities.length - 4} more
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            )}
             
-            {/* Quick Info Row */}
-            <Box display="flex" alignItems="center" gap="2rem" flexWrap="wrap">
+            {/* Booking Quick Info Row */}
+            <Box display="flex" alignItems="center" gap="2rem" flexWrap="wrap" marginBottom="1rem">
               <Box display="flex" alignItems="center" gap="0.5rem">
                 <IoCalendar color="#059669" size={16} />
                 <Box fontSize="0.875rem" color="#374151">
                   {booking.checkInDate === booking.checkOutDate 
-                    ? `Half day on ${booking.checkInDate}`
-                    : `${booking.checkInDate} - ${booking.checkOutDate}`}
+                    ? `Half day on ${formatDate(booking.checkInDate)}`
+                    : `${formatDate(booking.checkInDate)} - ${formatDate(booking.checkOutDate)}`}
                 </Box>
               </Box>
               
-              <Box fontSize="0.875rem" color="#374151">
+              <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.875rem" color="#374151">
+                <IoPeople color="#059669" size={14} />
                 <span style={{ fontWeight: '600' }}>{booking.numGuests || 1}</span> guest{(booking.numGuests || 1) > 1 ? 's' : ''}
               </Box>
               
@@ -147,10 +315,34 @@ const BookingDetailsHeader: React.FC<BookingDetailsHeaderProps> = ({
                 AED {Math.round(booking.totalPrice || 0)}
               </Box>
             </Box>
+
+            {/* Host Contact Information */}
+            {booking.property?.owner && (
+              <Box padding="1rem" backgroundColor="#f0f9ff" borderRadius="8px" marginBottom="1rem">
+                <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
+                  <IoKey color="#3b82f6" size={14} />
+                  <Box fontSize="0.875rem" fontWeight="600" color="#1e40af">
+                    Host Contact
+                  </Box>
+                </Box>
+                <Box display="flex" alignItems="center" gap="1rem" flexWrap="wrap">
+                  <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.75rem" color="#1e3a8a">
+                    <IoMail size={12} />
+                    {booking.property.owner.email}
+                  </Box>
+                  {booking.property.owner.phone && (
+                    <Box display="flex" alignItems="center" gap="0.5rem" fontSize="0.75rem" color="#1e3a8a">
+                      <IoCall size={12} />
+                      {booking.property.owner.phone}
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            )}
             
             {/* Guest Info for HomeOwner/Manager */}
             {(userRole === 'HomeOwner' || userRole === 'Manager') && booking.guest && (
-              <Box marginTop="1rem" padding="1rem" backgroundColor="#f9fafb" borderRadius="8px">
+              <Box padding="1rem" backgroundColor="#f9fafb" borderRadius="8px">
                 <Box fontSize="0.875rem" fontWeight="600" color="#374151" marginBottom="0.25rem">
                   Guest Information
                 </Box>
@@ -213,11 +405,7 @@ const BookingDetailsHeader: React.FC<BookingDetailsHeaderProps> = ({
               Booked On
             </Box>
             <Box fontSize="0.875rem" color="#374151">
-              {new Date(booking.createdAt || Date.now()).toLocaleDateString('en-AE', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
+              {formatDate(booking.createdAt || new Date().toISOString())}
             </Box>
           </Box>
           

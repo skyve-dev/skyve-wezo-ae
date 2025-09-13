@@ -199,8 +199,7 @@ const CalendarView: React.FC = () => {
                 price: publicCalendarDay.fullDayPrice > 0 ? publicCalendarDay.fullDayPrice : null,
                 halfDayPrice: publicCalendarDay.halfDayPrice > 0 ? publicCalendarDay.halfDayPrice : null,
                 isOverride: publicCalendarDay.isOverride || false,
-                isAvailable: publicCalendarDay.isAvailable !== false, // Default to true if not specified
-                reason: publicCalendarDay.reason || (publicCalendarDay.isOverride ? 'Date override' : undefined)
+                isAvailable: publicCalendarDay.isAvailable !== false // Default to true if not specified
             }
         }
         

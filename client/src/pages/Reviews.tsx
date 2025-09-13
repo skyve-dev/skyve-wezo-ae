@@ -65,11 +65,24 @@ const ReviewCard: React.FC<{
     }
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-AE', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        })
+        // Handle both date-only strings and full datetime strings
+        if (dateString && dateString.includes('T')) {
+            // Full datetime string - safe to use Date constructor
+            return new Date(dateString).toLocaleDateString('en-AE', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        } else {
+            // Date-only string - parse manually to avoid timezone shift
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date.toLocaleDateString('en-AE', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
     }
 
     return (
@@ -240,11 +253,24 @@ const GuestReviewCard: React.FC<{ review: any }> = ({review}) => {
     }
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-AE', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        })
+        // Handle both date-only strings and full datetime strings
+        if (dateString && dateString.includes('T')) {
+            // Full datetime string - safe to use Date constructor
+            return new Date(dateString).toLocaleDateString('en-AE', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        } else {
+            // Date-only string - parse manually to avoid timezone shift
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            return date.toLocaleDateString('en-AE', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
     }
 
     return (

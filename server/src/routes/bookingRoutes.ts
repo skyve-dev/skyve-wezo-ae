@@ -898,4 +898,123 @@ router.get('/reservations/:reservationId/export', authenticate, exportReservatio
 // Respond to review
 router.post('/reviews/:reviewId/respond', authenticate, respondToReview)
 
+// Create booking for authenticated users (bypasses OTP verification)
+router.post('/create-authenticated', authenticate, async (req, res) => {
+  try {
+    const userId = (req as any).user.id // From authenticate middleware
+    const {
+      propertyId,
+      ratePlanId, // Now optional
+      checkInDate,
+      checkOutDate,
+      numGuests,
+      guestEmail,
+      guestFirstName,
+      guestLastName,
+      specialRequests,
+      totalPrice
+    } = req.body
+
+    // Get authenticated user
+    const guestUser = await prisma.user.findUnique({
+      where: { id: userId }
+    })
+
+    if (!guestUser) {
+      return res.status(401).json({ message: 'User not found' })
+    }
+
+    // Update user profile if name has changed
+    if (guestFirstName && guestLastName && 
+        (guestUser.firstName !== guestFirstName || guestUser.lastName !== guestLastName)) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          firstName: guestFirstName,
+          lastName: guestLastName
+        }
+      })
+    }
+
+    let ratePlan = null
+    let property = null
+
+    if (ratePlanId) {
+      // Booking with rate plan
+      ratePlan = await prisma.ratePlan.findUnique({
+        where: { id: ratePlanId },
+        include: { 
+          property: {
+            include: {
+              owner: true
+            }
+          }
+        }
+      })
+
+      if (!ratePlan) {
+        return res.status(404).json({ message: 'Rate plan not found' })
+      }
+
+      property = ratePlan.property
+    } else {
+      // Direct booking
+      property = await prisma.property.findUnique({
+        where: { propertyId: propertyId },
+        include: {
+          owner: true
+        }
+      })
+
+      if (!property) {
+        return res.status(404).json({ message: 'Property not found' })
+      }
+    }
+
+    // Create the booking
+    const booking = await prisma.reservation.create({
+      data: {
+        checkInDate: new Date(checkInDate),
+        checkOutDate: new Date(checkOutDate),
+        numGuests: numGuests,
+        totalPrice: totalPrice,
+        status: 'Pending',
+        paymentStatus: 'pending',
+        guestRequests: specialRequests || '',
+        property: { connect: { propertyId: propertyId } },
+        guest: { connect: { id: guestUser.id } },
+        ...(ratePlanId && { ratePlan: { connect: { id: ratePlanId } } })
+      },
+      include: {
+        property: {
+          include: {
+            owner: true
+          }
+        },
+        guest: true,
+        ratePlan: true
+      }
+    })
+
+    // Clear any existing OTP for this email (cleanup)
+    otpStore.delete(guestEmail)
+
+    // Set booking expiry (15 minutes from now)
+    const expiresAt = new Date()
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15)
+
+    return res.status(201).json({
+      success: true,
+      bookingId: booking.id,
+      bookingExpiresAt: expiresAt.toISOString(),
+      message: 'Booking created successfully',
+      data: booking
+    })
+
+  } catch (error: any) {
+    console.error('Create authenticated booking error:', error)
+    return res.status(500).json({ message: 'Server error', error: error.message })
+  }
+})
+
 export default router

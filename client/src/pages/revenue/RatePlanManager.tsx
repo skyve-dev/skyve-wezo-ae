@@ -26,7 +26,6 @@ import {
 import { fetchMyProperties } from '@/store/slices/propertySlice'
 import { ApiError, resolvePhotoUrl } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
-import { useDialogs } from '@/hooks/useDialogs'
 import RatePlanManagerHeader from './RatePlanManagerHeader'
 import RatePlanManagerFooter from './RatePlanManagerFooter'
 import CancellationPolicyBuilder from '@/components/CancellationPolicyBuilder'
@@ -62,8 +61,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   const { currentProperty, properties } = useAppSelector((state) => state.property)
   const propertyId = currentProperty?.propertyId
   
-  const { openDialog, navigateTo, mountHeader, mountFooter } = useAppShell()
-  const dialogs = useDialogs()
+  const { navigateTo, mountHeader, mountFooter } = useAppShell()
   const [isLoading, setIsLoading] = useState(true)
   
   // Load user's properties for selection

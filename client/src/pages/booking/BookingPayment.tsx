@@ -139,7 +139,7 @@ const BookingPayment: React.FC = () => {
           
           // Show success and navigate to confirmation
           await openDialog<void>((close) => (
-            <Box padding="2rem" textAlign="center" alignItems={'center'}>
+            <Box display={'flex'} flexDirection={'column'} alignItems={'center'} padding="2rem" >
               <Box display="flex" justifyContent="center" marginBottom="1rem">
                 <IoCheckmarkCircle color="#059669" size={48} />
               </Box>
@@ -325,7 +325,7 @@ const BookingPayment: React.FC = () => {
               color="#666"
             >
               <Box marginBottom="0.25rem">
-                <strong>Guest:</strong> {currentBooking.guestName}
+                <strong>Guest:</strong> {`${currentBooking.guestFirstName} ${currentBooking.guestLastName}`.trim()}
               </Box>
               <Box marginBottom="0.25rem">
                 <strong>Email:</strong> {currentBooking.guestEmail}

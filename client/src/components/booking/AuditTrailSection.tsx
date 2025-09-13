@@ -54,12 +54,26 @@ const AuditTrailSection: React.FC<AuditTrailSectionProps> = ({
   };
   
   const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString('en-AE', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    // Handle both date-only strings and full datetime strings
+    if (timestamp && timestamp.includes('T')) {
+      // Full datetime string - safe to use Date constructor
+      return new Date(timestamp).toLocaleString('en-AE', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else {
+      // Date-only string - parse manually and assume midnight to avoid timezone shift
+      const [year, month, day] = timestamp.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleString('en-AE', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   };
   
   const getUserRoleLabel = (role: string) => {

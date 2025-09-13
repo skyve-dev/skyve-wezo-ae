@@ -21,8 +21,18 @@ const BookingOverview: React.FC<BookingOverviewProps> = ({ booking, userRole: _u
       return 'Half Day';
     }
     
-    const checkIn = new Date(booking.checkInDate);
-    const checkOut = new Date(booking.checkOutDate);
+    // Parse dates safely to avoid timezone issues
+    const parseDate = (dateString: string) => {
+      if (dateString && dateString.includes('T')) {
+        return new Date(dateString);
+      } else {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      }
+    };
+    
+    const checkIn = parseDate(booking.checkInDate);
+    const checkOut = parseDate(booking.checkOutDate);
     const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
@@ -30,12 +40,26 @@ const BookingOverview: React.FC<BookingOverviewProps> = ({ booking, userRole: _u
   };
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-AE', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    // Handle date-only strings to avoid timezone conversion issues
+    if (dateString && dateString.includes('T')) {
+      // Full datetime string - safe to use Date constructor
+      return new Date(dateString).toLocaleDateString('en-AE', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } else {
+      // Date-only string - parse manually to avoid timezone shift
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-AE', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
   };
   
   const formatTime = (dateString: string) => {

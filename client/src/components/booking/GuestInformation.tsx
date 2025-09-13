@@ -16,11 +16,6 @@ interface GuestInformationProps {
 const GuestInformation: React.FC<GuestInformationProps> = ({ booking, userRole: _userRole }) => {
   if (!booking.guest) return null;
   
-  const handleMessageGuest = () => {
-    // TODO: Implement messaging functionality
-    console.log('Message guest:', booking.guest.email);
-  };
-  
   return (
     <Box
       backgroundColor="white"
@@ -28,17 +23,10 @@ const GuestInformation: React.FC<GuestInformationProps> = ({ booking, userRole: 
       padding="1.5rem"
       border="1px solid #e5e7eb"
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="1.5rem">
+      <Box marginBottom="1.5rem">
         <Box fontSize="1.125rem" fontWeight="600" color="#111827">
           Guest Information
         </Box>
-        <Button
-          label="Message Guest"
-          icon={<IoMail />}
-          onClick={handleMessageGuest}
-          variant="normal"
-          size="small"
-        />
       </Box>
       
       <Box display="grid" gridTemplateColumns="1fr" gridTemplateColumnsMd="1fr 1fr" gap="1.5rem">
@@ -93,10 +81,24 @@ const GuestInformation: React.FC<GuestInformationProps> = ({ booking, userRole: 
               <Box fontSize="0.875rem" color="#6b7280">Member Since:</Box>
               <Box fontSize="0.875rem" fontWeight="500" color="#111827">
                 {booking.guest.memberSince 
-                  ? new Date(booking.guest.memberSince).toLocaleDateString('en-AE', {
-                      month: 'short',
-                      year: 'numeric'
-                    })
+                  ? (() => {
+                      const dateString = booking.guest.memberSince;
+                      if (dateString.includes('T')) {
+                        // Full datetime string
+                        return new Date(dateString).toLocaleDateString('en-AE', {
+                          month: 'short',
+                          year: 'numeric'
+                        });
+                      } else {
+                        // Date-only string - parse manually to avoid timezone shift
+                        const [year, month] = dateString.split('-').map(Number);
+                        const date = new Date(year, month - 1, 1);
+                        return date.toLocaleDateString('en-AE', {
+                          month: 'short',
+                          year: 'numeric'
+                        });
+                      }
+                    })()
                   : 'N/A'
                 }
               </Box>
