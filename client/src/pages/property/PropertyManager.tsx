@@ -26,6 +26,7 @@ import {
 } from '@/store/slices/propertySlice'
 import {api, ApiError, resolvePhotoUrl} from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
+import { useDialogs } from '@/hooks/useDialogs'
 import PropertyManagerHeader from './PropertyManagerHeader'
 import PropertyManagerFooter from './PropertyManagerFooter'
 import PropertyStatusWidget from '@/components/PropertyStatusWidget'
@@ -131,6 +132,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
     } = useAppSelector((state) => state.property)
 
     const {openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard} = useAppShell()
+    const dialogs = useDialogs()
     const [isLoading, setIsLoading] = useState(true)
 
     // Room management
@@ -196,20 +198,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
         if (!hasUnsavedChanges) return
 
         const cleanup = registerNavigationGuard(async () => {
-            const shouldLeave = await openDialog<boolean>((close) => (
-                <Box padding="2rem" textAlign="center">
-                    <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
-                        Unsaved Changes
-                    </Box>
-                    <Box marginBottom="2rem">
-                        You have unsaved changes. Are you sure you want to leave?
-                    </Box>
-                    <Box display="flex" gap="1rem" justifyContent="center">
-                        <Button onClick={() => close(false)}>Stay</Button>
-                        <Button onClick={() => close(true)} variant="promoted">Yes, Leave</Button>
-                    </Box>
-                </Box>
-            ))
+            const shouldLeave = await dialogs.confirmUnsavedChanges()
 
             if (shouldLeave) {
                 // Clear draft when leaving with unsaved changes
@@ -220,7 +209,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
         })
 
         return cleanup
-    }, [hasUnsavedChanges, registerNavigationGuard, openDialog])
+    }, [hasUnsavedChanges, registerNavigationGuard, dialogs])
 
     // Mount header and footer using AppShell (ENABLE IMMEDIATE SAVE/EDIT like RatePlanManager)
     useEffect(() => {
@@ -292,20 +281,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({propertyId}) => {
     // Smart back button
     const handleBack = async () => {
         if (hasUnsavedChanges) {
-            const shouldSaveAndLeave = await openDialog<boolean>((close) => (
-                <Box padding="2rem" textAlign="center">
-                    <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
-                        Unsaved Changes
-                    </Box>
-                    <Box marginBottom="2rem">
-                        Do you want to save your changes before leaving?
-                    </Box>
-                    <Box display="flex" gap="1rem" justifyContent="center">
-                        <Button label="Leave Without Saving" onClick={() => close(false)}/>
-                        <Button label="Save & Leave" onClick={() => close(true)} variant="promoted"/>
-                    </Box>
-                </Box>
-            ))
+            const shouldSaveAndLeave = await dialogs.confirmSaveBeforeLeave()
 
             if (shouldSaveAndLeave) {
                 await handleSave()

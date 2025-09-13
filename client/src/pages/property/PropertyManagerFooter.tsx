@@ -1,7 +1,5 @@
 import React from 'react'
-import { Box } from '@/components'
-import { Button } from '@/components/base/Button'
-import { FaSave, FaUndo, FaSpinner } from 'react-icons/fa'
+import BaseManagerFooter from '@/components/base/BaseManagerFooter'
 
 interface PropertyManagerFooterProps {
   onSave: () => void
@@ -16,38 +14,14 @@ const PropertyManagerFooter: React.FC<PropertyManagerFooterProps> = ({
   isSaving = false, 
   hasErrors = false 
 }) => (
-  <Box
-    display="flex"
-    alignItems="center"
-    justifyContent="flex-end"
-    padding="1rem 1.5rem"
-    backgroundColor="#D52122"
-    height="4.5rem"
-  >
-    <Box display="flex" alignItems="center" gap="0.75rem" flexGrow="1">
-      {onDiscard && (
-        <Button
-          label="Discard Changes"
-          icon={<FaUndo />}
-          onClick={onDiscard}
-          disabled={isSaving}
-          flexDirection={'column'}
-          variant={'text'}
-          style={{color: 'white'}}
-        />
-      )}
-      <Box flexGrow="1" />
-      <Button
-        label={isSaving ? "Saving..." : "Save Property"}
-        icon={isSaving ? <FaSpinner className="spin" /> : <FaSave />}
-        onClick={onSave}
-        disabled={isSaving || hasErrors}
-        style={{color:'white'}}
-        flexDirection={'column'}
-        variant={'text'}
-      />
-    </Box>
-  </Box>
+  <BaseManagerFooter
+    onSave={onSave}
+    onDiscard={onDiscard}
+    isSaving={isSaving}
+    hasErrors={hasErrors}
+    saveLabel="Save Property"
+    discardLabel="Discard Changes"
+  />
 )
 
 export default PropertyManagerFooter

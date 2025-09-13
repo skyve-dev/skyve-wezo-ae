@@ -26,6 +26,7 @@ import {
 import { fetchMyProperties, setCurrentProperty } from '@/store/slices/propertySlice'
 import { ApiError } from '@/utils/api'
 import useErrorHandler from '@/hooks/useErrorHandler'
+import { useDialogs } from '@/hooks/useDialogs'
 import RatePlanManagerHeader from './RatePlanManagerHeader'
 import RatePlanManagerFooter from './RatePlanManagerFooter'
 import CancellationPolicyBuilder from '@/components/CancellationPolicyBuilder'
@@ -63,6 +64,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   const propertyId = currentProperty?.propertyId
   
   const { openDialog, navigateTo, mountHeader, mountFooter, registerNavigationGuard } = useAppShell()
+  const dialogs = useDialogs()
   const [isLoading, setIsLoading] = useState(true)
   
   // Load user's properties for selection
@@ -153,20 +155,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
     }
     
     const cleanup = registerNavigationGuard(async () => {
-      const shouldLeave = await openDialog<boolean>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
-            Unsaved Changes
-          </Box>
-          <Box marginBottom="2rem" color="#374151">
-            You have unsaved changes. Are you sure you want to leave?
-          </Box>
-          <Box display="flex" gap="1rem" justifyContent="center">
-            <Button label="Stay" onClick={() => close(false)} />
-            <Button label="Yes, Leave" onClick={() => close(true)} variant="promoted" />
-          </Box>
-        </Box>
-      ))
+      const shouldLeave = await dialogs.confirmUnsavedChanges()
       return shouldLeave
     })
     
@@ -232,20 +221,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   // Smart back button
   const handleBack = async () => {
     if (hasUnsavedChanges) {
-      const shouldSaveAndLeave = await openDialog<boolean>((close) => (
-        <Box padding="2rem" textAlign="center">
-          <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
-            Unsaved Changes
-          </Box>
-          <Box marginBottom="2rem" color="#374151">
-            Do you want to save your changes before leaving?
-          </Box>
-          <Box display="flex" gap="1rem" justifyContent="center">
-            <Button label="Leave Without Saving" onClick={() => close(false)} />
-            <Button label="Save & Leave" onClick={() => close(true)} variant="promoted" />
-          </Box>
-        </Box>
-      ))
+      const shouldSaveAndLeave = await dialogs.confirmSaveBeforeLeave()
       
       if (shouldSaveAndLeave) {
         await handleSave()
@@ -261,20 +237,7 @@ const RatePlanManager: React.FC<RatePlanManagerProps> = ({ ratePlanId }) => {
   
   // Handle discard changes
   const handleDiscard = async () => {
-    const shouldDiscard = await openDialog<boolean>((close) => (
-      <Box padding="2rem" textAlign="center">
-        <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem" color="#f59e0b">
-          Discard Changes?
-        </Box>
-        <Box marginBottom="2rem" color="#374151">
-          Are you sure you want to discard all unsaved changes?
-        </Box>
-        <Box display="flex" gap="1rem" justifyContent="center">
-          <Button label="Keep Editing" onClick={() => close(false)} />
-          <Button label="Discard" onClick={() => close(true)} variant="promoted" />
-        </Box>
-      </Box>
-    ))
+    const shouldDiscard = await dialogs.confirmDiscardChanges()
     
     if (shouldDiscard) {
       dispatch(resetFormToOriginal())

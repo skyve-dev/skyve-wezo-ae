@@ -1,7 +1,6 @@
 import React from 'react'
-import { Box } from '@/components/base/Box'
-import Button from '@/components/base/Button'
-import { FaArrowLeft, FaTags } from 'react-icons/fa'
+import BaseManagerHeader from '@/components/base/BaseManagerHeader'
+import { IoIosPricetags } from 'react-icons/io'
 
 interface RatePlanManagerHeaderProps {
     title: string
@@ -11,56 +10,12 @@ interface RatePlanManagerHeaderProps {
 const RatePlanManagerHeader: React.FC<RatePlanManagerHeaderProps> = ({
     title,
     onBack
-}) => {
-    return (
-        <Box
-            display="flex"
-            alignItems="center"
-            padding="1rem 1.5rem"
-            backgroundColor="#D52122"
-            height="4rem"
-        >
-            {/* Left: Back Button and Title */}
-            <Box display="flex" alignItems="center" gap="1rem" flex="1">
-                <Button
-                    label=""
-                    icon={<FaArrowLeft />}
-                    onClick={onBack}
-                    variant="normal"
-                    size="small"
-                    style={{
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        padding: '0.5rem',
-                        minWidth: 'unset',
-                        color: 'white'
-                    }}
-                    title="Back to Rate Plans"
-                />
-                
-                {/* Rate Plan Icon and Title */}
-                <Box display="flex" alignItems="center" gap="0.75rem">
-                    <Box 
-                        color="white" 
-                        fontSize="1.125rem"
-                        display="flex"
-                        alignItems="center"
-                    >
-                        <FaTags />
-                    </Box>
-                    <h2 style={{
-                        margin: 0,
-                        fontSize: '1.125rem',
-                        fontWeight: '600',
-                        color: 'white',
-                        lineHeight: '1.2'
-                    }}>
-                        {title}
-                    </h2>
-                </Box>
-            </Box>
-        </Box>
-    )
-}
+}) => (
+    <BaseManagerHeader 
+        title={title} 
+        onBack={onBack} 
+        icon={<IoIosPricetags />}
+    />
+)
 
 export default RatePlanManagerHeader
