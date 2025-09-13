@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaBan, FaCalendarCheck, FaCalendarTimes, FaCog } from 'react-icons/fa'
+import { IoIosCloseCircleOutline, IoIosCheckmarkCircleOutline, IoIosCloseCircleOutline as IoIosCalendarTimes, IoIosSettings } from 'react-icons/io'
 import { Box } from '@/components'
 import Button from '@/components/base/Button'
 import { useAppShell } from '@/components/base/AppShell'
@@ -439,7 +439,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
       >
         <Button 
           label={isMobile ? "Block Weekends" : "Block All Weekends"}
-          icon={<FaBan />}
+          icon={<IoIosCloseCircleOutline />}
           variant="normal"
           size={isMobile ? "small" : "medium"}
           onClick={handleBlockWeekends}
@@ -451,7 +451,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         
         <Button 
           label={isMobile ? "Date Range" : "Block Date Range"}
-          icon={<FaCalendarTimes />}
+          icon={<IoIosCalendarTimes />}
           variant="normal"
           size={isMobile ? "small" : "medium"}
           onClick={handleBlockDateRange}
@@ -463,7 +463,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         
         <Button 
           label={isMobile ? "Maintenance" : "Maintenance Mode"}
-          icon={<FaCog />}
+          icon={<IoIosSettings />}
           variant="normal"
           size={isMobile ? "small" : "medium"}
           onClick={handleMaintenanceMode}
@@ -475,7 +475,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         
         <Button 
           label={isMobile ? "Unblock All" : "Unblock All Dates"}
-          icon={<FaCalendarCheck />}
+          icon={<IoIosCheckmarkCircleOutline />}
           variant="normal"
           size={isMobile ? "small" : "medium"}
           onClick={handleUnblockAll}

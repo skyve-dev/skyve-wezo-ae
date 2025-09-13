@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { IoIosCalendar, IoIosArrowBack, IoIosArrowForward } from 'react-icons/io'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Button from '@/components/base/Button'
@@ -100,7 +100,7 @@ const AvailabilityManager: React.FC = () => {
           <Box display="flex" gap="0.5rem">
             <Button 
               label="Calendar" 
-              icon={<FaCalendarAlt />} 
+              icon={<IoIosCalendar />} 
               onClick={() => dispatch(setViewMode('calendar'))} 
               variant={viewMode === 'calendar' ? 'promoted' : 'normal'}
               size={isMobile ? 'small' : 'medium'}
@@ -131,7 +131,7 @@ const AvailabilityManager: React.FC = () => {
             flexDirection={'column'}
             alignItems={'center'}
           >
-            <FaCalendarAlt style={{fontSize: '3rem', color: '#9ca3af', marginBottom: '1rem'}} />
+            <IoIosCalendar style={{fontSize: '3rem', color: '#9ca3af', marginBottom: '1rem'}} />
             <h3 style={{margin: '0 0 0.5rem 0', color: '#374151'}}>No Property Selected</h3>
             <p style={{color: '#6b7280', margin: 0}}>
               Select a property above to manage its availability calendar
@@ -164,7 +164,7 @@ const AvailabilityManager: React.FC = () => {
             >
               <Button
                 label=""
-                icon={<FaChevronLeft />}
+                icon={<IoIosArrowBack />}
                 onClick={() => navigateMonth('prev')}
                 variant="normal"
                 size="small"
@@ -187,7 +187,7 @@ const AvailabilityManager: React.FC = () => {
               
               <Button
                 label=""
-                icon={<FaChevronRight />}
+                icon={<IoIosArrowForward />}
                 onClick={() => navigateMonth('next')}
                 variant="normal"
                 size="small"

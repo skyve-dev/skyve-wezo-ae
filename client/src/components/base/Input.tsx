@@ -106,14 +106,14 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * <Box display="flex" flexDirection="column" gap="1rem">
  *   <Input
  *     label="Property Name"
- *     icon={FaHome}
+ *     icon={IoIosHome}
  *     value={propertyName}
  *     onChange={(e) => setPropertyName(e.target.value)}
  *     placeholder="Search properties..."
  *   />
  *   <Input
  *     label="Location"
- *     icon={FaMapMarkerAlt}
+ *     icon={IoIosPin}
  *     value={location}
  *     onChange={(e) => setLocation(e.target.value)}
  *     placeholder="City or address"
@@ -124,11 +124,11 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * ## Icon Integration
  * ### With React Icons
  * ```tsx
- * import { FaUser, FaEnvelope, FaPhone } from 'react-icons/fa'
+ * import { IoIosPerson, IoIosMail, IoIosCall } from 'react-icons/io'
  * 
  * <Input
  *   label="Name"
- *   icon={FaUser}
+ *   icon={IoIosPerson}
  *   value={name}
  *   onChange={(e) => setName(e.target.value)}
  *   placeholder="Your full name"
@@ -226,7 +226,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * <Input
  *   label="Email"
  *   type="email"
- *   icon={FaEnvelope}
+ *   icon={IoIosMail}
  *   value={email}
  *   onChange={(e) => setEmail(e.target.value)}
  *   placeholder="user@example.com"
@@ -236,7 +236,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * <Input
  *   label="Password"
  *   type="password"
- *   icon={FaLock}
+ *   icon={IoIosLock}
  *   value={password}
  *   onChange={(e) => setPassword(e.target.value)}
  * />
@@ -245,7 +245,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * <Input
  *   label="Phone"
  *   type="tel"
- *   icon={FaPhone}
+ *   icon={IoIosCall}
  *   value={phone}
  *   onChange={(e) => setPhone(e.target.value)}
  *   placeholder="+1 (555) 123-4567"
@@ -255,7 +255,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * ### Search and Filter
  * ```tsx
  * <Input
- *   icon={FaSearch}
+ *   icon={IoIosSearch}
  *   value={searchQuery}
  *   onChange={(e) => setSearchQuery(e.target.value)}
  *   placeholder="Search properties..."
@@ -284,7 +284,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *     <Box display="flex" flexDirection="column" gap="1.5rem">
  *       <Input
  *         label="Full Name"
- *         icon={FaUser}
+ *         icon={IoIosPerson}
  *         value={formData.name}
  *         onChange={(e) => handleChange('name', e.target.value)}
  *         error={!!errors.name}
@@ -295,7 +295,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *         <Input
  *           label="Email"
  *           type="email"
- *           icon={FaEnvelope}
+ *           icon={IoIosMail}
  *           value={formData.email}
  *           onChange={(e) => handleChange('email', e.target.value)}
  *           error={!!errors.email}
@@ -307,7 +307,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *         <Input
  *           label="Phone"
  *           type="tel"
- *           icon={FaPhone}
+ *           icon={IoIosCall}
  *           value={formData.phone}
  *           onChange={(e) => handleChange('phone', e.target.value)}
  *           error={!!errors.phone}
@@ -333,7 +333,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *          gridTemplateColumnsLg="repeat(4, 1fr)" gap="1rem">
  *       <Input
  *         label="Location"
- *         icon={FaMapMarkerAlt}
+ *         icon={IoIosPin}
  *         value={filters.location}
  *         onChange={(e) => setFilters(prev => ({...prev, location: e.target.value}))}
  *         placeholder="City or area"
@@ -342,7 +342,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *       <Input
  *         label="Min Price"
  *         type="number"
- *         icon={FaDollarSign}
+ *         icon={IoIosCash}
  *         value={filters.minPrice}
  *         onChange={(e) => setFilters(prev => ({...prev, minPrice: e.target.value}))}
  *         placeholder="0"
@@ -351,7 +351,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *       <Input
  *         label="Max Price"
  *         type="number"
- *         icon={FaDollarSign}
+ *         icon={IoIosCash}
  *         value={filters.maxPrice}
  *         onChange={(e) => setFilters(prev => ({...prev, maxPrice: e.target.value}))}
  *         placeholder="10000"
@@ -360,7 +360,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *       <Input
  *         label="Bedrooms"
  *         type="number"
- *         icon={FaBed}
+ *         icon={IoIosBed}
  *         value={filters.bedrooms}
  *         onChange={(e) => setFilters(prev => ({...prev, bedrooms: e.target.value}))}
  *         placeholder="Any"
@@ -461,7 +461,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  *         <Input
  *           label="Email Address"
  *           type="email"
- *           icon={FaEnvelope}
+ *           icon={IoIosMail}
  *           value={inquiry.email}
  *           onChange={(e) => setInquiry(prev => ({...prev, email: e.target.value}))}
  *           error={!!errors.email}

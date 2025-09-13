@@ -1,5 +1,5 @@
 import React from 'react'
-import {FaCalendarPlus, FaChartLine, FaCopy, FaDownload, FaEdit, FaPlus, FaUpload} from 'react-icons/fa'
+import {IoIosAddCircle, IoIosTrendingUp, IoIosCopy, IoIosDownload, IoIosCreate, IoIosAdd, IoIosCloudUpload} from 'react-icons/io'
 import {Box} from '@/components'
 import Button from '@/components/base/Button'
 import {useAppShell} from '@/components/base/AppShell'
@@ -19,7 +19,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   const handleBulkPricingWizard = async () => {
     await openDialog<void>((close) => (
       <Box padding="2rem" textAlign="center" maxWidth="400px">
-        <FaCalendarPlus size={48} color="#3b82f6" style={{ marginBottom: '1rem' }} />
+        <IoIosAddCircle size={48} color="#3b82f6" style={{ marginBottom: '1rem' }} />
         <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem">
           Bulk Pricing Wizard
         </Box>
@@ -37,7 +37,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   const handleSeasonalPricing = async () => {
     await openDialog<void>((close) => (
       <Box padding="2rem" textAlign="center" maxWidth="400px">
-        <FaChartLine size={48} color="#059669" style={{ marginBottom: '1rem' }} />
+        <IoIosTrendingUp size={48} color="#059669" style={{ marginBottom: '1rem' }} />
         <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem">
           Seasonal Pricing Templates
         </Box>
@@ -55,7 +55,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   const handleExportPricing = async () => {
     await openDialog<void>((close) => (
       <Box padding="2rem" textAlign="center" maxWidth="400px">
-        <FaDownload size={48} color="#7c3aed" style={{ marginBottom: '1rem' }} />
+        <IoIosDownload size={48} color="#7c3aed" style={{ marginBottom: '1rem' }} />
         <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem">
           Export Pricing Data
         </Box>
@@ -73,7 +73,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   const handleImportPricing = async () => {
     await openDialog<void>((close) => (
       <Box padding="2rem" textAlign="center" maxWidth="400px">
-        <FaUpload size={48} color="#dc2626" style={{ marginBottom: '1rem' }} />
+        <IoIosCloudUpload size={48} color="#dc2626" style={{ marginBottom: '1rem' }} />
         <Box fontSize="1.25rem" fontWeight="bold" marginBottom="1rem">
           Import Pricing Data
         </Box>
@@ -92,7 +92,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Create New Rate Plan',
       description: 'Set up a new rate plan with custom pricing rules and restrictions',
-      icon: <FaPlus />,
+      icon: <IoIosAdd />,
       color: '#059669',
       backgroundColor: '#f0fdf4',
       borderColor: '#bbf7d0',
@@ -102,7 +102,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Copy Rate Plan',
       description: 'Duplicate an existing rate plan to create variations quickly',
-      icon: <FaCopy />,
+      icon: <IoIosCopy />,
       color: '#3b82f6',
       backgroundColor: '#eff6ff',
       borderColor: '#dbeafe',
@@ -115,7 +115,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Bulk Pricing Wizard',
       description: 'Set pricing across multiple dates and rate plans with guided wizard',
-      icon: <FaCalendarPlus />,
+      icon: <IoIosAddCircle />,
       color: '#7c3aed',
       backgroundColor: '#faf5ff',
       borderColor: '#e9d5ff',
@@ -126,7 +126,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Seasonal Pricing',
       description: 'Apply seasonal pricing templates based on market trends',
-      icon: <FaChartLine />,
+      icon: <IoIosTrendingUp />,
       color: '#f59e0b',
       backgroundColor: '#fffbeb',
       borderColor: '#fde68a',
@@ -137,7 +137,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Edit Rate Plans',
       description: 'Modify existing rate plans, restrictions, and cancellation policies',
-      icon: <FaEdit />,
+      icon: <IoIosCreate />,
       color: '#dc2626',
       backgroundColor: '#fef2f2',
       borderColor: '#fecaca',
@@ -147,7 +147,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Export Pricing Data',
       description: 'Download pricing data as CSV or Excel for analysis and backup',
-      icon: <FaDownload />,
+      icon: <IoIosDownload />,
       color: '#6366f1',
       backgroundColor: '#f0f9ff',
       borderColor: '#c7d2fe',
@@ -158,7 +158,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       title: 'Import Pricing Data',
       description: 'Upload bulk pricing data from CSV or Excel files',
-      icon: <FaUpload />,
+      icon: <IoIosCloudUpload />,
       color: '#ec4899',
       backgroundColor: '#fdf2f8',
       borderColor: '#fce7f3',

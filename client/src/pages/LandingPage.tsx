@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaSignOutAlt } from 'react-icons/fa'
+import { IoIosLogOut } from 'react-icons/io'
 import { useAppDispatch } from '@/store'
 import { logout } from '@/store/slices/authSlice.ts'
 import { SecuredPage } from '@/components/SecuredPage.tsx'
@@ -48,7 +48,7 @@ const LandingPage: React.FC = () => {
                     </Box>
                     <Button
                         label="Sign Out"
-                        icon={<FaSignOutAlt/>}
+                        icon={<IoIosLogOut/>}
                         onClick={handleLogout}
                         variant="normal"
                         size="medium"

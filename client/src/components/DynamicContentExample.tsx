@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Box } from './base/Box'
 import { Button } from './base/Button'
 import { useAppShell } from './base/AppShell'
-import { FaSearch, FaBell, FaShoppingCart } from 'react-icons/fa'
+import { IoIosSearch, IoIosNotifications, IoIosCart } from 'react-icons/io'
 
 // Header components for stacking demo
 const HeaderA: React.FC = () => (
@@ -16,7 +16,7 @@ const HeaderA: React.FC = () => (
         width="100%"
     >
         <Box display="flex" alignItems="center" gap="1rem">
-            <FaSearch size={20} />
+            <IoIosSearch size={20} />
             <Box fontSize="1.5rem" fontWeight="bold">Header A - Search</Box>
         </Box>
         <Button 
@@ -38,7 +38,7 @@ const HeaderB: React.FC = () => (
         width="100%"
     >
         <Box display="flex" alignItems="center" gap="1rem">
-            <FaBell size={20} />
+            <IoIosNotifications size={20} />
             <Box fontSize="1.5rem" fontWeight="bold">Header B - Notifications</Box>
         </Box>
         <Button 
@@ -60,7 +60,7 @@ const HeaderC: React.FC = () => (
         width="100%"
     >
         <Box display="flex" alignItems="center" gap="1rem">
-            <FaShoppingCart size={20} />
+            <IoIosCart size={20} />
             <Box fontSize="1.5rem" fontWeight="bold">Header C - Shopping</Box>
         </Box>
         <Button 

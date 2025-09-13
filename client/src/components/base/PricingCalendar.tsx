@@ -1,3 +1,5 @@
+// Backward compatibility wrapper - now uses unified calendar system
+// Consider migrating to PricingCalendarUnified for new implementations
 import React, { useState, useMemo, useEffect } from 'react'
 import { Box } from './Box'
 import { useAppShell } from '@/components/base/AppShell'

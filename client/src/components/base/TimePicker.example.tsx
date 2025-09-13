@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {Box} from './Box'
 import TimePicker from './TimePicker'
-import {FaCalendarAlt, FaCog, FaHome, FaUserClock} from 'react-icons/fa'
+import {IoIosCalendar, IoIosSettings, IoIosHome, IoIosTime} from 'react-icons/io'
 
 // Example data interfaces (commented out as not used)
 // interface BookingSchedule {
@@ -261,7 +261,7 @@ const TimePickerExample: React.FC = () => {
                 border="1px solid #e5e7eb"
               >
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1rem">
-                  <FaHome color="#3b82f6" />
+                  <IoIosHome color="#3b82f6" />
                   <Box fontSize="1.125rem" fontWeight="600">Villa Marina Booking</Box>
                 </Box>
 
@@ -341,7 +341,7 @@ const TimePickerExample: React.FC = () => {
                 border="1px solid #e5e7eb"
               >
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1.5rem">
-                  <FaCog color="#059669" />
+                  <IoIosSettings color="#059669" />
                   <Box fontSize="1.125rem" fontWeight="600">Service Coordination</Box>
                 </Box>
 
@@ -430,7 +430,7 @@ const TimePickerExample: React.FC = () => {
                 border="1px solid #e5e7eb"
               >
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1.5rem">
-                  <FaCalendarAlt color="#7c3aed" />
+                  <IoIosCalendar color="#7c3aed" />
                   <Box fontSize="1.125rem" fontWeight="600">Private Event Schedule</Box>
                 </Box>
 
@@ -530,7 +530,7 @@ const TimePickerExample: React.FC = () => {
                 border="1px solid #e5e7eb"
               >
                 <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="1.5rem">
-                  <FaUserClock color="#f59e0b" />
+                  <IoIosTime color="#f59e0b" />
                   <Box fontSize="1.125rem" fontWeight="600">Communication Hours</Box>
                 </Box>
 

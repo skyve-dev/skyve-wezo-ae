@@ -1,7 +1,7 @@
 import React from 'react'
 import {useSelector} from 'react-redux'
 import {RootState, useAppDispatch} from '@/store'
-import {FaPlus} from 'react-icons/fa'
+import {IoIosAdd} from 'react-icons/io'
 import {IoIosCheckmark} from 'react-icons/io'
 import {Box} from '@/components'
 import {openDateOverrideForm, setSelectedDate, toggleDateSelection} from '@/store/slices/priceSlice'
@@ -304,7 +304,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
                                 }))
                             }}
                         >
-                            <FaPlus size={10} style={{marginBottom: '0.25rem'}}/>
+                            <IoIosAdd size={10} style={{marginBottom: '0.25rem'}}/>
                             <div>Set Price</div>
                         </Box>
                     )}

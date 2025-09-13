@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaTags } from 'react-icons/fa'
+import { IoIosPricetags } from 'react-icons/io'
 import { Box } from '@/components'
 
 interface RatePlanOverviewProps {
@@ -16,7 +16,7 @@ const RatePlanOverview: React.FC<RatePlanOverviewProps> = () => {
       backgroundColor="#f9fafb" 
       borderRadius="8px"
     >
-      <FaTags size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
+      <IoIosPricetags size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
       <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
         Rate Plan Overview Under Construction
       </h3>

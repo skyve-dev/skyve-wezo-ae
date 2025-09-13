@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react'
-import { FaPlus, FaEdit, FaTrash, FaCopy, FaToggleOn, FaToggleOff, FaInfoCircle } from 'react-icons/fa'
+import { IoIosAdd, IoIosCreate, IoIosTrash, IoIosCopy, IoIosCheckmarkCircle, IoIosCloseCircle, IoIosInformationCircle } from 'react-icons/io'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Button from '@/components/base/Button'
@@ -220,7 +220,7 @@ const RatePlans: React.FC = () => {
         <Box display="flex" gap="0.25rem" flexWrap="wrap">
           <Button
             label=""
-            icon={ratePlan.isActive ? <FaToggleOn /> : <FaToggleOff />}
+            icon={ratePlan.isActive ? <IoIosCheckmarkCircle /> : <IoIosCloseCircle />}
             onClick={useCallback(() => handleToggleActive(ratePlan), [handleToggleActive, ratePlan])}
             variant="plain"
             size="small"
@@ -228,7 +228,7 @@ const RatePlans: React.FC = () => {
           />
           <Button
             label=""
-            icon={<FaCopy />}
+            icon={<IoIosCopy />}
             onClick={useCallback(() => handleDuplicateRatePlan(ratePlan), [handleDuplicateRatePlan, ratePlan])}
             variant="plain"
             size="small"
@@ -236,7 +236,7 @@ const RatePlans: React.FC = () => {
           />
           <Button
             label=""
-            icon={<FaEdit />}
+            icon={<IoIosCreate />}
             onClick={useCallback(() => handleEditRatePlan(ratePlan.id), [handleEditRatePlan, ratePlan.id])}
             variant="plain"
             size="small"
@@ -244,7 +244,7 @@ const RatePlans: React.FC = () => {
           />
           <Button
             label=""
-            icon={<FaTrash />}
+            icon={<IoIosTrash />}
             onClick={useCallback(() => handleDelete(ratePlan.id), [handleDelete, ratePlan.id])}
             variant="plain"
             size="small"
@@ -328,7 +328,7 @@ const RatePlans: React.FC = () => {
               />
               <Button
                 label={isMobile ? "Add" : "Add Rate Plan"}
-                icon={<FaPlus />}
+                icon={<IoIosAdd />}
                 variant="promoted"
                 onClick={handleCreateRatePlan}
                 size={isMobile ? "small" : "medium"}
@@ -368,7 +368,7 @@ const RatePlans: React.FC = () => {
             marginBottom="2rem"
           >
             <Box display="flex" gap="0.75rem" alignItems="start">
-              <FaInfoCircle color="#3b82f6" size={isMobile ? 16 : 20} style={{ flexShrink: 0 }} />
+              <IoIosInformationCircle color="#3b82f6" size={isMobile ? 16 : 20} style={{ flexShrink: 0 }} />
               <Box>
                 <h3 style={styles.bannerTitle}>
                   Get Started with Rate Plans
@@ -391,7 +391,7 @@ const RatePlans: React.FC = () => {
             marginBottom="2rem"
           >
             <Box display="flex" gap="0.75rem" alignItems="start">
-              <FaInfoCircle color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <IoIosInformationCircle color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
               <Box>
                 <h3 style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#92400e' }}>
                   No Property Selected

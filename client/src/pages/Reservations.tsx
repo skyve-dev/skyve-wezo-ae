@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FaEnvelope, FaCheckCircle, FaTimesCircle, FaExclamationTriangle } from 'react-icons/fa'
+import { IoIosMail, IoIosCheckmarkCircle, IoIosCloseCircle, IoIosWarning } from 'react-icons/io'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/store'
 import { setShowNewMessageDrawer } from '@/store/slices/messageSlice'
@@ -280,7 +280,7 @@ const Reservations: React.FC = () => {
                                 />
                                 <Button 
                                     label={window.innerWidth < 640 ? "Message" : "Message Guest"} 
-                                    icon={<FaEnvelope />} 
+                                    icon={<IoIosMail />} 
                                     size="small" 
                                     variant="normal"
                                     onClick={() => handleMessageGuest(reservation)}
@@ -291,7 +291,7 @@ const Reservations: React.FC = () => {
                                  !reservation.isNoShowReported && (
                                     <Button 
                                         label="Report No-Show" 
-                                        icon={<FaExclamationTriangle />}
+                                        icon={<IoIosWarning />}
                                         onClick={() => handleReportNoShow(reservation.id)}
                                         variant="normal"
                                         size="small"
@@ -306,14 +306,14 @@ const Reservations: React.FC = () => {
                                     <>
                                         <Button 
                                             label="Confirm" 
-                                            icon={<FaCheckCircle />} 
+                                            icon={<IoIosCheckmarkCircle />} 
                                             size="small" 
                                             variant="promoted"
                                             style={{ flex: window.innerWidth < 640 ? '1' : 'unset' }}
                                         />
                                         <Button 
                                             label="Decline" 
-                                            icon={<FaTimesCircle />} 
+                                            icon={<IoIosCloseCircle />} 
                                             size="small" 
                                             variant="normal"
                                             style={{ flex: window.innerWidth < 640 ? '1' : 'unset' }}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaEye, FaEyeSlash, FaLock, FaUnlock, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa'
+import { IoIosEye, IoIosEyeOff, IoIosLock, IoIosUnlock, IoIosWarning, IoIosCheckmarkCircle } from 'react-icons/io'
 import { Box } from './base/Box'
 import Button from './base/Button'
 import { PropertyStatus } from '@/store/slices/propertySlice'
@@ -46,7 +46,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
     switch (status) {
       case PropertyStatus.Draft:
         return {
-          icon: <FaEyeSlash />,
+          icon: <IoIosEyeOff />,
           label: 'Draft',
           color: '#6b7280', // gray
           bgColor: '#f3f4f6',
@@ -54,7 +54,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
         }
       case PropertyStatus.Live:
         return {
-          icon: <FaEye />,
+          icon: <IoIosEye />,
           label: 'Live',
           color: '#059669', // green
           bgColor: '#d1fae5',
@@ -62,7 +62,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
         }
       case PropertyStatus.Closed:
         return {
-          icon: <FaLock />,
+          icon: <IoIosLock />,
           label: 'Closed',
           color: '#dc2626', // red
           bgColor: '#fee2e2',
@@ -70,7 +70,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
         }
       default:
         return {
-          icon: <FaEyeSlash />,
+          icon: <IoIosEyeOff />,
           label: 'Unknown',
           color: '#6b7280',
           bgColor: '#f3f4f6',
@@ -131,7 +131,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
           marginBottom="1rem"
         >
           <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-            <FaExclamationTriangle color="#d97706" />
+            <IoIosWarning color="#d97706" />
             <Box fontSize="0.875rem" fontWeight="600" color="#92400e">
               Requirements for Publishing
             </Box>
@@ -151,7 +151,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
         {currentStatus === PropertyStatus.Draft && (
           <Button
             label={isReadyForLive ? "Publish Property" : "Cannot Publish Yet"}
-            icon={isReadyForLive ? <FaCheckCircle /> : <FaExclamationTriangle />}
+            icon={isReadyForLive ? <IoIosCheckmarkCircle /> : <IoIosWarning />}
             variant="promoted"
             size="medium"
             onClick={() => handleStatusChange(PropertyStatus.Live)}
@@ -168,7 +168,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
           <>
             <Button
               label="Temporarily Close"
-              icon={<FaLock />}
+              icon={<IoIosLock />}
               variant="normal"
               size="medium"
               onClick={() => handleStatusChange(PropertyStatus.Closed)}
@@ -181,7 +181,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
             />
             <Button
               label="Move to Draft"
-              icon={<FaEyeSlash />}
+              icon={<IoIosEyeOff />}
               variant="normal"
               size="medium"
               onClick={() => handleStatusChange(PropertyStatus.Draft)}
@@ -198,7 +198,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
           <>
             <Button
               label={isReadyForLive ? "Reopen Property" : "Cannot Reopen Yet"}
-              icon={isReadyForLive ? <FaUnlock /> : <FaExclamationTriangle />}
+              icon={isReadyForLive ? <IoIosUnlock /> : <IoIosWarning />}
               variant="promoted"
               size="medium"
               onClick={() => handleStatusChange(PropertyStatus.Live)}
@@ -211,7 +211,7 @@ const PropertyStatusWidget: React.FC<PropertyStatusWidgetProps> = ({
             />
             <Button
               label="Move to Draft"
-              icon={<FaEyeSlash />}
+              icon={<IoIosEyeOff />}
               variant="normal"
               size="medium"
               onClick={() => handleStatusChange(PropertyStatus.Draft)}

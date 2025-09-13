@@ -1,5 +1,5 @@
 import React from 'react'
-import {FaCalendarAlt, FaChartLine} from 'react-icons/fa'
+import {IoIosCalendar, IoIosTrendingUp} from 'react-icons/io'
 import {Box} from '@/components'
 import Button from '@/components/base/Button'
 
@@ -18,7 +18,7 @@ const ModeToggle: React.FC<ModeToggleProps> = ({
     <Box display="flex" backgroundColor="#f3f4f6" borderRadius="8px" padding="0.25rem">
       <Button
         label={window.innerWidth < 768 ? '' : 'Calendar'}
-        icon={<FaCalendarAlt />}
+        icon={<IoIosCalendar />}
         onClick={() => onModeChange('calendar')}
         variant={currentMode === 'calendar' ? 'promoted' : 'plain'}
         size="small"
@@ -35,7 +35,7 @@ const ModeToggle: React.FC<ModeToggleProps> = ({
       
       <Button
         label={window.innerWidth < 768 ? '' : 'Dashboard'}
-        icon={<FaChartLine />}
+        icon={<IoIosTrendingUp />}
         onClick={() => onModeChange('dashboard')}
         variant={currentMode === 'dashboard' ? 'promoted' : 'plain'}
         size="small"

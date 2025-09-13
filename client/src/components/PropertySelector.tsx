@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {FaBath, FaBed, FaBuilding, FaChevronDown, FaMapMarkerAlt} from 'react-icons/fa'
+import {IoIosWater, IoIosBed, IoIosBusiness, IoIosArrowDown, IoIosPin} from 'react-icons/io'
 import {Box} from './base/Box'
 import Button from './base/Button'
 import SlidingDrawer from './base/SlidingDrawer'
@@ -124,7 +124,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
             justifyContent="center"
             flexShrink="0"
           >
-            <FaBuilding size={24} color="#9ca3af" />
+            <IoIosBusiness size={24} color="#9ca3af" />
           </Box>
         )}
         
@@ -153,7 +153,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
           </Box>
           
           <Box display="flex" alignItems="center" gap="0.5rem" marginBottom="0.5rem">
-            <FaMapMarkerAlt size={12} color="#6b7280" />
+            <IoIosPin size={12} color="#6b7280" />
             <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
               {property.address?.city || 'No location'}
             </span>
@@ -162,7 +162,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
           <Box display="flex" gap="1rem">
             {property.maximumGuest && (
               <Box display="flex" alignItems="center" gap="0.25rem">
-                <FaBed size={12} color="#6b7280" />
+                <IoIosBed size={12} color="#6b7280" />
                 <span style={{ color: '#6b7280', fontSize: '0.75rem' }}>
                   {property.maximumGuest} guests
                 </span>
@@ -170,7 +170,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
             )}
             {property.bathrooms && (
               <Box display="flex" alignItems="center" gap="0.25rem">
-                <FaBath size={12} color="#6b7280" />
+                <IoIosWater size={12} color="#6b7280" />
                 <span style={{ color: '#6b7280', fontSize: '0.75rem' }}>
                   {property.bathrooms} bath
                 </span>
@@ -187,18 +187,18 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
     if (currentProperty && showDetails) {
       return (
         <Box display="flex" alignItems="center" gap="0.5rem">
-          <FaBuilding />
+          <IoIosBusiness />
           <span>{currentProperty.name}</span>
-          <FaChevronDown style={{ marginLeft: 'auto' }} />
+          <IoIosArrowDown style={{ marginLeft: 'auto' }} />
         </Box>
       )
     }
     
     return (
       <Box display="flex" alignItems="center" gap="0.5rem">
-        <FaBuilding />
+        <IoIosBusiness />
         <span>{currentProperty ? currentProperty.name : placeholder}</span>
-        <FaChevronDown />
+        <IoIosArrowDown />
       </Box>
     )
   }
@@ -224,7 +224,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
           border="1px solid #e0f2fe"
         >
           <Box display="flex" alignItems="center" gap="0.5rem">
-            <FaBuilding style={{ color: '#0369a1', fontSize: '0.875rem' }} />
+            <IoIosBusiness style={{ color: '#0369a1', fontSize: '0.875rem' }} />
             <span style={{ color: '#0369a1', fontSize: '0.875rem', fontWeight: '500' }}>
               Working with property: {currentProperty.name}
             </span>
@@ -298,7 +298,7 @@ const PropertySelector: React.FC<PropertySelectorProps> = ({
                 backgroundColor="#f9fafb"
                 borderRadius="8px"
               >
-                <FaBuilding size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
+                <IoIosBusiness size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
                 <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
                   No properties found
                 </p>

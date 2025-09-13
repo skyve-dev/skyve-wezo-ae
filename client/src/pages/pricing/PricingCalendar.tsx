@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useAppDispatch } from '@/store'
-import { FaChartLine, FaSpinner } from 'react-icons/fa'
+import { IoIosTrendingUp, IoIosRefresh } from 'react-icons/io'
 import { SecuredPage } from '@/components/SecuredPage'
 import { Box } from '@/components'
 import Button from '@/components/base/Button'
@@ -193,7 +193,7 @@ const PricingCalendar: React.FC = () => {
             borderRadius="8px"
             marginBottom="2rem"
           >
-            <FaSpinner className="spin" style={{ marginRight: '0.5rem', color: '#3b82f6' }} />
+            <IoIosRefresh className="spin" style={{ marginRight: '0.5rem', color: '#3b82f6' }} />
             <span style={{ color: '#6b7280' }}>
               {ratePlansLoading ? 'Loading rate plans...' : 'Loading pricing data...'}
             </span>
@@ -242,7 +242,7 @@ const PricingCalendar: React.FC = () => {
                 </Box>
                 <Button
                   label="Create Rate Plan"
-                  icon={<FaChartLine />}
+                  icon={<IoIosTrendingUp />}
                   variant="promoted"
                   size="small"
                   onClick={() => window.location.href = '/rate-plan-create'}
@@ -284,7 +284,7 @@ const PricingCalendar: React.FC = () => {
                     backgroundColor="#f9fafb" 
                     borderRadius="8px"
                   >
-                    <FaChartLine size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
+                    <IoIosTrendingUp size={48} color="#d1d5db" style={{ marginBottom: '1rem' }} />
                     <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
                       Dashboard Available with Rate Plans
                     </h3>
